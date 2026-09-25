@@ -1,0 +1,121 @@
+# .github/workflows/claude-auto-merge.yml
+#
+# Hands-off PR pipeline: Claude reviews every PR you open against main,
+# fixes what it safely can, waits for CI, and merges. If it hits something
+# significant, it labels the PR "needs-human", explains why, and stops.
+# Remove the label after you've dealt with it and Claude will try again.
+
+name: Claude auto-review and merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, unlabeled]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+  checks: read
+
+jobs:
+  review-and-merge:
+    # Safety gates:
+    #  - skip drafts
+    #  - only PRs from this repo (never forks)
+    #  - only PRs opened by TheRedJa
+    #  - skip runs triggered by Claude's own pushes (prevents loops)
+    #  - skip PRs parked for a human
+    if: >
+      github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'TheRedJa' && github.actor != 'claude[bot]' && !contains(github.event.pull_request.labels.*.name, 'needs-human')
+
+    # Job-level (not workflow-level) so Claude's own pushes, which are
+    # skipped by the `if` above, don't cancel the run that made them.
+    concurrency:
+      group: claude-automerge-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      # Node 24 + pnpm with a frozen-lockfile install, same as the other workflows.
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --max-turns 60
+            --allowedTools "Bash(gh pr:*),Bash(gh run:*),Bash(git:*),Bash(pnpm check),Bash(pnpm fix),Bash(pnpm typecheck),Bash(pnpm test),Bash(pnpm test:*),Bash(pnpm lint:md),Read,Edit,Write,Glob,Grep"
+          prompt: |
+            You are the automated merge agent for ${{ github.repository }}.
+            Your job: get PR #${{ github.event.pull_request.number }} safely merged into main,
+            or stop and hand it to a human. Work through these steps in order.
+
+            1. SYNC WITH MAIN
+               Run `git fetch origin main && git merge origin/main`.
+               - Trivial conflicts (import order, lockfiles, formatting, both sides adding
+                 unrelated lines next to each other): resolve them and commit.
+               - Anything else is significant: run `git merge --abort` and go to ESCALATE.
+
+            2. REVIEW
+               Read `gh pr diff ${{ github.event.pull_request.number }}` and the surrounding code.
+               Fix clear problems: bugs, failing tests, lint/type errors, obvious typos.
+               Do NOT change the intent, scope, or public behavior of the PR.
+
+            3. TEST
+               Run the project's checks:
+               - `pnpm check`      (Ultracite lint + format check; `pnpm fix` auto-fixes)
+               - `pnpm typecheck`  (tsc --noEmit)
+               - `pnpm test`       (Vitest)
+               - `pnpm lint:md`    (markdownlint)
+               Fix the code, never the rules: do not disable or loosen a lint rule to get
+               a check to pass. Fix failures. If still failing after 2 attempts, go to ESCALATE.
+
+            4. PUSH
+               If you changed anything, commit with a clear message and `git push`.
+               Never force-push. Never push to main directly.
+
+            5. WAIT FOR CI
+               Run `gh pr checks ${{ github.event.pull_request.number }} --required --watch`.
+               Ignore the check for this workflow itself (review-and-merge).
+               If the repo has no required checks, rely on your local test results from step 3.
+               If CI fails, fix and retry (max 2 attempts total), otherwise ESCALATE.
+
+            6. MERGE
+               `gh pr merge ${{ github.event.pull_request.number }} --squash --delete-branch`
+               Then post a short PR comment summarizing what you checked and anything you fixed.
+
+            ESCALATE (do not merge) when any of these are true:
+            - merge conflicts where both sides changed the same logic
+            - tests or CI still failing after 2 fix attempts
+            - a fix would require changing the PR's intent, a public API, a DB schema or migration
+            - changes touch auth, secrets, permissions, payments, or CI/workflow files
+            - you are unsure whether merging is safe
+            - changes touch database migrations or schema: `drizzle/`, `src/db/schema.ts`,
+              `drizzle.config.ts`, or seed scripts in `scripts/`
+            - changes touch auth or bot protection: `src/lib/auth*`, `src/lib/turnstile*`,
+              `src/routes/api/auth/`, `src/components/turnstile-widget.tsx`
+            - changes touch webhooks, file storage, uploads or downloads: `server/routes/webhooks.ts`,
+              `src/lib/storage.ts`, `src/lib/upload-*`, `src/lib/project-access.ts`, `src/routes/api/`
+            - changes touch environment or deployment config: `env.config.ts`, `server/env.ts`,
+              `.env*`, `Dockerfile`, `docker/`, `compose*.yaml`, `docker-compose.yml`, `justfile`,
+              `mise.toml`
+            - changes touch tooling or CI config: `.github/`, `.husky/`, `oxlint.config.ts`,
+              `oxfmt.config.ts`, `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`,
+              `.markdownlint*`, `pnpm-workspace.yaml`
+            - changes add, remove, or major-bump a dependency in `package.json`
+            - changes the release stage of the `version` in `package.json` (e.g. ALPHA to BETA)
+            To escalate: run `gh pr edit ${{ github.event.pull_request.number }} --add-label needs-human`,
+            post a comment explaining exactly what's wrong and what decision you need, then stop.
