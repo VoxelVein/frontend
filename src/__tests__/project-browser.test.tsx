@@ -1,9 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Mod } from "@/lib/mods-data";
-import type { ModSearchParams, ModSearchResponse } from "@/lib/mods.functions";
-import { Route } from "@/routes/mods";
+import { ProjectBrowser } from "@/components/projects/project-browser";
+import type { ProjectBrowserData } from "@/lib/project-browser-loader";
+import type {
+  ProjectSearchParams,
+  ProjectSearchResponse,
+} from "@/lib/project-search.functions";
+import type { ProjectDocument } from "@/lib/projects";
 
 const {
   cacheDeleteMock,
@@ -12,53 +16,39 @@ const {
   searchModsMock,
   useLoaderDataMock,
 } = vi.hoisted(() => ({
-  cacheDeleteMock: vi.fn<(params: ModSearchParams) => void>(),
-  cacheGetMock: vi.fn<() => ModSearchResponse | undefined>(),
+  cacheDeleteMock: vi.fn<(params: ProjectSearchParams) => void>(),
+  cacheGetMock: vi.fn<() => ProjectSearchResponse | undefined>(),
   cacheSetMock:
-    vi.fn<(params: ModSearchParams, data: ModSearchResponse) => void>(),
+    vi.fn<(params: ProjectSearchParams, data: ProjectSearchResponse) => void>(),
   searchModsMock:
-    vi.fn<(opts: { data: ModSearchParams }) => Promise<ModSearchResponse>>(),
-  useLoaderDataMock:
     vi.fn<
-      () => { initial: ModSearchResponse | null; initialError: string | null }
+      (opts: { data: ProjectSearchParams }) => Promise<ProjectSearchResponse>
     >(),
+  useLoaderDataMock: vi.fn<() => ProjectBrowserData>(),
 }));
 
-// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the mods page requires a faithful search stub; string path avoids strict factory type-checking against the server function type
-vi.mock("@/lib/mods.functions", () => ({
-  searchMods: searchModsMock,
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the browser requires a faithful search stub; string path avoids strict factory type-checking against the server function type
+vi.mock("@/lib/project-search.functions", () => ({
+  searchProjects: searchModsMock,
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The page reads the shared cache singleton; a controllable stub isolates cache behavior in tests
-vi.mock("@/lib/mods-cache", () => ({
-  modsCache: {
+vi.mock("@/lib/project-search-cache", () => ({
+  projectSearchCache: {
     delete: cacheDeleteMock,
     get: cacheGetMock,
     set: cacheSetMock,
   },
 }));
 
-// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- ModCard is covered by its own rendering; a stub keeps the page test focused on search state
-vi.mock("@/components/mods/mod-card", () => ({
-  ModCard: ({ mod }: { mod: Mod }) => (
-    <div data-testid={`mod-card-${mod.id}`}>{mod.name}</div>
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- ProjectCard is covered by its own rendering; a stub keeps the page test focused on search state
+vi.mock("@/components/projects/project-card", () => ({
+  ProjectCard: ({ project }: { project: ProjectDocument }) => (
+    <div data-testid={`mod-card-${project.id}`}>{project.name}</div>
   ),
 }));
 
-// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Router context is unavailable in unit tests; string path avoids strict factory type-checking against the router module
-vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual = await importOriginal();
-  // SAFETY: The actual module is spread at runtime to preserve createFileRoute; the cast only widens the type for the mock factory
-  return {
-    ...(actual as object),
-    useLoaderData: useLoaderDataMock,
-  };
-});
-
-const ModsPage = Route.options.component;
-if (!ModsPage) {
-  throw new Error("ModsPage component not found");
-}
+const ModsPage = () => <ProjectBrowser type="mod" {...useLoaderDataMock()} />;
 
 // Base UI Select renders a button trigger, so tests must open the popup and
 // click the option instead of firing a change event on a native <select>.
@@ -112,7 +102,7 @@ class EventSourceMock {
   }
 }
 
-const modFixture: Mod = {
+const modFixture: ProjectDocument = {
   author: "JellySquid",
   category: "performance",
   description: "A rendering engine replacement.",
@@ -121,12 +111,14 @@ const modFixture: Mod = {
   id: "sodium",
   loaders: ["fabric", "forge"],
   name: "Sodium",
+  slug: "sodium",
   tags: ["rendering"],
+  type: "mod",
   updatedAt: "2026-01-01T00:00:00.000Z",
   version: "0.6.0",
 };
 
-const responseFixture = (hits: Mod[]): ModSearchResponse => ({
+const responseFixture = (hits: ProjectDocument[]): ProjectSearchResponse => ({
   estimatedTotalHits: hits.length,
   // oxlint-disable-next-line sonarjs/no-undefined-assignment -- Test fixture mirrors the server response shape
   facetDistribution: undefined,
@@ -137,11 +129,11 @@ const responseFixture = (hits: Mod[]): ModSearchResponse => ({
 });
 
 // Reassigned inside the skeleton test to resolve the in-flight search.
-let resolveSearch: (value: ModSearchResponse) => void = (
-  _value: ModSearchResponse
+let resolveSearch: (value: ProjectSearchResponse) => void = (
+  _value: ProjectSearchResponse
 ) => {};
 
-describe("ModsPage", () => {
+describe(ProjectBrowser, () => {
   beforeEach(() => {
     EventSourceMock.instances.splice(0);
     cacheDeleteMock.mockReset();
@@ -174,7 +166,7 @@ describe("ModsPage", () => {
   it("shows skeletons with aria-busy while a search is in flight", async () => {
     searchModsMock.mockReturnValue(
       // oxlint-disable-next-line promise/avoid-new -- A deferred promise is the only way to hold a search in flight and assert the loading state
-      new Promise<ModSearchResponse>((resolve) => {
+      new Promise<ProjectSearchResponse>((resolve) => {
         resolveSearch = resolve;
       })
     );
@@ -301,5 +293,24 @@ describe("ModsPage", () => {
       expect(screen.getByTestId("mod-card-sodium")).toBeTruthy();
     });
     expect(searchModsMock).not.toHaveBeenCalled();
+  });
+
+  it("adapts labels and search params to plugins", async () => {
+    searchModsMock.mockResolvedValue(responseFixture([]));
+
+    render(<ProjectBrowser type="plugin" initial={null} initialError={null} />);
+
+    expect(screen.getByRole("heading", { name: "Plugins" })).toBeTruthy();
+    expect(screen.getByLabelText("Platform")).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Search plugins"), {
+      target: { value: "claims" },
+    });
+
+    await waitFor(() => {
+      expect(searchModsMock).toHaveBeenCalledWith({
+        data: expect.objectContaining({ query: "claims", type: "plugin" }),
+      });
+    });
   });
 });

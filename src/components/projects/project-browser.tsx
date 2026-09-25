@@ -6,13 +6,12 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
-import { ModCard } from "@/components/mods/mod-card";
 import { PageHeader } from "@/components/page-header";
+import { ProjectCard } from "@/components/projects/project-card";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -22,14 +21,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { modsCache } from "@/lib/mods-cache";
+import { toSearchErrorMessage } from "@/lib/project-browser-loader";
+import type { ProjectBrowserData } from "@/lib/project-browser-loader";
+import { projectSearchCache } from "@/lib/project-search-cache";
+import { searchProjects } from "@/lib/project-search.functions";
+import type {
+  ProjectSearchParams,
+  ProjectSearchResponse,
+} from "@/lib/project-search.functions";
 import {
-  MOD_CATEGORIES,
-  MOD_GAME_VERSIONS,
-  MOD_LOADERS,
-} from "@/lib/mods-data";
-import { searchMods } from "@/lib/mods.functions";
-import type { ModSearchParams, ModSearchResponse } from "@/lib/mods.functions";
+  CATEGORIES_BY_TYPE,
+  GAME_VERSIONS,
+  LOADERS_BY_TYPE,
+  PROJECT_TYPE_LABELS,
+} from "@/lib/projects";
+import type { ProjectType } from "@/lib/projects";
 
 const DEFAULT_SORT = "downloads:desc";
 
@@ -51,8 +57,8 @@ interface LiveModEvent {
 
 const LIVE_EVENT_LABELS = {
   "mod.created": "New mod added",
-  "mod.updated": "Mod updated",
   "mod.deleted": "Mod removed",
+  "mod.updated": "Mod updated",
 } as const satisfies Record<LiveModEvent["event"], string>;
 
 const SORT_OPTIONS = [
@@ -61,33 +67,14 @@ const SORT_OPTIONS = [
   { label: "Name (A–Z)", value: "name:asc" },
 ] as const;
 
-const toErrorMessage = (cause: unknown) => {
-  if (!(cause instanceof Error)) {
-    return "Could not search mods.";
-  }
-
-  const message = cause.message.toLowerCase();
-  if (
-    message.includes("fetch failed") ||
-    message.includes("econnrefused") ||
-    message.includes("failed to fetch")
-  ) {
-    return "Could not reach the search service. Start the API server with `pnpm dev:all` and try again.";
-  }
-
-  if (message.includes("aborted due to timeout")) {
-    return "The search service timed out. Please try again.";
-  }
-
-  return cause.message;
-};
-
-const ModsSearchBar = ({
+const SearchBar = ({
   query,
   onQueryChange,
+  type,
 }: {
   query: string;
   onQueryChange: (value: string) => void;
+  type: ProjectType;
 }) => (
   <div className="relative mt-8">
     <IconSearch
@@ -96,16 +83,16 @@ const ModsSearchBar = ({
       aria-hidden="true"
       className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 -translate-y-1/2"
     />
-    <label className="sr-only" htmlFor="mods-search">
-      Search mods
+    <label className="sr-only" htmlFor={`${type}-search`}>
+      Search {PROJECT_TYPE_LABELS[type].plural.toLowerCase()}
     </label>
     <input
-      id="mods-search"
+      id={`${type}-search`}
       name="query"
       type="search"
       value={query}
       onChange={(event) => onQueryChange(event.target.value)}
-      placeholder="Search mods…"
+      placeholder={`Search ${PROJECT_TYPE_LABELS[type].plural.toLowerCase()}…`}
       autoComplete="off"
       className="border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus-visible:ring-ring focus:bg-background min-h-12 w-full rounded-xl border pr-12 pl-11 text-base transition-colors focus-visible:ring-2 focus-visible:outline-none"
     />
@@ -122,7 +109,7 @@ const ModsSearchBar = ({
   </div>
 );
 
-interface ModsFiltersProps {
+interface FiltersProps {
   category: string;
   gameVersion: string;
   loader: string;
@@ -131,9 +118,18 @@ interface ModsFiltersProps {
   onLoaderChange: (value: string | null) => void;
   onSortChange: (value: string | null) => void;
   sort: string;
+  type: ProjectType;
 }
 
-const ModsFilters = ({
+const ALL_LOADERS_LABELS = {
+  mod: "All loaders",
+  plugin: "All platforms",
+} as const satisfies Record<ProjectType, string>;
+
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
+
+const Filters = ({
   category,
   gameVersion,
   loader,
@@ -142,21 +138,32 @@ const ModsFilters = ({
   onLoaderChange,
   onSortChange,
   sort,
-}: ModsFiltersProps) => (
+  type,
+}: FiltersProps) => (
   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
     <div>
-      <label className="sr-only" htmlFor="mods-category">
+      <label className="sr-only" htmlFor={`${type}-category`}>
         Category
       </label>
-      <Select value={category} onValueChange={onCategoryChange}>
-        <SelectTrigger id="mods-category" className="min-h-11 w-full">
+      <Select
+        items={[
+          { label: "All categories", value: "" },
+          ...CATEGORIES_BY_TYPE[type].map((value) => ({
+            label: capitalize(value),
+            value,
+          })),
+        ]}
+        value={category}
+        onValueChange={onCategoryChange}
+      >
+        <SelectTrigger id={`${type}-category`} className="min-h-11 w-full">
           <SelectValue placeholder="All categories" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">All categories</SelectItem>
-          {MOD_CATEGORIES.map((value) => (
+          {CATEGORIES_BY_TYPE[type].map((value) => (
             <SelectItem key={value} value={value}>
-              {value.charAt(0).toUpperCase() + value.slice(1)}
+              {capitalize(value)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -164,16 +171,26 @@ const ModsFilters = ({
     </div>
 
     <div>
-      <label className="sr-only" htmlFor="mods-game-version">
+      <label className="sr-only" htmlFor={`${type}-game-version`}>
         Game version
       </label>
-      <Select value={gameVersion} onValueChange={onGameVersionChange}>
-        <SelectTrigger id="mods-game-version" className="min-h-11 w-full">
+      <Select
+        items={[
+          { label: "All versions", value: "" },
+          ...GAME_VERSIONS.map((value) => ({
+            label: `Minecraft ${value}`,
+            value,
+          })),
+        ]}
+        value={gameVersion}
+        onValueChange={onGameVersionChange}
+      >
+        <SelectTrigger id={`${type}-game-version`} className="min-h-11 w-full">
           <SelectValue placeholder="All versions" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">All versions</SelectItem>
-          {MOD_GAME_VERSIONS.map((value) => (
+          {GAME_VERSIONS.map((value) => (
             <SelectItem key={value} value={value}>
               Minecraft {value}
             </SelectItem>
@@ -183,18 +200,28 @@ const ModsFilters = ({
     </div>
 
     <div>
-      <label className="sr-only" htmlFor="mods-loader">
-        Loader
+      <label className="sr-only" htmlFor={`${type}-loader`}>
+        {type === "mod" ? "Loader" : "Platform"}
       </label>
-      <Select value={loader} onValueChange={onLoaderChange}>
-        <SelectTrigger id="mods-loader" className="min-h-11 w-full">
-          <SelectValue placeholder="All loaders" />
+      <Select
+        items={[
+          { label: ALL_LOADERS_LABELS[type], value: "" },
+          ...LOADERS_BY_TYPE[type].map((value) => ({
+            label: capitalize(value),
+            value,
+          })),
+        ]}
+        value={loader}
+        onValueChange={onLoaderChange}
+      >
+        <SelectTrigger id={`${type}-loader`} className="min-h-11 w-full">
+          <SelectValue placeholder={ALL_LOADERS_LABELS[type]} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All loaders</SelectItem>
-          {MOD_LOADERS.map((value) => (
+          <SelectItem value="">{ALL_LOADERS_LABELS[type]}</SelectItem>
+          {LOADERS_BY_TYPE[type].map((value) => (
             <SelectItem key={value} value={value}>
-              {value.charAt(0).toUpperCase() + value.slice(1)}
+              {capitalize(value)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -202,11 +229,11 @@ const ModsFilters = ({
     </div>
 
     <div>
-      <label className="sr-only" htmlFor="mods-sort">
+      <label className="sr-only" htmlFor={`${type}-sort`}>
         Sort by
       </label>
-      <Select value={sort} onValueChange={onSortChange}>
-        <SelectTrigger id="mods-sort" className="min-h-11 w-full">
+      <Select items={SORT_OPTIONS} value={sort} onValueChange={onSortChange}>
+        <SelectTrigger id={`${type}-sort`} className="min-h-11 w-full">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
@@ -221,30 +248,20 @@ const ModsFilters = ({
   </div>
 );
 
-const DEFAULT_SEARCH_PARAMS: ModSearchParams = {
-  query: "",
-  sort: DEFAULT_SORT,
-};
-
-interface ModsLoaderData {
-  initial: ModSearchResponse | null;
-  initialError: string | null;
-}
-
 // ---------------------------------------------------------------------------
 // Search state managed via useReducer — consolidates result, error, and
 // isSearching that were previously three separate useState hooks.
 // ---------------------------------------------------------------------------
 
 interface SearchState {
-  result: ModSearchResponse | null;
+  result: ProjectSearchResponse | null;
   error: string | null;
   isSearching: boolean;
 }
 
 type SearchAction =
   | { type: "SEARCH_START" }
-  | { type: "SEARCH_SUCCESS"; payload: ModSearchResponse }
+  | { type: "SEARCH_SUCCESS"; payload: ProjectSearchResponse }
   | { type: "SEARCH_ERROR"; payload: string }
   | { type: "RETRY" };
 
@@ -254,16 +271,16 @@ const searchReducer = (
 ): SearchState => {
   switch (action.type) {
     case "SEARCH_START": {
-      return { ...state, isSearching: true, error: null };
+      return { ...state, error: null, isSearching: true };
     }
     case "SEARCH_SUCCESS": {
-      return { result: action.payload, error: null, isSearching: false };
+      return { error: null, isSearching: false, result: action.payload };
     }
     case "SEARCH_ERROR": {
       return { ...state, error: action.payload, isSearching: false };
     }
     case "RETRY": {
-      return { result: null, error: null, isSearching: true };
+      return { error: null, isSearching: true, result: null };
     }
     default: {
       return state;
@@ -271,26 +288,26 @@ const searchReducer = (
   }
 };
 
-interface ModsPaginationProps {
+interface PaginationProps {
   currentPage: number;
   isSearching: boolean;
   onPageChange: (page: number) => void;
   totalPages: number;
 }
 
-const ModsPagination = ({
+const Pagination = ({
   currentPage,
   isSearching,
   onPageChange,
   totalPages,
-}: ModsPaginationProps) => {
+}: PaginationProps) => {
   if (totalPages <= 1) {
     return null;
   }
 
   return (
     <nav
-      aria-label="Mod list pagination"
+      aria-label="Search results pagination"
       className="mt-8 flex items-center justify-center gap-2"
     >
       <Button
@@ -344,7 +361,7 @@ const LiveEventBanner = ({ event, onRefresh }: LiveEventBannerProps) => (
   </output>
 );
 
-const ModsSkeletons = () => (
+const ResultSkeletons = () => (
   <div
     aria-busy="true"
     className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
@@ -355,39 +372,45 @@ const ModsSkeletons = () => (
   </div>
 );
 
-interface ModsResultsProps {
+interface ResultsProps {
   currentPage: number;
   isSearching: boolean;
   onPageChange: (page: number) => void;
-  result: ModSearchResponse;
+  result: ProjectSearchResponse;
   totalPages: number;
+  type: ProjectType;
 }
 
-const ModsResults = ({
+const Results = ({
   currentPage,
   isSearching,
   onPageChange,
   result,
   totalPages,
-}: ModsResultsProps) => (
+  type,
+}: ResultsProps) => (
   <>
     <p className="text-muted-foreground mt-8 text-sm" aria-live="polite">
       {result.estimatedTotalHits}{" "}
-      {result.estimatedTotalHits === 1 ? "mod" : "mods"} found
+      {(result.estimatedTotalHits === 1
+        ? PROJECT_TYPE_LABELS[type].singular
+        : PROJECT_TYPE_LABELS[type].plural
+      ).toLowerCase()}{" "}
+      found
     </p>
 
     <ul
       aria-busy={isSearching}
       className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
-      {result.hits.map((mod) => (
-        <li key={mod.id}>
-          <ModCard mod={mod} />
+      {result.hits.map((project) => (
+        <li key={project.id}>
+          <ProjectCard project={project} />
         </li>
       ))}
     </ul>
 
-    <ModsPagination
+    <Pagination
       currentPage={currentPage}
       isSearching={isSearching}
       onPageChange={onPageChange}
@@ -396,9 +419,22 @@ const ModsResults = ({
   </>
 );
 
-// oxlint-disable-next-line eslint/complexity -- ModsPage conditionally renders search, filters, skeleton, empty, results, and pagination states; extracting further would fragment the page logic
-const ModsPage = () => {
-  const { initial, initialError } = useLoaderData({ from: "/mods" });
+const PAGE_DESCRIPTIONS = {
+  mod: "Discover performance, technology, adventure, and more — search Minecraft mods.",
+  plugin:
+    "Find administration, economy, protection, and minigame plugins for Minecraft servers.",
+} as const satisfies Record<ProjectType, string>;
+
+interface ProjectBrowserProps extends ProjectBrowserData {
+  type: ProjectType;
+}
+
+// oxlint-disable-next-line eslint/complexity -- ProjectBrowser conditionally renders search, filters, skeleton, empty, results, and pagination states; extracting further would fragment the page logic
+export const ProjectBrowser = ({
+  initial,
+  initialError,
+  type,
+}: ProjectBrowserProps) => {
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebouncedValue(query, { wait: 300 });
   const [category, setCategory] = useState("");
@@ -408,9 +444,9 @@ const ModsPage = () => {
   const [page, setPage] = useState(1);
   const [liveEvent, setLiveEvent] = useState<LiveModEvent | null>(null);
   const [state, dispatch] = useReducer(searchReducer, {
-    result: initial,
     error: initialError,
     isSearching: false,
+    result: initial,
   });
   const hasMountedRef = useRef(false);
   const requestIdRef = useRef(0);
@@ -418,31 +454,31 @@ const ModsPage = () => {
   const { result, error, isSearching } = state;
 
   // oxlint-disable-next-line react-doctor/react-compiler-no-manual-memoization -- React Compiler is not enabled in this project; useCallback keeps runSearch stable so the search effect does not re-run on every render
-  const runSearch = useCallback(async (params: ModSearchParams) => {
+  const runSearch = useCallback(async (params: ProjectSearchParams) => {
     requestIdRef.current += 1;
     const thisRequestId = requestIdRef.current;
     dispatch({ type: "SEARCH_START" });
 
-    const cached = modsCache.get(params);
+    const cached = projectSearchCache.get(params);
     if (cached) {
       if (requestIdRef.current === thisRequestId) {
-        dispatch({ type: "SEARCH_SUCCESS", payload: cached });
+        dispatch({ payload: cached, type: "SEARCH_SUCCESS" });
       }
       return;
     }
 
     try {
-      const data = await searchMods({ data: params });
-      modsCache.set(params, data);
+      const data = await searchProjects({ data: params });
+      projectSearchCache.set(params, data);
 
       if (requestIdRef.current === thisRequestId) {
-        dispatch({ type: "SEARCH_SUCCESS", payload: data });
+        dispatch({ payload: data, type: "SEARCH_SUCCESS" });
       }
     } catch (searchError) {
       if (requestIdRef.current === thisRequestId) {
         dispatch({
+          payload: toSearchErrorMessage(searchError),
           type: "SEARCH_ERROR",
-          payload: toErrorMessage(searchError),
         });
       }
     }
@@ -463,8 +499,18 @@ const ModsPage = () => {
       page,
       query: debouncedQuery,
       sort,
+      type,
     });
-  }, [category, debouncedQuery, gameVersion, loader, page, runSearch, sort]);
+  }, [
+    category,
+    debouncedQuery,
+    gameVersion,
+    loader,
+    page,
+    runSearch,
+    sort,
+    type,
+  ]);
 
   useEffect(() => {
     const source = new EventSource(`${API_URL}/api/events`);
@@ -523,13 +569,15 @@ const ModsPage = () => {
       page,
       query,
       sort,
+      type,
     });
   };
 
   const refreshFromLiveEvent = () => {
     setLiveEvent(null);
-    modsCache.delete({ category, gameVersion, loader, page, query, sort });
-    runSearch({ category, gameVersion, loader, page, query, sort });
+    const params = { category, gameVersion, loader, page, query, sort, type };
+    projectSearchCache.delete(params);
+    runSearch(params);
   };
 
   const changeFilter =
@@ -542,13 +590,13 @@ const ModsPage = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
       <PageHeader
-        title="Mods"
-        description="Discover performance, technology, adventure, and more — search thousands of Minecraft mods."
+        title={PROJECT_TYPE_LABELS[type].plural}
+        description={PAGE_DESCRIPTIONS[type]}
       />
 
-      <ModsSearchBar query={query} onQueryChange={setQuery} />
+      <SearchBar query={query} onQueryChange={setQuery} type={type} />
 
-      <ModsFilters
+      <Filters
         category={category}
         gameVersion={gameVersion}
         loader={loader}
@@ -557,6 +605,7 @@ const ModsPage = () => {
         onLoaderChange={changeFilter(setLoader)}
         onSortChange={changeFilter(setSort)}
         sort={sort}
+        type={type}
       />
 
       {error ? <ErrorState message={error} onRetry={retry} /> : null}
@@ -565,12 +614,12 @@ const ModsPage = () => {
         <LiveEventBanner event={liveEvent} onRefresh={refreshFromLiveEvent} />
       ) : null}
 
-      {showSkeletons || showInitialSkeletons ? <ModsSkeletons /> : null}
+      {showSkeletons || showInitialSkeletons ? <ResultSkeletons /> : null}
 
       {showEmpty ? (
         <EmptyState
           icon={<IconSearchOff size={24} aria-hidden="true" />}
-          title="No mods found"
+          title={`No ${PROJECT_TYPE_LABELS[type].plural.toLowerCase()} found`}
           description="Try a different search or clear your filters."
           action={
             hasFilters ? (
@@ -587,19 +636,20 @@ const ModsPage = () => {
       ) : null}
 
       {showResults ? (
-        <ModsResults
+        <Results
           currentPage={page}
           isSearching={isSearching}
           onPageChange={setPage}
           result={result}
           totalPages={totalPages}
+          type={type}
         />
       ) : null}
     </div>
   );
 };
 
-const ModsSkeleton = () => (
+export const ProjectBrowserSkeleton = () => (
   <div
     aria-busy="true"
     className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
@@ -614,22 +664,3 @@ const ModsSkeleton = () => (
     </div>
   </div>
 );
-
-export const Route = createFileRoute("/mods")({
-  pendingComponent: ModsSkeleton,
-  loader: async (): Promise<ModsLoaderData> => {
-    const cached = modsCache.get(DEFAULT_SEARCH_PARAMS);
-    if (cached) {
-      return { initial: cached, initialError: null };
-    }
-
-    try {
-      const data = await searchMods({ data: DEFAULT_SEARCH_PARAMS });
-      modsCache.set(DEFAULT_SEARCH_PARAMS, data);
-      return { initial: data, initialError: null };
-    } catch (loaderError) {
-      return { initial: null, initialError: toErrorMessage(loaderError) };
-    }
-  },
-  component: ModsPage,
-});

@@ -28,6 +28,7 @@ const envWithDefaults = {
   // Blank optional values from .env files mean "unset", not an empty URL.
   STORAGE_MAX_FILE_BYTES: process.env.STORAGE_MAX_FILE_BYTES || undefined,
   STORAGE_PUBLIC_URL: process.env.STORAGE_PUBLIC_URL || undefined,
+  STORAGE_QUOTA_BYTES: process.env.STORAGE_QUOTA_BYTES || undefined,
   TURNSTILE_HOSTNAMES: process.env.TURNSTILE_HOSTNAMES,
   TURNSTILE_SECRET: process.env.TURNSTILE_SECRET,
   VITE_GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -56,6 +57,7 @@ const env = defineEnv({
     STORAGE_FORCE_PATH_STYLE: optional(picklist(["true", "false"])),
     STORAGE_MAX_FILE_BYTES: optional(pipe(string(), regex(/^\d+$/u))),
     STORAGE_PUBLIC_URL: optional(pipe(string(), url())),
+    STORAGE_QUOTA_BYTES: optional(pipe(string(), regex(/^\d+$/u))),
     STORAGE_REGION: optional(string()),
     STORAGE_SECRET_ACCESS_KEY: optional(string()),
     TURNSTILE_HOSTNAMES: optional(string()),

@@ -40,6 +40,19 @@ top of Oxlint and Oxfmt.
 Use the project-local Drizzle binary; `pnpm dlx drizzle-kit` fails in
 a fresh environment.
 
+## Content and search
+
+| Command             | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| `just infra`        | Start Postgres, Meilisearch, and Garage         |
+| `pnpm storage:init` | Prepare the local Garage bucket and key         |
+| `pnpm db:seed`      | Create demo mods and plugins, then reindex      |
+| `pnpm db:reindex`   | Rebuild the search index from the database      |
+| `pnpm db:seed:admin`| Make an existing user an admin                  |
+
+See [Object Storage](../storage/object-storage.md) and
+[Projects and Files](../content/projects.md).
+
 ## Tooling
 
 | Command                     | Description                          |

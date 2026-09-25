@@ -1,83 +1,96 @@
 # Meilisearch Search
 
-Meilisearch powers the `/mods` page. The frontend never talks to
-Meilisearch directly from the browser — search runs through the
-ElysiaJS API server so the search key stays server-side.
+Meilisearch powers the `/mods` and `/plugins` pages. The browser never
+talks to Meilisearch directly. Search runs through the ElysiaJS API
+server, so the search key stays server-side.
+
+Postgres is the source of truth. Meilisearch holds one document per
+published project in the `projects` index.
 
 ## How it works
 
-* `server/lib/meilisearch.ts` — Meilisearch client factory used by the
-  API server (`getSearchClient`) and the index name (`mods`)
-* `server/routes/mods.ts` — `GET /api/mods/search` proxy that validates
-  filters, builds the Meilisearch query, and returns hits plus facet
-  counts
-* `src/lib/mods.functions.ts` — `searchMods` client-side helper that
-  calls the API server endpoint
-* `src/lib/mods-data.ts` — the hard-coded example mods used to seed the
-  index
-* `scripts/seed-mods.ts` — creates the index, configures filterable /
-  searchable / sortable attributes, and uploads the example mods
+* `server/lib/meilisearch.ts` — search client factory used by the API
+  server (`getSearchClient`) and the index name (`projects`)
+* `server/routes/projects.ts` — `GET /api/projects/search` proxy that
+  validates the project type and filters, builds the Meilisearch query,
+  and returns hits plus facet counts
+* `src/lib/project-search.functions.ts` — `searchProjects` server
+  function that calls the API server endpoint
+* `src/lib/search-sync.ts` — builds a project's search document from the
+  database and writes or removes it after every change
+* `scripts/seed-projects.ts` — configures the index and rebuilds it from
+  the database (`pnpm db:seed` also creates demo projects first)
 
 ## Environment variables
 
 * `MEILI_HOST` — Meilisearch base URL. Defaults to
   `http://localhost:7700`.
-* `MEILI_MASTER_KEY` — admin key, only needed when seeding.
-* `MEILI_SEARCH_KEY` — public search key used by the API server.
+* `MEILI_SEARCH_KEY` — search-only key used by the API server.
+* `MEILI_ADMIN_KEY` — key used by the web app to write project
+  documents. Scope it to `documents.add` and `documents.delete` on the
+  `projects` index.
+* `MEILI_MASTER_KEY` — only needed by `pnpm db:seed` and
+  `pnpm db:reindex`, which change index settings.
 
-The master key is only needed when running the seed script. The running
-app only needs the search key.
+Create the scoped write key once with the master key:
+
+```bash
+curl -X POST "$MEILI_HOST/keys" \
+  -H "Authorization: Bearer $MEILI_MASTER_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"voxelvein-web-projects-writer",
+       "actions":["documents.add","documents.delete"],
+       "indexes":["projects"],"expiresAt":null}'
+```
+
+Put the returned `key` into `MEILI_ADMIN_KEY`.
 
 ## Local setup
 
-The root `docker-compose.yml` starts Postgres, Meilisearch, and the web
-app together:
+`docker-compose.yml` starts Postgres, Meilisearch, and Garage:
 
 ```bash
-MEILI_MASTER_KEY=your-master-key MEILI_SEARCH_KEY=your-search-key \
-  docker compose up --build
+just infra
 ```
 
-Meilisearch is exposed on port 7700. The web app reaches it at
-`http://meilisearch:7700` inside the compose network.
+Meilisearch listens on `127.0.0.1:7700`.
 
-## Seeding the index
+## Building the index
 
 ```bash
-MEILI_HOST=http://localhost:7700 \
-MEILI_MASTER_KEY=your-master-key \
-  pnpm db:seed
+pnpm db:seed      # demo projects + full reindex
+pnpm db:reindex   # full reindex only
 ```
 
-The script:
+The reindex:
 
-1. Creates the `mods` index
-2. Marks `category`, `gameVersions`, and `loaders` as filterable
+1. Deletes the legacy `mods` index if it still exists
+2. Marks `type`, `category`, `gameVersions`, and `loaders` as filterable
 3. Marks `name`, `description`, `author`, `tags`, and `category` as
    searchable
 4. Marks `downloads`, `updatedAt`, and `name` as sortable
-5. Uploads the 12 example mods from `src/lib/mods-data.ts`
-
-Re-running the script is safe — documents are upserted by `id`.
+5. Replaces all documents with the published projects from Postgres
 
 ## Search endpoint
 
-`searchMods` accepts a validated payload:
+`searchProjects` accepts:
 
 ```ts
 {
+  type: "mod" | "plugin";
   query: string;
-  category: string;
-  gameVersion: string;
-  loader: string;
+  category?: string;
+  gameVersion?: string;
+  loader?: string;
+  page?: number;
   sort: "downloads:desc" | "updatedAt:desc" | "name:asc";
 }
 ```
 
-Filters are validated against the known values in `mods-data.ts` before
-reaching Meilisearch, so arbitrary filter strings are rejected. The
-response includes `hits`, `estimatedTotalHits`, and `facetDistribution`
-for the filter dropdowns.
+Categories and loaders are validated against the values for the given
+type in `src/lib/projects.ts` before they reach Meilisearch. Unknown
+values return `422`. The response includes `hits`,
+`estimatedTotalHits`, and `facetDistribution`.
 
 The API server must be running for search to work (`pnpm dev:all` starts
 it). See [API Server](../architecture/api.md).
@@ -92,17 +105,21 @@ The production Meilisearch runs on the VoxelVein server via Dokploy:
   the internal `dokploy-network`
 * CORS is disabled, which is why search is server-side
 
-To seed the production instance, point the seed script at the public
-URL with the production master key:
+To rebuild the production index from the production database, run the
+reindex against the public URL with the production master key:
 
 ```bash
 MEILI_HOST=http://website-meilisearch-4c5035-5-175-245-175.sslip.io \
 MEILI_MASTER_KEY=your-master-key \
-  pnpm db:seed
+DATABASE_URL=postgresql://... \
+  pnpm db:reindex
 ```
+
+Do not run `pnpm db:seed` against production; it creates demo projects.
 
 ## Related
 
+* [Projects and Files](../content/projects.md)
 * [Commands](../development/commands.md)
 * [Docker](../deployment/docker.md)
 * [Architecture](../architecture/overview.md)

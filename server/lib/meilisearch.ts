@@ -2,7 +2,7 @@ import { Meilisearch } from "meilisearch";
 
 import "../env";
 
-export const MODS_INDEX = "mods";
+export const PROJECTS_INDEX = "projects";
 
 const host = process.env.MEILI_HOST ?? "http://localhost:7700";
 

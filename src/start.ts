@@ -1,4 +1,8 @@
-import { createMiddleware, createStart } from "@tanstack/react-start";
+import {
+  createCsrfMiddleware,
+  createMiddleware,
+  createStart,
+} from "@tanstack/react-start";
 
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
@@ -45,6 +49,12 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
   }
 );
 
+// Server functions (project uploads, edits, deletes) authenticate with the
+// session cookie, so reject cross-site calls to them.
+const csrfMiddleware = createCsrfMiddleware({
+  filter: (context) => context.handlerType === "serverFn",
+});
+
 export const startInstance = createStart(() => ({
-  requestMiddleware: [securityHeadersMiddleware],
+  requestMiddleware: [csrfMiddleware, securityHeadersMiddleware],
 }));

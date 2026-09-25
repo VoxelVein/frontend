@@ -1,53 +1,60 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import {
-  MOD_CATEGORIES,
-  MOD_GAME_VERSIONS,
-  MOD_LOADERS,
-} from "@/lib/mods-data";
-import type { Mod } from "@/lib/mods-data";
+  CATEGORIES_BY_TYPE,
+  GAME_VERSIONS as ALL_GAME_VERSIONS,
+  isProjectType,
+  LOADERS_BY_TYPE,
+} from "@/lib/projects";
+import type { ProjectDocument, ProjectType } from "@/lib/projects";
 
 import env from "../../env.config";
 
-const CATEGORIES = new Set<string>(MOD_CATEGORIES);
-const GAME_VERSIONS = new Set<string>(MOD_GAME_VERSIONS);
-const LOADERS = new Set<string>(MOD_LOADERS);
+const GAME_VERSIONS = new Set<string>(ALL_GAME_VERSIONS);
 
 const SORTS = ["downloads:desc", "updatedAt:desc", "name:asc"] as const;
 
-export interface ModSearchParams {
+export interface ProjectSearchParams {
   category?: string;
   gameVersion?: string;
   loader?: string;
   page?: number;
   query: string;
   sort: string;
+  type: ProjectType;
 }
 
-export interface ModSearchResponse {
+export interface ProjectSearchResponse {
   estimatedTotalHits: number;
   facetDistribution: Record<string, Record<string, number>> | undefined;
-  hits: Mod[];
+  hits: ProjectDocument[];
   page: number;
   pageSize: number;
   query: string;
 }
 
-export const searchMods = createServerFn({ method: "GET" })
-  .validator((data: ModSearchParams) => data)
-  .handler(async ({ data }): Promise<ModSearchResponse> => {
-    const params = new URLSearchParams();
+export const searchProjects = createServerFn({ method: "GET" })
+  .validator((data: ProjectSearchParams) => {
+    if (!isProjectType(data.type)) {
+      throw new Error("Unknown project type.");
+    }
+    return data;
+  })
+  .handler(async ({ data }): Promise<ProjectSearchResponse> => {
+    const params = new URLSearchParams({ type: data.type });
+    const categories = new Set<string>(CATEGORIES_BY_TYPE[data.type]);
+    const loaders = new Set<string>(LOADERS_BY_TYPE[data.type]);
 
     if (data.query) {
       params.set("q", data.query);
     }
-    if (data.category && CATEGORIES.has(data.category)) {
+    if (data.category && categories.has(data.category)) {
       params.set("category", data.category);
     }
     if (data.gameVersion && GAME_VERSIONS.has(data.gameVersion)) {
       params.set("gameVersion", data.gameVersion);
     }
-    if (data.loader && LOADERS.has(data.loader)) {
+    if (data.loader && loaders.has(data.loader)) {
       params.set("loader", data.loader);
     }
     if (data.page && data.page > 1) {
@@ -65,7 +72,7 @@ export const searchMods = createServerFn({ method: "GET" })
     let response: Response;
     try {
       response = await fetch(
-        `${env.API_URL}/api/mods/search?${params.toString()}`,
+        `${env.API_URL}/api/projects/search?${params.toString()}`,
         { signal: AbortSignal.timeout(8000) }
       );
     } catch (fetchError) {
@@ -79,7 +86,7 @@ export const searchMods = createServerFn({ method: "GET" })
       throw new Error(`Search failed (${response.status})`);
     }
 
-    // SAFETY: The Elysia /api/mods/search endpoint returns the same shape as
+    // SAFETY: The Elysia /api/projects/search endpoint returns the same shape as
     // the previous direct Meilisearch call (hits + estimatedTotalHits + query).
-    return response.json() as Promise<ModSearchResponse>;
+    return response.json() as Promise<ProjectSearchResponse>;
   });

@@ -133,6 +133,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
 MEILI_HOST=http://localhost:7700
 MEILI_MASTER_KEY=your-master-key      # Only needed when seeding
 MEILI_SEARCH_KEY=your-search-key
+MEILI_ADMIN_KEY=your-projects-write-key  # See docs/search/meilisearch.md
 API_URL=http://localhost:3002
 API_PORT=3002
 WEBHOOK_SECRET=your-webhook-secret    # Required, at least 32 characters
@@ -273,7 +274,8 @@ A standalone **ElysiaJS** API server (`server/`) powers mod search and
 real-time mod events:
 
 * `GET /api/health` — liveness check
-* `GET /api/mods/search` — Meilisearch proxy used by the mods page
+* `GET /api/projects/search` — Meilisearch proxy used by the mods and
+  plugins pages
 * `GET /api/events` — Server-Sent Events (SSE) stream of mod events
 * `POST /api/webhooks/mods` — webhook endpoint (HMAC-SHA256 verified) that
   broadcasts `mod.created`, `mod.updated`, and `mod.deleted` events

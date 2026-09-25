@@ -11,7 +11,7 @@ for the longer-term plan.
 * [ ] Update README (scope, commands, Node 24, mise, just, Unpic, legal)
 * [ ] Repo-wide consistency audit (Node 22 → 24: setup.md, CI action)
 * [ ] `/mods` loading skeletons (pendingComponent + initial-null handling)
-* [ ] Create `/mods/$modId` mod detail page
+* [x] Create `/mods/$slug` mod detail page (content hosting)
 * [ ] Update web-design-guidelines SKILL.md (skeletons + empty states)
 * [ ] Use `cn` more across the application
 * [ ] Verification: typecheck, check, test, build, lint:md

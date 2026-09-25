@@ -13,18 +13,27 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as ModsRouteImport } from './routes/mods'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as ModsModIdRouteImport } from './routes/mods.$modId'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as ModsIndexRouteImport } from './routes/mods.index'
+import { Route as ModsSlugRouteImport } from './routes/mods.$slug'
+import { Route as PluginsIndexRouteImport } from './routes/plugins.index'
+import { Route as PluginsSlugRouteImport } from './routes/plugins.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiDownloadFileIdRouteImport } from './routes/api/download.$fileId'
+import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
+import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard.projects.$projectId'
+import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard.projects.new'
+import { Route as ApiProjectsProjectIdVersionsVersionIdFilesRouteImport } from './routes/api/projects.$projectId.versions.$versionId.files'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +55,11 @@ const CookiesRoute = CookiesRouteImport.update({
   path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DisclaimerRoute = DisclaimerRouteImport.update({
   id: '/disclaimer',
   path: '/disclaimer',
@@ -59,11 +73,6 @@ const LegalRoute = LegalRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModsRoute = ModsRouteImport.update({
-  id: '/mods',
-  path: '/mods',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -96,34 +105,90 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
-const ModsModIdRoute = ModsModIdRouteImport.update({
-  id: '/$modId',
-  path: '/$modId',
-  getParentRoute: () => ModsRoute,
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const ModsIndexRoute = ModsIndexRouteImport.update({
+  id: '/mods/',
+  path: '/mods/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModsSlugRoute = ModsSlugRouteImport.update({
+  id: '/mods/$slug',
+  path: '/mods/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PluginsIndexRoute = PluginsIndexRouteImport.update({
+  id: '/plugins/',
+  path: '/plugins/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PluginsSlugRoute = PluginsSlugRouteImport.update({
+  id: '/plugins/$slug',
+  path: '/plugins/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDownloadFileIdRoute = ApiDownloadFileIdRouteImport.update({
+  id: '/api/download/$fileId',
+  path: '/api/download/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProjectsProjectIdRoute =
+  DashboardProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
+  id: '/projects/new',
+  path: '/projects/new',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const ApiProjectsProjectIdVersionsVersionIdFilesRoute =
+  ApiProjectsProjectIdVersionsVersionIdFilesRouteImport.update({
+    id: '/api/projects/$projectId/versions/$versionId/files',
+    path: '/api/projects/$projectId/versions/$versionId/files',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/disclaimer': typeof DisclaimerRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
-  '/mods': typeof ModsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/mods/$modId': typeof ModsModIdRoute
+  '/mods/$slug': typeof ModsSlugRoute
+  '/plugins/$slug': typeof PluginsSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/mods/': typeof ModsIndexRoute
+  '/plugins/': typeof PluginsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/download/$fileId': typeof ApiDownloadFileIdRoute
+  '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
+  '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -133,15 +198,23 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
-  '/mods': typeof ModsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/mods/$modId': typeof ModsModIdRoute
+  '/mods/$slug': typeof ModsSlugRoute
+  '/plugins/$slug': typeof PluginsSlugRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/mods': typeof ModsIndexRoute
+  '/plugins': typeof PluginsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/download/$fileId': typeof ApiDownloadFileIdRoute
+  '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
+  '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,18 +222,27 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/disclaimer': typeof DisclaimerRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
-  '/mods': typeof ModsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/mods/$modId': typeof ModsModIdRoute
+  '/mods/$slug': typeof ModsSlugRoute
+  '/plugins/$slug': typeof PluginsSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/mods/': typeof ModsIndexRoute
+  '/plugins/': typeof PluginsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/download/$fileId': typeof ApiDownloadFileIdRoute
+  '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
+  '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -169,18 +251,27 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/cookies'
+    | '/dashboard'
     | '/disclaimer'
     | '/legal'
     | '/login'
-    | '/mods'
     | '/privacy'
     | '/settings'
     | '/signup'
     | '/terms'
     | '/terms-of-use'
     | '/blog/$slug'
-    | '/mods/$modId'
+    | '/mods/$slug'
+    | '/plugins/$slug'
+    | '/dashboard/'
+    | '/mods/'
+    | '/plugins/'
     | '/api/auth/$'
+    | '/api/download/$fileId'
+    | '/dashboard/projects/$projectId'
+    | '/dashboard/projects/new'
+    | '/dashboard/projects/'
+    | '/api/projects/$projectId/versions/$versionId/files'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -190,33 +281,50 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/legal'
     | '/login'
-    | '/mods'
     | '/privacy'
     | '/settings'
     | '/signup'
     | '/terms'
     | '/terms-of-use'
     | '/blog/$slug'
-    | '/mods/$modId'
+    | '/mods/$slug'
+    | '/plugins/$slug'
+    | '/dashboard'
+    | '/mods'
+    | '/plugins'
     | '/api/auth/$'
+    | '/api/download/$fileId'
+    | '/dashboard/projects/$projectId'
+    | '/dashboard/projects/new'
+    | '/dashboard/projects'
+    | '/api/projects/$projectId/versions/$versionId/files'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/blog'
     | '/cookies'
+    | '/dashboard'
     | '/disclaimer'
     | '/legal'
     | '/login'
-    | '/mods'
     | '/privacy'
     | '/settings'
     | '/signup'
     | '/terms'
     | '/terms-of-use'
     | '/blog/$slug'
-    | '/mods/$modId'
+    | '/mods/$slug'
+    | '/plugins/$slug'
+    | '/dashboard/'
+    | '/mods/'
+    | '/plugins/'
     | '/api/auth/$'
+    | '/api/download/$fileId'
+    | '/dashboard/projects/$projectId'
+    | '/dashboard/projects/new'
+    | '/dashboard/projects/'
+    | '/api/projects/$projectId/versions/$versionId/files'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,16 +332,22 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BlogRoute: typeof BlogRouteWithChildren
   CookiesRoute: typeof CookiesRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   DisclaimerRoute: typeof DisclaimerRoute
   LegalRoute: typeof LegalRoute
   LoginRoute: typeof LoginRoute
-  ModsRoute: typeof ModsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
+  ModsSlugRoute: typeof ModsSlugRoute
+  PluginsSlugRoute: typeof PluginsSlugRoute
+  ModsIndexRoute: typeof ModsIndexRoute
+  PluginsIndexRoute: typeof PluginsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiDownloadFileIdRoute: typeof ApiDownloadFileIdRoute
+  ApiProjectsProjectIdVersionsVersionIdFilesRoute: typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -266,6 +380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/disclaimer': {
       id: '/disclaimer'
       path: '/disclaimer'
@@ -285,13 +406,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mods': {
-      id: '/mods'
-      path: '/mods'
-      fullPath: '/mods'
-      preLoaderRoute: typeof ModsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -336,18 +450,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
-    '/mods/$modId': {
-      id: '/mods/$modId'
-      path: '/$modId'
-      fullPath: '/mods/$modId'
-      preLoaderRoute: typeof ModsModIdRouteImport
-      parentRoute: typeof ModsRoute
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/mods/': {
+      id: '/mods/'
+      path: '/mods'
+      fullPath: '/mods/'
+      preLoaderRoute: typeof ModsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mods/$slug': {
+      id: '/mods/$slug'
+      path: '/mods/$slug'
+      fullPath: '/mods/$slug'
+      preLoaderRoute: typeof ModsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plugins/': {
+      id: '/plugins/'
+      path: '/plugins'
+      fullPath: '/plugins/'
+      preLoaderRoute: typeof PluginsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plugins/$slug': {
+      id: '/plugins/$slug'
+      path: '/plugins/$slug'
+      fullPath: '/plugins/$slug'
+      preLoaderRoute: typeof PluginsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/download/$fileId': {
+      id: '/api/download/$fileId'
+      path: '/api/download/$fileId'
+      fullPath: '/api/download/$fileId'
+      preLoaderRoute: typeof ApiDownloadFileIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/projects/': {
+      id: '/dashboard/projects/'
+      path: '/projects'
+      fullPath: '/dashboard/projects/'
+      preLoaderRoute: typeof DashboardProjectsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/projects/$projectId': {
+      id: '/dashboard/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/dashboard/projects/$projectId'
+      preLoaderRoute: typeof DashboardProjectsProjectIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/projects/new': {
+      id: '/dashboard/projects/new'
+      path: '/projects/new'
+      fullPath: '/dashboard/projects/new'
+      preLoaderRoute: typeof DashboardProjectsNewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/api/projects/$projectId/versions/$versionId/files': {
+      id: '/api/projects/$projectId/versions/$versionId/files'
+      path: '/api/projects/$projectId/versions/$versionId/files'
+      fullPath: '/api/projects/$projectId/versions/$versionId/files'
+      preLoaderRoute: typeof ApiProjectsProjectIdVersionsVersionIdFilesRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -363,31 +540,46 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
-interface ModsRouteChildren {
-  ModsModIdRoute: typeof ModsModIdRoute
+interface DashboardRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardProjectsProjectIdRoute: typeof DashboardProjectsProjectIdRoute
+  DashboardProjectsNewRoute: typeof DashboardProjectsNewRoute
+  DashboardProjectsIndexRoute: typeof DashboardProjectsIndexRoute
 }
 
-const ModsRouteChildren: ModsRouteChildren = {
-  ModsModIdRoute: ModsModIdRoute,
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardProjectsProjectIdRoute: DashboardProjectsProjectIdRoute,
+  DashboardProjectsNewRoute: DashboardProjectsNewRoute,
+  DashboardProjectsIndexRoute: DashboardProjectsIndexRoute,
 }
 
-const ModsRouteWithChildren = ModsRoute._addFileChildren(ModsRouteChildren)
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   BlogRoute: BlogRouteWithChildren,
   CookiesRoute: CookiesRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   DisclaimerRoute: DisclaimerRoute,
   LegalRoute: LegalRoute,
   LoginRoute: LoginRoute,
-  ModsRoute: ModsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
   TermsOfUseRoute: TermsOfUseRoute,
+  ModsSlugRoute: ModsSlugRoute,
+  PluginsSlugRoute: PluginsSlugRoute,
+  ModsIndexRoute: ModsIndexRoute,
+  PluginsIndexRoute: PluginsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiDownloadFileIdRoute: ApiDownloadFileIdRoute,
+  ApiProjectsProjectIdVersionsVersionIdFilesRoute:
+    ApiProjectsProjectIdVersionsVersionIdFilesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -47,15 +47,19 @@ The API server never uses `MEILI_MASTER_KEY` for public search.
 
 Liveness check. Returns `{ ok: true }` when the server is up.
 
-### `GET /api/mods/search`
+### `GET /api/projects/search`
 
-Proxies the mods search to Meilisearch. Accepts the same query parameters
-the mods page sends (`q`, `category`, `gameVersion`, `loader`, `sort`) and
-returns the same shape as the previous direct Meilisearch call: `hits`,
-`estimatedTotalHits`, `facetDistribution`, and `query`. Sort values are
-whitelisted (`downloads:desc`, `updatedAt:desc`, `name:asc`), and
-`category`, `gameVersion`, and `loader` must be one of the known values
-from `src/lib/mods-data.ts` (anything else returns `422`).
+Proxies project search to Meilisearch. `type` is required (`mod` or
+`plugin`). Optional parameters: `q`, `category`, `gameVersion`, `loader`,
+`sort`, and `page`. Returns `hits`, `estimatedTotalHits`,
+`facetDistribution`, `page`, `pageSize`, and `query`. Sort values are
+whitelisted (`downloads:desc`, `updatedAt:desc`, `name:asc`). `category`
+and `loader` must be valid for the given type, and `gameVersion` must be
+a known version, all from `src/lib/projects.ts`. Anything else returns
+`422`.
+
+Uploads and downloads are served by the web app, not this server. See
+[Projects and Files](../content/projects.md).
 
 ### `GET /api/events`
 
@@ -150,7 +154,7 @@ server/
 │   └── meilisearch.ts    # Meilisearch client factory
 └── routes/
     ├── health.ts         # GET /api/health
-    ├── mods.ts           # GET /api/mods/search
+    ├── projects.ts       # GET /api/projects/search
     ├── events.ts         # GET /api/events (SSE)
     └── webhooks.ts       # POST /api/webhooks/mods
 ```

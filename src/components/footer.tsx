@@ -15,7 +15,7 @@ interface FooterLink {
 const PROJECT_LINKS: readonly FooterLink[] = [
   { available: true, href: "/mods", label: "Mods" },
   { available: false, href: "/modpacks", label: "Modpacks" },
-  { available: false, href: "/plugins", label: "Plugins" },
+  { available: true, href: "/plugins", label: "Plugins" },
   { available: false, href: "/resource-packs", label: "Resource Packs" },
   { available: false, href: "/shaders", label: "Shaders" },
   { available: false, href: "/servers", label: "Servers" },

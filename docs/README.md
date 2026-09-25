@@ -34,10 +34,17 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 * [Docker](deployment/docker.md) — build and run the production image
 
+## Content
+
+* [Projects and Files](content/projects.md) — mods and plugins, versions,
+  uploads, downloads, and permissions
+* [Object Storage](storage/object-storage.md) — Garage for development,
+  Cloudflare R2 for production
+
 ## Search
 
-* [Meilisearch](search/meilisearch.md) — index, seed, and query the
-  mods search engine
+* [Meilisearch](search/meilisearch.md) — index, reindex, and query
+  project search
 
 ## API
 

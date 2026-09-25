@@ -36,6 +36,13 @@
       "when": 1789059568927,
       "tag": "0004_add_posts",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790368726950,
+      "tag": "0005_add_projects",
+      "breakpoints": true
     }
   ]
 }

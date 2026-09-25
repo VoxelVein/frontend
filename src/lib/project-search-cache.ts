@@ -1,38 +1,45 @@
-import type { ModSearchParams, ModSearchResponse } from "@/lib/mods.functions";
+import type {
+  ProjectSearchParams,
+  ProjectSearchResponse,
+} from "@/lib/project-search.functions";
 
-export interface ModsCacheOptions {
+export interface ProjectSearchCacheOptions {
   maxEntries?: number;
   ttlMs?: number;
 }
 
-export interface ModsCache {
+export interface ProjectSearchCache {
   clear: () => void;
-  delete: (params: ModSearchParams) => void;
-  get: (params: ModSearchParams) => ModSearchResponse | undefined;
-  set: (params: ModSearchParams, data: ModSearchResponse) => void;
+  delete: (params: ProjectSearchParams) => void;
+  get: (params: ProjectSearchParams) => ProjectSearchResponse | undefined;
+  set: (params: ProjectSearchParams, data: ProjectSearchResponse) => void;
 }
 
-interface ModsCacheEntry {
-  data: ModSearchResponse;
+interface ProjectSearchCacheEntry {
+  data: ProjectSearchResponse;
   expiresAt: number;
 }
 
 const DEFAULT_MAX_ENTRIES = 50;
 const DEFAULT_TTL_MS = 60_000;
 
-const buildCacheKey = (params: ModSearchParams): string =>
+const buildCacheKey = (params: ProjectSearchParams): string =>
   JSON.stringify([
+    params.type,
     params.query,
     params.category ?? "",
     params.gameVersion ?? "",
     params.loader ?? "",
     params.sort,
+    params.page ?? 1,
   ]);
 
-export const createModsCache = (options: ModsCacheOptions = {}): ModsCache => {
+export const createProjectSearchCache = (
+  options: ProjectSearchCacheOptions = {}
+): ProjectSearchCache => {
   const maxEntries = Math.max(1, options.maxEntries ?? DEFAULT_MAX_ENTRIES);
   const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS;
-  const entries = new Map<string, ModsCacheEntry>();
+  const entries = new Map<string, ProjectSearchCacheEntry>();
 
   return {
     clear: () => {
@@ -80,4 +87,4 @@ export const createModsCache = (options: ModsCacheOptions = {}): ModsCache => {
   };
 };
 
-export const modsCache = createModsCache();
+export const projectSearchCache = createProjectSearchCache();

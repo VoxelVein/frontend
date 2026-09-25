@@ -1,21 +1,20 @@
 import { Elysia, t } from "elysia";
 
 import {
-  MOD_CATEGORIES,
-  MOD_GAME_VERSIONS,
-  MOD_LOADERS,
-} from "../../src/lib/mods-data";
-import type { Mod } from "../../src/lib/mods-data";
-import { getSearchClient, MODS_INDEX } from "../lib/meilisearch";
+  CATEGORIES_BY_TYPE,
+  GAME_VERSIONS as ALL_GAME_VERSIONS,
+  LOADERS_BY_TYPE,
+  isProjectType,
+} from "../../src/lib/projects";
+import type { ProjectDocument, ProjectType } from "../../src/lib/projects";
+import { getSearchClient, PROJECTS_INDEX } from "../lib/meilisearch";
 
 const DEFAULT_SORT = "downloads:desc";
 const SORTS = [DEFAULT_SORT, "updatedAt:desc", "name:asc"] as const;
 const PAGE_SIZE = 12;
 const MAX_PAGE = 1000;
 
-const CATEGORIES = new Set<string>(MOD_CATEGORIES);
-const GAME_VERSIONS = new Set<string>(MOD_GAME_VERSIONS);
-const LOADERS = new Set<string>(MOD_LOADERS);
+const GAME_VERSIONS = new Set<string>(ALL_GAME_VERSIONS);
 
 // Only values from the allowlists above ever reach the filter (see
 // hasUnknownFilter), so they cannot contain quotes that would alter the
@@ -25,21 +24,20 @@ const quote = (value: string) => `"${value}"`;
 const isUnknown = (value: string | undefined, allowed: Set<string>) =>
   value !== undefined && !allowed.has(value);
 
-const hasUnknownFilter = (params: {
+interface FilterParams {
   category?: string;
   gameVersion?: string;
   loader?: string;
-}): boolean =>
-  isUnknown(params.category, CATEGORIES) ||
-  isUnknown(params.gameVersion, GAME_VERSIONS) ||
-  isUnknown(params.loader, LOADERS);
+  type: ProjectType;
+}
 
-const buildFilter = (params: {
-  category?: string;
-  gameVersion?: string;
-  loader?: string;
-}): string[] | undefined => {
-  const filters: string[] = [];
+const hasUnknownFilter = (params: FilterParams): boolean =>
+  isUnknown(params.category, new Set(CATEGORIES_BY_TYPE[params.type])) ||
+  isUnknown(params.gameVersion, GAME_VERSIONS) ||
+  isUnknown(params.loader, new Set(LOADERS_BY_TYPE[params.type]));
+
+const buildFilter = (params: FilterParams): string[] => {
+  const filters = [`type = ${quote(params.type)}`];
 
   if (params.category) {
     filters.push(`category = ${quote(params.category)}`);
@@ -51,13 +49,18 @@ const buildFilter = (params: {
     filters.push(`loaders = ${quote(params.loader)}`);
   }
 
-  return filters.length > 0 ? filters : undefined;
+  return filters;
 };
 
-export const modsRoute = new Elysia().get(
-  "/api/mods/search",
+export const projectsRoute = new Elysia().get(
+  "/api/projects/search",
   async ({ query, status }) => {
-    if (hasUnknownFilter(query)) {
+    // Checked here rather than with t.UnionEnum: Elysia's exact-mirror cannot
+    // compile unions without the TypeBox TypeCompiler.
+    if (!isProjectType(query.type)) {
+      return status(422, "Unknown project type");
+    }
+    if (hasUnknownFilter({ ...query, type: query.type })) {
       return status(422, "Unknown filter value");
     }
 
@@ -71,10 +74,10 @@ export const modsRoute = new Elysia().get(
     const offset = (page - 1) * PAGE_SIZE;
 
     const result = await getSearchClient()
-      .index(MODS_INDEX)
-      .search<Mod>(query.q ?? "", {
+      .index(PROJECTS_INDEX)
+      .search<ProjectDocument>(query.q ?? "", {
         facets: ["category", "gameVersions", "loaders"],
-        filter: buildFilter(query),
+        filter: buildFilter({ ...query, type: query.type }),
         limit: PAGE_SIZE,
         offset,
         sort: [sort],
@@ -92,6 +95,7 @@ export const modsRoute = new Elysia().get(
   {
     query: t.Object({
       q: t.Optional(t.String({ maxLength: 200 })),
+      type: t.String(),
       category: t.Optional(t.String()),
       gameVersion: t.Optional(t.String()),
       loader: t.Optional(t.String()),

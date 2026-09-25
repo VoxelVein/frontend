@@ -41,7 +41,7 @@ const PROJECT_ITEMS: readonly {
     label: "Modpacks",
   },
   {
-    available: false,
+    available: true,
     description: "Server-side plugins",
     href: "/plugins",
     icon: IconServer,

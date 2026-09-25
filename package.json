@@ -1,6 +1,6 @@
 {
   "name": "voxelvein-frontend",
-  "version": "ALPHA-0.6.0",
+  "version": "ALPHA-0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,10 +16,12 @@
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage",
     "check:bundle": "tsx scripts/check-bundle-size.ts",
-    "db:seed": "node scripts/seed-mods.ts",
+    "db:seed": "tsx scripts/seed-projects.ts",
+    "db:reindex": "tsx scripts/seed-projects.ts --reindex",
     "db:seed:admin": "tsx scripts/seed-admin.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "storage:init": "./scripts/garage-init.sh",
     "lint": "oxlint",
     "lint:md": "markdownlint-cli2",
     "lint:md:fix": "markdownlint-cli2 --fix",

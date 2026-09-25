@@ -25,6 +25,8 @@ export interface StorageConfig {
   forcePathStyle: boolean;
   maxFileBytes: number;
   publicUrl: string | null;
+  /** Total bytes all stored files may use; null means unlimited. */
+  quotaBytes: number | null;
   region: string;
   secretAccessKey: string;
 }
@@ -34,6 +36,8 @@ export interface UploadInput {
   contentType: string;
   filename: string;
   key: string;
+  /** Lower byte limit for this upload, e.g. the space left in the quota. */
+  maxBytes?: number;
 }
 
 export interface UploadResult {
@@ -45,6 +49,7 @@ export interface UploadResult {
 export const STORAGE_ERROR = {
   fileTooLarge: "file-too-large",
   notConfigured: "not-configured",
+  quotaExceeded: "quota-exceeded",
 } as const;
 
 export type StorageErrorCode =
@@ -84,6 +89,9 @@ export const loadStorageConfig = (): StorageConfig => {
       ? Number(env.STORAGE_MAX_FILE_BYTES)
       : DEFAULT_MAX_FILE_BYTES,
     publicUrl: env.STORAGE_PUBLIC_URL?.replace(/\/+$/u, "") ?? null,
+    quotaBytes: env.STORAGE_QUOTA_BYTES
+      ? Number(env.STORAGE_QUOTA_BYTES)
+      : null,
     region: env.STORAGE_REGION ?? "auto",
     secretAccessKey,
   };
@@ -179,7 +187,11 @@ export const uploadStream = async (
     client,
     params: {
       Body: Readable.from(
-        hashAndLimit(input.body, digest, config.maxFileBytes)
+        hashAndLimit(
+          input.body,
+          digest,
+          Math.min(config.maxFileBytes, input.maxBytes ?? Infinity)
+        )
       ),
       Bucket: config.bucket,
       CacheControl: IMMUTABLE_CACHE_CONTROL,
