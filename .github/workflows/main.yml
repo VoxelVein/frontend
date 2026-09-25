@@ -3,9 +3,6 @@ name: Main
 on:
   push:
     branches: [main]
-  # Started by claude-auto-merge after a bot merge, since merges made with
-  # GITHUB_TOKEN don't fire push events.
-  workflow_dispatch:
 
 concurrency:
   group: main-${{ github.ref }}
