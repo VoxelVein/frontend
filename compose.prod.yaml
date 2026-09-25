@@ -1,0 +1,14 @@
+# Production override for the VoxelVein Frontend.
+# Builds the production image and runs the Nitro server.
+# Usage: docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+
+services:
+  web:
+    image: voxelvein-frontend:${TAG:-latest}
+    build:
+      target: runtime
+    ports:
+      - "${PORT:-1112}:3000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped

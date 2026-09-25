@@ -1,0 +1,22 @@
+# Development override for VoxelVein Frontend.
+#
+# Mounts the source tree and runs the Vite dev server with hot reload.
+#
+# Usage: docker compose -f compose.yaml -f compose.dev.yaml up
+
+services:
+  web:
+    image: voxelvein-frontend:dev
+    build:
+      target: deps
+    ports:
+      - "${PORT:-1112}:6001"
+    environment:
+      NODE_ENV: development
+    volumes:
+      # Mount source for hot reload
+      - .:/app
+      # Anonymous volume to keep node_modules from the image (not overwritten by the bind mount)
+      - /app/node_modules
+    command: pnpm dev
+    restart: "no"
