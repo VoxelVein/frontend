@@ -5,6 +5,9 @@ on:
     branches: [main, prod]
   push:
     branches: [main, prod]
+  # Started by claude-auto-merge after a bot merge, since merges made with
+  # GITHUB_TOKEN don't fire push events.
+  workflow_dispatch:
 
 concurrency:
   group: docs-${{ github.ref }}

@@ -17,7 +17,7 @@ permissions:
   pull-requests: write
   issues: write
   id-token: write
-  actions: read
+  actions: write # dispatch the post-merge workflows
   checks: read
 
 jobs:
@@ -119,3 +119,20 @@ jobs:
             - changes the release stage of the `version` in `package.json` (e.g. ALPHA to BETA)
             To escalate: run `gh pr edit ${{ github.event.pull_request.number }} --add-label needs-human`,
             post a comment explaining exactly what's wrong and what decision you need, then stop.
+
+      # Merges made with GITHUB_TOKEN don't fire push events, so main.yml and
+      # docs.yml would never run for a bot merge. workflow_dispatch is exempt
+      # from that rule, so start them explicitly once the PR is merged.
+      - name: Run post-merge workflows on main
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          state=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
+          if [ "$state" != "MERGED" ]; then
+            echo "PR #$PR_NUMBER is $state; nothing to run."
+            exit 0
+          fi
+          gh workflow run main.yml --repo "$GITHUB_REPOSITORY" --ref main
+          gh workflow run docs.yml --repo "$GITHUB_REPOSITORY" --ref main
