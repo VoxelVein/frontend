@@ -9,7 +9,7 @@ const Hero = () => (
   <section className="px-4 pt-14 pb-12 sm:px-6 lg:px-8">
     <div className="animate-hero-fade-in mx-auto max-w-4xl text-center">
       <div className="mb-8 flex justify-center">
-        <Logo className="h-20 w-20 object-contain" />
+        <Logo className="h-20 w-20" />
       </div>
 
       <h1 className="text-foreground mb-5 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">

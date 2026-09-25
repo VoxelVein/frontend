@@ -16,7 +16,7 @@ const NavbarLogo = ({ className }: NavbarLogoProps) => (
       className
     )}
   >
-    <Logo className="h-8 w-8 object-contain" />
+    <Logo className="h-8 w-8" />
     <span className="text-foreground text-lg font-semibold tracking-tight">
       VoxelVein
     </span>
