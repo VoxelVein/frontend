@@ -6,7 +6,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { check, nonEmpty, pipe, regex, string } from "valibot";
+import { check, nonEmpty, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { GitHubSignInButton } from "@/components/github-sign-in-button";
@@ -23,30 +23,39 @@ import {
 } from "@/lib/turnstile-client";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+const MIN_USERNAME_LENGTH = 3;
 
-const emailSchema = pipe(
-  string(),
-  check((value) => value.trim().length > 0, "Email is required."),
-  regex(EMAIL_PATTERN, "Enter a valid email address.")
-);
+const MISSING_VERIFICATION_MESSAGE =
+  "Complete the human verification check before signing in.";
+const INVALID_CREDENTIALS_MESSAGE = "Invalid email, username, or password.";
 
-const usernameSchema = pipe(
+/**
+ * A single field accepts either identifier, and the `@` decides which one it
+ * is. That is the only signal available: Better Auth exposes `signIn.email` and
+ * `signIn.username` as separate calls, so the branch has to be made client-side.
+ */
+const isEmailIdentifier = (value: string) => value.includes("@");
+
+/** Accepts an email address or a username, and names the failing one. */
+const identifierSchema = pipe(
   string(),
-  check((value) => value.trim().length > 0, "Username is required."),
-  check((value) => value.length >= 3, "Username must be at least 3 characters.")
+  check((value) => value.trim().length > 0, "Email or username is required."),
+  check(
+    (value) => !isEmailIdentifier(value) || EMAIL_PATTERN.test(value),
+    "Enter a valid email address."
+  ),
+  check(
+    (value) =>
+      isEmailIdentifier(value) || value.trim().length >= MIN_USERNAME_LENGTH,
+    `Username must be at least ${MIN_USERNAME_LENGTH} characters.`
+  )
 );
 
 const passwordSchema = pipe(string(), nonEmpty("Password is required."));
 
-const MISSING_VERIFICATION_MESSAGE =
-  "Complete the human verification check before signing in.";
-
-type LoginMode = "email" | "username";
-
 const LoginPage = () => {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
-  const [loginMode, setLoginMode] = useState<LoginMode>("email");
   // A ref, not state: useForm keeps the onSubmit from the first render, so
   // state read there would always be the initial null.
   const turnstileTokenRef = useRef<string | null>(null);
@@ -57,8 +66,7 @@ const LoginPage = () => {
 
   const form = useForm({
     defaultValues: {
-      email: "",
-      username: "",
+      identifier: "",
       password: "",
     },
     onSubmit: async ({ value }) => {
@@ -70,28 +78,24 @@ const LoginPage = () => {
         return;
       }
 
+      const identifier = value.identifier.trim();
       const fetchOptions = turnstileFetchOptions(turnstileToken);
-      const { error } =
-        loginMode === "email"
-          ? await authClient.signIn.email({
-              email: value.email,
-              fetchOptions,
-              password: value.password,
-            })
-          : await authClient.signIn.username({
-              fetchOptions,
-              password: value.password,
-              username: value.username,
-            });
+      const { error } = isEmailIdentifier(identifier)
+        ? await authClient.signIn.email({
+            email: identifier,
+            fetchOptions,
+            password: value.password,
+          })
+        : await authClient.signIn.username({
+            fetchOptions,
+            password: value.password,
+            username: identifier,
+          });
 
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
-        const fallback =
-          loginMode === "email"
-            ? "Invalid email or password."
-            : "Invalid username or password.";
-        setFormError(error.message ?? fallback);
+        setFormError(error.message ?? INVALID_CREDENTIALS_MESSAGE);
         return;
       }
 
@@ -136,32 +140,6 @@ const LoginPage = () => {
           <hr className="bg-border h-px flex-1 border-0" />
         </div>
 
-        <fieldset className="mt-6" aria-label="Login method">
-          <legend className="sr-only">Login method</legend>
-          <div className="bg-muted flex rounded-lg p-1">
-            <Button
-              type="button"
-              variant={loginMode === "email" ? "default" : "ghost"}
-              size="sm"
-              className="min-h-10 flex-1"
-              onClick={() => setLoginMode("email")}
-              aria-pressed={loginMode === "email"}
-            >
-              Email
-            </Button>
-            <Button
-              type="button"
-              variant={loginMode === "username" ? "default" : "ghost"}
-              size="sm"
-              className="min-h-10 flex-1"
-              onClick={() => setLoginMode("username")}
-              aria-pressed={loginMode === "username"}
-            >
-              Username
-            </Button>
-          </div>
-        </fieldset>
-
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -172,53 +150,32 @@ const LoginPage = () => {
           aria-busy={isSubmitting}
           className="mt-6 grid gap-4"
         >
-          {loginMode === "email" ? (
-            <form.Field
-              name="email"
-              validators={{
-                onChange: emailSchema,
-                onSubmit: emailSchema,
-              }}
-            >
-              {(field) => (
-                <FormField
-                  id="email"
-                  label="Email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com…"
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors[0]?.message}
-                  required
-                />
-              )}
-            </form.Field>
-          ) : (
-            <form.Field
-              name="username"
-              validators={{
-                onChange: usernameSchema,
-                onSubmit: usernameSchema,
-              }}
-            >
-              {(field) => (
-                <FormField
-                  id="username"
-                  label="Username"
-                  type="text"
-                  autoComplete="username"
-                  placeholder="yourusername…"
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors[0]?.message}
-                  required
-                />
-              )}
-            </form.Field>
-          )}
+          <form.Field
+            name="identifier"
+            validators={{
+              onChange: identifierSchema,
+              onSubmit: identifierSchema,
+            }}
+          >
+            {(field) => (
+              <FormField
+                id="identifier"
+                label="Email or username"
+                // Not type="email": the field also accepts usernames, and
+                // `username` is the autocomplete token that pairs with
+                // current-password in password managers.
+                type="text"
+                autoComplete="username"
+                placeholder="you@example.com"
+                helperText="Use your email address or username."
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                onBlur={field.handleBlur}
+                error={field.state.meta.errors[0]?.message}
+                required
+              />
+            )}
+          </form.Field>
 
           <form.Field
             name="password"
@@ -233,6 +190,7 @@ const LoginPage = () => {
                 label="Password"
                 type="password"
                 autoComplete="current-password"
+                placeholder="Enter your password"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}

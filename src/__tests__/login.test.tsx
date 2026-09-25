@@ -13,17 +13,26 @@ interface SignInEmailOptions {
   password: string;
 }
 
-const { navigate, signInEmail } = vi.hoisted(() => ({
+interface SignInUsernameOptions {
+  fetchOptions?: { headers: Record<string, string> };
+  password: string;
+  username: string;
+}
+
+const { navigate, signInEmail, signInUsername } = vi.hoisted(() => ({
   navigate: vi.fn<(opts: { to: string }) => void>(),
   signInEmail: vi.fn<(opts: SignInEmailOptions) => Promise<AuthResult>>(),
+  signInUsername: vi.fn<(opts: SignInUsernameOptions) => Promise<AuthResult>>(),
 }));
 
 // Cloudflare's documented always-passing test site key.
 const TEST_SITE_KEY = "1x00000000000000000000AA";
 
-const fillValidCredentials = () => {
-  fireEvent.change(screen.getByLabelText("Email"), {
-    target: { value: "user@example.com" },
+const IDENTIFIER_LABEL = "Email or username";
+
+const fillCredentials = (identifier: string) => {
+  fireEvent.change(screen.getByLabelText(IDENTIFIER_LABEL), {
+    target: { value: identifier },
   });
   fireEvent.change(screen.getByLabelText("Password"), {
     // oxlint-disable-next-line sonarjs/no-hardcoded-passwords -- Test fixture password
@@ -31,11 +40,16 @@ const fillValidCredentials = () => {
   });
 };
 
+const fillValidCredentials = () => {
+  fillCredentials("user@example.com");
+};
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the login form requires a faithful auth client stub; string path avoids strict factory type-checking against the real auth client
 vi.mock("@/lib/auth-client", () => ({
   authClient: {
     signIn: {
       email: signInEmail,
+      username: signInUsername,
     },
   },
 }));
@@ -67,6 +81,7 @@ describe("LoginPage", () => {
   beforeEach(() => {
     navigate.mockReset();
     signInEmail.mockReset();
+    signInUsername.mockReset();
   });
 
   afterEach(() => {
@@ -74,12 +89,20 @@ describe("LoginPage", () => {
     delete window.turnstile;
   });
 
-  it("renders the email and password fields", () => {
+  it("renders the combined identifier and password fields", () => {
     render(<LoginPage />);
 
-    expect(screen.getByLabelText("Email")).toBeTruthy();
+    expect(screen.getByLabelText(IDENTIFIER_LABEL)).toBeTruthy();
     expect(screen.getByLabelText("Password")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Sign In" })).toBeTruthy();
+  });
+
+  it("offers no username/email toggle to switch between", () => {
+    render(<LoginPage />);
+
+    // The two identifiers share one field, so the old mode buttons are gone.
+    expect(screen.queryByRole("button", { name: "Email" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Username" })).toBeNull();
   });
 
   it("shows validation errors for empty fields", async () => {
@@ -87,40 +110,46 @@ describe("LoginPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
-    await expect(screen.findByText("Email is required.")).resolves.toBeTruthy();
+    await expect(
+      screen.findByText("Email or username is required.")
+    ).resolves.toBeTruthy();
     expect(screen.getByText("Password is required.")).toBeTruthy();
     expect(signInEmail).not.toHaveBeenCalled();
+    expect(signInUsername).not.toHaveBeenCalled();
   });
 
-  it("shows a validation error for an invalid email", async () => {
+  it("shows a validation error for an email with no top-level domain", async () => {
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "not-an-email" },
-    });
-    fireEvent.change(screen.getByLabelText("Password"), {
-      target: { value: "password123" },
-    });
+    fillCredentials("user@example");
     fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
     await expect(
       screen.findByText("Enter a valid email address.")
     ).resolves.toBeTruthy();
     expect(signInEmail).not.toHaveBeenCalled();
+    expect(signInUsername).not.toHaveBeenCalled();
   });
 
-  it("calls signIn.email and navigates home on success", async () => {
+  it("shows a validation error for a username under three characters", async () => {
+    render(<LoginPage />);
+
+    fillCredentials("ab");
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await expect(
+      screen.findByText("Username must be at least 3 characters.")
+    ).resolves.toBeTruthy();
+    expect(signInEmail).not.toHaveBeenCalled();
+    expect(signInUsername).not.toHaveBeenCalled();
+  });
+
+  it("routes an identifier containing @ to signIn.email and navigates home", async () => {
     signInEmail.mockResolvedValue({ error: null });
 
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText("Password"), {
-      // oxlint-disable-next-line sonarjs/no-hardcoded-passwords -- Test fixture password
-      target: { value: "password123" },
-    });
+    fillValidCredentials();
     fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
     await waitFor(() => {
@@ -130,7 +159,42 @@ describe("LoginPage", () => {
         password: "password123",
       });
     });
+    expect(signInUsername).not.toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith({ to: "/" });
+  });
+
+  it("routes an identifier without @ to signIn.username and navigates home", async () => {
+    signInUsername.mockResolvedValue({ error: null });
+
+    render(<LoginPage />);
+
+    fillCredentials("alice");
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await waitFor(() => {
+      expect(signInUsername).toHaveBeenCalledWith({
+        // oxlint-disable-next-line sonarjs/no-hardcoded-passwords -- Test fixture password
+        password: "password123",
+        username: "alice",
+      });
+    });
+    expect(signInEmail).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith({ to: "/" });
+  });
+
+  it("trims surrounding whitespace from the identifier before dispatching", async () => {
+    signInUsername.mockResolvedValue({ error: null });
+
+    render(<LoginPage />);
+
+    fillCredentials("  alice  ");
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await waitFor(() => {
+      expect(signInUsername).toHaveBeenCalledWith(
+        expect.objectContaining({ username: "alice" })
+      );
+    });
   });
 
   it("shows the server error message on failed sign-in", async () => {
@@ -140,7 +204,7 @@ describe("LoginPage", () => {
 
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText(IDENTIFIER_LABEL), {
       target: { value: "user@example.com" },
     });
     fireEvent.change(screen.getByLabelText("Password"), {

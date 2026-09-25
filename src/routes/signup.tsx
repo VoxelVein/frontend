@@ -167,7 +167,7 @@ const SignupPage = () => {
                 label="Email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@example.com…"
+                placeholder="you@example.com"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}
@@ -190,6 +190,7 @@ const SignupPage = () => {
                 label="Password"
                 type="password"
                 autoComplete="new-password"
+                placeholder="Create a password"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}

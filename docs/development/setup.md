@@ -50,8 +50,8 @@ Optional variables:
 | `MEILI_MASTER_KEY`          | Meilisearch admin key (seeding)   |
 | `MEILI_ADMIN_KEY`           | Meilisearch project write key     |
 | `STORAGE_*`                 | Object storage (file uploads)     |
-| `VITE_QUACKBACK_WIDGET_KEY` | Feedback widget key (optional)    |
-| `PORT`                      | Web server port (default `3000`)  |
+| `PORT`                      | Port the app listens on (3000)    |
+| `WEB_PORT`                  | Host port docker publishes (3000) |
 
 Generate secrets with:
 
