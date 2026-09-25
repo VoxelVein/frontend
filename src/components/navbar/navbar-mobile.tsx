@@ -43,10 +43,11 @@ const NavbarMobileMenu = ({
           onClose();
         }
       }}
-      swipeDirection="right"
+      swipeDirection="down"
+      showSwipeHandle
     >
-      <DrawerContent id="mobile-menu" className="w-[85%] max-w-sm">
-        <DrawerHeader className="flex-row items-center justify-between gap-2">
+      <DrawerContent id="mobile-menu">
+        <DrawerHeader className="flex-row items-center justify-between gap-2 text-left">
           <div className="min-w-0">
             <DrawerTitle>Menu</DrawerTitle>
             <DrawerDescription>Navigate VoxelVein</DrawerDescription>
