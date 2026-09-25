@@ -41,14 +41,14 @@ services:
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 6001
       DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
       MEILI_HOST: http://meilisearch:7700
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:?MEILI_SEARCH_KEY is required}
     ports:
-      - "${PORT:-3001}:3000"
+      - "${WEB_PORT:-3001}:6001"
     depends_on:
       db:
         condition: service_healthy

@@ -36,7 +36,7 @@ if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
 
 const trustedOrigins = [
   env.BETTER_AUTH_URL,
-  "http://localhost:6001",
+  "http://localhost:3000",
   ...(env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean) ?? []),

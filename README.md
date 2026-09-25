@@ -128,7 +128,7 @@ variables:
 
 ```env
 BETTER_AUTH_SECRET=your-secret-here  # Must be at least 32 characters
-BETTER_AUTH_URL=http://localhost:6001
+BETTER_AUTH_URL=http://localhost:3000
 DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
 MEILI_HOST=http://localhost:7700
 MEILI_MASTER_KEY=your-master-key      # Only needed when seeding
@@ -154,11 +154,11 @@ pnpm dev
 Or run them in separate terminals:
 
 ```bash
-pnpm dev:web    # web app on http://localhost:6001
+pnpm dev:web    # web app on http://localhost:3000
 pnpm dev:api    # API server on http://localhost:3002
 ```
 
-The development server runs on `http://localhost:6001` and the API server
+The development server runs on `http://localhost:3000` and the API server
 on `http://localhost:3002`.
 
 > `pnpm dev` delegates to `pnpm dev:all`, so the two commands can never
@@ -171,7 +171,7 @@ on `http://localhost:3002`.
 | Command             | Description                                       |
 | ------------------- | ------------------------------------------------- |
 | `pnpm dev`          | Starts the complete dev environment (app + API)   |
-| `pnpm dev:web`      | Starts only the Vite app (port 6001)              |
+| `pnpm dev:web`      | Starts only the Vite app (port 3000)              |
 | `pnpm dev:api`      | Starts the ElysiaJS API server (watch)            |
 | `pnpm dev:all`      | Runs the app and API server together              |
 | `pnpm start:api`    | Starts the API server (no watch)                  |
@@ -259,7 +259,7 @@ The application uses **Better Auth** for authentication.
 
   ```env
   BETTER_AUTH_SECRET=your-secret-here
-  BETTER_AUTH_URL=http://localhost:6001
+  BETTER_AUTH_URL=http://localhost:3000
   ```
 
 * For local development, `BETTER_AUTH_URL` should be set to the local
@@ -445,16 +445,16 @@ docker compose -f compose.yaml -f compose.prod.yaml up -d
 ```
 
 The production Compose configuration builds and runs the production image
-with the Nitro server. The container listens on port `3000` and is exposed
+with the Nitro server. The container listens on port `6001` and is exposed
 on host port `1112`:
 
 ```text
-host :1112 → container :3000 (Nitro server)
+host :1112 → container :6001 (Nitro server)
 ```
 
 > The host port defaults to `1112` to avoid conflicts with other services
 > (for example, Dokploy commonly occupies host port `3000`). Override it
-> with the `PORT` environment variable if needed.
+> with the `WEB_PORT` environment variable if needed.
 
 ---
 

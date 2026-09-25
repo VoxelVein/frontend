@@ -17,7 +17,7 @@ default:
 dev:
     pnpm dev
 
-# Start only the Vite web app (port 6001)
+# Start only the Vite web app (port 3000)
 dev:web:
     pnpm dev:web
 

@@ -49,6 +49,7 @@ Optional variables:
 | `VITE_GITHUB_CLIENT_ID`     | GitHub OAuth client ID (client)   |
 | `MEILI_MASTER_KEY`          | Meilisearch admin key (seeding)   |
 | `VITE_QUACKBACK_WIDGET_KEY` | Feedback widget key (optional)    |
+| `PORT`                      | Web server port (default `3000`)  |
 
 Generate secrets with:
 
@@ -85,16 +86,16 @@ pnpm dev
 Or run them in separate terminals:
 
 ```bash
-pnpm dev:web    # web app on http://localhost:6001
+pnpm dev:web    # web app on http://localhost:3000
 pnpm dev:api    # API server on http://localhost:3002
 ```
 
 ## 6. Verify
 
-* Open `http://localhost:6001` — the homepage renders.
-* Open `http://localhost:6001/projects` — the projects hub links to the
+* Open `http://localhost:3000` — the homepage renders.
+* Open `http://localhost:3000/projects` — the projects hub links to the
   mods page.
-* Open `http://localhost:6001/mods` — search is real-time and results come
+* Open `http://localhost:3000/mods` — search is real-time and results come
   through the API server.
 * Open `http://localhost:3002/api/health` — the API server responds.
 * Send a test mod event and watch the live banner on the mods page:
@@ -103,8 +104,8 @@ pnpm dev:api    # API server on http://localhost:3002
   pnpm send:webhook mod.created "My Mod"
   ```
 
-* Open `http://localhost:6001/signup` — create an account.
-* Open `http://localhost:6001/settings` — manage profile, passkeys,
+* Open `http://localhost:3000/signup` — create an account.
+* Open `http://localhost:3000/settings` — manage profile, passkeys,
   and sessions.
 
 ## Related

@@ -8,7 +8,7 @@ services:
     build:
       target: runtime
     ports:
-      - "${PORT:-1112}:3000"
+      - "${WEB_PORT:-1112}:6001"
     environment:
       NODE_ENV: production
     restart: unless-stopped

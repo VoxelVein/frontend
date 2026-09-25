@@ -7,7 +7,7 @@ top of Oxlint and Oxfmt.
 
 | Command             | Description                              |
 | ------------------- | ---------------------------------------- |
-| `pnpm dev`          | Start the dev server on port 6001        |
+| `pnpm dev`          | Start the dev server on port 3000        |
 | `pnpm dev:api`      | Start the ElysiaJS API server (watch)    |
 | `pnpm dev:all`      | Run the app and API server together      |
 | `pnpm start:api`    | Start the API server (no watch)          |

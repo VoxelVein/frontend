@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm dev:all",
-    "dev:web": "vite dev --port 6001",
+    "dev:web": "vite dev",
     "dev:api": "tsx watch server/index.ts",
     "dev:all": "concurrently -n app,api -c blue,green \"pnpm dev:web\" \"pnpm dev:api\"",
     "start:api": "tsx server/index.ts",

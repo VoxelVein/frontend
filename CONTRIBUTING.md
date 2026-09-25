@@ -40,7 +40,7 @@ pull request process.
    pnpm dev:all
    ```
 
-The web app runs on `http://localhost:6001` and the API server on
+The web app runs on `http://localhost:3000` and the API server on
 `http://localhost:3002`. See [docs/development/setup.md](docs/development/setup.md)
 for the full setup guide.
 

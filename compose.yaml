@@ -7,6 +7,9 @@
 # file free of host port bindings so Dokploy can deploy it directly and route
 # traffic via Traefik (Domains tab) without conflicting with other services.
 #
+# The container listens on 6001 inside the container; the host-side port is
+# published by the overrides as ${WEB_PORT} (default 1112).
+#
 # Usage:
 #   Development: docker compose -f compose.yaml -f compose.dev.yaml up
 #   Production:  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
@@ -21,5 +24,5 @@ services:
       dockerfile: Dockerfile
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: 3000
+      PORT: 6001
     restart: unless-stopped

@@ -10,9 +10,12 @@ services:
     build:
       target: deps
     ports:
-      - "${PORT:-1112}:6001"
+      - "${WEB_PORT:-1112}:6001"
     environment:
       NODE_ENV: development
+      # `pnpm dev` runs inside this container. Vite defaults to 3000 for local
+      # use, so pin it to 6001 to match the published port above.
+      PORT: 6001
     volumes:
       # Mount source for hot reload
       - .:/app
