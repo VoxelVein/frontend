@@ -1,4 +1,4 @@
-# NexVaultX Frontend — command runner
+# VoxelVein Frontend — command runner
 #
 # Thin wrapper around the package.json scripts so common tasks can be run
 # with `just <recipe>` instead of `pnpm <script>`.

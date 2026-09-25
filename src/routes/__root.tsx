@@ -29,7 +29,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider storageKey="nexvaultx-theme" defaultTheme="system">
+        <ThemeProvider storageKey="voxelvein-theme" defaultTheme="system">
           <HotkeysProvider
             defaultOptions={{
               hotkey: {
@@ -79,7 +79,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "NexVaultX — Free & Open-Source Minecraft Mod Platform",
+        title: "VoxelVein — Free & Open-Source Minecraft Mod Platform",
       },
       {
         name: "description",

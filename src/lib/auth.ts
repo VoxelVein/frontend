@@ -53,7 +53,7 @@ export const auth = betterAuth({
     },
   },
 
-  appName: "NexVaultX",
+  appName: "VoxelVein",
 
   baseURL: env.BETTER_AUTH_URL,
 
@@ -81,7 +81,7 @@ export const auth = betterAuth({
     passkey({
       origin: env.BETTER_AUTH_URL,
       rpID,
-      rpName: "NexVaultX",
+      rpName: "VoxelVein",
     }),
 
     tanstackStartCookies(),

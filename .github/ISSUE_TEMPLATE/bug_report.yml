@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a bug or unexpected behavior in the NexVaultX frontend
+description: Report a bug or unexpected behavior in the VoxelVein frontend
 title: "[Bug]: "
 labels: [bug, triage]
 body:

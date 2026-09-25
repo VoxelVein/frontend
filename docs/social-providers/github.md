@@ -1,7 +1,7 @@
 # GitHub Social Provider
 
 This guide explains how to enable GitHub Sign-In (login and
-registration) for NexVaultX using Better Auth's built-in GitHub OAuth
+registration) for VoxelVein using Better Auth's built-in GitHub OAuth
 provider.
 
 ## Prerequisites

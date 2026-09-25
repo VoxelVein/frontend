@@ -132,7 +132,7 @@ export const Route = createFileRoute("/mods/$modId")({
     return {
       meta: [
         {
-          title: mod ? `${mod.name} — NexVaultX` : "Mod not found — NexVaultX",
+          title: mod ? `${mod.name} — VoxelVein` : "Mod not found — VoxelVein",
         },
       ],
     };

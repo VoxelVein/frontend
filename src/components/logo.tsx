@@ -8,14 +8,14 @@ const Logo = ({ className }: LogoProps) => (
   <>
     <img
       src="/logo_light.png"
-      alt="NexVaultX"
+      alt="VoxelVein"
       width={800}
       height={800}
       className={cn(className, "dark:hidden")}
     />
     <img
       src="/logo_dark.png"
-      alt="NexVaultX"
+      alt="VoxelVein"
       width={800}
       height={800}
       className={cn("hidden", className, "dark:block")}

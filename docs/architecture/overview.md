@@ -1,6 +1,6 @@
 # Architecture Overview
 
-NexVaultX is a full-stack TypeScript application built with TanStack
+VoxelVein is a full-stack TypeScript application built with TanStack
 Start, React 19, Better Auth, and Drizzle ORM, with a standalone
 ElysiaJS API server for search and real-time events.
 

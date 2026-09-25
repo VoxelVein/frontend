@@ -1,6 +1,6 @@
 # Database Migrations
 
-NexVaultX uses Drizzle ORM with PostgreSQL. Schema changes are tracked
+VoxelVein uses Drizzle ORM with PostgreSQL. Schema changes are tracked
 as SQL migrations in the `drizzle/` directory.
 
 ## Configuration

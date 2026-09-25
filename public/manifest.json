@@ -1,7 +1,7 @@
 {
-  "name": "NexVaultX — Free & Open-Source Minecraft Mod Platform",
-  "short_name": "NexVaultX",
-  "description": "NexVaultX is a free and open-source platform for discovering and sharing Minecraft mods.",
+  "name": "VoxelVein — Free & Open-Source Minecraft Mod Platform",
+  "short_name": "VoxelVein",
+  "description": "VoxelVein is a free and open-source platform for discovering and sharing Minecraft mods.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

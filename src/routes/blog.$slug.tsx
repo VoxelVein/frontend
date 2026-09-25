@@ -97,8 +97,8 @@ export const Route = createFileRoute("/blog/$slug")({
     meta: [
       {
         title: loaderData?.post
-          ? `${loaderData.post.title} — NexVaultX`
-          : "Post not found — NexVaultX",
+          ? `${loaderData.post.title} — VoxelVein`
+          : "Post not found — VoxelVein",
       },
     ],
   }),

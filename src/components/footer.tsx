@@ -37,7 +37,7 @@ const COMPANY_LINKS: readonly FooterLink[] = [
 
 const SOCIAL_LINKS = [
   {
-    href: "https://github.com/NexVaultX",
+    href: "https://github.com/VoxelVein",
     icon: IconBrandGithub,
     label: "GitHub",
   },
@@ -80,7 +80,7 @@ const Footer = () => (
           >
             <IconBox size={24} className="text-primary" />
             <span className="text-lg font-semibold tracking-tight">
-              NexVaultX
+              VoxelVein
             </span>
           </Link>
           <p className="text-muted-foreground mt-3 max-w-xs text-sm">
@@ -147,7 +147,7 @@ const Footer = () => (
       {/* Bottom bar */}
       <div className="border-border mt-8 flex flex-col items-center justify-between gap-4 border-t pt-6 sm:flex-row">
         <p className="text-muted-foreground text-sm">
-          © {new Date().getFullYear()} NexVaultX. All rights reserved.
+          © {new Date().getFullYear()} VoxelVein. All rights reserved.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-end">
           <Link to="/legal" className={LINK_CLASS}>

@@ -1,6 +1,6 @@
 # Local Development Setup
 
-This guide walks through getting the NexVaultX frontend running
+This guide walks through getting the VoxelVein frontend running
 locally.
 
 ## Prerequisites
@@ -62,7 +62,7 @@ Use an existing PostgreSQL instance or run one with Docker:
 
 ```bash
 docker run -d \
-  --name nexvaultx-db \
+  --name voxelvein-db \
   -e POSTGRES_PASSWORD=postgres \
   -p 5432:5432 \
   postgres:16

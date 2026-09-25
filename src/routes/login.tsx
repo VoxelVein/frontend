@@ -84,7 +84,7 @@ const LoginPage = () => {
           Welcome back
         </h1>
         <p className="text-muted-foreground mt-1.5 text-sm">
-          Sign in to your NexVaultX account.
+          Sign in to your VoxelVein account.
         </p>
 
         {formError ? (

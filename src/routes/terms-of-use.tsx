@@ -8,7 +8,7 @@ const TermsOfUsePage = () => (
     updated="September 11, 2026"
     intro={
       <>
-        These Terms of Use set out the rules for using the NexVaultX platform as
+        These Terms of Use set out the rules for using the VoxelVein platform as
         a user.
       </>
     }
@@ -41,11 +41,11 @@ const TermsOfUsePage = () => (
         heading: "Community Content",
         body: (
           <p>
-            Content on the platform is provided by the community. NexVaultX does
+            Content on the platform is provided by the community. VoxelVein does
             not endorse and is not responsible for user-submitted content. Users
             are solely responsible for what they upload. If a user uploads
             malicious software (malware) or other unlawful content without our
-            knowledge, and no one reports it, NexVaultX is not liable for it.
+            knowledge, and no one reports it, VoxelVein is not liable for it.
             The user who uploaded the content, as well as users who were aware
             of it but did not report it, bear responsibility for such content.
           </p>
@@ -75,7 +75,7 @@ const TermsOfUsePage = () => (
 
 export const Route = createFileRoute("/terms-of-use")({
   head: () => ({
-    meta: [{ title: "Terms of Use — NexVaultX" }],
+    meta: [{ title: "Terms of Use — VoxelVein" }],
   }),
   component: TermsOfUsePage,
 });

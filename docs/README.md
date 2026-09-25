@@ -1,6 +1,6 @@
-# NexVaultX Documentation
+# VoxelVein Documentation
 
-Guides for developing, configuring, and deploying the NexVaultX
+Guides for developing, configuring, and deploying the VoxelVein
 frontend. Each guide lives in its own directory under `docs/`.
 
 ## Authentication

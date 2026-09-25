@@ -6,7 +6,7 @@ the production server.
 ## Build the image
 
 ```bash
-docker build -t nexvaultx-frontend .
+docker build -t voxelvein-frontend .
 ```
 
 The build has three stages:
@@ -22,13 +22,13 @@ The build has three stages:
 
 ```bash
 docker run -d \
-  --name nexvaultx \
+  --name voxelvein \
   -p 3000:3000 \
   -e NODE_ENV=production \
   -e DATABASE_URL=postgresql://user:pass@host:5432/db \
   -e BETTER_AUTH_SECRET=your-secret \
   -e BETTER_AUTH_URL=https://example.com \
-  nexvaultx-frontend
+  voxelvein-frontend
 ```
 
 The container listens on port 3000 and exposes a health check at `/`.

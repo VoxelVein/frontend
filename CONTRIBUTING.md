@@ -1,6 +1,6 @@
-# Contributing to NexVaultX Frontend
+# Contributing to VoxelVein Frontend
 
-Thank you for your interest in contributing to NexVaultX Frontend! This
+Thank you for your interest in contributing to VoxelVein Frontend! This
 guide covers the contribution workflow, code-quality requirements, and the
 pull request process.
 

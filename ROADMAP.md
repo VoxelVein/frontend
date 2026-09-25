@@ -1,4 +1,4 @@
-# NexVaultX Frontend — Roadmap
+# VoxelVein Frontend — Roadmap
 
 > [!NOTE]
 > This roadmap reflects the current state of the repository. It is a living

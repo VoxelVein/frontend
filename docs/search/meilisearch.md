@@ -84,7 +84,7 @@ it). See [API Server](../architecture/api.md).
 
 ## Production instance
 
-The production Meilisearch runs on the NexVaultX server via Dokploy:
+The production Meilisearch runs on the VoxelVein server via Dokploy:
 
 * Public URL: `http://website-meilisearch-4c5035-5-175-245-175.sslip.io`
 * Image: `getmeili/meilisearch:v1.35.1`

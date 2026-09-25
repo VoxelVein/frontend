@@ -1,7 +1,7 @@
 # Google Social Provider
 
 This guide explains how to enable Google Sign-In (login and
-registration) for NexVaultX using Better Auth's built-in Google OAuth
+registration) for VoxelVein using Better Auth's built-in Google OAuth
 provider.
 
 ## Prerequisites

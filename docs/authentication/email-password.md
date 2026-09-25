@@ -1,6 +1,6 @@
 # Email and Password Authentication
 
-NexVaultX uses Better Auth for email/password sign-up and sign-in. This
+VoxelVein uses Better Auth for email/password sign-up and sign-in. This
 guide explains how the flow is configured and how to adjust it.
 
 ## Configuration

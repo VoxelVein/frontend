@@ -69,7 +69,7 @@ const SignupPage = () => {
           Create your account
         </h1>
         <p className="text-muted-foreground mt-1.5 text-sm">
-          Join NexVaultX to publish and discover Minecraft content.
+          Join VoxelVein to publish and discover Minecraft content.
         </p>
 
         {formError ? (

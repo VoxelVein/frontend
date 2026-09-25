@@ -50,7 +50,7 @@ const NavbarMobileMenu = ({
         <DrawerHeader className="flex-row items-center justify-between gap-2">
           <div className="min-w-0">
             <DrawerTitle>Menu</DrawerTitle>
-            <DrawerDescription>Navigate NexVaultX</DrawerDescription>
+            <DrawerDescription>Navigate VoxelVein</DrawerDescription>
           </div>
 
           <DrawerClose

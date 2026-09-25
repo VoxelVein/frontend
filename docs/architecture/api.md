@@ -1,6 +1,6 @@
 # API Server
 
-NexVaultX runs a standalone **ElysiaJS** API server (`server/`) on its own
+VoxelVein runs a standalone **ElysiaJS** API server (`server/`) on its own
 port. It is the single entry point for mod search and real-time mod
 events. The web app never talks to Meilisearch directly — the API server
 proxies search and streams events to the browser over Server-Sent Events

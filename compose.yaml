@@ -1,4 +1,4 @@
-# Base Compose configuration for NexVaultX Frontend.
+# Base Compose configuration for VoxelVein Frontend.
 #
 # This file defines the shared service. Environment-specific overrides live in
 # compose.dev.yaml (development) and compose.prod.yaml (production).
@@ -11,11 +11,11 @@
 #   Development: docker compose -f compose.yaml -f compose.dev.yaml up
 #   Production:  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
-name: nexvaultx-frontend
+name: voxelvein-frontend
 
 services:
   web:
-    image: nexvaultx-frontend:${TAG:-latest}
+    image: voxelvein-frontend:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile

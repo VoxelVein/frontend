@@ -1,6 +1,6 @@
 # Custom Theme
 
-NexVaultX uses Tailwind CSS v4 with OKLCH semantic tokens. Themes are
+VoxelVein uses Tailwind CSS v4 with OKLCH semantic tokens. Themes are
 sourced from [tweakcn.com](https://tweakcn.com) and applied with the
 shadcn CLI.
 

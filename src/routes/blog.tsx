@@ -46,7 +46,7 @@ const BlogPage = () => {
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-14">
       <PageHeader
         title="Blog"
-        description="News, updates, and guides from the NexVaultX team."
+        description="News, updates, and guides from the VoxelVein team."
       />
 
       {posts.length === 0 ? (
@@ -93,7 +93,7 @@ export const Route = createFileRoute("/blog")({
     return { posts };
   },
   head: () => ({
-    meta: [{ title: "Blog — NexVaultX" }],
+    meta: [{ title: "Blog — VoxelVein" }],
   }),
   component: BlogPage,
 });

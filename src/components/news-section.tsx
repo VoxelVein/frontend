@@ -26,7 +26,7 @@ const NEWS: NewsItem[] = [
     date: "2026-08-28",
     excerpt:
       "A major update brings redesigned project pages, faster search, and a brand-new launcher integration.",
-    title: "NexVaultX 2.0 is here",
+    title: "VoxelVein 2.0 is here",
   },
   {
     category: "Community",
@@ -66,7 +66,7 @@ const NewsSection = () => (
             News
           </h2>
           <p className="text-muted-foreground mt-2">
-            Updates from the NexVaultX team and community.
+            Updates from the VoxelVein team and community.
           </p>
         </div>
         <Link

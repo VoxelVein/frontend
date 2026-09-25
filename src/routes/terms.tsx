@@ -7,14 +7,14 @@ const TermsPage = () => (
     title="Terms of Service"
     updated="September 11, 2026"
     intro={
-      <>These Terms of Service govern your use of the NexVaultX platform.</>
+      <>These Terms of Service govern your use of the VoxelVein platform.</>
     }
     sections={[
       {
         heading: "Acceptance of Terms",
         body: (
           <p>
-            By accessing or using NexVaultX, you agree to be bound by these
+            By accessing or using VoxelVein, you agree to be bound by these
             Terms. If you do not agree, you must not use the platform.
           </p>
         ),
@@ -23,7 +23,7 @@ const TermsPage = () => (
         heading: "Description of Service",
         body: (
           <p>
-            NexVaultX is an open-source marketplace for discovering, sharing,
+            VoxelVein is an open-source marketplace for discovering, sharing,
             and managing community-created Minecraft content, including mods,
             resource packs, modpacks, shaders, plugins, and servers.
           </p>
@@ -54,7 +54,7 @@ const TermsPage = () => (
         body: (
           <p>
             You retain ownership of content you submit. By submitting content,
-            you grant NexVaultX a license to host, display, and distribute it as
+            you grant VoxelVein a license to host, display, and distribute it as
             part of the platform.
           </p>
         ),
@@ -81,7 +81,7 @@ const TermsPage = () => (
         heading: "Limitation of Liability",
         body: (
           <p>
-            To the maximum extent permitted by law, NexVaultX shall not be
+            To the maximum extent permitted by law, VoxelVein shall not be
             liable for indirect, incidental, or consequential damages arising
             from your use of the platform.
           </p>
@@ -111,7 +111,7 @@ const TermsPage = () => (
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
-    meta: [{ title: "Terms of Service — NexVaultX" }],
+    meta: [{ title: "Terms of Service — VoxelVein" }],
   }),
   component: TermsPage,
 });

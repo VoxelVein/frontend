@@ -1,7 +1,7 @@
 <p align="center">
   <img
-    alt="NexVaultX Frontend"
-    src="https://shieldcn.dev/header/surface.svg?title=NexVaultX+Frontend"
+    alt="VoxelVein Frontend"
+    src="https://shieldcn.dev/header/surface.svg?title=VoxelVein+Frontend"
   />
 </p>
 
@@ -12,25 +12,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/NexVaultX/frontend">
+  <a href="https://github.com/VoxelVein/frontend">
     <img
       alt="License"
-      src="https://shieldcn.dev/github/NexVaultX/frontend/license.svg"
+      src="https://shieldcn.dev/github/VoxelVein/frontend/license.svg"
     />
   </a>
 </p>
 
-# NexVaultX Frontend
+# VoxelVein Frontend
 
 ## Overview
 
-**NexVaultX Frontend** is the web application for
-[NexVaultX](https://github.com/NexVaultX), an open-source marketplace for
+**VoxelVein Frontend** is the web application for
+[VoxelVein](https://github.com/VoxelVein), an open-source marketplace for
 Minecraft creators.
 
 This repository contains the **frontend and server-side application layer**,
 built with TanStack Start, TanStack Router, and Nitro. It is part of the
-NexVaultX platform but does not include the full infrastructure stack.
+VoxelVein platform but does not include the full infrastructure stack.
 
 ### Features
 
@@ -111,7 +111,7 @@ Before starting development, ensure you have:
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/NexVaultX/frontend.git
+git clone https://github.com/VoxelVein/frontend.git
 cd frontend
 ```
 
@@ -129,7 +129,7 @@ variables:
 ```env
 BETTER_AUTH_SECRET=your-secret-here  # Must be at least 32 characters
 BETTER_AUTH_URL=http://localhost:6001
-DATABASE_URL=postgresql://user:password@localhost:5432/nexvaultx
+DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
 MEILI_HOST=http://localhost:7700
 MEILI_MASTER_KEY=your-master-key      # Only needed when seeding
 MEILI_SEARCH_KEY=your-search-key
@@ -244,7 +244,7 @@ The application uses **PostgreSQL** via **Drizzle ORM**.
 * The connection is configured via `DATABASE_URL`:
 
   ```env
-  DATABASE_URL=postgresql://user:password@localhost:5432/nexvaultx
+  DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
   ```
 
 * Database migrations are stored in the `drizzle/` directory.

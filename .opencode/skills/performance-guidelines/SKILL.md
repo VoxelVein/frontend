@@ -2,7 +2,7 @@
 name: performance-guidelines
 description: Review code for web performance best practices and integrate TanStack Pacer (debounce/throttle/rate-limit/queue), TanStack Virtual (list virtualization), and Unpic (image optimization) where appropriate. Use when asked to "review performance", "optimize", "check bundle size", "reduce re-renders", "debounce", "throttle", "rate limit", "virtualize a list", "optimize images", or "audit performance".
 version: 1.1.0
-author: nexvaultx
+author: voxelvein
 type: skill
 category: performance
 tags:

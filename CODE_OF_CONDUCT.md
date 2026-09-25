@@ -3,7 +3,7 @@
 ## Our Pledge
 
 We as members, contributors, maintainers, and community members of
-NexVaultX pledge to make participation in the project a harassment-free
+VoxelVein pledge to make participation in the project a harassment-free
 experience for everyone.
 
 We are committed to maintaining an open, welcoming, inclusive, and
@@ -26,7 +26,7 @@ Examples of behavior that contributes to a positive environment include:
 * Helping others learn and improve
 * Taking responsibility for mistakes and learning from them
 * Keeping discussions focused on the project rather than individuals
-* Prioritizing the health and success of the NexVaultX community
+* Prioritizing the health and success of the VoxelVein community
 
 Examples of unacceptable behavior include:
 
@@ -67,7 +67,7 @@ enforcement actions.
 
 ## Scope
 
-This Code of Conduct applies to all official NexVaultX community spaces,
+This Code of Conduct applies to all official VoxelVein community spaces,
 including but not limited to:
 
 * GitHub repositories
@@ -76,26 +76,26 @@ including but not limited to:
 * Official Discord servers
 * Project-related events and meetings
 * Other communication channels officially operated or maintained by
-  NexVaultX
+  VoxelVein
 
 This Code of Conduct also applies when an individual is officially
-representing NexVaultX in public spaces.
+representing VoxelVein in public spaces.
 
 Examples include:
 
-* Using an official NexVaultX account or email address
-* Representing NexVaultX at an event
+* Using an official VoxelVein account or email address
+* Representing VoxelVein at an event
 * Acting as an appointed project representative
 * Publishing content on behalf of the project
 
 Behavior occurring outside official community spaces may also be considered
 when it directly affects the safety or participation of members within the
-NexVaultX community.
+VoxelVein community.
 
 ## Enforcement
 
 If you experience or witness behavior that violates this Code of Conduct,
-report it to the NexVaultX maintainers or community leaders through the
+report it to the VoxelVein maintainers or community leaders through the
 project's official private reporting channel.
 
 When reporting an incident, provide as much relevant information as you
@@ -145,7 +145,7 @@ restrictions from community spaces.
 **Community Impact:** A serious violation, repeated misconduct,
 harassment, or behavior that significantly disrupts or harms the community.
 
-**Consequence:** Temporary removal from one or more NexVaultX community
+**Consequence:** Temporary removal from one or more VoxelVein community
 spaces for a specified period. During this period, the individual may be
 prohibited from contacting affected individuals or participating in project
 discussions.
@@ -158,13 +158,13 @@ Violating the terms of a temporary ban may result in a permanent ban.
 harassment, credible threats, targeted abuse, or behavior that demonstrates
 an unwillingness to follow community standards.
 
-**Consequence:** Permanent removal from NexVaultX community spaces and
+**Consequence:** Permanent removal from VoxelVein community spaces and
 prohibition from future participation in the project's official community.
 
 ## Appeals
 
 If you believe an enforcement action was made incorrectly or
-disproportionately, you may request a review from the NexVaultX
+disproportionately, you may request a review from the VoxelVein
 maintainers.
 
 Appeals should focus on the specific enforcement decision and provide any

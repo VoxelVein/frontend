@@ -1,4 +1,4 @@
-# NexVaultX Frontend — Agent Standards
+# VoxelVein Frontend — Agent Standards
 
 This project uses **Ultracite** (zero-config preset) on **Oxlint + Oxfmt**
 for linting and formatting, and treats **accessibility (a11y)** as a

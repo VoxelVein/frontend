@@ -14,7 +14,7 @@ const LegalNotesPage = () => (
     updated="September 11, 2026"
     intro={
       <>
-        Legal information about the operator of NexVaultX in accordance with § 5
+        Legal information about the operator of VoxelVein in accordance with § 5
         DDG (German Digital Services Act).
       </>
     }
@@ -53,10 +53,10 @@ const LegalNotesPage = () => (
         heading: "Liability for User Content",
         body: (
           <p>
-            Content uploaded by users is not governed by NexVaultX. Users are
+            Content uploaded by users is not governed by VoxelVein. Users are
             solely responsible for the content they upload. If a user uploads
             malicious software (malware) or other unlawful content without our
-            knowledge, and no one reports it, NexVaultX is not liable for it.
+            knowledge, and no one reports it, VoxelVein is not liable for it.
             The user who uploaded the content, as well as users who were aware
             of it but did not report it, bear responsibility for such content.
           </p>
@@ -89,7 +89,7 @@ const LegalNotesPage = () => (
 
 export const Route = createFileRoute("/legal")({
   head: () => ({
-    meta: [{ title: "Legal Notes — NexVaultX" }],
+    meta: [{ title: "Legal Notes — VoxelVein" }],
   }),
   component: LegalNotesPage,
 });

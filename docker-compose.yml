@@ -1,12 +1,12 @@
-name: nexvaultx
+name: voxelvein
 
 services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-nexvaultx}
+      POSTGRES_USER: ${POSTGRES_USER:-voxelvein}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-nexvaultx}
+      POSTGRES_DB: ${POSTGRES_DB:-voxelvein}
     # Bound to loopback only so the database is never reachable from outside
     # the host. The web service reaches it over the internal compose network.
     ports:
@@ -15,7 +15,7 @@ services:
       # postgres:18+ stores data in a versioned subdirectory; mount the parent.
       - pgdata:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexvaultx}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-voxelvein}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,7 +42,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-nexvaultx}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-nexvaultx}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
       MEILI_HOST: http://meilisearch:7700

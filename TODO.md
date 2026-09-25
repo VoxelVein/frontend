@@ -1,6 +1,6 @@
 # TODO
 
-Current work items for the NexVaultX frontend. See [ROADMAP.md](ROADMAP.md)
+Current work items for the VoxelVein frontend. See [ROADMAP.md](ROADMAP.md)
 for the longer-term plan.
 
 ## In Progress

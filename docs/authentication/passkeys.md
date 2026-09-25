@@ -1,7 +1,7 @@
 # Passkeys
 
 Passkeys let users sign in without a password using platform
-authentication (fingerprint, face, or device PIN). NexVaultX uses the
+authentication (fingerprint, face, or device PIN). VoxelVein uses the
 Better Auth passkey plugin.
 
 ## Server configuration
@@ -18,7 +18,7 @@ plugins: [
   passkey({
     origin: env.BETTER_AUTH_URL,
     rpID,
-    rpName: "NexVaultX",
+    rpName: "VoxelVein",
   }),
   // MUST be the last plugin for TanStack Start cookie handling
   tanstackStartCookies(),
