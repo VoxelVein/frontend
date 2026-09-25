@@ -122,16 +122,17 @@ jobs:
 
       # Merges made with GITHUB_TOKEN don't fire push events, so main.yml and
       # docs.yml would never run for a bot merge. workflow_dispatch is exempt
-      # from that rule, so start them explicitly once the PR is merged.
+      # from that rule, so start them explicitly once the bot has merged. A
+      # human merge already fires push, and a second run would cancel it.
       - name: Run post-merge workflows on main
         if: ${{ !cancelled() }}
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          state=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
-          if [ "$state" != "MERGED" ]; then
-            echo "PR #$PR_NUMBER is $state; nothing to run."
+          merged_by=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq '.merged_by.login // ""')
+          if [ "$merged_by" != "github-actions[bot]" ]; then
+            echo "PR #$PR_NUMBER was not merged by this workflow (merged_by: '${merged_by:-none}'); nothing to run."
             exit 0
           fi
           gh workflow run main.yml --repo "$GITHUB_REPOSITORY" --ref main
