@@ -14,12 +14,22 @@ pnpm dlx shadcn@latest add \
 ```
 
 Replace `{theme-name}` with the identifier from the tweakcn.com URL.
-For example, the current theme (Sage Garden) was applied with:
 
-```bash
-pnpm dlx shadcn@latest add \
-  https://tweakcn.com/r/themes/sage-garden.json --yes
-```
+## Brand colors
+
+The current theme is a custom VoxelVein red palette maintained directly
+in `src/styles.css`. Re-applying a tweakcn theme overwrites these
+values, so re-check them afterwards:
+
+* `--primary` — light `oklch(0.56 0.2185 22.6077)`, dark
+  `oklch(0.6122 0.2313 22.6077)`
+* `--destructive` — light `oklch(0.55 0.17 40)`, dark
+  `oklch(0.7 0.19 40)`
+
+The brand red is a crimson (hue ≈ 23). Destructive actions and errors
+use a distinct orange-red (hue 40) and a solid button fill so they do
+not blend in with regular primary buttons. Both pass WCAG AA as text on
+the page background and with their `-foreground` color on top.
 
 ## What the theme changes
 

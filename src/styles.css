@@ -49,8 +49,8 @@
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 4px 12px oklch(0 0 0 / 0.06);
   --shadow-glow:
-    0 0 0 1px oklch(0.6333 0.0309 154.9039 / 0.14),
-    0 8px 32px oklch(0.6333 0.0309 154.9039 / 0.18);
+    0 0 0 1px oklch(0.6122 0.2313 22.6077 / 0.14),
+    0 8px 32px oklch(0.6122 0.2313 22.6077 / 0.18);
   --font-mono: Inter, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Inter, serif;
   --radius: 1.4rem;
@@ -95,7 +95,7 @@
   --muted-foreground: oklch(0.464 0 0);
   --accent: oklch(0.9617 0.02 22.6077);
   --accent-foreground: oklch(0.2178 0 0);
-  --destructive: oklch(0.5433 0.174 29.6967);
+  --destructive: oklch(0.55 0.17 40);
   --border: oklch(0.9006 0 0);
   --input: oklch(0.9006 0 0);
   --ring: oklch(0.56 0.2185 22.6077);
@@ -142,7 +142,7 @@
 }
 
 .dark {
-  /* Obsidian — deep volcanic glass with green (emerald) undertone */
+  /* Obsidian — deep volcanic glass with red brand accent */
   --background: oklch(0.1398 0 0);
   --foreground: oklch(0.985 0.0041 91.4457);
   --card: oklch(0.1776 0 0);
@@ -157,7 +157,7 @@
   --muted-foreground: oklch(0.683 0 0);
   --accent: oklch(0.2221 0 0);
   --accent-foreground: oklch(0.9851 0 0);
-  --destructive: oklch(0.5433 0.174 29.6967);
+  --destructive: oklch(0.7 0.19 40);
   --border: oklch(0.252 0 0);
   --input: oklch(0.252 0 0);
   --ring: oklch(0.6122 0.2313 22.6077);
@@ -174,7 +174,7 @@
   --sidebar-accent-foreground: oklch(0.6122 0.2313 22.6077);
   --sidebar-border: oklch(0.252 0 0);
   --sidebar-ring: oklch(0.6122 0.2313 22.6077);
-  --destructive-foreground: oklch(1 0 0);
+  --destructive-foreground: oklch(0.1398 0 0);
   --radius: 1.4rem;
   --font-sans: Inter, sans-serif;
   --font-serif: Inter, serif;
@@ -217,11 +217,11 @@
   html {
     @apply font-sans;
   }
-  /* Sage ambient glow — soft green bloom at the top of the page. */
+  /* Ambient glow — soft brand-red bloom at the top of the page. */
   .dark body {
     background-image: radial-gradient(
       1100px 520px at 50% -8%,
-      oklch(0.6333 0.0309 154.9039 / 0.09),
+      oklch(0.6122 0.2313 22.6077 / 0.06),
       transparent 62%
     );
     background-repeat: no-repeat;
