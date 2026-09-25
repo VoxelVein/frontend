@@ -4,7 +4,6 @@ import { Link, useMatchRoute } from "@tanstack/react-router";
 import { AuthButtons } from "@/components/navbar/auth-buttons";
 import type { NavbarUser } from "@/components/navbar/auth-buttons";
 import { CONTENT_LINKS, PROJECT_ITEMS } from "@/components/navbar/navbar-links";
-import { NavbarSearch } from "@/components/navbar/navbar-search";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -68,8 +67,6 @@ const NavbarMobileMenu = ({
         </DrawerHeader>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-          <NavbarSearch variant="mobile" />
-
           <nav aria-label="Content navigation" className="flex flex-col">
             <p className="text-muted-foreground mb-2 px-3 py-2 text-xs font-semibold tracking-wider uppercase">
               Content

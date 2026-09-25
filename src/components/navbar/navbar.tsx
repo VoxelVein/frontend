@@ -1,7 +1,6 @@
 import { IconMenu2, IconX } from "@tabler/icons-react";
-import { useHotkey } from "@tanstack/react-hotkeys";
 import { useRouter } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { ThemeToggle } from "@/components/motion/theme-toggle";
@@ -9,7 +8,6 @@ import { AuthButtons } from "@/components/navbar/auth-buttons";
 import { NavbarLinks } from "@/components/navbar/navbar-links";
 import { NavbarLogo } from "@/components/navbar/navbar-logo";
 import { NavbarMobileMenu } from "@/components/navbar/navbar-mobile";
-import { NavbarSearch } from "@/components/navbar/navbar-search";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
@@ -17,26 +15,6 @@ const Navbar = () => {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const focusSearch = () => {
-    searchInputRef.current?.focus();
-  };
-
-  const blurSearch = () => {
-    searchInputRef.current?.blur();
-  };
-
-  useHotkey("Mod+K", focusSearch);
-  useHotkey("Escape", blurSearch);
-
-  const handleSearchKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (event.key === "Escape") {
-      blurSearch();
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -76,12 +54,6 @@ const Navbar = () => {
 
         {/* Desktop actions */}
         <div className="ml-auto hidden items-center gap-2 lg:flex">
-          <NavbarSearch
-            ref={searchInputRef}
-            variant="desktop"
-            onKeyDown={handleSearchKeyDown}
-            className="hidden xl:block"
-          />
           <ThemeToggle variant="circle" start="center" />
           <AuthButtons
             variant="desktop"

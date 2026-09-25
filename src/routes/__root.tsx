@@ -1,7 +1,6 @@
 import { ThemeProvider } from "@lonik/themer";
 import { IconHome } from "@tabler/icons-react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import {
   HeadContent,
   Link,
@@ -30,24 +29,15 @@ const RootDocument = ({ children }: { children: ReactNode }) => {
       </head>
       <body>
         <ThemeProvider storageKey="voxelvein-theme" defaultTheme="system">
-          <HotkeysProvider
-            defaultOptions={{
-              hotkey: {
-                preventDefault: true,
-                ignoreInputs: false,
-              },
-            }}
+          <a
+            href="#main-content"
+            className="focus:ring-ring focus:bg-background sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:outline-none"
           >
-            <a
-              href="#main-content"
-              className="focus:ring-ring focus:bg-background sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:outline-none"
-            >
-              Skip to content
-            </a>
-            <Navbar />
-            <main id="main-content">{children}</main>
-            <Footer />
-          </HotkeysProvider>
+            Skip to content
+          </a>
+          <Navbar />
+          <main id="main-content">{children}</main>
+          <Footer />
         </ThemeProvider>
         <CookieBanner />
         <Toaster richColors position="bottom-right" />
