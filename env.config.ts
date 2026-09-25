@@ -17,6 +17,8 @@ const envWithDefaults = {
   MEILI_MASTER_KEY: process.env.MEILI_MASTER_KEY,
   MEILI_SEARCH_KEY: process.env.MEILI_SEARCH_KEY,
   NODE_ENV: process.env.NODE_ENV ?? "development",
+  TURNSTILE_HOSTNAMES: process.env.TURNSTILE_HOSTNAMES,
+  TURNSTILE_SECRET: process.env.TURNSTILE_SECRET,
   VITE_GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   VITE_GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };
@@ -36,11 +38,14 @@ const env = defineEnv({
     MEILI_HOST: pipe(string(), url()),
     MEILI_MASTER_KEY: optional(string()),
     MEILI_SEARCH_KEY: optional(string()),
+    TURNSTILE_HOSTNAMES: optional(string()),
+    TURNSTILE_SECRET: optional(string()),
   },
   shared: {
     NODE_ENV: picklist(["development", "production", "test"]),
     VITE_GITHUB_CLIENT_ID: optional(string()),
     VITE_GOOGLE_CLIENT_ID: optional(string()),
+    VITE_TURNSTILE_SITE_KEY: optional(string()),
   },
 });
 

@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 
 // Node 26's experimental global localStorage (requires --localstorage-file)
 // shadows jsdom's window.localStorage in the vitest jsdom environment.
@@ -30,6 +30,12 @@ if (window.localStorage === undefined) {
     value: localStorageMock,
   });
 }
+
+// Vite loads .env.local in tests too. Keep Turnstile off by default so tests
+// don't depend on a developer's local env; Turnstile tests stub the key.
+beforeEach(() => {
+  vi.stubEnv("VITE_TURNSTILE_SITE_KEY", "");
+});
 
 afterEach(() => {
   cleanup();

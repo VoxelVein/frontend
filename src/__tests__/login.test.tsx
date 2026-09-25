@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Route } from "@/routes/login";
 
@@ -7,11 +7,29 @@ interface AuthResult {
   error: { message: string } | null;
 }
 
+interface SignInEmailOptions {
+  email: string;
+  fetchOptions?: { headers: Record<string, string> };
+  password: string;
+}
+
 const { navigate, signInEmail } = vi.hoisted(() => ({
   navigate: vi.fn<(opts: { to: string }) => void>(),
-  signInEmail:
-    vi.fn<(opts: { email: string; password: string }) => Promise<AuthResult>>(),
+  signInEmail: vi.fn<(opts: SignInEmailOptions) => Promise<AuthResult>>(),
 }));
+
+// Cloudflare's documented always-passing test site key.
+const TEST_SITE_KEY = "1x00000000000000000000AA";
+
+const fillValidCredentials = () => {
+  fireEvent.change(screen.getByLabelText("Email"), {
+    target: { value: "user@example.com" },
+  });
+  fireEvent.change(screen.getByLabelText("Password"), {
+    // oxlint-disable-next-line sonarjs/no-hardcoded-passwords -- Test fixture password
+    target: { value: "password123" },
+  });
+};
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the login form requires a faithful auth client stub; string path avoids strict factory type-checking against the real auth client
 vi.mock("@/lib/auth-client", () => ({
@@ -49,6 +67,11 @@ describe("LoginPage", () => {
   beforeEach(() => {
     navigate.mockReset();
     signInEmail.mockReset();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    delete window.turnstile;
   });
 
   it("renders the email and password fields", () => {
@@ -129,5 +152,67 @@ describe("LoginPage", () => {
       screen.findByText("Invalid email or password")
     ).resolves.toBeTruthy();
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("requires the Turnstile check before signing in when enabled", async () => {
+    vi.stubEnv("VITE_TURNSTILE_SITE_KEY", TEST_SITE_KEY);
+    window.turnstile = {
+      remove: vi.fn<(widgetId: string) => void>(),
+      render: vi.fn<() => string>(() => "widget-1"),
+      reset: vi.fn<(widgetId: string) => void>(),
+    };
+
+    render(<LoginPage />);
+    fillValidCredentials();
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await expect(
+      screen.findByText(
+        "Complete the human verification check before signing in."
+      )
+    ).resolves.toBeTruthy();
+    expect(signInEmail).not.toHaveBeenCalled();
+  });
+
+  it("sends the Turnstile token and resets the widget after a failure", async () => {
+    vi.stubEnv("VITE_TURNSTILE_SITE_KEY", TEST_SITE_KEY);
+    const reset = vi.fn<(widgetId: string) => void>();
+    const renderWidget = vi.fn<NonNullable<typeof window.turnstile>["render"]>(
+      (_container, options) => {
+        options.callback("turnstile-token");
+        return "widget-1";
+      }
+    );
+    window.turnstile = {
+      remove: vi.fn<(widgetId: string) => void>(),
+      render: renderWidget,
+      reset,
+    };
+    signInEmail.mockResolvedValue({
+      error: { message: "Invalid email or password" },
+    });
+
+    render(<LoginPage />);
+    await waitFor(() => {
+      expect(renderWidget).toHaveBeenCalledWith(
+        expect.any(HTMLElement),
+        expect.objectContaining({ action: "login", sitekey: TEST_SITE_KEY })
+      );
+    });
+    fillValidCredentials();
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await waitFor(() => {
+      expect(signInEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fetchOptions: {
+            headers: { "cf-turnstile-response": "turnstile-token" },
+          },
+        })
+      );
+    });
+    await waitFor(() => {
+      expect(reset).toHaveBeenCalledWith("widget-1");
+    });
   });
 });

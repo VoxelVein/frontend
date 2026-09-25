@@ -5,16 +5,22 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { check, nonEmpty, pipe, regex, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { GitHubSignInButton } from "@/components/github-sign-in-button";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import type { TurnstileWidgetHandle } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { getSession } from "@/lib/auth.functions";
+import {
+  isTurnstileEnabled,
+  turnstileFetchOptions,
+} from "@/lib/turnstile-client";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
@@ -32,12 +38,22 @@ const usernameSchema = pipe(
 
 const passwordSchema = pipe(string(), nonEmpty("Password is required."));
 
+const MISSING_VERIFICATION_MESSAGE =
+  "Complete the human verification check before signing in.";
+
 type LoginMode = "email" | "username";
 
 const LoginPage = () => {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [loginMode, setLoginMode] = useState<LoginMode>("email");
+  // A ref, not state: useForm keeps the onSubmit from the first render, so
+  // state read there would always be the initial null.
+  const turnstileTokenRef = useRef<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const handleTurnstileToken = (token: string | null) => {
+    turnstileTokenRef.current = token;
+  };
 
   const form = useForm({
     defaultValues: {
@@ -48,24 +64,35 @@ const LoginPage = () => {
     onSubmit: async ({ value }) => {
       setFormError(null);
 
-      if (loginMode === "email") {
-        const { error } = await authClient.signIn.email({
-          email: value.email,
-          password: value.password,
-        });
-        if (error) {
-          setFormError(error.message ?? "Invalid email or password.");
-          return;
-        }
-      } else {
-        const { error } = await authClient.signIn.username({
-          username: value.username,
-          password: value.password,
-        });
-        if (error) {
-          setFormError(error.message ?? "Invalid username or password.");
-          return;
-        }
+      const turnstileToken = turnstileTokenRef.current;
+      if (isTurnstileEnabled() && !turnstileToken) {
+        setFormError(MISSING_VERIFICATION_MESSAGE);
+        return;
+      }
+
+      const fetchOptions = turnstileFetchOptions(turnstileToken);
+      const { error } =
+        loginMode === "email"
+          ? await authClient.signIn.email({
+              email: value.email,
+              fetchOptions,
+              password: value.password,
+            })
+          : await authClient.signIn.username({
+              fetchOptions,
+              password: value.password,
+              username: value.username,
+            });
+
+      if (error) {
+        // Turnstile tokens are single-use, so every retry needs a fresh one.
+        turnstileRef.current?.reset();
+        const fallback =
+          loginMode === "email"
+            ? "Invalid email or password."
+            : "Invalid username or password.";
+        setFormError(error.message ?? fallback);
+        return;
       }
 
       router.navigate({ to: "/" });
@@ -214,6 +241,12 @@ const LoginPage = () => {
               />
             )}
           </form.Field>
+
+          <TurnstileWidget
+            ref={turnstileRef}
+            action="login"
+            onTokenChange={handleTurnstileToken}
+          />
 
           <Button
             type="submit"

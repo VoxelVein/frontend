@@ -11,6 +11,8 @@ frontend. Each guide lives in its own directory under `docs/`.
   authentication
 * [Sessions](authentication/sessions.md) — session lifetime, sliding
   expiration, and sign-out
+* [Cloudflare Turnstile](authentication/turnstile.md) — bot protection
+  for password sign-in and sign-up
 
 ## Social Providers
 
