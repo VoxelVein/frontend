@@ -66,9 +66,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The Claude GitHub App rejects the OIDC token of pull_request_target
+          # runs, so use the workflow token instead. Pushes made with it don't
+          # fire pull_request, which is why Claude dispatches pr.yml itself.
+          github_token: ${{ github.token }}
           claude_args: |
             --max-turns 80
-            --allowedTools "Bash(gh pr:*),Bash(gh run:*),Bash(git:*),Bash(sleep:*),Bash(pnpm check),Bash(pnpm fix),Bash(pnpm typecheck),Bash(pnpm test),Bash(pnpm test:*),Bash(pnpm lint:md),Read,Edit,Write,Glob,Grep"
+            --allowedTools "Bash(gh pr:*),Bash(gh run:*),Bash(gh workflow run pr.yml:*),Bash(gh workflow run docs.yml:*),Bash(git:*),Bash(sleep:*),Bash(pnpm check),Bash(pnpm fix),Bash(pnpm typecheck),Bash(pnpm test),Bash(pnpm test:*),Bash(pnpm lint:md),Read,Edit,Write,Glob,Grep"
           prompt: |
             You are the automated review and merge agent for ${{ github.repository }}.
             Your job: get PR #${{ github.event.pull_request.number }} into a mergeable state
@@ -113,6 +117,11 @@ jobs:
             4. PUSH
                If you changed anything, commit with a clear Conventional Commits message and
                `git push`. Never force-push. Never push to main directly.
+               Your pushes do not start CI on their own, so after every push run
+               `gh workflow run pr.yml --ref ${{ github.event.pull_request.head.ref }}` and
+               `gh workflow run docs.yml --ref ${{ github.event.pull_request.head.ref }}`.
+               If the PR conflicts with main and you did not push anything, CI has not run
+               on it either; dispatch both workflows the same way before waiting for CI.
 
             5. WAIT FOR CI
                After a push, wait until the new head commit's checks have been registered
