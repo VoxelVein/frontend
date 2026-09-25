@@ -1,7 +1,7 @@
 # .github/workflows/claude-auto-merge.yml
 #
-# Hands-off PR pipeline: Claude reviews every PR you open against main,
-# fixes what it safely can, waits for CI, and merges. If it hits something
+# Hands-off PR pipeline: Claude reviews every PR TheRedJa or itzzjustmateo
+# opens against main, fixes what it safely can, waits for CI, and merges. If it hits something
 # significant, it labels the PR "needs-human", explains why, and stops.
 # Remove the label after you've dealt with it and Claude will try again.
 
@@ -25,11 +25,11 @@ jobs:
     # Safety gates:
     #  - skip drafts
     #  - only PRs from this repo (never forks)
-    #  - only PRs opened by TheRedJa
+    #  - only PRs opened by TheRedJa or itzzjustmateo
     #  - skip runs triggered by Claude's own pushes (prevents loops)
     #  - skip PRs parked for a human
     if: >
-      github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'TheRedJa' && github.actor != 'claude[bot]' && !contains(github.event.pull_request.labels.*.name, 'needs-human')
+      github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && contains(fromJSON('["TheRedJa", "itzzjustmateo"]'), github.event.pull_request.user.login) && github.actor != 'claude[bot]' && !contains(github.event.pull_request.labels.*.name, 'needs-human')
 
     # Job-level (not workflow-level) so Claude's own pushes, which are
     # skipped by the `if` above, don't cancel the run that made them.
