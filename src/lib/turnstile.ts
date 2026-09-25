@@ -54,7 +54,7 @@ const siteverifyResponseSchema = object({
 
 type SiteverifyResponse = InferOutput<typeof siteverifyResponseSchema>;
 
-export const parseHostnames = (value: string | undefined): Set<string> =>
+export const parseHostnames = (value?: string): Set<string> =>
   new Set(
     (value ?? "")
       .split(",")
