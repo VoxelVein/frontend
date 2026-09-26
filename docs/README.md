@@ -5,6 +5,8 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 ## Authentication
 
+* [Accounts](authentication/accounts.md) — usernames, sign-in methods,
+  and account deletion
 * [Email and Password](authentication/email-password.md) — configure
   email/password sign-up and sign-in
 * [Passkeys](authentication/passkeys.md) — add passwordless passkey

@@ -1,10 +1,12 @@
 import {
   IconBan,
+  IconClockX,
   IconShield,
   IconTrash,
   IconUser,
   IconUsers,
 } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -144,6 +146,105 @@ const formatDate = (value: Date | string) =>
 
 const ROW_HEIGHT_ESTIMATE = 80;
 
+/**
+ * Ban reason the account-deletion flow sets. Such an account is not banned
+ * for misconduct: it is waiting to be purged, and only restoring it from the
+ * Deletions tab cancels that.
+ */
+const PENDING_DELETION_BAN_REASON = "pending-deletion";
+
+const badgeBaseClassName =
+  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium tracking-wide uppercase";
+
+const UserStatusBadge = ({
+  isBanned,
+  isPendingDeletion,
+}: {
+  isBanned: boolean;
+  isPendingDeletion: boolean;
+}) => {
+  if (isPendingDeletion) {
+    return (
+      <span
+        className={`border-border bg-background text-foreground ${badgeBaseClassName}`}
+      >
+        <IconClockX size={10} stroke={2} aria-hidden="true" />
+        Scheduled for deletion
+      </span>
+    );
+  }
+  if (isBanned) {
+    return (
+      <span
+        className={`border-destructive/30 bg-destructive/10 text-destructive ${badgeBaseClassName}`}
+      >
+        <IconBan size={10} stroke={2} aria-hidden="true" />
+        Banned
+      </span>
+    );
+  }
+  return null;
+};
+
+interface BanActionProps {
+  isBanned: boolean;
+  isMutating: boolean;
+  isPendingDeletion: boolean;
+  user: AdminUser;
+  onBan: (user: AdminUser) => void;
+  onUnban: (userId: string) => void;
+}
+
+const BanAction = ({
+  isBanned,
+  isMutating,
+  isPendingDeletion,
+  user,
+  onBan,
+  onUnban,
+}: BanActionProps) => {
+  if (isPendingDeletion) {
+    // Unbanning would let the user sign in while the purge stays scheduled,
+    // so point to the Deletions tab, where restoring cancels both.
+    return (
+      <Link
+        to="/admin"
+        search={{ tab: "deletions" }}
+        className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
+      >
+        Manage in Deletions
+        <span className="sr-only">: {user.name}</span>
+      </Link>
+    );
+  }
+  if (isBanned) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="min-h-11"
+        disabled={isMutating}
+        onClick={() => onUnban(user.id)}
+      >
+        Unban
+      </Button>
+    );
+  }
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="min-h-11"
+      disabled={isMutating}
+      onClick={() => onBan(user)}
+    >
+      Ban
+    </Button>
+  );
+};
+
 interface AdminUserRowProps {
   isMutating: boolean;
   user: AdminUser;
@@ -162,6 +263,8 @@ const AdminUserRow = ({
   onUnban,
 }: AdminUserRowProps) => {
   const isBanned = user.banned === true;
+  const isPendingDeletion =
+    isBanned && user.banReason === PENDING_DELETION_BAN_REASON;
 
   return (
     <div className="border-border bg-muted/40 flex flex-wrap items-center gap-3 rounded-lg border p-3">
@@ -189,12 +292,10 @@ const AdminUserRow = ({
               Admin
             </span>
           ) : null}
-          {isBanned ? (
-            <span className="border-destructive/30 bg-destructive/10 text-destructive inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium tracking-wide uppercase">
-              <IconBan size={10} stroke={2} />
-              Banned
-            </span>
-          ) : null}
+          <UserStatusBadge
+            isBanned={isBanned}
+            isPendingDeletion={isPendingDeletion}
+          />
         </p>
         <p className="text-muted-foreground truncate text-xs">
           {user.email} · Joined {formatDate(user.createdAt)}
@@ -222,29 +323,14 @@ const AdminUserRow = ({
           </SelectContent>
         </Select>
 
-        {isBanned ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            disabled={isMutating}
-            onClick={() => onUnban(user.id)}
-          >
-            Unban
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            disabled={isMutating}
-            onClick={() => onBan(user)}
-          >
-            Ban
-          </Button>
-        )}
+        <BanAction
+          isBanned={isBanned}
+          isMutating={isMutating}
+          isPendingDeletion={isPendingDeletion}
+          user={user}
+          onBan={onBan}
+          onUnban={onUnban}
+        />
 
         <Button
           type="button"

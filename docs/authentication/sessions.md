@@ -22,10 +22,10 @@ session: {
   An active user's session keeps sliding forward, but the database is
   written at most once per day instead of on every request.
 * `freshAge` — how recently the session must have been created for
-  sensitive actions. Listing sessions, registering a passkey, unlinking
-  a social account, and deleting the account without a password all
-  require a session younger than one day; otherwise the user has to sign
-  in again.
+  sensitive actions. Listing sessions, registering a passkey, and
+  unlinking a social account require a session younger than one day;
+  otherwise the user has to sign in again. Deleting the account is
+  stricter: see [Accounts](accounts.md).
 
 ## How sessions work
 

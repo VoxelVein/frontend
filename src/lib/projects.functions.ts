@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
-import { object, parse, pipe, string, uuid } from "valibot";
+import { boolean, object, parse, pipe, string, uuid } from "valibot";
 
 import { db } from "@/db";
-import { projectFiles, projects, projectVersions } from "@/db/schema";
+import { projectFiles, projects, projectVersions, users } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import {
   isAdmin,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/project-access";
 import type { Session } from "@/lib/project-access";
 import {
+  DELETED_USER_LABEL,
   isCategoryForType,
   LOADERS_BY_TYPE,
   projectInputSchema,
@@ -80,16 +81,19 @@ const loadProjectView = async (
   }
 
   return {
-    author:
-      project.owner.displayUsername ??
-      project.owner.username ??
-      project.owner.name,
+    author: project.owner
+      ? (project.owner.displayUsername ??
+        project.owner.username ??
+        project.owner.name)
+      : DELETED_USER_LABEL,
     category: project.category,
     description: project.description,
     downloads: project.downloads,
     id: project.id,
+    isProtected: project.isProtected,
     name: project.name,
     ownerId: project.ownerId,
+    pendingDeletion: project.pendingDeletion,
     publishedAt: project.publishedAt?.toISOString() ?? null,
     slug: project.slug,
     status: project.status,
@@ -134,6 +138,11 @@ export const getProject = createServerFn({ method: "GET" })
     const project = await loadProjectView(eq(projects.slug, data.slug));
     if (!project) {
       return null;
+    }
+    if (project.pendingDeletion) {
+      // Its owner is deleting their account; only admins may still look.
+      const session = await getSessionOrNull();
+      return session && isAdmin(session) ? project : null;
     }
     if (project.status === "published") {
       return project;
@@ -201,6 +210,12 @@ export const createProject = createServerFn({ method: "POST" })
         .insert(projects)
         .values({ ...data, ownerId: session.user.id })
         .returning({ id: projects.id, slug: projects.slug });
+      // Remembered for good: owning a project once means a later account
+      // deletion gets the recoverable grace period.
+      await db
+        .update(users)
+        .set({ hasOwnedProject: true })
+        .where(eq(users.id, session.user.id));
       return created;
     } catch (error) {
       if (hasErrorCode(error, PG_UNIQUE_VIOLATION)) {
@@ -376,4 +391,28 @@ export const removeProject = createServerFn({ method: "POST" })
       .set({ status: "removed" })
       .where(eq(projects.id, data.projectId));
     await syncProjectToSearch(data.projectId);
+  });
+
+const protectedSchema = object({
+  isProtected: boolean(),
+  projectId: pipe(string(), uuid()),
+});
+
+/**
+ * Moderation: marks a large project that must survive its owner deleting
+ * their account. Owners cannot choose to delete a protected project.
+ */
+export const setProjectProtected = createServerFn({ method: "POST" })
+  .validator((data: { isProtected: boolean; projectId: string }) =>
+    parse(protectedSchema, data)
+  )
+  .handler(async ({ data }): Promise<void> => {
+    const session = await getSessionOrNull();
+    if (!session || !isAdmin(session)) {
+      throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
+    }
+    await db
+      .update(projects)
+      .set({ isProtected: data.isProtected })
+      .where(eq(projects.id, data.projectId));
   });

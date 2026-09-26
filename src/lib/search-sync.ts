@@ -3,6 +3,7 @@ import { Meilisearch } from "meilisearch";
 
 import { db } from "@/db";
 import { projects, projectVersions, users } from "@/db/schema";
+import { DELETED_USER_LABEL } from "@/lib/projects";
 import type { ProjectDocument } from "@/lib/projects";
 
 import env from "../../env.config";
@@ -75,6 +76,7 @@ export const buildProjectDocument = async (
       downloads: projects.downloads,
       id: projects.id,
       name: projects.name,
+      pendingDeletion: projects.pendingDeletion,
       slug: projects.slug,
       status: projects.status,
       summary: projects.summary,
@@ -83,11 +85,12 @@ export const buildProjectDocument = async (
       updatedAt: projects.updatedAt,
     })
     .from(projects)
-    .innerJoin(users, eq(users.id, projects.ownerId))
+    // Left join: a kept project whose owner deleted their account has none.
+    .leftJoin(users, eq(users.id, projects.ownerId))
     .where(eq(projects.id, projectId))
     .limit(1);
 
-  if (!project || project.status !== "published") {
+  if (!project || project.status !== "published" || project.pendingDeletion) {
     return null;
   }
 
@@ -105,7 +108,8 @@ export const buildProjectDocument = async (
     author:
       project.authorDisplayUsername ??
       project.authorUsername ??
-      project.authorName,
+      project.authorName ??
+      DELETED_USER_LABEL,
     category: project.category,
     description: project.summary,
     downloads: project.downloads,

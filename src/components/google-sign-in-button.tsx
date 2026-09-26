@@ -43,6 +43,8 @@ const GoogleSignInButtonContent = () => {
 
     const { error: signInError } = await authClient.signIn.social({
       callbackURL: "/",
+      // New accounts get a generated username and choose their own first.
+      newUserCallbackURL: "/welcome",
       provider: "google",
     });
 
