@@ -16,6 +16,23 @@
 name: voxelvein-frontend
 
 services:
+  # Applies pending database migrations, then exits. web only starts once it
+  # succeeded, so a deploy never serves new code against an old schema.
+  migrate:
+    image: voxelvein-migrate:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      # drizzle.config.ts loads env.config.ts, which validates these and
+      # fails the run (and so blocks web) if any is missing.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+    restart: "no"
+
   web:
     image: voxelvein-frontend:${TAG:-latest}
     build:
@@ -39,6 +56,9 @@ services:
       API_URL: http://api:3002
       # Trust X-Forwarded-For for per-client download dedupe ("true"/"false").
       TRUST_PROXY: ${TRUST_PROXY:-true}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   meilisearch:

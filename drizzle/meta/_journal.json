@@ -62,7 +62,7 @@
       "idx": 8,
       "version": "7",
       "when": 1790429419364,
-      "tag": "0008_lean_liz_osborn",
+      "tag": "0008_add_composite_sort_indexes",
       "breakpoints": true
     }
   ]

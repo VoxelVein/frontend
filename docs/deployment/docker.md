@@ -44,15 +44,11 @@ Dokploy set `VITE_API_URL` in the Environment tab.
 
 ## Run with Compose
 
-`compose.yaml` defines `web`, `api`, and `meilisearch`. It is the file
-Dokploy deploys. It does not run migrations; apply them against the
-production database before deploying a schema change, for example with
-the `migrate` image:
-
-```bash
-docker run --rm -e DATABASE_URL -e BETTER_AUTH_SECRET -e BETTER_AUTH_URL \
-  voxelvein-migrate
-```
+`compose.yaml` defines `migrate`, `web`, `api`, and `meilisearch`. It
+is the file Dokploy deploys. `migrate` applies pending migrations and
+exits; `web` only starts after it exits successfully, so a deploy never
+serves new code against an old schema. `api` does not use the database
+and starts independently.
 
 ```bash
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build
