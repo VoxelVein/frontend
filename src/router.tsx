@@ -2,6 +2,9 @@ import { QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
+import { RouteError } from "@/components/route-error";
+import { reloadForChunkError } from "@/lib/chunk-reload";
+
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
@@ -14,6 +17,8 @@ export const getRouter = () => {
   });
 
   const router = createTanStackRouter({
+    defaultErrorComponent: RouteError,
+
     defaultPreload: "intent",
 
     defaultPreloadStaleTime: 0,
@@ -22,6 +27,17 @@ export const getRouter = () => {
 
     scrollRestoration: true,
   });
+
+  // Vite fires `vite:preloadError` when a chunk's dependencies fail to load
+  // (a network blip, or a deploy that replaced the files). Load the page
+  // again instead of leaving the navigation stuck.
+  if (typeof window !== "undefined") {
+    window.addEventListener("vite:preloadError", (event) => {
+      if (reloadForChunkError(window.location.href)) {
+        event.preventDefault();
+      }
+    });
+  }
 
   setupRouterSsrQueryIntegration({
     queryClient,
