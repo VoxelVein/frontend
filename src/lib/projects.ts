@@ -265,14 +265,22 @@ export interface ProjectVersionView {
   versionNumber: string;
 }
 
+/** Author shown for projects kept after their owner deleted the account. */
+export const DELETED_USER_LABEL = "Deleted user";
+
 export interface ProjectView {
   author: string;
   category: string;
   description: string;
   downloads: number;
   id: string;
+  /** Admin-marked large project, kept when its owner deletes their account. */
+  isProtected: boolean;
   name: string;
-  ownerId: string;
+  /** Null when the owner deleted their account and the project was kept. */
+  ownerId: string | null;
+  /** Chosen for deletion along with the owner's account; hidden meanwhile. */
+  pendingDeletion: boolean;
   publishedAt: string | null;
   slug: string;
   status: ProjectStatus;

@@ -5,26 +5,54 @@ import {
   useRouter,
   useSearch,
 } from "@tanstack/react-router";
+import { useCallback } from "react";
 import { object, optional, parse, picklist } from "valibot";
 
 import { SettingsDangerZone } from "@/components/settings/settings-danger-zone";
 import { SettingsPasskeys } from "@/components/settings/settings-passkeys";
 import { SettingsProfile } from "@/components/settings/settings-profile";
 import { SettingsSessions } from "@/components/settings/settings-sessions";
+import { SettingsSignInMethods } from "@/components/settings/settings-sign-in-methods";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
 import { getSession } from "@/lib/auth.functions";
 
 const settingsSearchSchema = object({
-  tab: optional(picklist(["profile", "passkeys", "sessions", "danger"])),
+  confirm: optional(picklist(["delete"])),
+  // "passkeys" is the former name of the "security" tab; old links still work.
+  tab: optional(
+    picklist(["profile", "security", "passkeys", "sessions", "danger"])
+  ),
 });
+
+const parseSettingsSearch = (search: Record<string, string | undefined>) =>
+  parse(settingsSearchSchema, search);
+
+type SettingsSearch = ReturnType<typeof parseSettingsSearch>;
+
+const resolveTab = ({ confirm, tab }: SettingsSearch) => {
+  if (tab === "passkeys") {
+    return "security";
+  }
+  if (tab) {
+    return tab;
+  }
+  return confirm === "delete" ? "danger" : "profile";
+};
 
 const SettingsPage = () => {
   const router = useRouter();
   const navigate = useNavigate();
   // oxlint-disable-next-line no-use-before-define -- Route must be exported after the component for TanStack Router; SettingsPage only executes after Route is initialized
   const session = Route.useLoaderData();
-  const { tab = "profile" } = useSearch({ from: "/settings" });
+  const search = useSearch({ from: "/settings" });
+  const tab = resolveTab(search);
+
+  // The deletion dialog has consumed the re-authentication return; drop the
+  // flag so a reload does not reopen it.
+  const handleResumeHandled = useCallback(() => {
+    navigate({ to: "/settings", search: { tab: "danger" }, replace: true });
+  }, [navigate]);
 
   const handleSignOut = async () => {
     let signOutError: string | null = null;
@@ -72,7 +100,7 @@ const SettingsPage = () => {
       >
         <TabsList aria-label="Settings sections">
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="passkeys">Passkeys</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
           <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
@@ -81,8 +109,11 @@ const SettingsPage = () => {
           {session?.user ? <SettingsProfile user={session.user} /> : null}
         </TabsContent>
 
-        <TabsContent value="passkeys">
-          <SettingsPasskeys />
+        <TabsContent value="security">
+          <div className="grid gap-6">
+            <SettingsSignInMethods />
+            <SettingsPasskeys />
+          </div>
         </TabsContent>
 
         <TabsContent value="sessions">
@@ -90,7 +121,11 @@ const SettingsPage = () => {
         </TabsContent>
 
         <TabsContent value="danger">
-          <SettingsDangerZone onSignOut={handleSignOut} />
+          <SettingsDangerZone
+            onSignOut={handleSignOut}
+            resumeDeletion={search.confirm === "delete"}
+            onResumeHandled={handleResumeHandled}
+          />
         </TabsContent>
       </Tabs>
     </div>
@@ -98,8 +133,7 @@ const SettingsPage = () => {
 };
 
 export const Route = createFileRoute("/settings")({
-  validateSearch: (search: Record<string, string | undefined>) =>
-    parse(settingsSearchSchema, search),
+  validateSearch: parseSettingsSearch,
   beforeLoad: async () => {
     const session = await getSession();
     if (!session) {

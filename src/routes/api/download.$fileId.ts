@@ -62,6 +62,7 @@ const handleDownload = async (
 
   const [file] = await db
     .select({
+      pendingDeletion: projects.pendingDeletion,
       projectId: projects.id,
       status: projects.status,
       storageKey: projectFiles.storageKey,
@@ -73,7 +74,7 @@ const handleDownload = async (
     .where(eq(projectFiles.id, fileId))
     .limit(1);
 
-  if (!file || file.status !== "published") {
+  if (!file || file.status !== "published" || file.pendingDeletion) {
     return notFound();
   }
 

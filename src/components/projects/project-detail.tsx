@@ -3,14 +3,18 @@ import {
   IconCalendar,
   IconDownload,
   IconPencil,
+  IconShieldCheck,
   IconTag,
 } from "@tabler/icons-react";
 import { Markdown } from "@tanstack/markdown/react";
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { StatCard } from "@/components/stat-card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
+import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import { PROJECT_TYPE_LABELS } from "@/lib/projects";
 import type {
@@ -18,6 +22,7 @@ import type {
   ProjectVersionView,
   ProjectView,
 } from "@/lib/projects";
+import { setProjectProtected } from "@/lib/projects.functions";
 
 const badgeClassName =
   "border-border bg-muted text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium";
@@ -147,11 +152,91 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
   );
 };
 
+interface ProtectionControlProps {
+  isProtected: boolean;
+  isSaving: boolean;
+  saveError: string | null;
+  onToggle: () => void;
+}
+
+const ProtectionControl = ({
+  isProtected,
+  isSaving,
+  saveError,
+  onToggle,
+}: ProtectionControlProps) => (
+  <section
+    aria-labelledby="moderation-heading"
+    className="border-border bg-card mt-4 rounded-xl border p-4"
+  >
+    <h2
+      id="moderation-heading"
+      className="text-foreground text-sm font-semibold"
+    >
+      Admin moderation
+    </h2>
+    <p id="protection-help" className="text-muted-foreground mt-1 text-sm">
+      Large projects are never deleted with their owner&apos;s account.
+    </p>
+    <div className="mt-3 flex flex-wrap items-center gap-3">
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-11"
+        aria-describedby="protection-help"
+        disabled={isSaving}
+        onClick={onToggle}
+      >
+        <IconShieldCheck size={16} aria-hidden="true" />
+        {isProtected ? "Unmark large project" : "Mark as large project"}
+      </Button>
+      {saveError ? (
+        <p role="alert" className="text-destructive text-sm">
+          {saveError}
+        </p>
+      ) : null}
+    </div>
+  </section>
+);
+
+/**
+ * The protected flag as the admin last saved it. Kept per project so that
+ * navigating to another project falls back to that project's loaded value.
+ */
+interface ProtectedOverride {
+  isProtected: boolean;
+  projectId: string;
+}
+
 export const ProjectDetail = ({ project }: { project: ProjectView }) => {
   const { data: session } = authClient.useSession();
-  const canManage =
-    session?.user.id === project.ownerId || session?.user.role === "admin";
+  const isAdmin = session?.user.role === "admin";
+  const canManage = session?.user.id === project.ownerId || isAdmin;
   const [latest] = project.versions;
+  const [protectedOverride, setProtectedOverride] =
+    useState<ProtectedOverride | null>(null);
+  const [isSavingProtection, setIsSavingProtection] = useState(false);
+  const [protectionError, setProtectionError] = useState<string | null>(null);
+
+  const isProtected =
+    protectedOverride?.projectId === project.id
+      ? protectedOverride.isProtected
+      : project.isProtected;
+
+  const toggleProtected = async () => {
+    const next = !isProtected;
+    setIsSavingProtection(true);
+    setProtectionError(null);
+    try {
+      await setProjectProtected({
+        data: { isProtected: next, projectId: project.id },
+      });
+      setProtectedOverride({ isProtected: next, projectId: project.id });
+    } catch (error) {
+      setProtectionError(errorMessage(error, "Could not update the project."));
+    }
+    setIsSavingProtection(false);
+  };
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
@@ -169,6 +254,21 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         ) : null}
       </div>
 
+      {isAdmin && project.pendingDeletion ? (
+        <output className="border-border bg-muted text-foreground mt-4 block rounded-xl border px-4 py-3 text-sm">
+          Scheduled for deletion with its owner&apos;s account.
+        </output>
+      ) : null}
+
+      {isAdmin ? (
+        <ProtectionControl
+          isProtected={isProtected}
+          isSaving={isSavingProtection}
+          saveError={protectionError}
+          onToggle={() => toggleProtected()}
+        />
+      ) : null}
+
       {project.status === "published" ? null : (
         <output className="border-border bg-muted text-foreground mt-4 block rounded-xl border px-4 py-3 text-sm">
           This {PROJECT_TYPE_LABELS[project.type].singular.toLowerCase()} is a
@@ -185,9 +285,17 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         </div>
 
         <div className="min-w-0">
-          <span className="text-primary/80 border-primary/20 bg-primary/5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase">
-            {project.category.replaceAll("-", " ")}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-primary/80 border-primary/20 bg-primary/5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase">
+              {project.category.replaceAll("-", " ")}
+            </span>
+            {isAdmin && isProtected ? (
+              <span className={`${badgeClassName} gap-1`}>
+                <IconShieldCheck size={12} aria-hidden="true" />
+                Large project
+              </span>
+            ) : null}
+          </div>
           <h1 className="text-foreground mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
             {project.name}
           </h1>

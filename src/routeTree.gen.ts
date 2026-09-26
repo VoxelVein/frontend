@@ -22,6 +22,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as ModsIndexRouteImport } from './routes/mods.index'
@@ -98,6 +99,11 @@ const TermsRoute = TermsRouteImport.update({
 const TermsOfUseRoute = TermsOfUseRouteImport.update({
   id: '/terms-of-use',
   path: '/terms-of-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
+  '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
+  '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
+  '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/terms-of-use'
+    | '/welcome'
     | '/blog/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/terms-of-use'
+    | '/welcome'
     | '/blog/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/terms-of-use'
+    | '/welcome'
     | '/blog/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
+  WelcomeRoute: typeof WelcomeRoute
   ModsSlugRoute: typeof ModsSlugRoute
   PluginsSlugRoute: typeof PluginsSlugRoute
   ModsIndexRoute: typeof ModsIndexRoute
@@ -441,6 +454,13 @@ declare module '@tanstack/react-router' {
       path: '/terms-of-use'
       fullPath: '/terms-of-use'
       preLoaderRoute: typeof TermsOfUseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
   TermsOfUseRoute: TermsOfUseRoute,
+  WelcomeRoute: WelcomeRoute,
   ModsSlugRoute: ModsSlugRoute,
   PluginsSlugRoute: PluginsSlugRoute,
   ModsIndexRoute: ModsIndexRoute,

@@ -64,6 +64,13 @@
       "when": 1790429419364,
       "tag": "0008_add_composite_sort_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790453111911,
+      "tag": "0009_account_lifecycle",
+      "breakpoints": true
     }
   ]
 }

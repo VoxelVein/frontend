@@ -22,9 +22,16 @@ export const users = pgTable("users", {
   banReason: text("ban_reason"),
   banned: boolean("banned").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  // Set when the owner asked to delete an account that owns or owned a
+  // project. The account is banned meanwhile and purged 14 days later unless
+  // an admin restores it.
+  deletionRequestedAt: timestamp("deletion_requested_at"),
   displayUsername: text("display_username"),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
+  // Whether the user ever created a project. Projects can be hard-deleted, so
+  // this is the only record that decides immediate vs. delayed deletion.
+  hasOwnedProject: boolean("has_owned_project").default(false).notNull(),
   id: text("id").primaryKey(),
   image: text("image"),
   name: text("name").notNull(),
@@ -34,7 +41,33 @@ export const users = pgTable("users", {
     .$onUpdate(() => new Date())
     .notNull(),
   username: text("username").unique(),
+  // Last self-service username change; starts the change cooldown.
+  usernameChangedAt: timestamp("username_changed_at"),
+  // False for accounts created through Google/GitHub until the user confirms
+  // the generated username on /welcome.
+  usernameConfirmed: boolean("username_confirmed").default(true).notNull(),
 });
+
+/**
+ * Usernames a user gave up recently. The old name stays reserved for them
+ * (and still signs them in) until `expiresAt`, then becomes free again.
+ */
+export const usernameHistory = pgTable(
+  "username_history",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    username: text("username").notNull(),
+  },
+  (table) => [
+    index("username_history_username_idx").on(table.username),
+    index("username_history_userId_idx").on(table.userId),
+  ]
+);
 
 export const sessions = pgTable(
   "sessions",
@@ -158,9 +191,16 @@ export const projects = pgTable(
     downloads: integer("downloads").default(0).notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
-    ownerId: text("owner_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Admin-marked large project: never deleted along with its owner's
+    // account, it is kept without an owner instead.
+    isProtected: boolean("is_protected").default(false).notNull(),
+    // Null once the owner's account is deleted and the project was kept.
+    ownerId: text("owner_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    // Chosen for deletion with the owner's account. Hidden right away and
+    // removed when the account is purged.
+    pendingDeletion: boolean("pending_deletion").default(false).notNull(),
     publishedAt: timestamp("published_at"),
     slug: text("slug").notNull().unique(),
     status: text("status").$type<ProjectStatus>().default("draft").notNull(),
@@ -180,6 +220,26 @@ export const projects = pgTable(
     // descending. The ownerId index alone cannot supply that sort.
     index("projects_ownerId_updatedAt_idx").on(table.ownerId, table.updatedAt),
   ]
+);
+
+/** Inbox entries shown to every admin in the admin panel. */
+export const adminNotifications = pgTable(
+  "admin_notifications",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    message: text("message").notNull(),
+    projectId: uuid("project_id").references(() => projects.id, {
+      onDelete: "set null",
+    }),
+    readAt: timestamp("read_at"),
+    title: text("title").notNull(),
+    type: text("type").notNull(),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [index("admin_notifications_readAt_idx").on(table.readAt)]
 );
 
 export const projectVersions = pgTable(
@@ -244,7 +304,18 @@ export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   projects: many(projects),
   sessions: many(sessions),
+  usernameHistory: many(usernameHistory),
 }));
+
+export const usernameHistoryRelations = relations(
+  usernameHistory,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [usernameHistory.userId],
+      references: [users.id],
+    }),
+  })
+);
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
