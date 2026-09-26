@@ -54,13 +54,59 @@ services:
       timeout: 5s
       retries: 5
 
+  # Applies pending database migrations, then exits. web and api wait for it.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
+      # drizzle.config.ts loads env.config.ts, which validates these too.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      NODE_ENV: production
+      API_PORT: 3002
+      CORS_ORIGIN: ${BETTER_AUTH_URL:-http://localhost:3001}
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:?MEILI_SEARCH_KEY is required}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}
+      # Ports are published directly here, with no proxy in front, so
+      # X-Forwarded-For is client-controlled and must not be trusted.
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    ports:
+      - "${API_PORT:-3002}:3002"
+    depends_on:
+      meilisearch:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Public URL browsers use to reach the API (inlined at build time).
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3002}
     environment:
       NODE_ENV: production
       PORT: 6001
+      API_URL: http://api:3002
+      TRUST_PROXY: ${TRUST_PROXY:-false}
       DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
@@ -73,6 +119,8 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:

@@ -12,3 +12,7 @@ services:
     environment:
       NODE_ENV: production
     restart: unless-stopped
+
+  api:
+    ports:
+      - "${API_HOST_PORT:-1113}:3002"

@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -225,7 +225,15 @@ export const projectFiles = pgTable(
       .references(() => projectVersions.id, { onDelete: "cascade" }),
   },
   (table) => [
-    index("project_files_versionId_idx").on(table.versionId),
+    // Also serves lookups by version, as version_id leads the index.
+    uniqueIndex("project_files_versionId_filename_uidx").on(
+      table.versionId,
+      table.filename
+    ),
+    // At most one primary file per version.
+    uniqueIndex("project_files_versionId_primary_uidx")
+      .on(table.versionId)
+      .where(sql`${table.primary}`),
     index("project_files_sha1_idx").on(table.sha1),
   ]
 );

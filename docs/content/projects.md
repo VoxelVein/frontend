@@ -88,8 +88,20 @@ project download counters, then redirects (`302`) to the storage URL.
 Download links work without JavaScript or Turnstile, so launchers and
 scripts can use them.
 
-Download counts are not deduplicated or rate limited yet. The search
-index picks up new counts when a project changes or on
+Every request gets the redirect, but only plausible downloads are counted
+(`src/lib/download-counter.ts`):
+
+* Prefetch and prerender requests (`Sec-Purpose`, `Purpose`, `X-Moz`
+  headers) are never counted.
+* Each client counts at most once per file per 24 hours. Signed-in users
+  are keyed by account; anonymous users by the last `X-Forwarded-For`
+  entry when `TRUST_PROXY=true`.
+* Anonymous clients that cannot be identified share one bucket per file,
+  which undercounts rather than letting a request loop inflate the
+  counters. Set `TRUST_PROXY=true` behind a reverse proxy to avoid this.
+
+The dedup cache is in memory, so it resets on restart and is per process.
+The search index picks up new counts when a project changes or on
 `pnpm db:reindex`.
 
 ## Search sync

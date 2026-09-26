@@ -1,6 +1,7 @@
 import { Elysia, sse } from "elysia";
 
 import "../env";
+import { getForwardedClientIp, readTrustProxy } from "../../src/lib/client-key";
 import { AsyncQueue, events } from "../lib/events";
 import type { ModEvent } from "../lib/events";
 
@@ -20,21 +21,22 @@ const MAX_CONNECTIONS_PER_IP = readPositiveInt(
   process.env.SSE_MAX_CONNECTIONS_PER_IP,
   DEFAULT_MAX_CONNECTIONS_PER_IP
 );
-const TRUST_PROXY = process.env.TRUST_PROXY === "true";
+// The Node adapter does not expose the socket address (server.requestIP is
+// Bun-only), so per-client limits rely on the proxy's X-Forwarded-For header.
+// It is only trusted when TRUST_PROXY is set, because clients can forge it
+// otherwise. Production must choose explicitly so a missing setting cannot
+// quietly leave one client able to take every slot.
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const TRUST_PROXY = readTrustProxy(process.env.TRUST_PROXY, IS_PRODUCTION);
+
+if (IS_PRODUCTION && !TRUST_PROXY) {
+  console.warn(
+    "TRUST_PROXY is not enabled: SSE streams are only capped globally, so a single client can use every slot."
+  );
+}
 
 let openConnections = 0;
 const connectionsByClient = new Map<string, number>();
-
-// The Node adapter does not expose the socket address, so per-client limits
-// rely on the proxy's X-Forwarded-For header. It is only trusted when
-// TRUST_PROXY is set, because clients can forge it otherwise.
-const getClientKey = (request: Request): string | null => {
-  if (!TRUST_PROXY) {
-    return null;
-  }
-  const forwarded = request.headers.get("x-forwarded-for");
-  return forwarded?.split(",")[0]?.trim() || null;
-};
 
 const acquireSlot = (clientKey: string | null): boolean => {
   if (openConnections >= MAX_CONNECTIONS) {
@@ -99,7 +101,7 @@ const streamModEvents = async function* streamModEvents(
 };
 
 export const eventsRoute = new Elysia().get("/api/events", ({ request }) => {
-  const clientKey = getClientKey(request);
+  const clientKey = getForwardedClientIp(request.headers, TRUST_PROXY);
 
   if (!acquireSlot(clientKey)) {
     return new Response("Too many event streams", {

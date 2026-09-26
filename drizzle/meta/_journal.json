@@ -43,6 +43,13 @@
       "when": 1790368726950,
       "tag": "0005_add_projects",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790419960977,
+      "tag": "0006_project_files_unique",
+      "breakpoints": true
     }
   ]
 }

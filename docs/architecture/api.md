@@ -33,7 +33,7 @@ pnpm dev:all
 | `MEILI_SEARCH_KEY`           | Meilisearch search key (required)           |
 | `SSE_MAX_CONNECTIONS`        | Max concurrent SSE streams (default `500`)  |
 | `SSE_MAX_CONNECTIONS_PER_IP` | Max SSE streams per client (default `5`)    |
-| `TRUST_PROXY`                | `true` to key SSE limits on proxy IP header |
+| `TRUST_PROXY`                | `true`/`false`; required in production      |
 
 The server loads `.env.local` via `server/env.ts` (imported first in every
 env-consuming module) and otherwise reads `process.env`, so it works in CI
@@ -78,7 +78,11 @@ data: {"id":"mod-123","name":"My Mod"}
 Concurrent streams are capped globally (`SSE_MAX_CONNECTIONS`) and per
 client (`SSE_MAX_CONNECTIONS_PER_IP`); requests over the limit get `429`.
 Per-client limits only apply when `TRUST_PROXY=true`, because the Node
-adapter does not expose the socket address.
+adapter does not expose the socket address. The client is then keyed on the
+last `X-Forwarded-For` entry (the one the proxy appended), so set it only
+behind a reverse proxy that adds that header. With `NODE_ENV=production` the
+server refuses to start unless `TRUST_PROXY` is explicitly `true` or `false`,
+so running without per-client limits is always a deliberate choice.
 
 The browser subscribes with `EventSource`:
 

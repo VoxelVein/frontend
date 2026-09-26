@@ -41,6 +41,11 @@ Apply pending migrations to the database:
 ./node_modules/.bin/drizzle-kit migrate
 ```
 
+Deployments apply migrations automatically. The `migrate` Docker target
+runs `drizzle-kit migrate` as a one-shot Compose service, and the web and
+API services only start after it exits successfully. See
+[Docker Deployment](../deployment/docker.md).
+
 ## Review the SQL
 
 Always review the generated SQL before applying it. Check that:

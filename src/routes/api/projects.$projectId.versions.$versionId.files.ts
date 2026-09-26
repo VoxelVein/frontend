@@ -20,6 +20,7 @@ import {
   uploadStream,
 } from "@/lib/storage";
 import {
+  DuplicateFilenameError,
   getRemainingBytes,
   insertFileWithinQuota,
   quotaExceededError,
@@ -133,15 +134,19 @@ const handleUpload = async (
     return errorResponse(400, "The upload is empty.");
   }
 
-  const existingFiles = await db
-    .select({ filename: projectFiles.filename })
+  // Fail fast before streaming; insertFileWithinQuota re-checks under a lock.
+  const [duplicate] = await db
+    .select({ id: projectFiles.id })
     .from(projectFiles)
-    .where(eq(projectFiles.versionId, version.id));
-  if (existingFiles.some((file) => file.filename === filename)) {
-    return errorResponse(
-      409,
-      "This version already has a file with that name."
-    );
+    .where(
+      and(
+        eq(projectFiles.versionId, version.id),
+        eq(projectFiles.filename, filename)
+      )
+    )
+    .limit(1);
+  if (duplicate) {
+    throw new DuplicateFilenameError();
   }
 
   const { head, stream } = await peekStream(request.body, ZIP_MAGIC_LENGTH);
@@ -159,13 +164,12 @@ const handleUpload = async (
     maxBytes: remainingBytes ?? undefined,
   });
 
-  const primary = existingFiles.length === 0;
+  let primary: boolean;
   try {
-    await insertFileWithinQuota(
+    ({ primary } = await insertFileWithinQuota(
       {
         filename,
         id: fileId,
-        primary,
         sha1: stored.sha1,
         sha512: stored.sha512,
         size: stored.size,
@@ -173,9 +177,10 @@ const handleUpload = async (
         versionId: version.id,
       },
       quotaBytes
-    );
+    ));
   } catch (error) {
-    // Another upload used the remaining space first; drop this object.
+    // Another upload used the remaining space or took the filename first;
+    // drop this object.
     await deleteObjects([storageKey]).catch(() => null);
     throw error;
   }
@@ -220,6 +225,9 @@ export const Route = createFileRoute(
           }
           if (error instanceof StorageError) {
             return storageErrorResponse(error);
+          }
+          if (error instanceof DuplicateFilenameError) {
+            return errorResponse(409, error.message);
           }
           console.error("Upload failed", error);
           return errorResponse(500, "The upload failed. Try again.");

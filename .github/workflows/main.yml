@@ -59,5 +59,9 @@ jobs:
           file: ./Dockerfile
           target: runtime
           push: false
+          # Build check only (nothing is pushed), so a placeholder API URL is
+          # fine when the repository variable is not set.
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL || 'https://api.invalid' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

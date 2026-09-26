@@ -39,11 +39,17 @@ import type { ProjectType } from "@/lib/projects";
 
 const DEFAULT_SORT = "downloads:desc";
 
+const DEV_API_URL = "http://localhost:3002";
+
 // SAFETY: Vite exposes VITE_* vars as `any`; narrowing to string | undefined
 // matches the runtime value (string when set, undefined when absent).
+// VITE_API_URL is inlined at build time. Only dev builds fall back to the
+// local API; a production build without it gets no live updates rather than
+// connecting to the visitor's own machine. The Docker build refuses to run
+// without it.
 const API_URL =
   (import.meta.env.VITE_API_URL as string | undefined) ??
-  "http://localhost:3002";
+  (import.meta.env.DEV ? DEV_API_URL : undefined);
 
 interface LiveModEventData {
   id: string;
@@ -513,6 +519,9 @@ export const ProjectBrowser = ({
   ]);
 
   useEffect(() => {
+    if (!API_URL) {
+      return;
+    }
     const source = new EventSource(`${API_URL}/api/events`);
 
     const handleEvent = (event: MessageEvent) => {

@@ -8,7 +8,12 @@
 # traffic via Traefik (Domains tab) without conflicting with other services.
 #
 # The container listens on 6001 inside the container; the host-side port is
-# published by the overrides as ${WEB_PORT} (default 1112).
+# published by the overrides as ${WEB_PORT} (default 1112). The API listens on
+# 3002 and is published as ${API_HOST_PORT} (default 1113).
+#
+# Services read their runtime configuration from .env next to this file (the
+# file Dokploy writes from its Environment tab). `migrate` applies pending
+# database migrations and exits; web and api only start once it succeeded.
 #
 # Usage:
 #   Development: docker compose -f compose.yaml -f compose.dev.yaml up
@@ -16,13 +21,59 @@
 
 name: voxelvein-frontend
 
+x-env-file: &env-file
+  env_file:
+    - path: .env
+      required: false
+
 services:
+  migrate:
+    <<: *env-file
+    image: voxelvein-migrate:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+    restart: "no"
+
+  api:
+    <<: *env-file
+    image: voxelvein-api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      API_PORT: 3002
+      # Behind Traefik: trust the X-Forwarded-For entry it appends. Required in
+      # production (the API refuses to start without an explicit value).
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   web:
+    <<: *env-file
     image: voxelvein-frontend:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Public URL browsers use to reach the API (inlined at build time).
+        # The Dockerfile refuses to build the web image without it.
+        VITE_API_URL: ${VITE_API_URL:-}
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 6001
+      # Server-side requests reach the API over the compose network.
+      API_URL: http://api:3002
+      # Dedupes download counts by client IP (see the api service).
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
