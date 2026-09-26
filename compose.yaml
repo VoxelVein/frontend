@@ -1,19 +1,11 @@
 # Base Compose configuration for VoxelVein Frontend.
 #
-# This file defines the shared service. Environment-specific overrides live in
+# This file defines the shared services. Environment-specific overrides live in
 # compose.dev.yaml (development) and compose.prod.yaml (production).
 #
 # Note: host port mapping lives in the overrides, not here. This keeps the base
 # file free of host port bindings so Dokploy can deploy it directly and route
 # traffic via Traefik (Domains tab) without conflicting with other services.
-#
-# The container listens on 6001 inside the container; the host-side port is
-# published by the overrides as ${WEB_PORT} (default 1112). The API listens on
-# 3002 and is published as ${API_HOST_PORT} (default 1113).
-#
-# Services read their runtime configuration from .env next to this file (the
-# file Dokploy writes from its Environment tab). `migrate` applies pending
-# database migrations and exits; web and api only start once it succeeded.
 #
 # Usage:
 #   Development: docker compose -f compose.yaml -f compose.dev.yaml up
@@ -21,59 +13,49 @@
 
 name: voxelvein-frontend
 
-x-env-file: &env-file
-  env_file:
-    - path: .env
-      required: false
-
 services:
-  migrate:
-    <<: *env-file
-    image: voxelvein-migrate:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: migrate
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-    restart: "no"
-
-  api:
-    <<: *env-file
-    image: voxelvein-api:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: api
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      API_PORT: 3002
-      # Behind Traefik: trust the X-Forwarded-For entry it appends. Required in
-      # production (the API refuses to start without an explicit value).
-      TRUST_PROXY: ${TRUST_PROXY:-true}
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-    restart: unless-stopped
-
   web:
-    <<: *env-file
     image: voxelvein-frontend:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        # Public URL browsers use to reach the API (inlined at build time).
-        # The Dockerfile refuses to build the web image without it.
-        VITE_API_URL: ${VITE_API_URL:-}
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: 6001
-      # Server-side requests reach the API over the compose network.
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       API_URL: http://api:3002
-      # Dedupes download counts by client IP (see the api service).
-      TRUST_PROXY: ${TRUST_PROXY:-true}
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
     restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.35.1
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
+      MEILI_ENV: production
+    restart: unless-stopped
+    volumes:
+      - meili_data:/meili_data
+
+  api:
+    image: voxelvein-api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      NODE_ENV: production
+      API_PORT: 3002
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
+      CORS_ORIGIN: https://voxelvein.vomlabs.com
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-dev-webhook-secret-change-me}
+    restart: unless-stopped
+    depends_on:
+      - meilisearch
+
+volumes:
+  meili_data:
