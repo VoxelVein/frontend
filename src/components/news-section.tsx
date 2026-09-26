@@ -1,4 +1,8 @@
-import { IconArrowUpRight, IconSpeakerphone } from "@tabler/icons-react";
+import {
+  IconArrowUpRight,
+  IconNewsOff,
+  IconSpeakerphone,
+} from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
 import { Reveal } from "@/components/reveal";
@@ -20,29 +24,8 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-const NEWS: NewsItem[] = [
-  {
-    category: "Announcement",
-    date: "2026-08-28",
-    excerpt:
-      "A major update brings redesigned project pages, faster search, and a brand-new launcher integration.",
-    title: "VoxelVein 2.0 is here",
-  },
-  {
-    category: "Community",
-    date: "2026-08-14",
-    excerpt:
-      "Check out the incredible mods created during our month-long community mod jam — over 200 entries!",
-    title: "Community Mod Jam winners announced",
-  },
-  {
-    category: "Development",
-    date: "2026-07-30",
-    excerpt:
-      "A comprehensive guide for shader developers, covering the new pipeline and best practices.",
-    title: "New shader API documentation",
-  },
-];
+// Set to an empty array to show the empty state
+const NEWS: NewsItem[] = [];
 
 const CATEGORY_COLORS = {
   Announcement: "bg-primary/10 text-primary border-primary/20",
@@ -79,44 +62,58 @@ const NewsSection = () => (
         </Link>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {NEWS.map((item, index) => (
-          <Reveal key={item.title} delay={index * 0.06}>
-            <article className="group border-border bg-card ease-smooth relative h-full rounded-xl border p-6 transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none">
-              <Link
-                to="/blog"
-                preload="intent"
-                className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
-                aria-label={`Read: ${item.title}`}
-              >
-                <span className="sr-only">Read: {item.title}</span>
-              </Link>
+      {NEWS.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {NEWS.map((item, index) => (
+            <Reveal key={item.title} delay={index * 0.06}>
+              <article className="group border-border bg-card ease-smooth relative h-full rounded-xl border p-6 transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none">
+                <Link
+                  to="/blog"
+                  preload="intent"
+                  className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+                  aria-label={`Read: ${item.title}`}
+                >
+                  <span className="sr-only">Read: {item.title}</span>
+                </Link>
 
-              <div
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
-                  CATEGORY_COLORS[item.category]
-                )}
-              >
-                <IconSpeakerphone size={12} aria-hidden="true" />
-                {item.category}
-              </div>
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+                    CATEGORY_COLORS[item.category]
+                  )}
+                >
+                  <IconSpeakerphone size={12} aria-hidden="true" />
+                  {item.category}
+                </div>
 
-              <h3 className="mt-3 mb-2 font-semibold">{item.title}</h3>
-              <p className="text-muted-foreground mb-4 line-clamp-3 text-sm">
-                {item.excerpt}
-              </p>
+                <h3 className="mt-3 mb-2 font-semibold">{item.title}</h3>
+                <p className="text-muted-foreground mb-4 line-clamp-3 text-sm">
+                  {item.excerpt}
+                </p>
 
-              <time
-                dateTime={item.date}
-                className="text-muted-foreground text-xs"
-              >
-                {dateFormatter.format(new Date(item.date))}
-              </time>
-            </article>
-          </Reveal>
-        ))}
-      </div>
+                <time
+                  dateTime={item.date}
+                  className="text-muted-foreground text-xs"
+                >
+                  {dateFormatter.format(new Date(item.date))}
+                </time>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      ) : (
+        <Reveal>
+          <div className="border-border bg-card/50 flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
+            <div className="bg-muted text-muted-foreground mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+              <IconNewsOff size={24} aria-hidden="true" />
+            </div>
+            <h3 className="text-base font-semibold">No news available</h3>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Check back later for future updates and announcements.
+            </p>
+          </div>
+        </Reveal>
+      )}
     </div>
   </section>
 );
