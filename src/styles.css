@@ -308,37 +308,6 @@
   }
 }
 
-/* ── Word-swap crossfade (replaces motion AnimatePresence + m.span) ──── */
-@keyframes word-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes word-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-}
-
-.animate-word-enter {
-  animation: word-enter 0.35s ease-out both;
-}
-
-.animate-word-exit {
-  animation: word-exit 0.25s ease-in both;
-}
-
 /* ── Icon crossfade (replaces motion AnimatePresence + m.span) ───────── */
 @keyframes icon-enter {
   from {

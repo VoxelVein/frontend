@@ -23,6 +23,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 });
 
 const BROWSE_MODS = /browse mods/iu;
+const HEADING = /discover the best mods, plugins/iu;
 
 describe(Hero, () => {
   // jsdom has no matchMedia; the headline animation checks reduced motion.
@@ -39,6 +40,14 @@ describe(Hero, () => {
         matches: false,
         removeEventListener: vi.fn<MediaQueryList["removeEventListener"]>(),
       }))
+    );
+    // jsdom has no ResizeObserver; the rotating text measures its pill.
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        disconnect = vi.fn<() => void>();
+        observe = vi.fn<() => void>();
+      }
     );
   });
 
@@ -58,5 +67,13 @@ describe(Hero, () => {
     expect(link.getAttribute("href")).toBe("/mods");
     expect(screen.queryByRole("button", { name: BROWSE_MODS })).toBeNull();
     expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it("gives the rotating heading one stable accessible name", () => {
+    render(<Hero />);
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: HEADING })
+    ).toBeInTheDocument();
   });
 });

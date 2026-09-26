@@ -54,7 +54,7 @@ const Navbar = () => {
 
         {/* Desktop actions */}
         <div className="ml-auto hidden items-center gap-2 lg:flex">
-          <ThemeToggle variant="circle" start="center" />
+          <ThemeToggle variant="pixel" />
           <AuthButtons
             variant="desktop"
             isPending={isPending}
@@ -65,7 +65,7 @@ const Navbar = () => {
 
         {/* Mobile actions */}
         <div className="ml-auto flex items-center gap-2 lg:hidden">
-          <ThemeToggle variant="circle" start="center" />
+          <ThemeToggle variant="pixel" />
           <Button
             type="button"
             variant="ghost"

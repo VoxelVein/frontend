@@ -7,12 +7,13 @@ import { useEffect } from "react";
 import type { ComponentPropsWithoutRef } from "react";
 
 import { IconSwap } from "@/components/motion/icon-swap";
+import { playPixelReveal } from "@/components/motion/pixel-reveal";
 import { Button } from "@/components/ui/button";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { EASE_OUT_CSS } from "@/lib/ease";
 import { cn } from "@/lib/utils";
 
-type ThemeVariant = "rectangle" | "circle" | "blinds";
+type ThemeVariant = "rectangle" | "circle" | "blinds" | "pixel";
 
 type RectStart =
   | "top-left"
@@ -86,6 +87,17 @@ html[data-beui-vt="blinds"]::view-transition-new(root) {
   mask-repeat: repeat;
   animation: beui-blinds-reveal 700ms ${EASE_OUT_CSS};
 }
+/* Pixel: the new snapshot starts fully masked; playPixelReveal() then drives
+   one mask layer per pixel from script, so there is no CSS animation. */
+html[data-beui-vt="pixel"]::view-transition-old(root),
+html[data-beui-vt="pixel"]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-beui-vt="pixel"]::view-transition-new(root) {
+  mask-image: linear-gradient(transparent, transparent);
+  mask-repeat: no-repeat;
+}
 @keyframes beui-rect-reveal {
   from { clip-path: var(--beui-vt-from, inset(100% 0 0 0)); }
   to   { clip-path: inset(0 0 0 0); }
@@ -151,9 +163,9 @@ const useThemeToggle = ({
     if (variant === "rectangle") {
       root.style.setProperty("--beui-vt-from", RECT_FROM[start]);
       root.dataset.beuiVt = "rect";
-    } else if (variant === "blinds") {
-      // Slats sweep the whole viewport; there is no origin point to set.
-      root.dataset.beuiVt = "blinds";
+    } else if (variant === "blinds" || variant === "pixel") {
+      // Slats and pixels cover the whole viewport; there is no origin point.
+      root.dataset.beuiVt = variant;
     } else {
       root.style.setProperty("--beui-vt-origin", CIRCLE_ORIGIN[start]);
       root.dataset.beuiVt = variant;
@@ -162,12 +174,18 @@ const useThemeToggle = ({
     // SAFETY: startViewTransition is only called after the "startViewTransition" in document guard above
     const vt = (
       document as Document & {
-        startViewTransition: (cb: () => void) => { finished: Promise<void> };
+        startViewTransition: (cb: () => void) => {
+          finished: Promise<void>;
+          ready: Promise<void>;
+        };
       }
     ).startViewTransition(() => setTheme(next));
+    // The reveal keeps the transition open until it ends, so awaiting
+    // vt.finished below also covers it.
+    const reveal = variant === "pixel" ? playPixelReveal(vt) : undefined;
 
     try {
-      await vt.finished;
+      await Promise.all([vt.finished, reveal]);
     } catch {
       // The view transition can be interrupted (e.g. by another navigation);
       // the theme has already been applied.
