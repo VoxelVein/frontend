@@ -168,6 +168,7 @@ const ChangePasswordCard = () => {
                 <FormField
                   id="current-password"
                   label="Current password"
+                  placeholder="••••••••"
                   type="password"
                   autoComplete="current-password"
                   value={field.state.value}
@@ -190,6 +191,7 @@ const ChangePasswordCard = () => {
                 <FormField
                   id="new-password"
                   label="New password"
+                  placeholder="••••••••"
                   type="password"
                   autoComplete="new-password"
                   value={field.state.value}
@@ -215,6 +217,7 @@ const ChangePasswordCard = () => {
                   id="confirm-password"
                   label="Confirm new password"
                   type="password"
+                  placeholder="••••••••"
                   autoComplete="new-password"
                   value={field.state.value}
                   onChange={(event) => field.handleChange(event.target.value)}
