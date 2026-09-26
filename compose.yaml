@@ -9,16 +9,45 @@
 # file free of host port bindings so Dokploy can deploy it directly and route
 # traffic via Traefik (Domains tab) without conflicting with other services.
 #
+# Services read runtime settings from .env next to this file, which is what
+# Dokploy writes from its Environment tab. The `environment:` entries below
+# only pin values that must not come from there (internal hostnames, ports)
+# or that are interpolated into other settings.
+#
 # Usage:
 #   Development: docker compose -f compose.yaml -f compose.dev.yaml up
 #   Production:  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
 name: voxelvein-frontend
 
+x-env-file: &env-file
+  env_file:
+    - path: .env
+      required: false
+
+x-database-url: &database-url ${DATABASE_URL:-postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}}
+
 services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-voxelvein}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-voxelvein}
+    volumes:
+      # postgres:18+ stores data in a versioned subdirectory; mount the parent.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-voxelvein}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   # Applies pending database migrations, then exits. web only starts once it
   # succeeded, so a deploy never serves new code against an old schema.
   migrate:
+    <<: *env-file
     image: voxelvein-migrate:${TAG:-latest}
     build:
       context: .
@@ -26,32 +55,36 @@ services:
       target: migrate
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      # drizzle.config.ts loads env.config.ts, which validates these and
-      # fails the run (and so blocks web) if any is missing.
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      # Defaults to the bundled db service; set DATABASE_URL to use an
+      # external database instead.
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
     restart: "no"
 
   web:
+    <<: *env-file
     image: voxelvein-frontend:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        # Public URL browsers use to reach the API. Inlined into the client
-        # bundle at build time, so the Dockerfile refuses to build the web
-        # image without it. Not required here so the dev override, which
-        # stops at the deps stage, still works without it.
+        # VITE_* values are inlined into the client bundle at build time, so
+        # they are build arguments, and changing one means a rebuild. The
+        # Dockerfile refuses to build the web image without VITE_API_URL and
+        # VITE_SITE_URL. Not required here so the dev override, which stops
+        # at the deps stage, still works without them.
         VITE_API_URL: ${VITE_API_URL:-}
+        VITE_SITE_URL: ${VITE_SITE_URL:-}
+        VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:-}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+        VITE_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
-      DATABASE_URL: ${DATABASE_URL}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      DATABASE_URL: *database-url
       MEILI_HOST: http://meilisearch:7700
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       API_URL: http://api:3002
       # Trust X-Forwarded-For for per-client download dedupe ("true"/"false").
@@ -66,11 +99,17 @@ services:
     environment:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
       MEILI_ENV: production
-    restart: unless-stopped
     volumes:
       - meili_data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   api:
+    <<: *env-file
     image: voxelvein-api:${TAG:-latest}
     build:
       context: .
@@ -80,7 +119,6 @@ services:
       NODE_ENV: production
       API_PORT: 3002
       MEILI_HOST: http://meilisearch:7700
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       CORS_ORIGIN: ${CORS_ORIGIN:-https://voxelvein.vomlabs.com}
       # The API refuses to start without a random secret of 32+ characters,
@@ -90,11 +128,11 @@ services:
       # X-Forwarded-For (Traefik under Dokploy, hence the default), "false"
       # otherwise. The API refuses to start in production without it.
       TRUST_PROXY: ${TRUST_PROXY:-true}
-      SSE_MAX_CONNECTIONS: ${SSE_MAX_CONNECTIONS:-}
-      SSE_MAX_CONNECTIONS_PER_IP: ${SSE_MAX_CONNECTIONS_PER_IP:-}
-    restart: unless-stopped
     depends_on:
-      - meilisearch
+      meilisearch:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
+  pgdata:
   meili_data:

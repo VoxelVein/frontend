@@ -68,9 +68,14 @@ jobs:
         id: meta
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
         run: |
           if [ -z "$VITE_API_URL" ]; then
             echo "::error::Set the VITE_API_URL repository variable to the public API URL."
+            exit 1
+          fi
+          if [ -z "$VITE_SITE_URL" ]; then
+            echo "::error::Set the VITE_SITE_URL repository variable to the public web app URL."
             exit 1
           fi
           version=$(node -p "require('./package.json').version")
@@ -89,6 +94,10 @@ jobs:
           push: true
           build-args: |
             VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_SITE_URL=${{ vars.VITE_SITE_URL }}
+            VITE_TURNSTILE_SITE_KEY=${{ vars.VITE_TURNSTILE_SITE_KEY }}
+            VITE_GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}
+            VITE_GITHUB_CLIENT_ID=${{ vars.GITHUB_CLIENT_ID }}
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
             ${{ steps.meta.outputs.image }}:${{ github.sha }}

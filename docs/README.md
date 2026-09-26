@@ -33,6 +33,7 @@ frontend. Each guide lives in its own directory under `docs/`.
 ## Deployment
 
 * [Docker](deployment/docker.md) — build and run the production image
+* [Dokploy](deployment/dokploy.md) — deploy the stack on Dokploy
 
 ## Content
 
