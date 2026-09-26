@@ -15,7 +15,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FeatureSection } from "@/components/feature-section";
 import { Hero } from "@/components/hero";
 import { NewsSection } from "@/components/news-section";
-import { TechStack } from "@/components/tech-stack";
+import { TrendingProjects } from "@/components/trending-projects";
+import { getTrendingProjects } from "@/lib/trending.functions";
 
 const PLAYER_FEATURES = [
   {
@@ -85,7 +86,8 @@ const BROWSE_FEATURES = [
 const HomePage = () => (
   <>
     <Hero />
-    <TechStack />
+    {/* oxlint-disable-next-line no-use-before-define -- Route must be exported after the component for TanStack Router; HomePage only executes after Route is initialized */}
+    <TrendingProjects initialProjects={Route.useLoaderData()} />
     <FeatureSection
       id="browse"
       headingId="browse-heading"
@@ -113,4 +115,5 @@ const HomePage = () => (
 
 export const Route = createFileRoute("/")({
   component: HomePage,
+  loader: () => getTrendingProjects(),
 });
