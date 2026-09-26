@@ -37,6 +37,8 @@ services:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       API_URL: http://api:3002
+      # Trust X-Forwarded-For for per-client download dedupe ("true"/"false").
+      TRUST_PROXY: ${TRUST_PROXY:-true}
     restart: unless-stopped
 
   meilisearch:
@@ -61,6 +63,12 @@ services:
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       CORS_ORIGIN: https://voxelvein.vomlabs.com
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-dev-webhook-secret-change-me}
+      # Required in production: "true" behind a proxy that sets
+      # X-Forwarded-For (Traefik under Dokploy, hence the default), "false"
+      # otherwise. The API refuses to start in production without it.
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      SSE_MAX_CONNECTIONS: ${SSE_MAX_CONNECTIONS:-}
+      SSE_MAX_CONNECTIONS_PER_IP: ${SSE_MAX_CONNECTIONS_PER_IP:-}
     restart: unless-stopped
     depends_on:
       - meilisearch
