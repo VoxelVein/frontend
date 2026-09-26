@@ -71,7 +71,8 @@ const MyProjectsPage = () => {
                   </span>
                   <span className="text-muted-foreground block text-sm">
                     {PROJECT_TYPE_LABELS[project.type].singular} ·{" "}
-                    {STATUS_LABELS[project.status]} · {project.versionCount}{" "}
+                    {STATUS_LABELS[project.status]} ·{" "}
+                    {formatCount(project.versionCount)}{" "}
                     {project.versionCount === 1 ? "version" : "versions"}
                   </span>
                 </span>

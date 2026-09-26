@@ -33,6 +33,10 @@ const envWithDefaults = {
   TURNSTILE_SECRET: process.env.TURNSTILE_SECRET,
   VITE_GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   VITE_GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  // Absolute origin of the deployment. Used for Open Graph URLs, JSON-LD, and
+  // the sitemap, all of which need an absolute URL rather than a path. Defaults
+  // to the dev server so local runs produce valid markup.
+  VITE_SITE_URL: process.env.VITE_SITE_URL ?? "http://localhost:3000",
 };
 
 const env = defineEnv({
@@ -67,6 +71,7 @@ const env = defineEnv({
     NODE_ENV: picklist(["development", "production", "test"]),
     VITE_GITHUB_CLIENT_ID: optional(string()),
     VITE_GOOGLE_CLIENT_ID: optional(string()),
+    VITE_SITE_URL: pipe(string(), url()),
     VITE_TURNSTILE_SITE_KEY: optional(string()),
   },
 });

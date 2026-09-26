@@ -10,7 +10,15 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import {
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  Card,
+} from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Select,
@@ -37,6 +45,12 @@ interface AdminUser {
 
 interface UsersState {
   error: string | null;
+  /**
+   * Bumped on every failure. The toast keys on this rather than on `error`, so
+   * two failures reporting the same message are still two separate events and
+   * the admin hears about both.
+   */
+  errorCount: number;
   isLoading: boolean;
   users: AdminUser[];
 }
@@ -57,10 +71,19 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
       return { ...state, error: null, isLoading: true };
     }
     case "LOAD_SUCCESS": {
-      return { error: null, isLoading: false, users: action.users };
+      // Spread so errorCount survives: dropping it would make the next failure
+      // compute `undefined + 1` (NaN), and React compares effect deps with
+      // Object.is, which treats NaN as equal to itself — the effect would then
+      // never re-run for two failures in a row.
+      return { ...state, error: null, isLoading: false, users: action.users };
     }
     case "LOAD_ERROR": {
-      return { ...state, error: action.error, isLoading: false };
+      return {
+        ...state,
+        error: action.error,
+        errorCount: state.errorCount + 1,
+        isLoading: false,
+      };
     }
     case "ROLE_SUCCESS": {
       return {
@@ -99,7 +122,11 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
       };
     }
     case "ACTION_ERROR": {
-      return { ...state, error: action.error };
+      return {
+        ...state,
+        error: action.error,
+        errorCount: state.errorCount + 1,
+      };
     }
     default: {
       return state;
@@ -331,6 +358,7 @@ const AdminUsersDialogs = ({
 const AdminUsers = () => {
   const [state, dispatch] = useReducer(usersReducer, {
     error: null,
+    errorCount: 0,
     isLoading: true,
     users: [],
   });
@@ -344,7 +372,7 @@ const AdminUsers = () => {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const { error, isLoading, users } = state;
+  const { error, errorCount, isLoading, users } = state;
 
   // oxlint-disable-next-line react/incompatible-library -- useVirtualizer returns functions that cannot be memoized
   const rowVirtualizer = useVirtualizer({
@@ -383,7 +411,10 @@ const AdminUsers = () => {
         },
       });
     }
-  }, [error, loadUsers]);
+    // errorCount is in the deps so the effect re-runs for a repeat failure that
+    // carries the same message; without it the second identical failure would
+    // leave `error` unchanged and be announced to nobody.
+  }, [error, errorCount, loadUsers]);
 
   useEffect(() => {
     loadUsers();
@@ -485,15 +516,12 @@ const AdminUsers = () => {
     );
   } else if (users.length === 0) {
     content = (
-      <div className="border-border bg-muted/40 mt-4 rounded-lg border p-6 text-center">
-        <div className="border-border bg-background text-muted-foreground mx-auto mb-3 flex size-11 items-center justify-center rounded-xl border">
-          <IconUsers size={20} aria-hidden="true" />
-        </div>
-        <p className="text-foreground text-sm font-medium">No users found</p>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Users who sign in will appear here.
-        </p>
-      </div>
+      <EmptyState
+        variant="inline"
+        title="No users found"
+        description="Users who sign in will appear here."
+        icon={<IconUsers size={20} aria-hidden="true" />}
+      />
     );
   } else {
     content = (
@@ -539,49 +567,49 @@ const AdminUsers = () => {
   }
 
   return (
-    <section
-      aria-labelledby="admin-users-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <section aria-labelledby="admin-users-heading">
+      <Card>
+        <CardHeader>
           <h2
             id="admin-users-heading"
             className="text-foreground text-lg font-semibold"
           >
             Users
           </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <CardDescription>
             Manage user roles, bans, and accounts.
-          </p>
-        </div>
+          </CardDescription>
+          <CardAction>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11"
+              disabled={isLoading}
+              onClick={() => loadUsers()}
+            >
+              Refresh
+            </Button>
+          </CardAction>
+        </CardHeader>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="min-h-11"
-          disabled={isLoading}
-          onClick={() => loadUsers()}
-        >
-          Refresh
-        </Button>
-      </div>
+        <CardContent>
+          {content}
 
-      {content}
-
-      <AdminUsersDialogs
-        isMutating={isMutating}
-        pendingBan={pendingBan}
-        pendingRemove={pendingRemove}
-        pendingRole={pendingRole}
-        onBan={handleBan}
-        onCloseBan={() => setPendingBan(null)}
-        onCloseRemove={() => setPendingRemove(null)}
-        onCloseRole={() => setPendingRole(null)}
-        onRemove={handleRemove}
-        onRoleChange={handleRoleChange}
-      />
+          <AdminUsersDialogs
+            isMutating={isMutating}
+            pendingBan={pendingBan}
+            pendingRemove={pendingRemove}
+            pendingRole={pendingRole}
+            onBan={handleBan}
+            onCloseBan={() => setPendingBan(null)}
+            onCloseRemove={() => setPendingRemove(null)}
+            onCloseRole={() => setPendingRole(null)}
+            onRemove={handleRemove}
+            onRoleChange={handleRoleChange}
+          />
+        </CardContent>
+      </Card>
     </section>
   );
 };

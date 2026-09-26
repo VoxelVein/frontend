@@ -21,7 +21,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
-import { formatBytes, formatDate } from "@/lib/format";
+import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import { PROJECT_TYPE_LABELS } from "@/lib/projects";
 import type {
   ProjectInput,
@@ -176,7 +176,7 @@ const VersionList = ({
                 {version.files.map((file) => (
                   <li key={file.id} className="break-all">
                     {file.filename} · {formatBytes(file.size)} ·{" "}
-                    {version.downloads} downloads
+                    {formatCount(version.downloads)} downloads
                   </li>
                 ))}
               </ul>

@@ -15,6 +15,26 @@ describe(formatCount, () => {
     expect(formatCount(14_200_000)).toBe("14.2M");
     expect(formatCount(950)).toBe("950");
   });
+
+  // Each step is 1000x the previous, so the suffix has to change at 10^3.
+  it("abbreviates at every 1000x step", () => {
+    expect(formatCount(1000)).toBe("1K");
+    expect(formatCount(1_000_000)).toBe("1M");
+    expect(formatCount(1_000_000_000)).toBe("1B");
+    expect(formatCount(1_000_000_000_000)).toBe("1T");
+  });
+
+  // English compact notation uses B for billion, not G, so 5e9 is "5B" and
+  // "T" does not appear until 10^12. Compact notation is for display only —
+  // never parse it back.
+  it("uses B for billions and reserves T for trillions", () => {
+    expect(formatCount(5_000_000_000)).toBe("5B");
+    expect(formatCount(999_999_999_999)).toBe("1T");
+  });
+
+  it("keeps at most one fraction digit", () => {
+    expect(formatCount(1_234_567)).toBe("1.2M");
+  });
 });
 
 describe(formatDate, () => {

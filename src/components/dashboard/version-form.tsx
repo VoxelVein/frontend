@@ -20,6 +20,7 @@ import {
 } from "@/lib/form-errors";
 import type { FieldErrors } from "@/lib/form-errors";
 import { formatBytes } from "@/lib/format";
+import { formatMinecraftVersion } from "@/lib/minecraft-versions";
 import {
   GAME_VERSIONS,
   LOADERS_BY_TYPE,
@@ -169,7 +170,7 @@ export const VersionForm = ({
         options={GAME_VERSIONS}
         values={gameVersions}
         onChange={setGameVersions}
-        formatLabel={(value) => `Minecraft ${value}`}
+        formatLabel={formatMinecraftVersion}
         error={errors.get("gameVersions")}
       />
 

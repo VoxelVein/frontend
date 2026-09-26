@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 
+import { AlertDescription, Alert } from "@/components/ui/alert";
+import { CardContent, CardHeader, Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { errorMessage } from "@/lib/form-errors";
-import { formatBytes } from "@/lib/format";
+import { formatBytes, formatCount } from "@/lib/format";
 import type { StorageUsage } from "@/lib/storage-quota";
 import { getStorageUsage } from "@/lib/storage.functions";
 
@@ -12,7 +14,7 @@ const WARNING_RATIO = 0.9;
 
 const UsageSummary = ({ usage }: { usage: StorageUsage }) => {
   const { fileCount, quotaBytes, usedBytes } = usage;
-  const files = `${fileCount} ${fileCount === 1 ? "file" : "files"}`;
+  const files = `${formatCount(fileCount)} ${fileCount === 1 ? "file" : "files"}`;
 
   if (quotaBytes === null) {
     return (
@@ -71,25 +73,29 @@ export const AdminStorage = () => {
   }, []);
 
   return (
-    <section
-      aria-labelledby="storage-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <h2
-        id="storage-heading"
-        className="text-foreground mb-4 text-lg font-semibold"
-      >
-        File storage
-      </h2>
-      {error ? (
-        <p role="alert" className="text-destructive text-sm">
-          {error}
-        </p>
-      ) : null}
-      {!error && usage ? <UsageSummary usage={usage} /> : null}
-      {!error && !usage ? (
-        <Skeleton aria-busy="true" className="h-12 w-full" />
-      ) : null}
+    <section aria-labelledby="storage-heading">
+      <Card>
+        <CardHeader>
+          <h2
+            id="storage-heading"
+            className="text-foreground text-lg font-semibold"
+          >
+            File storage
+          </h2>
+        </CardHeader>
+
+        <CardContent>
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+          {!error && usage ? <UsageSummary usage={usage} /> : null}
+          {!error && !usage ? (
+            <Skeleton aria-busy="true" className="h-12 w-full" />
+          ) : null}
+        </CardContent>
+      </Card>
     </section>
   );
 };

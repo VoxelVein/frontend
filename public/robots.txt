@@ -1,3 +1,20 @@
 # https://www.robotstxt.org/robotstxt.html
+#
+# VoxelVein is a public mod browser, so the content pages (/, /mods, /plugins,
+# /blog, and the legal pages) stay crawlable and indexable. Everything a
+# crawler cannot usefully consume is excluded below so it does not burn crawl
+# budget on redirects to /login or on machine-readable endpoints.
+#
+# Disallow is a crawler hint, NOT access control. The routes listed here are
+# already gated server-side; this only keeps them out of search results.
+#
+# There is no sitemap yet. When one exists, add a `Sitemap:` line with its
+# absolute URL.
+
 User-agent: *
-Disallow:
+Disallow: /api/
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /login
+Disallow: /signup

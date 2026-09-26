@@ -38,6 +38,10 @@ const FormField = ({
           "border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-11 w-full rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-3",
           error &&
             "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20 dark:border-destructive/50",
+          // A read-only field must not look editable: no focus ring, muted
+          // surface, and the browser's own text cursor suppressed.
+          inputProps.readOnly &&
+            "bg-muted/40 text-muted-foreground focus-visible:border-input cursor-default focus-visible:ring-0",
           className
         )}
         {...inputProps}

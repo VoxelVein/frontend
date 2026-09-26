@@ -37,6 +37,13 @@ yarn-error.log*
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# husky
+# Only the generated shim directory. Husky v9 writes .husky/_ on install and
+# ships its own .gitignore covering it, but naming it here keeps that explicit.
+# Do NOT ignore .husky wholesale: hooks must stay committable, or `git add .`
+# silently drops a new hook and it never runs for anyone else.
+.husky/_
+
 # OS
 .DS_Store
 Thumbs.db
@@ -51,5 +58,3 @@ coverage/
 *.local
 todos.json
 .tmp/
-
-.env.local

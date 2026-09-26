@@ -142,6 +142,10 @@ export const posts = pgTable(
   (table) => [
     index("posts_authorId_idx").on(table.authorId),
     index("posts_published_idx").on(table.published),
+    // listPosts filters on `published` and orders by `createdAt` descending.
+    // A single-column index on `published` cannot supply the sort, so Postgres
+    // sorts every matching row. This composite index serves both.
+    index("posts_published_createdAt_idx").on(table.published, table.createdAt),
   ]
 );
 
@@ -172,6 +176,9 @@ export const projects = pgTable(
     index("projects_ownerId_idx").on(table.ownerId),
     index("projects_status_idx").on(table.status),
     index("projects_type_idx").on(table.type),
+    // listMyProjects filters on `owner_id` and orders by `updated_at`
+    // descending. The ownerId index alone cannot supply that sort.
+    index("projects_ownerId_updatedAt_idx").on(table.ownerId, table.updatedAt),
   ]
 );
 

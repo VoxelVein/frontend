@@ -2,7 +2,16 @@ import { IconDeviceDesktop, IconDeviceMobile } from "@tabler/icons-react";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import type { ReactNode } from "react";
 
+import { EmptyState } from "@/components/empty-state";
+import { AlertDescription, Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  Card,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
@@ -187,17 +196,12 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
     );
   } else if (sessions.length === 0) {
     content = (
-      <div className="border-border bg-muted/40 mt-4 rounded-lg border p-6 text-center">
-        <div className="border-border bg-background text-muted-foreground mx-auto mb-3 flex size-11 items-center justify-center rounded-xl border">
-          <IconDeviceDesktop size={20} aria-hidden="true" />
-        </div>
-        <p className="text-foreground text-sm font-medium">
-          No active sessions
-        </p>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Devices signed in to your account will appear here.
-        </p>
-      </div>
+      <EmptyState
+        variant="inline"
+        title="No active sessions"
+        description="Devices signed in to your account will appear here."
+        icon={<IconDeviceDesktop size={20} aria-hidden="true" />}
+      />
     );
   } else {
     content = (
@@ -257,63 +261,60 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
   }
 
   return (
-    <section
-      aria-labelledby="settings-sessions-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <section aria-labelledby="settings-sessions-heading">
+      <Card>
+        <CardHeader>
           <h2
             id="settings-sessions-heading"
             className="text-foreground text-lg font-semibold"
           >
             Sessions
           </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Devices signed in to your account.
-          </p>
-        </div>
+          <CardDescription>Devices signed in to your account.</CardDescription>
+          <CardAction>
+            {sessions.length > 1 ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-11"
+                disabled={isRevokingOther}
+                onClick={handleRevokeOthers}
+              >
+                {isRevokingOther ? (
+                  <>
+                    <Spinner className="mr-1" />
+                    Signing out…
+                  </>
+                ) : (
+                  "Sign Out Other Sessions"
+                )}
+              </Button>
+            ) : null}
+          </CardAction>
+        </CardHeader>
 
-        {sessions.length > 1 ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            disabled={isRevokingOther}
-            onClick={handleRevokeOthers}
-          >
-            {isRevokingOther ? (
-              <>
-                <Spinner className="mr-1" />
-                Signing out…
-              </>
-            ) : (
-              "Sign Out Other Sessions"
-            )}
-          </Button>
-        ) : null}
-      </div>
+        <CardContent>
+          {error ? (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+                <span>{error}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="min-h-11"
+                  onClick={() => loadSessions()}
+                >
+                  Try again
+                </Button>
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
-      {error ? (
-        <div
-          role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm"
-        >
-          <span>{error}</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            onClick={() => loadSessions()}
-          >
-            Try again
-          </Button>
-        </div>
-      ) : null}
-
-      {content}
+          {content}
+        </CardContent>
+      </Card>
     </section>
   );
 };

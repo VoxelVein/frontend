@@ -13,7 +13,15 @@ import { PostFormDialog } from "@/components/admin/post-form-dialog";
 import { useAdminPosts } from "@/components/admin/use-admin-posts";
 import type { AdminPostRow } from "@/components/admin/use-admin-posts";
 import { PostSearchBar } from "@/components/blog/post-search-bar";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import {
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  Card,
+} from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Post, PostSummary } from "@/lib/posts";
@@ -88,24 +96,6 @@ const PostRow = ({ isMutating, post, onDelete, onEdit }: PostRowProps) => (
   </div>
 );
 
-const EmptyPanel = ({
-  body,
-  icon,
-  title,
-}: {
-  body: string;
-  icon: ReactNode;
-  title: string;
-}) => (
-  <div className="border-border bg-muted/40 mt-4 rounded-lg border p-6 text-center">
-    <div className="border-border bg-background text-muted-foreground mx-auto mb-3 flex size-11 items-center justify-center rounded-xl border">
-      {icon}
-    </div>
-    <p className="text-foreground text-sm font-medium">{title}</p>
-    <p className="text-muted-foreground mt-1 text-sm">{body}</p>
-  </div>
-);
-
 const AdminPosts = () => {
   const {
     error,
@@ -161,18 +151,20 @@ const AdminPosts = () => {
     );
   } else if (isSearchActive && posts.length === 0) {
     content = (
-      <EmptyPanel
-        body={`Nothing matches “${query.trim()}”.`}
-        icon={<IconSearchOff size={20} aria-hidden="true" />}
+      <EmptyState
+        variant="inline"
         title="No posts found"
+        description={`Nothing matches “${query.trim()}”.`}
+        icon={<IconSearchOff size={20} aria-hidden="true" />}
       />
     );
   } else if (posts.length === 0) {
     content = (
-      <EmptyPanel
-        body="Create your first blog post to get started."
-        icon={<IconFileText size={20} aria-hidden="true" />}
+      <EmptyState
+        variant="inline"
         title="No posts yet"
+        description="Create your first blog post to get started."
+        icon={<IconFileText size={20} aria-hidden="true" />}
       />
     );
   } else {
@@ -197,89 +189,86 @@ const AdminPosts = () => {
   }
 
   return (
-    <section
-      aria-labelledby="admin-posts-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <section aria-labelledby="admin-posts-heading">
+      <Card>
+        <CardHeader>
           <h2
             id="admin-posts-heading"
             className="text-foreground text-lg font-semibold"
           >
             Blog Posts
           </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <CardDescription>
             Create, edit, and publish blog posts.
+          </CardDescription>
+          <CardAction>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="min-h-11"
+              onClick={openCreate}
+            >
+              <IconPlus size={16} stroke={1.8} />
+              New post
+            </Button>
+          </CardAction>
+        </CardHeader>
+
+        <CardContent>
+          {" "}
+          {searchAvailable ? (
+            <PostSearchBar
+              label="Search blog posts, including drafts"
+              onQueryChange={onQueryChange}
+              placeholder="Search posts…"
+              query={query}
+            />
+          ) : null}
+          {/* Announced rather than shown: the list must not be replaced by a
+            loading state while the background refresh runs. */}
+          <p aria-live="polite" className="sr-only">
+            {isRefreshing ? "Refreshing posts" : ""}
           </p>
-        </div>
+          {content}
+          <PostFormDialog
+            open={formOpen}
+            onOpenChange={setFormOpen}
+            post={editingPost}
+            onSaved={(post) => {
+              if (editingPost) {
+                onUpdated(post);
+              } else {
+                onCreated(post);
+              }
 
-        <Button
-          type="button"
-          variant="default"
-          size="sm"
-          className="min-h-11"
-          onClick={openCreate}
-        >
-          <IconPlus size={16} stroke={1.8} />
-          New post
-        </Button>
-      </div>
-
-      {searchAvailable ? (
-        <PostSearchBar
-          label="Search blog posts, including drafts"
-          onQueryChange={onQueryChange}
-          placeholder="Search posts…"
-          query={query}
-        />
-      ) : null}
-
-      {/* Announced rather than shown: the list must not be replaced by a
-          loading state while the background refresh runs. */}
-      <p aria-live="polite" className="sr-only">
-        {isRefreshing ? "Refreshing posts" : ""}
-      </p>
-
-      {content}
-
-      <PostFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        post={editingPost}
-        onSaved={(post) => {
-          if (editingPost) {
-            onUpdated(post);
-          } else {
-            onCreated(post);
-          }
-
-          setEditingPost(null);
-        }}
-        onError={reportError}
-      />
-
-      <ConfirmDialog
-        open={pendingDelete !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPendingDelete(null);
-          }
-        }}
-        title="Delete post"
-        description={
-          pendingDelete
-            ? `Permanently delete "${pendingDelete.title}"? This cannot be undone.`
-            : ""
-        }
-        confirmLabel="Delete post"
-        pending={isMutating}
-        onConfirm={() => {
-          if (pendingDelete) {
-            void removePost(pendingDelete);
-          }
-        }}
-      />
+              setEditingPost(null);
+            }}
+            onError={reportError}
+          />
+          <ConfirmDialog
+            open={pendingDelete !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPendingDelete(null);
+              }
+            }}
+            title="Delete post"
+            description={
+              pendingDelete
+                ? `Permanently delete "${pendingDelete.title}"? This cannot be undone.`
+                : ""
+            }
+            confirmLabel="Delete post"
+            pending={isMutating}
+            onConfirm={() => {
+              if (pendingDelete) {
+                void removePost(pendingDelete);
+              }
+            }}
+          />
+        </CardContent>
+      </Card>
     </section>
   );
 };

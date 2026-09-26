@@ -43,7 +43,31 @@ export const PLUGIN_CATEGORIES = [
   "utility",
 ] as const;
 
+/**
+ * Selectable Minecraft versions, newest first.
+ *
+ * Kept as a literal tuple rather than derived from `MINECRAFT_VERSIONS` because
+ * `picklist()` below needs the literal type to enforce it at compile time. A
+ * test pins the two together: every stable release in the catalog must appear
+ * here, and snapshot-only releases must not.
+ *
+ * The 1.20.x-1.18.x entries predate the catalog and stay because projects
+ * already reference them — dropping them would orphan stored data.
+ */
 export const GAME_VERSIONS = [
+  "26.2",
+  "26.1",
+  "1.21.11",
+  "1.21.10",
+  "1.21.9",
+  "1.21.8",
+  "1.21.7",
+  "1.21.6",
+  "1.21.5",
+  "1.21.4",
+  "1.21.3",
+  "1.21.2",
+  "1.21.1",
   "1.21",
   "1.20.4",
   "1.20.1",

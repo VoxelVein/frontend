@@ -8,7 +8,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { EmptyState } from "@/components/empty-state";
+import { AlertDescription, Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  Card,
+} from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -80,175 +88,169 @@ const SettingsPasskeys = () => {
   };
 
   return (
-    <section
-      aria-labelledby="settings-passkeys-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <section aria-labelledby="settings-passkeys-heading">
+      <Card>
+        <CardHeader>
           <h2
             id="settings-passkeys-heading"
             className="text-foreground text-lg font-semibold"
           >
             Passkeys
           </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <CardDescription>
             Sign in securely with a passkey on this device.
-          </p>
-        </div>
-      </div>
+          </CardDescription>
+        </CardHeader>
 
-      {listError ? (
-        <div
-          role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm"
-        >
-          <span>{listError.message ?? "Could not load passkeys."}</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            onClick={() => refetch()}
-          >
-            Try again
-          </Button>
-        </div>
-      ) : null}
-
-      {actionError ? (
-        <div
-          role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive mt-4 rounded-lg border px-3 py-2.5 text-sm"
-        >
-          {actionError}
-        </div>
-      ) : null}
-
-      <form
-        onSubmit={handleAdd}
-        noValidate
-        className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]"
-      >
-        <label className="sr-only" htmlFor="passkey-name">
-          Passkey name
-        </label>
-        <input
-          id="passkey-name"
-          name="passkey-name"
-          type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="e.g. My laptop"
-          autoComplete="off"
-          className="border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring min-h-11 rounded-lg border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
-        />
-        <Button
-          type="submit"
-          variant="default"
-          className="min-h-11"
-          disabled={isAdding}
-        >
-          <IconPlus size={16} />
-          {isAdding ? (
-            <>
-              <Spinner className="mr-1" />
-              Adding…
-            </>
-          ) : (
-            "Add Passkey"
-          )}
-        </Button>
-      </form>
-
-      {isPending ? (
-        <div aria-busy="true" className="mt-4 grid gap-3">
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-        </div>
-      ) : null}
-
-      {!isPending && passkeys && passkeys.length === 0 ? (
-        <div className="border-border bg-muted/40 mt-4 rounded-lg border p-6 text-center">
-          <div className="border-border bg-background text-muted-foreground mx-auto mb-3 flex size-11 items-center justify-center rounded-xl border">
-            <IconFingerprint size={20} aria-hidden="true" />
-          </div>
-          <p className="text-foreground text-sm font-medium">No passkeys yet</p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Add one to sign in without a password.
-          </p>
-        </div>
-      ) : null}
-
-      {!isPending && passkeys && passkeys.length > 0 ? (
-        <ul className="mt-4 grid gap-3">
-          {passkeys.map((passkey) => {
-            const isSynced = passkey.deviceType === "multiDevice";
-            const DeviceIcon = isSynced ? IconFingerprint : IconDeviceMobile;
-
-            return (
-              <li
-                key={passkey.id}
-                className="border-border bg-muted/40 flex items-center gap-3 rounded-lg border p-3"
-              >
-                <span
-                  aria-hidden="true"
-                  className="border-border bg-background text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border"
-                >
-                  <DeviceIcon size={18} stroke={1.8} />
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate text-sm font-medium">
-                    {passkey.name ?? "Passkey"}
-                  </p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {isSynced ? "Synced passkey" : "Device-bound passkey"} ·
-                    Added {formatDate(passkey.createdAt)}
-                  </p>
-                </div>
-
+        <CardContent>
+          {listError ? (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+                <span>{listError.message ?? "Could not load passkeys."}</span>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="min-h-11 shrink-0"
-                  disabled={removingId === passkey.id}
-                  onClick={() => setPendingRemovalId(passkey.id)}
+                  className="min-h-11"
+                  onClick={() => refetch()}
                 >
-                  <IconTrash size={15} />
-                  {removingId === passkey.id ? (
-                    <>
-                      <Spinner className="mr-1" />
-                      Removing…
-                    </>
-                  ) : (
-                    "Remove"
-                  )}
+                  Try again
                 </Button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
-      <ConfirmDialog
-        open={pendingRemovalId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPendingRemovalId(null);
-          }
-        }}
-        title="Remove passkey?"
-        description="You will no longer be able to sign in with this passkey. You can add a new one at any time."
-        confirmLabel="Remove"
-        pending={removingId !== null}
-        onConfirm={() => {
-          if (pendingRemovalId) {
-            return handleRemove(pendingRemovalId);
-          }
-        }}
-      />
+          {actionError ? (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{actionError}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          <form
+            onSubmit={handleAdd}
+            noValidate
+            className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]"
+          >
+            <label className="sr-only" htmlFor="passkey-name">
+              Passkey name
+            </label>
+            <input
+              id="passkey-name"
+              name="passkey-name"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="e.g. My laptop"
+              autoComplete="off"
+              className="border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring min-h-11 rounded-lg border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
+            />
+            <Button
+              type="submit"
+              variant="default"
+              className="min-h-11"
+              disabled={isAdding}
+            >
+              <IconPlus size={16} />
+              {isAdding ? (
+                <>
+                  <Spinner className="mr-1" />
+                  Adding…
+                </>
+              ) : (
+                "Add Passkey"
+              )}
+            </Button>
+          </form>
+
+          {isPending ? (
+            <div aria-busy="true" className="mt-4 grid gap-3">
+              <Skeleton className="h-16" />
+              <Skeleton className="h-16" />
+            </div>
+          ) : null}
+
+          {!isPending && passkeys && passkeys.length === 0 ? (
+            <EmptyState
+              variant="inline"
+              title="No passkeys yet"
+              description="Add one to sign in without a password."
+              icon={<IconFingerprint size={20} aria-hidden="true" />}
+            />
+          ) : null}
+
+          {!isPending && passkeys && passkeys.length > 0 ? (
+            <ul className="mt-4 grid gap-3">
+              {passkeys.map((passkey) => {
+                const isSynced = passkey.deviceType === "multiDevice";
+                const DeviceIcon = isSynced
+                  ? IconFingerprint
+                  : IconDeviceMobile;
+
+                return (
+                  <li
+                    key={passkey.id}
+                    className="border-border bg-muted/40 flex items-center gap-3 rounded-lg border p-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="border-border bg-background text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border"
+                    >
+                      <DeviceIcon size={18} stroke={1.8} />
+                    </span>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-foreground truncate text-sm font-medium">
+                        {passkey.name ?? "Passkey"}
+                      </p>
+                      <p className="text-muted-foreground truncate text-xs">
+                        {isSynced ? "Synced passkey" : "Device-bound passkey"} ·
+                        Added {formatDate(passkey.createdAt)}
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="min-h-11 shrink-0"
+                      disabled={removingId === passkey.id}
+                      onClick={() => setPendingRemovalId(passkey.id)}
+                    >
+                      <IconTrash size={15} />
+                      {removingId === passkey.id ? (
+                        <>
+                          <Spinner className="mr-1" />
+                          Removing…
+                        </>
+                      ) : (
+                        "Remove"
+                      )}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+
+          <ConfirmDialog
+            open={pendingRemovalId !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPendingRemovalId(null);
+              }
+            }}
+            title="Remove passkey?"
+            description="You will no longer be able to sign in with this passkey. You can add a new one at any time."
+            confirmLabel="Remove"
+            pending={removingId !== null}
+            onConfirm={() => {
+              if (pendingRemovalId) {
+                return handleRemove(pendingRemovalId);
+              }
+            }}
+          />
+        </CardContent>
+      </Card>
     </section>
   );
 };

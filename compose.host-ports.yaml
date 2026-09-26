@@ -1,0 +1,23 @@
+# Opt-in host port publishing for the production images.
+#
+# Usage:
+#   docker compose -f compose.yaml -f compose.prod.yaml \
+#     -f compose.host-ports.yaml up -d
+#
+# This lives apart from compose.prod.yaml so that a Dokploy deploy has no host
+# bindings to collide with. Note that a Compose profile gates an entire
+# service, not a single key, so putting `profiles:` on `web` would stop it from
+# starting at all rather than just dropping its ports. Selecting this file is
+# the opt-in that actually works.
+#
+# Do not enable this on a host where Dokploy's Traefik already fronts the same
+# stack unless you have confirmed the ports are free.
+
+services:
+  web:
+    ports:
+      - "${WEB_PORT:-1112}:3000"
+
+  api:
+    ports:
+      - "${API_HOST_PORT:-1113}:3002"

@@ -1,7 +1,9 @@
 # Base Compose configuration for VoxelVein Frontend.
 #
 # This file defines the shared services. Environment-specific overrides live in
-# compose.dev.yaml (development) and compose.prod.yaml (production).
+# compose.dev.yaml (development) and compose.prod.yaml (production), with
+# compose.host-ports.yaml as an opt-in for reaching the prod stack from the
+# host.
 #
 # Note: host port mapping lives in the overrides, not here. This keeps the base
 # file free of host port bindings so Dokploy can deploy it directly and route
