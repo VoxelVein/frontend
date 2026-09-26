@@ -1,88 +1,111 @@
 ---
 name: context7
-description: Retrieve up-to-date documentation for software libraries, frameworks, and components via the Context7 API. This skill should be used when looking up documentation for any programming library or framework, finding code examples for specific APIs or features, verifying correct usage of library functions, or obtaining current information about library APIs that may have changed since training.
+description: Fetch current, version-specific documentation for the libraries this project actually uses (TanStack Start/Router/Query, Elysia, Drizzle ORM, Better Auth, Meilisearch, Vite, Tailwind, shadcn) via the Context7 MCP server. Use before writing or reviewing any code against a third-party API, when an error message names a library, when upgrading a dependency, or whenever you are unsure whether a remembered API still exists. Triggers on "latest docs for", "how do I use", "does this API still", "correct way to", or any unfamiliar import from node_modules.
+version: 2.0.0
+author: voxelvein
+type: skill
+category: tooling
+tags:
+  - documentation
+  - context7
+  - mcp
+  - dependencies
 ---
 
-# Context7
+# Context7 — Live Library Documentation
 
-## Overview
+## Why this exists
 
-This skill enables retrieval of current documentation for software libraries and components by querying the Context7 API via curl. Use it instead of relying on potentially outdated training data.
+Every other rule in this repo assumes you have **current** library
+knowledge. That assumption is false by default: training data goes stale,
+and this stack moves fast (Vite 8, Tailwind 4, React 19, Ultracite 5,
+shadcn on Base UI). A remembered API that was correct two majors ago will
+typecheck-fail or, worse, silently misbehave.
 
-## Workflow
+**Look it up. Don't guess.** If you are writing code that calls a
+third-party API you have not read in this session, resolve it first.
 
-### Step 1: Search for the Library
+## Step 1 — Resolve the library ID
 
-To find the Context7 library ID, query the search endpoint:
+Context7 addresses docs by ID, not by name. Always resolve first:
 
-```bash
-curl -s "https://context7.com/api/v2/libs/search?libraryName=LIBRARY_NAME&query=TOPIC" | jq '.results[0]'
+```json
+{ "libraryName": "TanStack Router", "query": "file-based routing createFileRoute" }
 ```
 
-**Parameters:**
+## Step 2 — Query the docs
 
-- `libraryName` (required): The library name to search for (e.g., "react", "nextjs", "fastapi", "axios")
-- `query` (required): A description of the topic for relevance ranking
+Scope **one question per call.** The index degrades badly when you bundle
+several topics — you get a shallow answer for each instead of one good
+answer.
 
-**Response fields:**
-
-- `id`: Library identifier for the context endpoint (e.g., `/websites/react_dev_reference`)
-- `title`: Human-readable library name
-- `description`: Brief description of the library
-- `totalSnippets`: Number of documentation snippets available
-
-### Step 2: Fetch Documentation
-
-To retrieve documentation, use the library ID from step 1:
-
-```bash
-curl -s "https://context7.com/api/v2/context?libraryId=LIBRARY_ID&query=TOPIC&type=txt"
+```json
+{
+  "libraryId": "/tanstack/router",
+  "query": "createFileRoute loader and beforeLoad difference"
+}
 ```
 
-**Parameters:**
+## Project libraries
 
-- `libraryId` (required): The library ID from search results
-- `query` (required): The specific topic to retrieve documentation for
-- `type` (optional): Response format - `json` (default) or `txt` (plain text, more readable)
+Resolve these by name; the IDs are stable, but resolve anyway to pick
+up the right version.
 
-## Examples
+| Concern | Library |
+| --- | --- |
+| Routing, SSR, server functions | TanStack Start, TanStack Router |
+| Server data fetching/caching | TanStack Query |
+| HTTP API routes | Elysia |
+| Schema and migrations | Drizzle ORM, drizzle-kit |
+| Auth, passkeys, OAuth | Better Auth |
+| Search | Meilisearch (`meilisearch` JS client) |
+| Build/dev server | Vite 8 |
+| Styling | Tailwind CSS 4 |
+| Components | shadcn/ui (built on Base UI) |
+| Validation | Valibot |
+| Object storage | AWS SDK v3 (S3-compatible: Garage) |
+| Linting/formatting | Ultracite, Oxlint, Oxfmt |
+| Tests | Vitest, Testing Library |
+| Agent tooling | OpenCode plugins, skills, commands |
 
-### React hooks documentation
+Not on this stack — do not reach for these: Next.js, Sentry, Vercel,
+Supabase, Firebase, Redux, Jest.
+
+## When to use it
+
+Reach for Context7 **before** writing code that:
+
+- Calls a library function whose signature you're recalling rather than
+  reading
+- Uses a config key, plugin hook, or CLI flag
+- Upgrades a dependency, or resolves an error whose message names a
+  package
+- Mirrors a config file you can't see the source of (`drizzle.config.ts`,
+  `oxlint.config.ts`, `components.json`)
+
+Skip it for: this repo's own code (read the source), anything in
+`AGENTS.md` (it's authoritative here), and well-established APIs you've
+already read in this session.
+
+## API keys
+
+`mcp.context7.com/mcp` works without a key at a lower rate limit. For a
+free key, set `CONTEXT7_API_KEY` and add the header to the server entry
+in `opencode.json` and `.mcp.json`.
+
+## Fallback — HTTP API
+
+If the MCP server is unavailable, the same data is reachable directly.
+This path needs `curl` and `jq`:
 
 ```bash
-# Find React library ID
-curl -s "https://context7.com/api/v2/libs/search?libraryName=react&query=hooks" | jq '.results[0].id'
-# Returns: "/websites/react_dev_reference"
+# Resolve an ID
+curl -s "https://context7.com/api/v2/libs/search?libraryName=drizzle-orm&query=migrations" \
+  | jq -r '.results[0].id'
 
-# Fetch useState documentation
-curl -s "https://context7.com/api/v2/context?libraryId=/websites/react_dev_reference&query=useState&type=txt"
+# Fetch docs as plain text
+curl -s "https://context7.com/api/v2/context?libraryId=/drizzle-orm/drizzle-orm&query=generate+migrations&type=txt"
 ```
 
-### Next.js routing documentation
-
-```bash
-# Find Next.js library ID
-curl -s "https://context7.com/api/v2/libs/search?libraryName=nextjs&query=routing" | jq '.results[0].id'
-
-# Fetch app router documentation
-curl -s "https://context7.com/api/v2/context?libraryId=/vercel/next.js&query=app+router&type=txt"
-```
-
-### FastAPI dependency injection
-
-```bash
-# Find FastAPI library ID
-curl -s "https://context7.com/api/v2/libs/search?libraryName=fastapi&query=dependencies" | jq '.results[0].id'
-
-# Fetch dependency injection documentation
-curl -s "https://context7.com/api/v2/context?libraryId=/fastapi/fastapi&query=dependency+injection&type=txt"
-```
-
-## Tips
-
-- Use `type=txt` for more readable output
-- Use `jq` to filter and format JSON responses
-- Be specific with the `query` parameter to improve relevance ranking
-- If the first search result is not correct, check additional results in the array
-- URL-encode query parameters containing spaces (use `+` or `%20`)
-- No API key is required for basic usage (rate-limited)
+Prefer the MCP tools: they return structured data, cost fewer tokens,
+and need no local dependencies.
