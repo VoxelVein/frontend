@@ -1,4 +1,8 @@
-@import "tailwindcss";
+/* Scan only src/ for class names. Automatic detection relies on .gitignore,
+   which the Docker build context leaves out, so the SSR pass also scanned the
+   client bundle written moments earlier. That gave it different CSS, and the
+   server linked a stylesheet hash that was never emitted (404 in production). */
+@import "tailwindcss" source("../src");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
