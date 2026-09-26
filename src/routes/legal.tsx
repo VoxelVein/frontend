@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/legal/legal-page";
 
 const OPERATOR = {
-  name: "Matéo Sauer",
-  address: "Dorfgasse 20, 99735 Kleinfurra, Germany",
-  email: "mateo.sauer161013@gmail.com",
+  name: "Unknown",
+  address: "Unknown",
+  email: "admin@vomlabs.com",
 };
 
 const LegalNotesPage = () => (
