@@ -80,6 +80,7 @@
   },
   "devDependencies": {
     "@github/markdownlint-github": "^0.8.4",
+    "@opencode/plugin": "2.0.18",
     "@tanstack/devtools-vite": "latest",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
