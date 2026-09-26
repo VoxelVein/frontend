@@ -1,9 +1,7 @@
 import { mkdir } from "fs/promises";
 import { join, dirname, basename, extname, resolve } from "path";
 
-import { tool } from "@opencode-ai/plugin/tool";
-
-import { getApiKey } from "../env";
+import { getApiKey } from "../lib/env";
 
 // Function to detect if we're in test mode
 function isTestMode(): boolean {
@@ -378,86 +376,150 @@ export async function analyzeImage(
   return text;
 }
 
-// Tool for generating images from text
-export const generate = tool({
-  description: "Generate an image using Gemini Nano Banana from text prompt",
-  args: {
-    prompt: tool.schema
-      .string()
-      .describe("Text description of the image to generate"),
-    outputDir: tool.schema
-      .string()
-      .optional()
-      .describe(
-        "Custom output directory (default: ./generated-images/YYYY-MM-DD/)"
-      ),
-    filename: tool.schema
-      .string()
-      .optional()
-      .describe("Custom filename (default: generated)"),
-  },
-  async execute(args, context) {
-    try {
-      const config: ImageConfig = {
-        outputDir: args.outputDir,
-        customName: args.filename,
-      };
-      return await generateImage(args.prompt, config);
-    } catch (error) {
-      return `Error: ${error.message}`;
-    }
-  },
-});
+/**
+ * Narrow an unknown thrown value to a readable message.
+ */
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
-// Tool for editing existing images
-export const edit = tool({
-  description: "Edit an existing image using Gemini Nano Banana",
-  args: {
-    image: tool.schema
-      .string()
-      .describe("File path or data URL of image to edit"),
-    prompt: tool.schema.string().describe("Edit instruction"),
-    outputDir: tool.schema
-      .string()
-      .optional()
-      .describe(
-        "Custom output directory (default: ./generated-images/YYYY-MM-DD/)"
-      ),
-    filename: tool.schema
-      .string()
-      .optional()
-      .describe("Custom filename (default: original name with _edit_XXX)"),
-  },
-  async execute(args, context) {
-    try {
-      const config: ImageConfig = {
-        outputDir: args.outputDir,
-        customName: args.filename,
-      };
-      return await editImage(args.image, args.prompt, config);
-    } catch (error) {
-      return `Error: ${error.message}`;
-    }
-  },
-});
+const OUTPUT_DIR_DESCRIPTION =
+  "Custom output directory (default: ./generated-images/YYYY-MM-DD/)";
 
-// Tool for analyzing images
-export const analyze = tool({
-  description: "Analyze an image using Gemini (text analysis only)",
-  args: {
-    image: tool.schema
-      .string()
-      .describe("File path or data URL of image to analyze"),
-    question: tool.schema.string().describe("What to analyze about the image"),
-  },
-  async execute(args, context) {
-    try {
-      return await analyzeImage(args.image, args.question);
-    } catch (error) {
-      return `Error: ${error.message}`;
-    }
-  },
-});
+export default {
+  id: "gemini",
+  /**
+   * Registers the Gemini image tools.
+   *
+   * OpenCode V2 drops the `tool()` helper and no longer scans a
+   * `.opencode/tool/` directory: custom tools are registered through a
+   * synchronous `ctx.tool.transform` editor. Schemas are JSON Schema instead
+   * of Zod, and `execute` returns structured content instead of a bare
+   * string. The `gemini` namespace keeps the V1 tool names
+   * (`gemini_generate`, `gemini_edit`, `gemini_analyze`).
+   *
+   * @param {*} ctx OpenCode plugin context
+   */
+  async setup(ctx) {
+    await ctx.tool.transform((editor) => {
+      editor.namespace({
+        name: "gemini",
+        description: "Generate, edit, and analyze images with Gemini",
+      });
 
-// Default export for backward compatibility
-export default edit;
+      // Tool for generating images from text
+      editor.add({
+        name: "generate",
+        description:
+          "Generate an image using Gemini Nano Banana from text prompt",
+        input: {
+          type: "object",
+          properties: {
+            prompt: {
+              type: "string",
+              description: "Text description of the image to generate",
+            },
+            outputDir: { type: "string", description: OUTPUT_DIR_DESCRIPTION },
+            filename: {
+              type: "string",
+              description: "Custom filename (default: generated)",
+            },
+          },
+          required: ["prompt"],
+          additionalProperties: false,
+        },
+        options: { namespace: "gemini" },
+        async execute(input) {
+          const args = input as {
+            prompt: string;
+            outputDir?: string;
+            filename?: string;
+          };
+          const config: ImageConfig = {
+            outputDir: args.outputDir,
+            customName: args.filename,
+          };
+          try {
+            return { content: await generateImage(args.prompt, config) };
+          } catch (error) {
+            return { content: `Error: ${errorMessage(error)}` };
+          }
+        },
+      });
+
+      // Tool for editing existing images
+      editor.add({
+        name: "edit",
+        description: "Edit an existing image using Gemini Nano Banana",
+        input: {
+          type: "object",
+          properties: {
+            image: {
+              type: "string",
+              description: "File path or data URL of image to edit",
+            },
+            prompt: { type: "string", description: "Edit instruction" },
+            outputDir: { type: "string", description: OUTPUT_DIR_DESCRIPTION },
+            filename: {
+              type: "string",
+              description:
+                "Custom filename (default: original name with _edit_XXX)",
+            },
+          },
+          required: ["image", "prompt"],
+          additionalProperties: false,
+        },
+        options: { namespace: "gemini" },
+        async execute(input) {
+          const args = input as {
+            image: string;
+            prompt: string;
+            outputDir?: string;
+            filename?: string;
+          };
+          const config: ImageConfig = {
+            outputDir: args.outputDir,
+            customName: args.filename,
+          };
+          try {
+            return {
+              content: await editImage(args.image, args.prompt, config),
+            };
+          } catch (error) {
+            return { content: `Error: ${errorMessage(error)}` };
+          }
+        },
+      });
+
+      // Tool for analyzing images
+      editor.add({
+        name: "analyze",
+        description: "Analyze an image using Gemini (text analysis only)",
+        input: {
+          type: "object",
+          properties: {
+            image: {
+              type: "string",
+              description: "File path or data URL of image to analyze",
+            },
+            question: {
+              type: "string",
+              description: "What to analyze about the image",
+            },
+          },
+          required: ["image", "question"],
+          additionalProperties: false,
+        },
+        options: { namespace: "gemini" },
+        async execute(input) {
+          const args = input as { image: string; question: string };
+          try {
+            return { content: await analyzeImage(args.image, args.question) };
+          } catch (error) {
+            return { content: `Error: ${errorMessage(error)}` };
+          }
+        },
+      });
+    });
+  },
+};

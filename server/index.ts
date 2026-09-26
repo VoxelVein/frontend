@@ -5,6 +5,7 @@ import { Elysia } from "elysia";
 import "./env";
 import { eventsRoute } from "./routes/events";
 import { healthRoute } from "./routes/health";
+import { postsRoute } from "./routes/posts";
 import { projectsRoute } from "./routes/projects";
 import { webhooksRoute } from "./routes/webhooks";
 
@@ -25,6 +26,7 @@ const app = new Elysia({ adapter: node() })
   .use(cors({ origin: allowedOrigins }))
   .use(healthRoute)
   .use(projectsRoute)
+  .use(postsRoute)
   .use(eventsRoute)
   .use(webhooksRoute);
 
