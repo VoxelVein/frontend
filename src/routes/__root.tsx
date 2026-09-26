@@ -40,7 +40,9 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
       <Toaster richColors position="bottom-right" />
       <TanStackDevtools
         config={{
-          position: "bottom-right",
+          position: "bottom-left",
+          triggerMode: "fixed",
+          hideUntilHover: true,
         }}
         plugins={[
           {
