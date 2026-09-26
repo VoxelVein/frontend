@@ -1,0 +1,126 @@
+name: General change
+description: Any change that does not fit a more specific template
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a more specific template when one fits. They ask better questions,
+        and reviewers read them faster.
+
+        | Your change | Template |
+        | --- | --- |
+        | A defect with an identifiable root cause | [2-bug-fix.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=2-bug-fix.yml) |
+        | New user-facing capability | [3-feature.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=3-feature.yml) |
+        | A component, page, or anything a11y | [4-ui-accessibility.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=4-ui-accessibility.yml) |
+        | Schema, migration, query, or search index | [5-database-search.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=5-database-search.yml) |
+        | Dependency, build, Docker, or CI change | [6-dependencies-tooling.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=6-dependencies-tooling.yml) |
+        | Markdown only, no code | [7-docs.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=7-docs.yml) |
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What changed, and why
+      description: >-
+        Lead with the effect, not the diff. A reviewer should learn what is different for a user before they learn which files moved.
+      placeholder: |
+        Upload validation now checks the zip magic bytes server-side instead of
+        trusting the extension the browser reported, so a renamed .exe is
+        rejected with a 400 instead of being stored.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - Behavior change
+        - Defect fix
+        - Refactor with no intended behavior change
+        - Performance
+        - Security hardening
+        - Accessibility
+        - Dependency or tooling
+        - Documentation
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Primary layer
+      description: Where the change lives. See docs/architecture/overview.md.
+      options:
+        - Route or loader in src/routes
+        - Server function in src/lib/*.functions.ts
+        - API route in src/routes/api or server/routes
+        - Shared logic in src/lib
+        - Client hook or state
+        - Database schema or migration
+        - Search index
+        - Storage or upload path
+        - Infrastructure, Docker, or CI
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: How you verified this
+      description: >-
+        The required checks already run lint, typecheck, tests, build, bundle budget, and the Docker build. Describe what they cannot: the manual path you walked and what you observed.
+      placeholder: |
+        Signed in as a non-admin, opened /dashboard/projects, confirmed the
+        upload button is absent rather than disabled. Re-ran the flow with a
+        12 MB file and got the quota error instead of a 500.
+    validations:
+      required: true
+  - type: dropdown
+    id: review-focus
+    attributes:
+      label: Where a reviewer should look first
+      description: The single highest-risk area in this diff.
+      options:
+        - Authorization and access control
+        - Upload and storage boundary
+        - Query, index, and cache efficiency
+        - Error handling and failure paths
+        - Rendering and state
+        - Tests only
+        - Documentation only
+        - Nothing in particular
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Blast radius and how to revert
+      description: >-
+        main is promoted to prod automatically, so a bad merge ships without a second gate. Say what breaks if this is wrong, and whether reverting the commit is enough or a data fix is needed too.
+      placeholder: |
+        Reverting the commit restores the old query. The 4 rows written by the
+        backfill stay, so they need scripts/cleanup-orphan-versions.ts
+        afterwards.
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Risk gates
+      description: Tick every one that applies. Each maps to something CI cannot check for you.
+      options:
+        - label: Touches authorization, sessions, or admin-only code
+        - label: Touches uploads, storage keys, or the quota path
+        - label: Adds or changes a database migration
+        - label: Adds or changes a searchable field or index setting
+        - label: Touches a public API route
+        - label: Touches UI, so accessibility was re-checked
+        - label: Adds a dependency or changes the client bundle
+        - label: Changes behavior a user or operator depends on
+        - label: Adds a configuration variable
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Commit and PR titles follow Conventional Commits
+        (`feat(scope): add ...`). See [CONTRIBUTING.md](https://github.com/VoxelVein/frontend/blob/main/CONTRIBUTING.md).

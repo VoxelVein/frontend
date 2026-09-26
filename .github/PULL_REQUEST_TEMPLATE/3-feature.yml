@@ -1,0 +1,101 @@
+name: New feature
+description: New user-facing capability
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the user problem before the solution. If the change is a
+        refactor with no intended behavior difference, use `1-general.yml`
+        instead.
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: input
+    id: issue
+    attributes:
+      label: Related issue
+      description: Use `Fixes #123` to link and auto-close, or write why there is no issue.
+      placeholder: "Fixes #87"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: >-
+        Who hits this and what are they unable to do today. Do not describe the solution here.
+      placeholder: |
+        A project owner cannot tell which of their versions is still being
+        downloaded after they rename it, so they delete the wrong one.
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: What you built, and the decisions that shaped it.
+      placeholder: |
+        Added a soft-delete column to project_versions, surfaced the state in
+        the version table, and kept existing download URLs resolving by
+        filtering deleted rows out of the lookup instead of deleting rows.
+    validations:
+      required: true
+  - type: dropdown
+    id: data-source
+    attributes:
+      label: Where the data comes from
+      description: >-
+        Server-rendered data belongs in a route loader. Fetching in an effect throws away SSR and flashes a loading state.
+      options:
+        - Route loader, server-rendered
+        - Server function via createServerFn
+        - TanStack Query
+        - Elysia API route
+        - Existing client state
+        - Static content, no data fetch
+    validations:
+      required: true
+  - type: checkboxes
+    id: decisions
+    attributes:
+      label: Decisions a reviewer will look for
+      options:
+        - label: Access control decided, using a guard from src/lib/project-access.ts or auth.functions.ts
+        - label: Input validated with Valibot, or the input is not user-controlled
+        - label: A migration was added for the schema change
+        - label: The Meilisearch index was updated if a searchable field changed
+        - label: The failure path degrades deliberately rather than throwing into the render
+        - label: Accessibility was checked, or there is no interface involved
+        - label: Tests cover the new behavior
+        - label: Documentation was updated
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you rejected
+      description: >-
+        What you did not do and why. A reviewer often spots a better option here, and it is much cheaper to discuss before merge than after.
+      placeholder: |
+        Considered a hard delete. Rejected because public download URLs are
+        already shared in Discord threads and would start returning 404.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: How you verified this
+      description: The manual path you walked and what you observed. The required checks cover lint, types, tests, and build.
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Blast radius and how to revert
+      description: >-
+        What breaks if this is wrong, and whether reverting the commit is enough or a data or index repair is needed too.
+  - type: markdown
+    attributes:
+      value: |
+        Commit and PR titles follow Conventional Commits
+        (`feat(scope): add ...`). See [CONTRIBUTING.md](https://github.com/VoxelVein/frontend/blob/main/CONTRIBUTING.md).

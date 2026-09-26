@@ -141,17 +141,52 @@ docs: update Docker port documentation
 
 ## Pull Request Process
 
-1. Open a pull request against `main` using the pull request template.
-2. Ensure all required checks pass:
+### Pull request templates
 
+There is one template per category of change, in
+[`.github/PULL_REQUEST_TEMPLATE`](.github/PULL_REQUEST_TEMPLATE). Each one
+asks the questions that actually matter for that area, and skips the ones
+the required checks already answer.
+
+Unlike issues, GitHub does not show a chooser for pull request templates, so
+pick one with its link:
+
+* **General change** — anything that does not fit below. This is the
+  default, so a plain compare URL already loads it.
+  [1-general.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=1-general.yml)
+* **Bug fix** — a defect with an identifiable root cause.
+  [2-bug-fix.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=2-bug-fix.yml)
+* **New feature** — new user-facing capability.
+  [3-feature.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=3-feature.yml)
+* **UI or accessibility** — a component, page, or anything affecting
+  accessibility.
+  [4-ui-accessibility.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=4-ui-accessibility.yml)
+* **Database, migration, or search** — schema, migration, query, or index.
+  [5-database-search.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=5-database-search.yml)
+* **Dependency, build, or CI** — dependencies, Docker, or workflows.
+  [6-dependencies-tooling.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=6-dependencies-tooling.yml)
+* **Documentation** — Markdown only, no code change.
+  [7-docs.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=7-docs.yml)
+
+Templates are filled in by the person opening the pull request. Dependabot
+and other bots do not fill them, so an automated pull request may arrive with
+an empty template. That is expected; the reviewer reads the diff instead.
+
+### Opening the pull request
+
+1. Open a pull request against `main` using the matching template.
+2. Merge `main` into your branch and get every required check green before
+   asking for review. These run automatically on every pull request:
+
+   * `Source branch policy`
    * `Quality checks`
+   * `Markdown lint` and `Markdown accessibility`
    * `Docker build`
-   * `Markdown lint & accessibility`
 
 3. Request a review from a maintainer.
 4. Address review feedback by pushing additional commits to your branch.
 5. Once approved and merged, changes flow to `prod` via a separate pull
-   request from `main`.
+   request from `main`, which deploys automatically.
 
 ## Getting Help
 

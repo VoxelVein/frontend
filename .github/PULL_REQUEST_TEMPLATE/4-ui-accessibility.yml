@@ -1,0 +1,125 @@
+name: UI or accessibility
+description: A component, page, route, or anything that affects accessibility
+labels: [accessibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        WCAG 2.2 AA is a baseline here, not a feature. A change that breaks it
+        is a regression even when the code is otherwise correct. Details in
+        [docs/accessibility/standards.md](https://github.com/VoxelVein/frontend/blob/main/docs/accessibility/standards.md).
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: input
+    id: issue
+    attributes:
+      label: Related issue
+      description: Use `Fixes #123` to link and auto-close, or write why there is no issue.
+      placeholder: "Fixes #64"
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What the user sees
+      description: Describe the interface, not the component tree. Include the route it lives on.
+      placeholder: |
+        The version table on /dashboard/projects/$projectId now shows a
+        "deleted" badge and a restore action for soft-deleted versions.
+    validations:
+      required: true
+  - type: textarea
+    id: states
+    attributes:
+      label: States you implemented
+      description: >-
+        Every interactive element needs a real answer for each of these. Write "inherited from Button" where that is true, so a reviewer knows it was a decision rather than an omission.
+      placeholder: |
+        hover: Button default
+        focus-visible: ring-3 ring-ring/50, inherited
+        disabled: opacity-50, cursor-not-allowed
+        loading: Skeleton with aria-busy, 3 rows
+        empty: IconSearchOff + title + "No versions yet" + create action
+        error: role="alert" inline under the table, not a toast
+    validations:
+      required: true
+  - type: dropdown
+    id: tokens
+    attributes:
+      label: Color source
+      options:
+        - OKLCH semantic tokens only, no new values
+        - Existing tokens plus a new value in the theme, explained below
+        - No color or surface change
+    validations:
+      required: true
+  - type: dropdown
+    id: motion
+    attributes:
+      label: Motion
+      options:
+        - No motion added
+        - transform or opacity only, under 400ms
+        - Motion that also honors usePrefersReducedMotion
+        - Existing animation only, unchanged
+    validations:
+      required: true
+  - type: checkboxes
+    id: keyboard
+    attributes:
+      label: Keyboard
+      description: Walk it with the keyboard only, no mouse.
+      options:
+        - label: Every new control is reachable by Tab in a sensible order
+          required: true
+        - label: Enter and Space activate it
+        - label: Esc closes the dialog, drawer, or menu
+        - label: Focus returns to the trigger on close
+        - label: Focus is visible at every stop, no outline removed without a replacement
+          required: true
+        - label: No focus trap outside a modal
+  - type: checkboxes
+    id: baseline
+    attributes:
+      label: Baseline
+      options:
+        - label: One main landmark per page, heading order does not skip
+        - label: Real elements, not div with role, and ARIA only where native semantics do not exist
+        - label: Every input has a visible label or an aria-label
+        - label: Validation errors use aria-invalid plus aria-describedby
+        - label: Touch targets are at least 44x44px
+        - label: Contrast holds in both light and dark themes
+        - label: Checked with a screen reader, or there is no announcement to make
+  - type: input
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Light theme, dark theme, or both. Include focus and an open dialog if the change has one.
+      placeholder: "Both themes, plus a screenshot of the dialog with focus on first field"
+    validations:
+      required: false
+  - type: textarea
+    id: verification
+    attributes:
+      label: How you verified accessibility
+      description: >-
+        The required checks do not test this. Say what you actually did: keyboard walkthrough, which screen reader, what it announced, and the viewport widths you checked at 320, 375, 768, 1024, and 1440.
+      placeholder: |
+        Keyboard: tabbed through the table, activated Restore with Enter, Esc
+        closed the confirm dialog and focus returned to the row's Restore
+        button. NVDA announced "Restore, button" and the row count.
+        Widths: 320 and 375 checked, the action column wraps under the table.
+    validations:
+      required: true
+  - type: checkboxes
+    id: commit
+    attributes:
+      label: Commit hygiene
+      options:
+        - label: No native control was replaced with a div and a role
+          required: true
+        - label: No focus ring or focus-visible style was removed
+          required: true
+        - label: No raw hex, rgb, or arbitrary gray was introduced
