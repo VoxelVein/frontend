@@ -1,6 +1,6 @@
 {
   "name": "voxelvein-frontend",
-  "version": "ALPHA-0.10.0",
+  "version": "ALPHA-0.10.1",
   "private": true,
   "type": "module",
   "scripts": {
