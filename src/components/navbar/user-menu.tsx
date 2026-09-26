@@ -1,6 +1,7 @@
 import {
   IconChevronDown,
   IconLogout,
+  IconPackage,
   IconSettings,
   IconShield,
 } from "@tabler/icons-react";
@@ -81,6 +82,14 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
             ) : null}
           </DropdownMenuLabel>
         </DropdownMenuGroup>
+
+        <DropdownMenuItem
+          render={<Link to="/dashboard/projects" />}
+          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <IconPackage size={16} stroke={1.8} />
+          My projects
+        </DropdownMenuItem>
 
         <DropdownMenuItem
           render={<Link to="/settings" />}

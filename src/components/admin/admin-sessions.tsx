@@ -8,7 +8,14 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  Card,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -36,6 +43,12 @@ interface AdminSession {
 
 interface SessionsState {
   error: string | null;
+  /**
+   * Bumped on every failure. The toast keys on this rather than on `error`, so
+   * two failures reporting the same message are still two separate events and
+   * the admin hears about both.
+   */
+  errorCount: number;
   isLoading: boolean;
   sessions: AdminSession[];
 }
@@ -50,7 +63,8 @@ type SessionsAction =
   | { type: "LOAD_SUCCESS"; sessions: AdminSession[] }
   | { type: "LOAD_ERROR"; error: string }
   | { type: "REVOKE_SUCCESS"; token: string }
-  | { type: "REVOKE_ERROR"; error: string };
+  | { type: "REVOKE_ERROR"; error: string }
+  | { type: "SELECT_USER" };
 
 type UsersAction =
   | { type: "LOAD_SUCCESS"; users: AdminUser[] }
@@ -75,14 +89,36 @@ const sessionsReducer = (
   action: SessionsAction
 ): SessionsState => {
   switch (action.type) {
+    case "SELECT_USER": {
+      // The previous failure belongs to the user that was selected before, so
+      // carrying it over would re-raise it for the new selection and point its
+      // retry at the wrong user. isLoading goes up immediately so the skeleton
+      // replaces the old user's rows instead of flashing an empty state before
+      // LOAD_START lands.
+      return { ...state, error: null, isLoading: true };
+    }
     case "LOAD_START": {
       return { ...state, error: null, isLoading: true };
     }
     case "LOAD_SUCCESS": {
-      return { error: null, isLoading: false, sessions: action.sessions };
+      // Spread so errorCount survives: dropping it would make the next failure
+      // compute `undefined + 1` (NaN), and React compares effect deps with
+      // Object.is, which treats NaN as equal to itself — the effect would then
+      // never re-run for two failures in a row.
+      return {
+        ...state,
+        error: null,
+        isLoading: false,
+        sessions: action.sessions,
+      };
     }
     case "LOAD_ERROR": {
-      return { ...state, error: action.error, isLoading: false };
+      return {
+        ...state,
+        error: action.error,
+        errorCount: state.errorCount + 1,
+        isLoading: false,
+      };
     }
     case "REVOKE_SUCCESS": {
       return {
@@ -94,7 +130,11 @@ const sessionsReducer = (
       };
     }
     case "REVOKE_ERROR": {
-      return { ...state, error: action.error };
+      return {
+        ...state,
+        error: action.error,
+        errorCount: state.errorCount + 1,
+      };
     }
     default: {
       return state;
@@ -150,13 +190,15 @@ const AdminSessions = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [state, dispatch] = useReducer(sessionsReducer, {
     error: null,
+    errorCount: 0,
     isLoading: false,
     sessions: [],
   });
 
   const parentRef = useRef<HTMLDivElement>(null);
+  const selectedUserIdRef = useRef(selectedUserId);
 
-  const { error, isLoading, sessions } = state;
+  const { error, errorCount, isLoading, sessions } = state;
 
   // oxlint-disable-next-line react/incompatible-library -- useVirtualizer returns functions that cannot be memoized
   const rowVirtualizer = useVirtualizer({
@@ -212,15 +254,26 @@ const AdminSessions = () => {
   }, []);
 
   useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+  }, [selectedUserId]);
+
+  useEffect(() => {
     if (error) {
       toast.error(error, {
         action: {
           label: "Try again",
-          onClick: () => loadSessions(selectedUserId),
+          // Read through a ref so this effect depends on the error alone.
+          // Depending on the selection would re-run it on every user change and
+          // bind the retry to whichever user happens to be selected when the
+          // toast is clicked, rather than the one that failed.
+          onClick: () => loadSessions(selectedUserIdRef.current),
         },
       });
     }
-  }, [error, loadSessions, selectedUserId]);
+    // errorCount is in the deps so the effect re-runs for a repeat failure that
+    // carries the same message; without it the second identical failure would
+    // leave `error` unchanged and be announced to nobody.
+  }, [error, errorCount, loadSessions]);
 
   useEffect(() => {
     if (selectedUserId) {
@@ -248,15 +301,12 @@ const AdminSessions = () => {
 
   if (!selectedUserId) {
     content = (
-      <div className="border-border bg-muted/40 mt-4 rounded-lg border p-6 text-center">
-        <div className="border-border bg-background text-muted-foreground mx-auto mb-3 flex size-11 items-center justify-center rounded-xl border">
-          <IconUserSearch size={20} aria-hidden="true" />
-        </div>
-        <p className="text-foreground text-sm font-medium">Select a user</p>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Choose a user to view their active sessions.
-        </p>
-      </div>
+      <EmptyState
+        variant="inline"
+        title="Select a user"
+        description="Choose a user to view their active sessions."
+        icon={<IconUserSearch size={20} aria-hidden="true" />}
+      />
     );
   } else if (isLoading) {
     content = (
@@ -267,17 +317,12 @@ const AdminSessions = () => {
     );
   } else if (sessions.length === 0) {
     content = (
-      <div className="border-border bg-muted/40 mt-4 rounded-lg border p-6 text-center">
-        <div className="border-border bg-background text-muted-foreground mx-auto mb-3 flex size-11 items-center justify-center rounded-xl border">
-          <IconDeviceDesktop size={20} aria-hidden="true" />
-        </div>
-        <p className="text-foreground text-sm font-medium">
-          No active sessions
-        </p>
-        <p className="text-muted-foreground mt-1 text-sm">
-          This user has no active sessions right now.
-        </p>
-      </div>
+      <EmptyState
+        variant="inline"
+        title="No active sessions"
+        description="This user has no active sessions right now."
+        icon={<IconDeviceDesktop size={20} aria-hidden="true" />}
+      />
     );
   } else {
     content = (
@@ -349,62 +394,62 @@ const AdminSessions = () => {
   }
 
   return (
-    <section
-      aria-labelledby="admin-sessions-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <section aria-labelledby="admin-sessions-heading">
+      <Card>
+        <CardHeader>
           <h2
             id="admin-sessions-heading"
             className="text-foreground text-lg font-semibold"
           >
             Sessions
           </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <CardDescription>
             View and revoke sessions for any user.
-          </p>
-        </div>
-      </div>
+          </CardDescription>
+        </CardHeader>
 
-      <div className="mt-4">
-        <label
-          htmlFor="admin-session-user"
-          className="text-foreground mb-1.5 block text-sm font-medium"
-        >
-          User
-        </label>
-        <Select
-          value={selectedUserId}
-          onValueChange={(value) => {
-            if (value) {
-              setSelectedUserId(value);
-            }
-          }}
-        >
-          <SelectTrigger
-            id="admin-session-user"
-            className="min-h-11 w-full max-w-sm"
-          >
-            <SelectValue placeholder="Select a user…" />
-          </SelectTrigger>
-          <SelectContent>
-            {usersState.users.length === 0 ? (
-              <SelectItem value="" disabled>
-                Loading users…
-              </SelectItem>
-            ) : (
-              usersState.users.map((user) => (
-                <SelectItem key={user.id} value={user.id}>
-                  {user.name} ({user.email})
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-      </div>
+        <CardContent>
+          <div className="mt-4">
+            <label
+              htmlFor="admin-session-user"
+              className="text-foreground mb-1.5 block text-sm font-medium"
+            >
+              User
+            </label>
+            <Select
+              value={selectedUserId}
+              onValueChange={(value) => {
+                if (value) {
+                  dispatch({ type: "SELECT_USER" });
+                  setSelectedUserId(value);
+                }
+              }}
+            >
+              <SelectTrigger
+                id="admin-session-user"
+                className="min-h-11 w-full max-w-sm"
+              >
+                <SelectValue placeholder="Select a user…" />
+              </SelectTrigger>
+              <SelectContent>
+                {usersState.users.length === 0 ? (
+                  <SelectItem value="" disabled>
+                    Loading users…
+                  </SelectItem>
+                ) : (
+                  usersState.users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name} ({user.email})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {content}
+          {content}
+        </CardContent>
+      </Card>
     </section>
   );
 };

@@ -19,9 +19,18 @@ jobs:
 
     steps:
       - name: Enforce source branch for prod
+        # Pass PR fields through env instead of interpolating them into the
+        # script, so a crafted branch name cannot inject shell commands.
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
         run: |
-          if [ "${{ github.event.pull_request.base.ref }}" = "prod" ] && \
-             [ "${{ github.event.pull_request.head.ref }}" != "main" ]; then
+          # A fork's branch named "main" must not satisfy the policy, so the
+          # head repository has to be this repository too.
+          if [ "$BASE_REF" = "prod" ] && \
+             { [ "$HEAD_REF" != "main" ] || [ "$HEAD_REPO" != "$BASE_REPO" ]; }; then
             echo "::error::Pull requests into 'prod' must come from 'main'."
             exit 1
           fi
@@ -74,5 +83,9 @@ jobs:
           file: ./Dockerfile
           target: runtime
           push: false
+          # Build check only (nothing is pushed), so a placeholder API URL is
+          # fine when the repository variable is not set.
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL || 'https://api.invalid' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

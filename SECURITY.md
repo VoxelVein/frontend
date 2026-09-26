@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-NexVaultX is currently under active development.
+VoxelVein is currently under active development.
 
 Security fixes are primarily applied to the latest version of the `main`
 branch and the currently deployed production version.
@@ -13,7 +13,7 @@ branch and the currently deployed production version.
 | `prod`           | Yes       |
 | Older versions   | No        |
 
-Because NexVaultX is actively evolving, older releases or commits may not
+Because VoxelVein is actively evolving, older releases or commits may not
 receive security fixes.
 
 ## Reporting a Vulnerability
@@ -71,19 +71,19 @@ Security reports may include, but are not limited to:
 * Insecure database access
 * Privilege escalation
 * Security issues in server-side application logic
-* Vulnerable dependencies that directly affect NexVaultX
+* Vulnerable dependencies that directly affect VoxelVein
 * Improper handling of secrets or credentials
 
 ## Out of Scope
 
 The following generally do not constitute security vulnerabilities in
-NexVaultX:
+VoxelVein:
 
 * Issues affecting unsupported or obsolete software versions
 * Vulnerabilities in third-party services that cannot be influenced by
-  NexVaultX
+  VoxelVein
 * Reports that require physical access to a user's device
-* Social engineering attacks against NexVaultX contributors or users
+* Social engineering attacks against VoxelVein contributors or users
 * Denial-of-service reports without a demonstrated security impact
 * Automated scanner output without a reproducible security impact
 * Vulnerabilities that have already been publicly disclosed and addressed
@@ -101,7 +101,7 @@ Do not use a vulnerability to access, modify, delete, or exfiltrate data
 belonging to other users.
 
 Security research should be conducted in a way that minimizes disruption to
-NexVaultX and its users.
+VoxelVein and its users.
 
 ## Security Updates
 
@@ -118,7 +118,7 @@ Depending on the severity of an issue, maintainers may:
 
 ## Thank You
 
-Responsible security research helps keep NexVaultX and its users safe.
+Responsible security research helps keep VoxelVein and its users safe.
 
 Thank you for taking the time to report vulnerabilities responsibly and for
 helping improve the security of the project.

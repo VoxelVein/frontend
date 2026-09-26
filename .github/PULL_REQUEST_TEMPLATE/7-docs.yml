@@ -1,0 +1,73 @@
+name: Documentation
+description: Markdown only, with no code change
+labels: [documentation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If this PR also changes a `.ts` or `.tsx` file, use a different
+        template. Documentation that ships with a behavior change needs the
+        risk questions, not these.
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: input
+    id: issue
+    attributes:
+      label: Related issue
+      description: Use `Fixes #123` to link and auto-close, or write why there is no issue.
+      placeholder: "Fixes #71"
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What changed
+      description: Which documents, and what a reader will understand differently afterwards.
+      placeholder: |
+        Corrected the port table in docs/deployment/docker.md, which said 3000
+        for the web container while compose.yaml publishes 1112.
+    validations:
+      required: true
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Who reads this
+      options:
+        - Contributors working on the code
+        - Users of the deployed site
+        - Operators deploying or running it
+        - Maintainers reviewing architecture decisions
+    validations:
+      required: true
+  - type: checkboxes
+    id: md
+    attributes:
+      label: Markdown
+      options:
+        - label: pnpm lint:md passes
+        - label: No new rule was disabled to make it pass, only MD033 and MD041 are off
+        - label: Relative links resolve, and anchors match the headings they point at
+        - label: Code samples, commands, and env var names match the code as it is now
+        - label: New prose describes a limitation honestly rather than rounding it off
+        - label: Accessibility standards still hold, including descriptive link text
+  - type: textarea
+    id: verification
+    attributes:
+      label: How you verified the accuracy
+      description: >-
+        Say how you confirmed the content is correct, for example by reading the compose file, running the command, or following each link. A passing linter does not prove any of that.
+      placeholder: |
+        Read the Dockerfile build stage and compared every port against
+        compose.yaml. Followed all 14 relative links. Followed all 14 relative links.
+    validations:
+      required: true
+  - type: checkboxes
+    id: commit
+    attributes:
+      label: Commit hygiene
+      options:
+        - label: This PR contains no .ts, .tsx, .json, or .yml config change
+          required: true
+        - label: No documentation was deleted to make a gate pass

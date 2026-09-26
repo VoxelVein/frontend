@@ -2,13 +2,33 @@ packages: []
 
 overrides:
   "@esbuild-kit/core-utils>esbuild": "^0.25.0"
+  # Elysia 1.4 passes exact-mirror a `TypeCompiler` option that 1.x renamed to
+  # `Compile`, so with 1.x query unions (e.g. t.Integer) are not normalized and
+  # every start logs "TypeCompiler is required to use Union". Its peer range
+  # (>= 0.0.9) would otherwise resolve to 1.x, so exact-mirror is also a direct
+  # dependency pinned to 0.2.x. Drop both once Elysia supports 1.x.
+  "elysia>exact-mirror": "^0.2.7"
 
 allowBuilds:
   esbuild: true
   lightningcss: true
   unrs-resolver: true
   msw: false
+  # Transitive native speedup pulled in by @opencode/* (a devDependency used
+  # only to type the .opencode plugins). Declined explicitly so installs stop
+  # erroring and no unreviewed native build runs.
+  msgpackr-extract: false
 
 minimumReleaseAgeExclude:
   - "@tanstack/charts@0.18.0"
   - "@tanstack/react-charts@0.18.0"
+  # @opencode/plugin is pinned to the version of the OpenCode binary this repo
+  # runs (see `opencode --version`), so these are released together and must
+  # resolve as a set even when a patch lands within the minimum-release-age
+  # window.
+  - "@opencode/ai@2.0.18"
+  - "@opencode/client@2.0.18"
+  - "@opencode/plugin@2.0.18"
+  - "@opencode/protocol@2.0.18"
+  - "@opencode/schema@2.0.18"
+  - "@opencode/util@2.0.18"

@@ -1,26 +1,43 @@
 ---
-name: OpenFrontendSpecialist
 description: Frontend UI design specialist - subagent for design systems, themes, animations
 mode: subagent
-temperature: 0.2
-permission:
-  task:
-    "*": "deny"
-    contextscout: "allow"
-    externalscout: "allow"
-  write:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
-    "**/*.ts": "deny"
-    "**/*.js": "deny"
-    "**/*.py": "deny"
-  edit:
-    "design_iterations/**/*.html": "allow"
-    "design_iterations/**/*.css": "allow"
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
+permissions:
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
+  - action: subagent
+    resource: subagents/core/externalscout
+    effect: allow
+  - action: edit
+    resource: design_iterations/**/*.html
+    effect: allow
+  - action: edit
+    resource: design_iterations/**/*.css
+    effect: allow
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
+  - action: edit
+    resource: "**/*.ts"
+    effect: deny
+  - action: edit
+    resource: "**/*.tsx"
+    effect: deny
+  - action: edit
+    resource: "**/*.js"
+    effect: deny
+  - action: edit
+    resource: "**/*.py"
+    effect: deny
 ---
 
 # Frontend Design Subagent
@@ -76,7 +93,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find frontend design standards", prompt="Find frontend design system standards, UI component patterns, accessibility guidelines, and responsive breakpoint conventions for this project.")
+subagent(agent="subagents/core/contextscout", description="Find frontend design standards", prompt="Find frontend design system standards, UI component patterns, accessibility guidelines, and responsive breakpoint conventions for this project.")
 ```
 
 ### After ContextScout Returns

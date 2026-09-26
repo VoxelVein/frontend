@@ -5,19 +5,27 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { check, minLength, nonEmpty, pipe, regex, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { GitHubSignInButton } from "@/components/github-sign-in-button";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import type { TurnstileWidgetHandle } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { getSession } from "@/lib/auth.functions";
+import {
+  isTurnstileEnabled,
+  turnstileFetchOptions,
+} from "@/lib/turnstile-client";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 const MIN_PASSWORD_LENGTH = 8;
+const MISSING_VERIFICATION_MESSAGE =
+  "Complete the human verification check before creating your account.";
 
 const nameSchema = pipe(
   string(),
@@ -39,6 +47,13 @@ const passwordSchema = pipe(
 const SignupPage = () => {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  // A ref, not state: useForm keeps the onSubmit from the first render, so
+  // state read there would always be the initial null.
+  const turnstileTokenRef = useRef<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const handleTurnstileToken = (token: string | null) => {
+    turnstileTokenRef.current = token;
+  };
 
   const form = useForm({
     defaultValues: {
@@ -48,8 +63,20 @@ const SignupPage = () => {
     },
     onSubmit: async ({ value }) => {
       setFormError(null);
-      const { error } = await authClient.signUp.email(value);
+
+      const turnstileToken = turnstileTokenRef.current;
+      if (isTurnstileEnabled() && !turnstileToken) {
+        setFormError(MISSING_VERIFICATION_MESSAGE);
+        return;
+      }
+
+      const { error } = await authClient.signUp.email({
+        ...value,
+        fetchOptions: turnstileFetchOptions(turnstileToken),
+      });
       if (error) {
+        // Turnstile tokens are single-use, so every retry needs a fresh one.
+        turnstileRef.current?.reset();
         setFormError(error.message ?? "Could not create your account.");
         return;
       }
@@ -69,7 +96,7 @@ const SignupPage = () => {
           Create your account
         </h1>
         <p className="text-muted-foreground mt-1.5 text-sm">
-          Join NexVaultX to publish and discover Minecraft content.
+          Join VoxelVein to publish and discover Minecraft content.
         </p>
 
         {formError ? (
@@ -140,7 +167,7 @@ const SignupPage = () => {
                 label="Email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@example.com…"
+                placeholder="you@example.com"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}
@@ -163,6 +190,7 @@ const SignupPage = () => {
                 label="Password"
                 type="password"
                 autoComplete="new-password"
+                placeholder="Create a password"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}
@@ -171,6 +199,12 @@ const SignupPage = () => {
               />
             )}
           </form.Field>
+
+          <TurnstileWidget
+            ref={turnstileRef}
+            action="signup"
+            onTokenChange={handleTurnstileToken}
+          />
 
           <Button
             type="submit"

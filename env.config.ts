@@ -1,6 +1,14 @@
 import { config } from "dotenv";
 import { defineEnv } from "envin";
-import { minLength, optional, picklist, pipe, string, url } from "valibot";
+import {
+  minLength,
+  optional,
+  picklist,
+  pipe,
+  regex,
+  string,
+  url,
+} from "valibot";
 
 config({ path: ".env.local" });
 
@@ -17,8 +25,18 @@ const envWithDefaults = {
   MEILI_MASTER_KEY: process.env.MEILI_MASTER_KEY,
   MEILI_SEARCH_KEY: process.env.MEILI_SEARCH_KEY,
   NODE_ENV: process.env.NODE_ENV ?? "development",
+  // Blank optional values from .env files mean "unset", not an empty URL.
+  STORAGE_MAX_FILE_BYTES: process.env.STORAGE_MAX_FILE_BYTES || undefined,
+  STORAGE_PUBLIC_URL: process.env.STORAGE_PUBLIC_URL || undefined,
+  STORAGE_QUOTA_BYTES: process.env.STORAGE_QUOTA_BYTES || undefined,
+  TURNSTILE_HOSTNAMES: process.env.TURNSTILE_HOSTNAMES,
+  TURNSTILE_SECRET: process.env.TURNSTILE_SECRET,
   VITE_GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   VITE_GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  // Absolute origin of the deployment. Used for Open Graph URLs, JSON-LD, and
+  // the sitemap, all of which need an absolute URL rather than a path. Defaults
+  // to the dev server so local runs produce valid markup.
+  VITE_SITE_URL: process.env.VITE_SITE_URL ?? "http://localhost:3000",
 };
 
 const env = defineEnv({
@@ -33,14 +51,28 @@ const env = defineEnv({
     GITHUB_CLIENT_SECRET: optional(string()),
     GOOGLE_CLIENT_ID: optional(string()),
     GOOGLE_CLIENT_SECRET: optional(string()),
+    MEILI_ADMIN_KEY: optional(string()),
     MEILI_HOST: pipe(string(), url()),
     MEILI_MASTER_KEY: optional(string()),
     MEILI_SEARCH_KEY: optional(string()),
+    STORAGE_ACCESS_KEY_ID: optional(string()),
+    STORAGE_BUCKET: optional(string()),
+    STORAGE_ENDPOINT: optional(pipe(string(), url())),
+    STORAGE_FORCE_PATH_STYLE: optional(picklist(["true", "false"])),
+    STORAGE_MAX_FILE_BYTES: optional(pipe(string(), regex(/^\d+$/u))),
+    STORAGE_PUBLIC_URL: optional(pipe(string(), url())),
+    STORAGE_QUOTA_BYTES: optional(pipe(string(), regex(/^\d+$/u))),
+    STORAGE_REGION: optional(string()),
+    STORAGE_SECRET_ACCESS_KEY: optional(string()),
+    TURNSTILE_HOSTNAMES: optional(string()),
+    TURNSTILE_SECRET: optional(string()),
   },
   shared: {
     NODE_ENV: picklist(["development", "production", "test"]),
     VITE_GITHUB_CLIENT_ID: optional(string()),
     VITE_GOOGLE_CLIENT_ID: optional(string()),
+    VITE_SITE_URL: pipe(string(), url()),
+    VITE_TURNSTILE_SITE_KEY: optional(string()),
   },
 });
 

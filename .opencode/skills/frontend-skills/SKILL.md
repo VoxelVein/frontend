@@ -2,7 +2,7 @@
 name: frontend-skills
 description: Frontend development workflow skill covering React 19+, TanStack Router/Start, component architecture, state management, and testing patterns for this project. Use when asked about "frontend patterns", "React conventions", "component structure", "routing", "state management", or "frontend architecture".
 version: 1.0.0
-author: nexvaultx
+author: voxelvein
 type: skill
 category: development
 tags:

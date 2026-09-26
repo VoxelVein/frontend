@@ -6,7 +6,7 @@ const DisclaimerPage = () => (
   <LegalPage
     title="Disclaimer"
     updated="September 11, 2026"
-    intro={<>This disclaimer governs your use of the NexVaultX platform.</>}
+    intro={<>This disclaimer governs your use of the VoxelVein platform.</>}
     sections={[
       {
         heading: "No Warranty",
@@ -22,7 +22,7 @@ const DisclaimerPage = () => (
         heading: "No Liability",
         body: (
           <p>
-            To the maximum extent permitted by law, NexVaultX and its
+            To the maximum extent permitted by law, VoxelVein and its
             contributors shall not be liable for any damages arising from the
             use of, or inability to use, the platform.
           </p>
@@ -42,7 +42,7 @@ const DisclaimerPage = () => (
         heading: "Not Affiliated with Mojang or Microsoft",
         body: (
           <p>
-            NexVaultX is an independent, community-driven project. It is not
+            VoxelVein is an independent, community-driven project. It is not
             affiliated with, endorsed by, or sponsored by Mojang Studios or
             Microsoft. &ldquo;Minecraft&rdquo; is a trademark of Mojang
             Synergies AB.
@@ -64,7 +64,7 @@ const DisclaimerPage = () => (
 
 export const Route = createFileRoute("/disclaimer")({
   head: () => ({
-    meta: [{ title: "Disclaimer — NexVaultX" }],
+    meta: [{ title: "Disclaimer — VoxelVein" }],
   }),
   component: DisclaimerPage,
 });

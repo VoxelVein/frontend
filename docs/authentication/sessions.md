@@ -8,23 +8,30 @@ This guide explains the session settings in `src/lib/auth.ts`.
 ```ts
 session: {
   // 30 days
-  expiresIn: 60 * 60 * 24 * 30,
-  // refresh on every request → sliding expiration
-  updateAge: 0,
+  expiresIn: SESSION_EXPIRES_IN_SECONDS,
+  // sensitive actions need a session created within the last day
+  freshAge: ONE_DAY_IN_SECONDS,
+  // extend the expiry at most once per day
+  updateAge: ONE_DAY_IN_SECONDS,
 },
 ```
 
 * `expiresIn` — how long a session lives, in seconds. The default is
   30 days.
 * `updateAge` — how often the session expiry is refreshed, in seconds.
-  `0` refreshes on every request, giving a sliding expiration: an
-  active user never gets signed out.
+  An active user's session keeps sliding forward, but the database is
+  written at most once per day instead of on every request.
+* `freshAge` — how recently the session must have been created for
+  sensitive actions. Listing sessions, registering a passkey, unlinking
+  a social account, and deleting the account without a password all
+  require a session younger than one day; otherwise the user has to sign
+  in again.
 
 ## How sessions work
 
 1. On sign-in, Better Auth creates a session cookie and a row in the
    `sessions` table.
-2. On each request, the session is validated and (with `updateAge: 0`)
+2. On each request, the session is validated, and once per `updateAge`
    its expiry is pushed forward.
 3. When the session expires, the user must sign in again.
 

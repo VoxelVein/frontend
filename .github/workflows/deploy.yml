@@ -37,12 +37,14 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Check bundle size
         run: pnpm check:bundle --no-build
 
   deploy:
-    name: Build & push image
+    name: Build & push images
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: quality
@@ -62,15 +64,59 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Resolve image names and version
+        id: meta
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          if [ -z "$VITE_API_URL" ]; then
+            echo "::error::Set the VITE_API_URL repository variable to the public API URL."
+            exit 1
+          fi
+          version=$(node -p "require('./package.json').version")
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      # Images are tagged with the package.json version (what is deployed) and
+      # the commit SHA (exactly which build). There is no floating `latest`.
+      - name: Build and push web image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           target: runtime
           push: true
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: api
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}-api:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image }}-api:${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+
+      - name: Build and push migrate image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: migrate
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}-migrate:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image }}-migrate:${{ github.sha }}
+          cache-from: type=gha,scope=migrate
+          cache-to: type=gha,scope=migrate,mode=max

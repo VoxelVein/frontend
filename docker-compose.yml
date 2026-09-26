@@ -1,18 +1,21 @@
-name: nexvaultx
+name: voxelvein
 
 services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-nexvaultx}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexvaultx}
-      POSTGRES_DB: ${POSTGRES_DB:-nexvaultx}
+      POSTGRES_USER: ${POSTGRES_USER:-voxelvein}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-voxelvein}
+    # Bound to loopback only so the database is never reachable from outside
+    # the host. The web service reaches it over the internal compose network.
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # postgres:18+ stores data in a versioned subdirectory; mount the parent.
+      - pgdata:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexvaultx}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-voxelvein}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,9 +24,9 @@ services:
     image: getmeili/meilisearch:v1.35.1
     environment:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
-      MEILI_ENV: ${MEILI_ENV:-development}
+      MEILI_ENV: ${MEILI_ENV:-production}
     ports:
-      - "${MEILI_PORT:-7700}:7700"
+      - "127.0.0.1:${MEILI_PORT:-7700}:7700"
     volumes:
       - meili_data:/meili_data
     healthcheck:
@@ -32,27 +35,96 @@ services:
       timeout: 5s
       retries: 5
 
+  garage:
+    image: dxflrs/garage:v2.4.1
+    # Development object storage (S3-compatible). Production uses
+    # Cloudflare R2; see docs/storage/object-storage.md.
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:?GARAGE_RPC_SECRET is required}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN:?GARAGE_ADMIN_TOKEN is required}
+    ports:
+      - "127.0.0.1:${GARAGE_S3_PORT:-3900}:3900"
+    volumes:
+      - ./docker/garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Applies pending database migrations, then exits. web and api wait for it.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
+      # drizzle.config.ts loads env.config.ts, which validates these too.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      NODE_ENV: production
+      API_PORT: 3002
+      CORS_ORIGIN: ${BETTER_AUTH_URL:-http://localhost:3001}
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:?MEILI_SEARCH_KEY is required}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}
+      # Ports are published directly here, with no proxy in front, so
+      # X-Forwarded-For is client-controlled and must not be trusted.
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    ports:
+      - "${API_PORT:-3002}:3002"
+    depends_on:
+      meilisearch:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Public URL browsers use to reach the API (inlined at build time).
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3002}
     environment:
       NODE_ENV: production
-      PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-nexvaultx}:${POSTGRES_PASSWORD:-nexvaultx}@db:5432/${POSTGRES_DB:-nexvaultx}
+      PORT: 6001
+      API_URL: http://api:3002
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
       MEILI_HOST: http://meilisearch:7700
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:?MEILI_SEARCH_KEY is required}
     ports:
-      - "${PORT:-3001}:3000"
+      - "${WEB_PORT:-3001}:6001"
     depends_on:
       db:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
   pgdata:
   meili_data:
+  garage_meta:
+  garage_data:

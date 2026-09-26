@@ -3,8 +3,8 @@ import { useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 
-const CONSENT_STORAGE_KEY = "nexvaultx-cookie-consent";
-const CONSENT_EVENT = "nexvaultx-cookie-consent-change";
+const CONSENT_STORAGE_KEY = "voxelvein-cookie-consent";
+const CONSENT_EVENT = "voxelvein-cookie-consent-change";
 
 type Consent = "accepted" | "declined";
 

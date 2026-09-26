@@ -1,0 +1,116 @@
+name: Database, migration, or search
+description: Schema, migration, query, index, or search index change
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `main` is promoted to `prod` automatically, so a migration ships on
+        merge. Backward compatibility with the currently deployed app is the
+        question a reviewer will ask first. See
+        [docs/database/migrations.md](https://github.com/VoxelVein/frontend/blob/main/docs/database/migrations.md)
+        and [docs/search/meilisearch.md](https://github.com/VoxelVein/frontend/blob/main/docs/search/meilisearch.md).
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: input
+    id: issue
+    attributes:
+      label: Related issue
+      description: Use `Fixes #123` to link and auto-close, or write why there is no issue.
+      placeholder: "Fixes #58"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - Schema migration
+        - Query or repository change only, no migration
+        - Index added or changed
+        - Meilisearch settings or document shape
+        - Seed, reindex, or maintenance script
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What changes
+      description: The SQL or index behavior, and what forced it.
+      placeholder: |
+        Adds a partial index on project_versions (project_id)
+        where deleted_at is null, because the version lookup filters on
+        deleted_at and the existing index still scanned deleted rows.
+    validations:
+      required: true
+  - type: input
+    id: migration
+    attributes:
+      label: Migration file
+      description: The generated drizzle/NNNN_*.sql filename, or `none` when no migration is needed.
+      placeholder: "drizzle/0008_version_soft_delete.sql"
+    validations:
+      required: true
+  - type: checkboxes
+    id: migration-safety
+    attributes:
+      label: Migration safety
+      options:
+        - label: Generated with drizzle-kit, not hand-edited
+        - label: The meta snapshot and _journal.json are included
+        - label: Backward compatible with the app currently deployed on prod
+        - label: If it is not backward compatible, the deploy order is written out below
+        - label: Reversible, or the rollback path is written out below
+        - label: A destructive change was confirmed with a maintainer before merge
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Search index
+      description: Meilisearch drifts silently, so a miss here is invisible until a user reports it.
+      options:
+        - label: No searchable field or index setting changed
+        - label: Index settings updated in src/lib/posts-index.ts or the equivalent
+        - label: The write path in search-sync.ts pushes the new field
+        - label: A reindex is required, and the command is written out below
+        - label: Verified with a real query, not only by inspecting the code
+  - type: checkboxes
+    id: efficiency
+    attributes:
+      label: Query efficiency
+      options:
+        - label: Every filtered or sorted column is indexed
+        - label: No query in a loop, so no N+1
+        - label: Reads are bounded by a limit, and page caps are unchanged
+        - label: The change does not run inside a transaction that also calls a remote service
+  - type: textarea
+    id: deploy-order
+    attributes:
+      label: Deploy order or rollback plan
+      description: >-
+        Only if the migration is not backward compatible or is not reversible. Write the order explicitly, for example "deploy the app first, then run the migration" or "run the backfill before enabling the column".
+      placeholder: |
+        Deploy order: merge and deploy the app that tolerates a null
+        deleted_at, then run the migration, then merge the code that writes it.
+    validations:
+      required: false
+  - type: textarea
+    id: reindex-command
+    attributes:
+      label: Reindex or backfill command
+      description: >-
+        Only if one is needed. The project-local Drizzle binary is required; `pnpm dlx drizzle-kit` fails in a fresh environment.
+      placeholder: "pnpm db:reindex:posts"
+    validations:
+      required: false
+  - type: textarea
+    id: verification
+    attributes:
+      label: How you verified this
+      description: What you ran against a real database, and the plan or query output that proves it.
+      placeholder: |
+        Ran the migration on a copy of prod. EXPLAIN ANALYZE on the version
+        lookup went from a 40k row seq scan to an index scan using
+        project_versions_project_id_deleted_at_idx.
+    validations:
+      required: true

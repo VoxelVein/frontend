@@ -1,6 +1,6 @@
 # API Server
 
-NexVaultX runs a standalone **ElysiaJS** API server (`server/`) on its own
+VoxelVein runs a standalone **ElysiaJS** API server (`server/`) on its own
 port. It is the single entry point for mod search and real-time mod
 events. The web app never talks to Meilisearch directly — the API server
 proxies search and streams events to the browser over Server-Sent Events
@@ -22,19 +22,24 @@ pnpm dev:all
 
 ## Environment variables
 
-| Variable          | Description                                        |
-| ----------------- | -------------------------------------------------- |
-| `API_URL`         | Base URL of the API server (server-to-server)      |
-| `API_PORT`        | Port the API server listens on (default `3002`)    |
-| `WEBHOOK_SECRET`  | HMAC secret for webhook signatures (16+ chars)     |
-| `VITE_API_URL`    | API base URL used by the browser (SSE client)      |
-| `CORS_ORIGIN`     | Comma-separated allowed origins (optional)         |
-| `MEILI_HOST`      | Meilisearch base URL                               |
-| `MEILI_SEARCH_KEY`| Meilisearch search key (falls back to master key)  |
+| Variable                     | Description                                 |
+| ---------------------------- | ------------------------------------------- |
+| `API_URL`                    | API server base URL (server-to-server)      |
+| `API_PORT`                   | API server port (default `3002`)            |
+| `WEBHOOK_SECRET`             | HMAC secret for webhooks (required, 32+)    |
+| `VITE_API_URL`               | API base URL used by the browser (SSE)      |
+| `CORS_ORIGIN`                | Comma-separated allowed origins (optional)  |
+| `MEILI_HOST`                 | Meilisearch base URL                        |
+| `MEILI_SEARCH_KEY`           | Meilisearch search key (required)           |
+| `SSE_MAX_CONNECTIONS`        | Max concurrent SSE streams (default `500`)  |
+| `SSE_MAX_CONNECTIONS_PER_IP` | Max SSE streams per client (default `5`)    |
+| `TRUST_PROXY`                | `true`/`false`; required in production      |
 
 The server loads `.env.local` via `server/env.ts` (imported first in every
 env-consuming module) and otherwise reads `process.env`, so it works in CI
 without a local env file.
+
+The API server never uses `MEILI_MASTER_KEY` for public search.
 
 ## Endpoints
 
@@ -42,13 +47,19 @@ without a local env file.
 
 Liveness check. Returns `{ ok: true }` when the server is up.
 
-### `GET /api/mods/search`
+### `GET /api/projects/search`
 
-Proxies the mods search to Meilisearch. Accepts the same query parameters
-the mods page sends (`q`, `category`, `gameVersion`, `loader`, `sort`) and
-returns the same shape as the previous direct Meilisearch call: `hits`,
-`estimatedTotalHits`, `facetDistribution`, and `query`. Sort values are
-whitelisted (`downloads:desc`, `updatedAt:desc`, `name:asc`).
+Proxies project search to Meilisearch. `type` is required (`mod` or
+`plugin`). Optional parameters: `q`, `category`, `gameVersion`, `loader`,
+`sort`, and `page`. Returns `hits`, `estimatedTotalHits`,
+`facetDistribution`, `page`, `pageSize`, and `query`. Sort values are
+whitelisted (`downloads:desc`, `updatedAt:desc`, `name:asc`). `category`
+and `loader` must be valid for the given type, and `gameVersion` must be
+a known version, all from `src/lib/projects.ts`. Anything else returns
+`422`.
+
+Uploads and downloads are served by the web app, not this server. See
+[Projects and Files](../content/projects.md).
 
 ### `GET /api/events`
 
@@ -64,6 +75,15 @@ event: mod.created
 data: {"id":"mod-123","name":"My Mod"}
 ```
 
+Concurrent streams are capped globally (`SSE_MAX_CONNECTIONS`) and per
+client (`SSE_MAX_CONNECTIONS_PER_IP`); requests over the limit get `429`.
+Per-client limits only apply when `TRUST_PROXY=true`, because the Node
+adapter does not expose the socket address. The client is then keyed on the
+last `X-Forwarded-For` entry (the one the proxy appended), so set it only
+behind a reverse proxy that adds that header. With `NODE_ENV=production` the
+server refuses to start unless `TRUST_PROXY` is explicitly `true` or `false`,
+so running without per-client limits is always a deliberate choice.
+
 The browser subscribes with `EventSource`:
 
 ```ts
@@ -73,19 +93,27 @@ source.addEventListener("mod.created", handleEvent);
 
 ### `POST /api/webhooks/mods`
 
-Receives mod events from external publishers. The request must include an
-`x-webhook-signature` header containing the HMAC-SHA256 digest of the raw
-body, signed with `WEBHOOK_SECRET`:
+Receives mod events from external publishers. The request must include:
+
+* `x-webhook-timestamp` — current Unix time in seconds
+* `x-webhook-signature` — hex HMAC-SHA256 of `${timestamp}.${rawBody}`,
+  signed with `WEBHOOK_SECRET`
 
 ```ts
 import { createHmac } from "node:crypto";
 
+const timestamp = String(Math.floor(Date.now() / 1000));
 const signature = createHmac("sha256", WEBHOOK_SECRET)
-  .update(rawBody)
+  .update(`${timestamp}.${rawBody}`)
   .digest("hex");
 ```
 
-The payload is validated with a Zod schema before broadcasting:
+Requests whose timestamp is more than 5 minutes off are rejected, so a
+captured request cannot be replayed later. The API server refuses to start
+when `WEBHOOK_SECRET` is missing, shorter than 32 characters, or still a
+placeholder value.
+
+The payload is validated with a Valibot schema before broadcasting:
 
 ```json
 {
@@ -98,7 +126,7 @@ Responses:
 
 * `200` — signature valid and payload accepted, event broadcast to SSE
 * `400` — invalid JSON or payload shape
-* `401` — invalid signature
+* `401` — invalid signature or stale timestamp
 
 Send a test event with:
 
@@ -130,7 +158,7 @@ server/
 │   └── meilisearch.ts    # Meilisearch client factory
 └── routes/
     ├── health.ts         # GET /api/health
-    ├── mods.ts           # GET /api/mods/search
+    ├── projects.ts       # GET /api/projects/search
     ├── events.ts         # GET /api/events (SSE)
     └── webhooks.ts       # POST /api/webhooks/mods
 ```

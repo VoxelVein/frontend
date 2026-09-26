@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   index,
   integer,
@@ -7,7 +8,14 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
+
+import type {
+  ProjectStatus,
+  ProjectType,
+  ReleaseChannel,
+} from "../lib/projects";
 
 export const users = pgTable("users", {
   banExpires: timestamp("ban_expires"),
@@ -57,7 +65,6 @@ export const accounts = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: text("id").primaryKey(),
     idToken: text("id_token"),
-    issuer: text("issuer").notNull(),
     password: text("password"),
     providerId: text("provider_id").notNull(),
     refreshToken: text("refresh_token"),
@@ -70,13 +77,7 @@ export const accounts = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
   },
-  (table) => [
-    uniqueIndex("accounts_issuer_accountId_uidx").on(
-      table.issuer,
-      table.accountId
-    ),
-    index("accounts_userId_idx").on(table.userId),
-  ]
+  (table) => [index("accounts_userId_idx").on(table.userId)]
 );
 
 export const verifications = pgTable(
@@ -141,6 +142,99 @@ export const posts = pgTable(
   (table) => [
     index("posts_authorId_idx").on(table.authorId),
     index("posts_published_idx").on(table.published),
+    // listPosts filters on `published` and orders by `createdAt` descending.
+    // A single-column index on `published` cannot supply the sort, so Postgres
+    // sorts every matching row. This composite index serves both.
+    index("posts_published_createdAt_idx").on(table.published, table.createdAt),
+  ]
+);
+
+export const projects = pgTable(
+  "projects",
+  {
+    category: text("category").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    description: text("description").default("").notNull(),
+    downloads: integer("downloads").default(0).notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    publishedAt: timestamp("published_at"),
+    slug: text("slug").notNull().unique(),
+    status: text("status").$type<ProjectStatus>().default("draft").notNull(),
+    summary: text("summary").notNull(),
+    tags: text("tags").array().default([]).notNull(),
+    type: text("type").$type<ProjectType>().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("projects_ownerId_idx").on(table.ownerId),
+    index("projects_status_idx").on(table.status),
+    index("projects_type_idx").on(table.type),
+    // listMyProjects filters on `owner_id` and orders by `updated_at`
+    // descending. The ownerId index alone cannot supply that sort.
+    index("projects_ownerId_updatedAt_idx").on(table.ownerId, table.updatedAt),
+  ]
+);
+
+export const projectVersions = pgTable(
+  "project_versions",
+  {
+    changelog: text("changelog").default("").notNull(),
+    channel: text("channel")
+      .$type<ReleaseChannel>()
+      .default("release")
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    downloads: integer("downloads").default(0).notNull(),
+    gameVersions: text("game_versions").array().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    loaders: text("loaders").array().notNull(),
+    name: text("name").notNull(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    versionNumber: text("version_number").notNull(),
+  },
+  (table) => [
+    uniqueIndex("project_versions_projectId_versionNumber_uidx").on(
+      table.projectId,
+      table.versionNumber
+    ),
+  ]
+);
+
+export const projectFiles = pgTable(
+  "project_files",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    filename: text("filename").notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    primary: boolean("primary").default(false).notNull(),
+    sha1: text("sha1").notNull(),
+    sha512: text("sha512").notNull(),
+    size: bigint("size", { mode: "number" }).notNull(),
+    storageKey: text("storage_key").notNull().unique(),
+    versionId: uuid("version_id")
+      .notNull()
+      .references(() => projectVersions.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    // Also serves lookups by version, as version_id leads the index.
+    uniqueIndex("project_files_versionId_filename_uidx").on(
+      table.versionId,
+      table.filename
+    ),
+    // At most one primary file per version.
+    uniqueIndex("project_files_versionId_primary_uidx")
+      .on(table.versionId)
+      .where(sql`${table.primary}`),
+    index("project_files_sha1_idx").on(table.sha1),
   ]
 );
 
@@ -148,6 +242,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   passkeys: many(passkeys),
   posts: many(posts),
+  projects: many(projects),
   sessions: many(sessions),
 }));
 
@@ -176,5 +271,31 @@ export const postsRelations = relations(posts, ({ one }) => ({
   author: one(users, {
     fields: [posts.authorId],
     references: [users.id],
+  }),
+}));
+
+export const projectsRelations = relations(projects, ({ many, one }) => ({
+  owner: one(users, {
+    fields: [projects.ownerId],
+    references: [users.id],
+  }),
+  versions: many(projectVersions),
+}));
+
+export const projectVersionsRelations = relations(
+  projectVersions,
+  ({ many, one }) => ({
+    files: many(projectFiles),
+    project: one(projects, {
+      fields: [projectVersions.projectId],
+      references: [projects.id],
+    }),
+  })
+);
+
+export const projectFilesRelations = relations(projectFiles, ({ one }) => ({
+  version: one(projectVersions, {
+    fields: [projectFiles.versionId],
+    references: [projectVersions.id],
   }),
 }));

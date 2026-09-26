@@ -1,14 +1,20 @@
-# Production override for the NexVaultX Frontend.
+# Production override for the VoxelVein Frontend.
 # Builds the production image and runs the Nitro server.
 # Usage: docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+#
+# No host ports are published here on purpose. Under Dokploy, Traefik routes
+# straight to the container network via the Domains tab, so a published port
+# buys nothing and only risks colliding with another service on a shared host.
+#
+# To reach the stack from the host anyway, add the opt-in port file:
+#   docker compose -f compose.yaml -f compose.prod.yaml \
+#     -f compose.host-ports.yaml up -d
 
 services:
   web:
-    image: nexvaultx-frontend:${TAG:-latest}
+    image: voxelvein-frontend:${TAG:-latest}
     build:
       target: runtime
-    ports:
-      - "${PORT:-1112}:3000"
     environment:
       NODE_ENV: production
     restart: unless-stopped

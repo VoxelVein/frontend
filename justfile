@@ -1,4 +1,4 @@
-# NexVaultX Frontend — command runner
+# VoxelVein Frontend — command runner
 #
 # Thin wrapper around the package.json scripts so common tasks can be run
 # with `just <recipe>` instead of `pnpm <script>`.
@@ -17,7 +17,7 @@ default:
 dev:
     pnpm dev
 
-# Start only the Vite web app (port 6001)
+# Start only the Vite web app (port 3000)
 dev:web:
     pnpm dev:web
 
@@ -72,3 +72,10 @@ docker-dev:
 # Build and run the production environment with Docker
 docker-prod:
     docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+# Start local infrastructure (Postgres, Meilisearch, Garage)
+infra:
+    docker compose -f docker-compose.yml --env-file .env.local up -d db meilisearch garage
+
+# Prepare the local Garage bucket and access key (idempotent)
+storage-init:
+    ./scripts/garage-init.sh

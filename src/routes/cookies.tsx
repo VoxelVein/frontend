@@ -8,7 +8,7 @@ const CookiesPage = () => (
     updated="September 11, 2026"
     intro={
       <>
-        This Cookie Policy explains how NexVaultX uses cookies and similar
+        This Cookie Policy explains how VoxelVein uses cookies and similar
         technologies.
       </>
     }
@@ -68,7 +68,7 @@ const CookiesPage = () => (
 
 export const Route = createFileRoute("/cookies")({
   head: () => ({
-    meta: [{ title: "Cookie Policy — NexVaultX" }],
+    meta: [{ title: "Cookie Policy — VoxelVein" }],
   }),
   component: CookiesPage,
 });

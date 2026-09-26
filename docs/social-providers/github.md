@@ -1,7 +1,7 @@
 # GitHub Social Provider
 
 This guide explains how to enable GitHub Sign-In (login and
-registration) for NexVaultX using Better Auth's built-in GitHub OAuth
+registration) for VoxelVein using Better Auth's built-in GitHub OAuth
 provider.
 
 ## Prerequisites
@@ -13,9 +13,9 @@ provider.
 
 1. Open **Settings** → **Developer settings** → **OAuth Apps** →
    **New OAuth App**.
-2. Set the **Homepage URL** to `http://localhost:6001`.
+2. Set the **Homepage URL** to `http://localhost:3000`.
 3. Set the **Authorization callback URL** to
-   `http://localhost:6001/api/auth/callback/github`.
+   `http://localhost:3000/api/auth/callback/github`.
 4. Register the app and copy the **Client ID** and **Client Secret**.
 
 ## 2. Add the environment variables
@@ -74,7 +74,7 @@ New users are registered automatically on first sign-in.
 ## 5. Verify
 
 1. Start the dev server with `pnpm dev`.
-2. Open `http://localhost:6001/login`.
+2. Open `http://localhost:3000/login`.
 3. Click the GitHub button and complete the flow.
 4. You should land on `/` signed in.
 

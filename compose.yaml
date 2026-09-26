@@ -1,7 +1,9 @@
-# Base Compose configuration for NexVaultX Frontend.
+# Base Compose configuration for VoxelVein Frontend.
 #
-# This file defines the shared service. Environment-specific overrides live in
-# compose.dev.yaml (development) and compose.prod.yaml (production).
+# This file defines the shared services. Environment-specific overrides live in
+# compose.dev.yaml (development) and compose.prod.yaml (production), with
+# compose.host-ports.yaml as an opt-in for reaching the prod stack from the
+# host.
 #
 # Note: host port mapping lives in the overrides, not here. This keeps the base
 # file free of host port bindings so Dokploy can deploy it directly and route
@@ -11,15 +13,51 @@
 #   Development: docker compose -f compose.yaml -f compose.dev.yaml up
 #   Production:  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
-name: nexvaultx-frontend
+name: voxelvein-frontend
 
 services:
   web:
-    image: nexvaultx-frontend:${TAG:-latest}
+    image: voxelvein-frontend:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
+      API_URL: http://api:3002
     restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.35.1
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
+      MEILI_ENV: production
+    restart: unless-stopped
+    volumes:
+      - meili_data:/meili_data
+
+  api:
+    image: voxelvein-api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      NODE_ENV: production
+      API_PORT: 3002
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
+      CORS_ORIGIN: https://voxelvein.vomlabs.com
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-dev-webhook-secret-change-me}
+    restart: unless-stopped
+    depends_on:
+      - meilisearch
+
+volumes:
+  meili_data:

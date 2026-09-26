@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import { UserMenu } from "@/components/navbar/user-menu";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -26,16 +27,15 @@ const AuthSkeleton = ({ variant }: { variant: "desktop" | "mobile" }) => (
 );
 
 const AuthSignIn = ({ variant }: { variant: "desktop" | "mobile" }) => (
-  <Button
-    render={<Link to="/login" />}
-    variant="default"
-    size="sm"
+  <Link
+    to="/login"
     className={cn(
+      buttonVariants({ size: "sm", variant: "default" }),
       variant === "desktop" ? "min-h-10 px-4" : "mt-3 min-h-11 w-full"
     )}
   >
     Sign In
-  </Button>
+  </Link>
 );
 
 const MobileUserCard = ({

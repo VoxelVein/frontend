@@ -1,33 +1,70 @@
 ---
-name: OpenDevopsSpecialist
 description: DevOps specialist subagent - CI/CD, infrastructure as code, deployment automation
 mode: subagent
-temperature: 0.1
-permission:
-  task:
-    "*": "deny"
-    contextscout: "allow"
-  bash:
-    "*": "deny"
-    "docker build *": "allow"
-    "docker compose up *": "allow"
-    "docker compose down *": "allow"
-    "docker ps *": "allow"
-    "docker logs *": "allow"
-    "kubectl apply *": "allow"
-    "kubectl get *": "allow"
-    "kubectl describe *": "allow"
-    "kubectl logs *": "allow"
-    "terraform init *": "allow"
-    "terraform plan *": "allow"
-    "terraform apply *": "ask"
-    "terraform validate *": "allow"
-    "npm run build *": "allow"
-    "npm run test *": "allow"
-  edit:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
+permissions:
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: docker build *
+    effect: allow
+  - action: shell
+    resource: docker compose up *
+    effect: allow
+  - action: shell
+    resource: docker compose down *
+    effect: allow
+  - action: shell
+    resource: docker ps *
+    effect: allow
+  - action: shell
+    resource: docker logs *
+    effect: allow
+  - action: shell
+    resource: kubectl apply *
+    effect: allow
+  - action: shell
+    resource: kubectl get *
+    effect: allow
+  - action: shell
+    resource: kubectl describe *
+    effect: allow
+  - action: shell
+    resource: kubectl logs *
+    effect: allow
+  - action: shell
+    resource: terraform init *
+    effect: allow
+  - action: shell
+    resource: terraform plan *
+    effect: allow
+  - action: shell
+    resource: terraform validate *
+    effect: allow
+  - action: shell
+    resource: npm run build *
+    effect: allow
+  - action: shell
+    resource: npm run test *
+    effect: allow
+  - action: shell
+    resource: terraform apply *
+    effect: ask
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
 ---
 
 # DevOps Specialist Subagent
@@ -82,7 +119,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find DevOps standards", prompt="Find DevOps patterns, CI/CD pipeline standards, infrastructure security guidelines, and deployment conventions for this project. I need patterns for [specific infrastructure task].")
+subagent(agent="subagents/core/contextscout", description="Find DevOps standards", prompt="Find DevOps patterns, CI/CD pipeline standards, infrastructure security guidelines, and deployment conventions for this project. I need patterns for [specific infrastructure task].")
 ```
 
 ### After ContextScout Returns

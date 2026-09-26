@@ -1,4 +1,4 @@
-# Development override for NexVaultX Frontend.
+# Development override for VoxelVein Frontend.
 #
 # Mounts the source tree and runs the Vite dev server with hot reload.
 #
@@ -6,13 +6,20 @@
 
 services:
   web:
-    image: nexvaultx-frontend:dev
+    image: voxelvein-frontend:dev
     build:
       target: deps
     ports:
-      - "${PORT:-1112}:6001"
+      - "${WEB_PORT:-1112}:6001"
+      # `pnpm dev` also runs the API inside this container.
+      - "${API_PORT:-3002}:3002"
     environment:
       NODE_ENV: development
+      # `pnpm dev` runs inside this container. Vite defaults to 3000 for local
+      # use, so pin it to 6001 to match the published port above.
+      PORT: 6001
+      # The API runs in this same container under `pnpm dev`.
+      API_URL: http://localhost:3002
     volumes:
       # Mount source for hot reload
       - .:/app
@@ -20,3 +27,12 @@ services:
       - /app/node_modules
     command: pnpm dev
     restart: "no"
+    # The dev server runs the API itself and migrations stay manual
+    # (`pnpm db:migrate`), so drop the production-only services below.
+    depends_on: !reset {}
+
+  migrate:
+    profiles: [prod]
+
+  api:
+    profiles: [prod]

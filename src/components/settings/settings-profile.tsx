@@ -3,7 +3,14 @@ import { useState } from "react";
 import { check, maxLength, minLength, pipe, regex, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 
 interface SettingsProfileProps {
@@ -66,106 +73,112 @@ const SettingsProfile = ({ user }: SettingsProfileProps) => {
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
-    <section
-      aria-labelledby="settings-profile-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <h2
-        id="settings-profile-heading"
-        className="text-foreground text-lg font-semibold"
-      >
-        Profile
-      </h2>
-      <p className="text-muted-foreground mt-1 text-sm">
-        Update your display name and username.
-      </p>
+    <section aria-labelledby="settings-profile-heading">
+      <Card>
+        <CardHeader>
+          {/* A real h2, not CardTitle: the primitive renders a div, and the
+              heading hierarchy must survive. */}
+          <h2
+            id="settings-profile-heading"
+            className="text-foreground text-lg font-semibold"
+          >
+            Profile
+          </h2>
+          <CardDescription>
+            Update your display name and username.
+          </CardDescription>
+        </CardHeader>
 
-      {formError ? (
-        <div
-          role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive mt-4 rounded-lg border px-3 py-2.5 text-sm"
-        >
-          {formError}
-        </div>
-      ) : null}
+        <CardContent>
+          {formError ? (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
+          ) : null}
 
-      {success ? (
-        <output className="border-border bg-muted/50 text-foreground mt-4 block rounded-lg border px-3 py-2.5 text-sm">
-          Profile updated.
-        </output>
-      ) : null}
+          {success ? (
+            <Alert className="mt-4">
+              <AlertDescription>Profile updated.</AlertDescription>
+            </Alert>
+          ) : null}
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void form.handleSubmit();
-        }}
-        noValidate
-        aria-busy={isSubmitting}
-        className="mt-4 grid gap-4"
-      >
-        <form.Field
-          name="name"
-          validators={{
-            onChange: nameSchema,
-            onSubmit: nameSchema,
-          }}
-        >
-          {(field) => (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void form.handleSubmit();
+            }}
+            noValidate
+            aria-busy={isSubmitting}
+            className="mt-4 grid gap-4"
+          >
+            <form.Field
+              name="name"
+              validators={{
+                onChange: nameSchema,
+                onSubmit: nameSchema,
+              }}
+            >
+              {(field) => (
+                <FormField
+                  id="profile-name"
+                  label="Display name"
+                  type="text"
+                  autoComplete="name"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  error={field.state.meta.errors[0]?.message}
+                  required
+                />
+              )}
+            </form.Field>
+
+            <form.Field
+              name="username"
+              validators={{
+                onChange: usernameSchema,
+                onSubmit: usernameSchema,
+              }}
+            >
+              {(field) => (
+                <FormField
+                  id="profile-username"
+                  label="Username"
+                  type="text"
+                  autoComplete="username"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  error={field.state.meta.errors[0]?.message}
+                  helperText="3-30 characters. Letters, numbers, underscores, and periods."
+                  required
+                />
+              )}
+            </form.Field>
+
+            {/* Read-only rather than a styled <p>: a real field keeps its label
+                association and is announced as a field the user cannot change. */}
             <FormField
-              id="profile-name"
-              label="Display name"
-              type="text"
-              autoComplete="name"
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-              required
+              id="profile-email"
+              label="Email"
+              type="email"
+              value={user.email ?? ""}
+              readOnly
+              helperText="Contact support to change the address on your account."
             />
-          )}
-        </form.Field>
 
-        <form.Field
-          name="username"
-          validators={{
-            onChange: usernameSchema,
-            onSubmit: usernameSchema,
-          }}
-        >
-          {(field) => (
-            <FormField
-              id="profile-username"
-              label="Username"
-              type="text"
-              autoComplete="username"
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-              helperText="3-30 characters. Letters, numbers, underscores, and periods."
-              required
-            />
-          )}
-        </form.Field>
-
-        <div className="grid gap-2">
-          <span className="text-foreground text-sm font-medium">Email</span>
-          <p className="text-muted-foreground border-input bg-muted/40 min-h-11 rounded-lg border px-3 py-2.5 text-sm">
-            {user.email}
-          </p>
-        </div>
-
-        <Button
-          type="submit"
-          variant="default"
-          className="mt-1 min-h-11 w-full sm:w-auto sm:px-6"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Saving…" : "Save Changes"}
-        </Button>
-      </form>
+            <Button
+              type="submit"
+              variant="default"
+              className="mt-1 min-h-11 w-full sm:w-auto sm:px-6"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving…" : "Save Changes"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 };

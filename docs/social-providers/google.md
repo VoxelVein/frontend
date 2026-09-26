@@ -1,7 +1,7 @@
 # Google Social Provider
 
 This guide explains how to enable Google Sign-In (login and
-registration) for NexVaultX using Better Auth's built-in Google OAuth
+registration) for VoxelVein using Better Auth's built-in Google OAuth
 provider.
 
 ## Prerequisites
@@ -19,7 +19,7 @@ provider.
    credentials** → **OAuth client ID**.
 5. Choose **Web application** as the application type.
 6. Add an authorized redirect URI:
-   `http://localhost:6001/api/auth/callback/google`
+   `http://localhost:3000/api/auth/callback/google`
 7. Copy the **Client ID** and **Client Secret**.
 
 ## 2. Add the environment variables
@@ -79,7 +79,7 @@ valid session. New users are registered automatically on first sign-in.
 ## 5. Verify
 
 1. Start the dev server with `pnpm dev`.
-2. Open `http://localhost:6001/login`.
+2. Open `http://localhost:3000/login`.
 3. Click **Continue with Google** and complete the flow.
 4. You should land on `/` signed in.
 

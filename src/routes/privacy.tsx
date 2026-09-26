@@ -8,7 +8,7 @@ const PrivacyPage = () => (
     updated="September 11, 2026"
     intro={
       <>
-        This Privacy Policy explains how NexVaultX handles personal data when
+        This Privacy Policy explains how VoxelVein handles personal data when
         you use the platform.
       </>
     }
@@ -113,7 +113,7 @@ const PrivacyPage = () => (
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
-    meta: [{ title: "Privacy Policy — NexVaultX" }],
+    meta: [{ title: "Privacy Policy — VoxelVein" }],
   }),
   component: PrivacyPage,
 });

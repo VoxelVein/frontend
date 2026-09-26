@@ -1,27 +1,51 @@
 ---
-name: TaskManager
-description: JSON-driven task breakdown specialist transforming complex features into atomic, verifiable subtasks with dependency tracking and CLI integration
+description: >-
+  JSON-driven task breakdown specialist transforming complex features into
+  atomic, verifiable subtasks with dependency tracking and CLI integration
 mode: subagent
-temperature: 0.1
-permission:
-  bash:
-    "*": "deny"
-    "npx ts-node*task-cli*": "allow"
-    "mkdir -p .tmp/tasks*": "allow"
-    "mv .tmp/tasks*": "allow"
-  edit:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
-    "node_modules/**": "deny"
-    ".git/**": "deny"
-  task:
-    contextscout: "allow"
-    externalscout: "allow"
-    "*": "deny"
-  skill:
-    "*": "deny"
-    "task-management": "allow"
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: npx ts-node*task-cli*
+    effect: allow
+  - action: shell
+    resource: mkdir -p .tmp/tasks*
+    effect: allow
+  - action: shell
+    resource: mv .tmp/tasks*
+    effect: allow
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
+  - action: edit
+    resource: "node_modules/**"
+    effect: deny
+  - action: edit
+    resource: ".git/**"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
+  - action: subagent
+    resource: subagents/core/externalscout
+    effect: allow
+  - action: skill
+    resource: "*"
+    effect: deny
+  - action: skill
+    resource: task-management
+    effect: allow
 ---
 
 <context>
@@ -80,8 +104,7 @@ WHY THIS MATTERS:
 
         4. If context is insufficient, call ContextScout via task tool:
            ```javascript
-           task(
-             subagent_type="ContextScout",
+           subagent(agent="subagents/core/contextscout",
              description="Find task planning context",
              prompt="Discover context files and standards needed to plan this feature. Return relevant file paths and summaries."
            )

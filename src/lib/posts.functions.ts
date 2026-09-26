@@ -6,8 +6,20 @@ import { parse } from "valibot";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { postInputSchema, postUpdateSchema } from "@/lib/posts";
+import { postInputSchema, postUpdateSchema, resolvePreview } from "@/lib/posts";
 import type { Post, PostInput, PostSummary } from "@/lib/posts";
+import {
+  scheduleReindex,
+  scheduleReindexDelete,
+  withIndex,
+} from "@/lib/posts-index";
+import { UNAVAILABLE_POST_SEARCH } from "@/lib/posts-search";
+import type {
+  PostSearchDocument,
+  PostSearchResponse,
+} from "@/lib/posts-search";
+
+import env from "../../env.config";
 
 const getAdminSessionOrNull = async () => {
   const headers = getRequestHeaders();
@@ -41,6 +53,7 @@ export const listPosts = createServerFn({ method: "GET" })
 
     const rows = await db
       .select({
+        content: posts.content,
         createdAt: posts.createdAt,
         excerpt: posts.excerpt,
         id: posts.id,
@@ -53,8 +66,109 @@ export const listPosts = createServerFn({ method: "GET" })
       .where(includeUnpublished ? undefined : eq(posts.published, true))
       .orderBy(desc(posts.createdAt));
 
-    return rows;
+    // The body never leaves the server: it is only used to derive the teaser.
+    return rows.map(({ content, ...row }) => ({
+      ...row,
+      preview: resolvePreview({ content, excerpt: row.excerpt }),
+    }));
   });
+
+const SEARCH_TIMEOUT_MS = 8000;
+
+/**
+ * Public post search, proxied through the API server so the browser never
+ * holds a Meilisearch key.
+ *
+ * A 503 means Meilisearch is unconfigured or down. That is reported as
+ * `available: false` rather than thrown, so callers can hide their search UI
+ * instead of showing an error.
+ */
+export const searchPosts = createServerFn({ method: "GET" })
+  .validator((data: { query: string }) => data)
+  .handler(async ({ data }): Promise<PostSearchResponse> => {
+    const params = new URLSearchParams();
+
+    if (data.query) {
+      params.set("q", data.query);
+    }
+
+    let response: Response;
+
+    try {
+      response = await fetch(
+        `${env.API_URL}/api/posts/search?${params.toString()}`,
+        { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) }
+      );
+    } catch (searchError) {
+      throw new Error(
+        "Could not reach the search service. Start the API server with `pnpm dev:all` and try again.",
+        { cause: searchError }
+      );
+    }
+
+    if (response.status === 503) {
+      return { ...UNAVAILABLE_POST_SEARCH, query: data.query };
+    }
+
+    if (!response.ok) {
+      throw new Error(`Search failed (${response.status})`);
+    }
+
+    // SAFETY: GET /api/posts/search is the only caller of this endpoint and
+    // Elysia validates its response shape, so the parsed body is always
+    // { available, estimatedTotalHits, hits, query }.
+    return response.json() as Promise<PostSearchResponse>;
+  });
+
+/**
+ * Admin post search, including drafts.
+ *
+ * Runs against Meilisearch directly rather than through the API server: the
+ * public route cannot verify a session, and it hardcodes a published-only
+ * filter precisely so drafts can never leak to anonymous callers.
+ */
+export const searchPostsAdmin = createServerFn({ method: "GET" })
+  .validator((data: { query: string }) => data)
+  .handler(async ({ data }): Promise<PostSearchResponse> => {
+    await getAdminSession();
+
+    const result = await withIndex((index) =>
+      index.search<PostSearchDocument>(data.query, {
+        limit: 50,
+        sort: ["createdAtTs:desc"],
+      })
+    );
+
+    if (result === null) {
+      return { ...UNAVAILABLE_POST_SEARCH, query: data.query };
+    }
+
+    return {
+      available: true,
+      estimatedTotalHits: result.estimatedTotalHits,
+      hits: result.hits,
+      query: result.query,
+    };
+  });
+
+/**
+ * Whether blog search can actually serve results.
+ *
+ * The UI hides its search field when this is false, so a Meilisearch outage
+ * degrades the page instead of showing a field that does nothing.
+ *
+ * An index that is reachable but still empty counts as unavailable: the
+ * reindex queue only ever sees posts as they are written, so a fresh
+ * deployment has an empty index until `pnpm db:reindex:posts` has run. Search
+ * that silently returns nothing is worse than no search at all.
+ */
+export const postSearchAvailable = createServerFn({ method: "GET" }).handler(
+  async (): Promise<boolean> => {
+    const result = await withIndex((index) => index.search("", { limit: 1 }));
+
+    return result !== null && result.estimatedTotalHits > 0;
+  }
+);
 
 export const getPost = createServerFn({ method: "GET" })
   .validator((data: { slug: string }) => data)
@@ -79,7 +193,7 @@ export const getPost = createServerFn({ method: "GET" })
       }
     }
 
-    return post;
+    return { ...post, preview: resolvePreview(post) };
   });
 
 export const getPostById = createServerFn({ method: "GET" })
@@ -93,7 +207,9 @@ export const getPostById = createServerFn({ method: "GET" })
       .where(eq(posts.id, data.id))
       .limit(1);
 
-    return rows[0] ?? null;
+    const [post] = rows;
+
+    return post ? { ...post, preview: resolvePreview(post) } : null;
   });
 
 export const createPost = createServerFn({ method: "POST" })
@@ -113,7 +229,9 @@ export const createPost = createServerFn({ method: "POST" })
       })
       .returning();
 
-    return row;
+    scheduleReindex(row);
+
+    return { ...row, preview: resolvePreview(row) };
   });
 
 export const updatePost = createServerFn({ method: "POST" })
@@ -139,7 +257,9 @@ export const updatePost = createServerFn({ method: "POST" })
       throw new Error("Post not found.");
     }
 
-    return row;
+    scheduleReindex(row);
+
+    return { ...row, preview: resolvePreview(row) };
   });
 
 export const deletePost = createServerFn({ method: "POST" })
@@ -152,6 +272,8 @@ export const deletePost = createServerFn({ method: "POST" })
     if (result.rowCount === 0) {
       throw new Error("Post not found.");
     }
+
+    scheduleReindexDelete(data.id);
 
     return { ok: true };
   });

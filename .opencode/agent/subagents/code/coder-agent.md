@@ -1,23 +1,43 @@
 ---
-name: CoderAgent
 description: Executes coding subtasks in sequence, ensuring completion as specified
 mode: subagent
-temperature: 0
-permission:
-  bash:
-    "*": "deny"
-    "bash .opencode/skills/task-management/router.sh complete*": "allow"
-    "bash .opencode/skills/task-management/router.sh status*": "allow"
-  edit:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
-    "node_modules/**": "deny"
-    ".git/**": "deny"
-  task:
-    contextscout: "allow"
-    externalscout: "allow"
-    TestEngineer: "allow"
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: bash .opencode/skills/task-management/router.sh complete*
+    effect: allow
+  - action: shell
+    resource: bash .opencode/skills/task-management/router.sh status*
+    effect: allow
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
+  - action: edit
+    resource: "node_modules/**"
+    effect: deny
+  - action: edit
+    resource: ".git/**"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
+  - action: subagent
+    resource: subagents/core/externalscout
+    effect: allow
+  - action: subagent
+    resource: subagents/code/test-engineer
+    effect: allow
 ---
 
 # CoderAgent
@@ -78,7 +98,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find coding standards for [feature]", prompt="Find coding standards, security patterns, and naming conventions needed to implement [feature]. I need patterns for [concrete scenario].")
+subagent(agent="subagents/core/contextscout", description="Find coding standards for [feature]", prompt="Find coding standards, security patterns, and naming conventions needed to implement [feature]. I need patterns for [concrete scenario].")
 ```
 
 ### After ContextScout Returns
@@ -124,7 +144,7 @@ This step ensures your implementation is consistent with how the project already
 **ALWAYS do this.** Even if `context_files` is populated, call ContextScout to verify completeness:
 
 ```
-task(subagent_type="ContextScout", description="Find context for [subtask title]", prompt="Find coding standards, patterns, and conventions for implementing [subtask title]. Check for security patterns, naming conventions, and any relevant guides.")
+subagent(agent="subagents/core/contextscout", description="Find context for [subtask title]", prompt="Find coding standards, patterns, and conventions for implementing [subtask title]. Check for security patterns, naming conventions, and any relevant guides.")
 ```
 
 Load every file ContextScout recommends. Apply those standards.
@@ -134,7 +154,7 @@ Load every file ContextScout recommends. Apply those standards.
 Scan your subtask requirements. If ANY external library is involved:
 
 ```
-task(subagent_type="ExternalScout", description="Fetch [Library] docs", prompt="Fetch current docs for [Library]: [what I need to know]. Context: [what I'm building]")
+subagent(agent="subagents/core/externalscout", description="Fetch [Library] docs", prompt="Fetch current docs for [Library]: [what I need to know]. Context: [what I'm building]")
 ```
 
 ### Step 5: Update Status to In Progress

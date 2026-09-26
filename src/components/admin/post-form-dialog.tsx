@@ -1,3 +1,4 @@
+import { Markdown } from "@tanstack/markdown/react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useRef } from "react";
 
@@ -148,16 +149,42 @@ const PostFormDialog = ({
             validators={{ onChange: postContentSchema }}
           >
             {({ state, handleChange, handleBlur }) => (
-              <FormTextarea
-                id="post-content"
-                label="Content (Markdown)"
-                rows={8}
-                value={state.value}
-                onChange={(event) => handleChange(event.target.value)}
-                onBlur={handleBlur}
-                error={state.meta.errors[0]?.message}
-                className="font-mono text-xs"
-              />
+              <div className="grid gap-2">
+                <FormTextarea
+                  id="post-content"
+                  label="Content (Markdown)"
+                  rows={8}
+                  value={state.value}
+                  onChange={(event) => handleChange(event.target.value)}
+                  onBlur={handleBlur}
+                  error={state.meta.errors[0]?.message}
+                  helperText="Rendered live in the preview beside this field."
+                  className="font-mono text-xs"
+                />
+
+                <div>
+                  <p
+                    className="text-foreground text-sm font-medium"
+                    id="post-content-preview-label"
+                  >
+                    Preview
+                  </p>
+                  <div
+                    aria-labelledby="post-content-preview-label"
+                    className="border-border bg-background mt-1.5 max-h-72 min-h-32 overflow-y-auto rounded-lg border p-4"
+                  >
+                    {state.value.trim() ? (
+                      <div className="markdown-body text-sm">
+                        <Markdown>{state.value}</Markdown>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        Nothing to preview yet.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
           </form.Field>
 

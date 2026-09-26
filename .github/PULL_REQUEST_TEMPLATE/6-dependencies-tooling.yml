@@ -1,0 +1,111 @@
+name: Dependency, build, or CI
+description: Dependency, lint config, Dockerfile, compose, or GitHub Actions change
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The client bundle has a hard budget of 700 kB raw and 250 kB gzip,
+        enforced by `pnpm check:bundle`. Anything that reaches the browser
+        counts against it, and a pre-existing margin is not a reason to spend
+        it.
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: input
+    id: issue
+    attributes:
+      label: Related issue or upstream reference
+      description: For a bump, the release note, advisory, or upstream PR that justifies it.
+      placeholder: "https://github.com/…/releases/tag/v3.2.1 (fixes the SSR warning)"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - Dependency added
+        - Dependency removed
+        - Version bump
+        - Build or bundler config
+        - Dockerfile or compose
+        - GitHub Actions workflow
+        - Lint or format config
+        - Editor or agent tooling under .opencode
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What changes and why
+      description: >-
+        For a bump, say what the new version fixes. For an addition, say what you could not do with what is already installed.
+      placeholder: |
+        Replaced a hand-rolled debounce in the project browser with
+        useDebouncedValue from @tanstack/react-pacer, which was already a
+        dependency. Removes the setTimeout cleanup bug on unmount.
+    validations:
+      required: true
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Dependency hygiene
+      options:
+        - label: pnpm-lock.yaml is committed with the change
+        - label: New pins respect save-exact, so no caret on a fresh dependency
+        - label: The capability was not already available in an installed package
+        - label: No lint rule, type assertion, or test was weakened to accommodate it
+        - label: The license is acceptable for this project
+        - label: Removed nothing that is still imported
+  - type: textarea
+    id: bundle-impact
+    attributes:
+      label: Bundle impact
+      description: >-
+        Paste the before and after from `pnpm check:bundle`. Write "does not reach the client bundle" and say why, if it does not.
+      placeholder: |
+        Before: 617.7 kB raw / 193.3 kB gzip
+        After:  611.2 kB raw / 191.8 kB gzip  (tree-shaken the old debounce)
+    validations:
+      required: true
+  - type: checkboxes
+    id: ci-safety
+    attributes:
+      label: CI safety
+      description: >-
+        Only relevant for a workflow change. Tick what applies, or state that no workflow was touched.
+      options:
+        - label: No workflow was changed
+        - label: The permissions block was not widened
+        - label: No secret value is echoed into a log or an error message
+        - label: No pull_request_target run checks out untrusted PR head code
+        - label: Actions are pinned to a tag or a SHA, not a mutable branch
+        - label: Branch triggers cover both main and prod where required
+        - label: Secrets and repository variables are documented
+  - type: checkboxes
+    id: container
+    attributes:
+      label: Container and runtime
+      options:
+        - label: No container or runtime config was changed
+        - label: The runtime stage still runs as a non-root user
+        - label: The image still builds for the runtime target
+        - label: No new layer leaks a secret into the build context
+        - label: New environment variables are documented in .env.example
+  - type: textarea
+    id: verification
+    attributes:
+      label: How you verified this
+      description: >-
+        The required checks cover lint, types, tests, build, bundle budget, and the Docker build. Say what else you ran, for example a clean install, or a local run of the changed workflow with act.
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: How to revert
+      description: >-
+        A revert that needs a regenerated lockfile, a cache purge, or a redeploy is worth writing down before you need it at 2am.
+    validations:
+      required: true

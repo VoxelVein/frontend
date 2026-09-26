@@ -1,4 +1,4 @@
-# NexVaultX Frontend — Roadmap
+# VoxelVein Frontend — Roadmap
 
 > [!NOTE]
 > This roadmap reflects the current state of the repository. It is a living
@@ -24,10 +24,13 @@
 
 ## Planned
 
-* Content pages for resource packs, modpacks, shaders, plugins, and
-  servers (nav and footer links exist; routes do not)
-* Mod detail pages (`/mods/:id` links already render in mod cards)
-* Project detail pages
+* Content pages for resource packs, modpacks, shaders, and servers (nav
+  and footer links exist; routes do not)
+* Email verification for password accounts, so they can upload content
+* Project icons and gallery images (stored in object storage)
+* Download deduplication and rate limiting; periodic search reindex of
+  download counts
+* Moderation UI for admins (list and restore removed projects)
 * Image optimization with Unpic once real content images exist (mod and
   project thumbnails) — the current UI uses letter avatars and tiny user
   avatars, so there is nothing to convert yet
@@ -41,6 +44,10 @@
 * Modpack/plugin/sharder submission workflows
 
 ## Completed
+
+* Content hosting for mods and plugins: Postgres projects, versions, and
+  files; uploads to S3-compatible storage (Garage locally, Cloudflare R2
+  in production); download counting; creator dashboard; Meilisearch sync
 
 * Marketplace shell: homepage, projects hub, mods search with Meilisearch
   and filters

@@ -1,16 +1,24 @@
 ---
-name: ContextOrganizer
-description: Organizes and generates context files (domain, processes, standards, templates) for optimal knowledge management
+description: >-
+  Organizes and generates context files (domain, processes, standards,
+  templates) for optimal knowledge management
 mode: subagent
-temperature: 0.1
-permission:
-  task:
-    contextscout: "allow"
-    "*": "deny"
-  edit:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
+permissions:
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
 ---
 
 # Context Organizer
@@ -70,7 +78,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find context system standards", prompt="Find context system standards including MVI format, structure requirements, frontmatter conventions, codebase reference patterns, and function-based folder organization rules. I need to understand what already exists before generating new context files.")
+subagent(agent="subagents/core/contextscout", description="Find context system standards", prompt="Find context system standards including MVI format, structure requirements, frontmatter conventions, codebase reference patterns, and function-based folder organization rules. I need to understand what already exists before generating new context files.")
 ```
 
 ### After ContextScout Returns

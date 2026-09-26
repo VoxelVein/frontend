@@ -1,7 +1,7 @@
 <p align="center">
   <img
-    alt="NexVaultX Frontend"
-    src="https://shieldcn.dev/header/surface.svg?title=NexVaultX+Frontend"
+    alt="VoxelVein Frontend"
+    src="https://shieldcn.dev/header/surface.svg?title=VoxelVein+Frontend"
   />
 </p>
 
@@ -12,25 +12,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/NexVaultX/frontend">
+  <a href="https://github.com/VoxelVein/frontend">
     <img
       alt="License"
-      src="https://shieldcn.dev/github/NexVaultX/frontend/license.svg"
+      src="https://shieldcn.dev/github/VoxelVein/frontend/license.svg"
     />
   </a>
 </p>
 
-# NexVaultX Frontend
+# VoxelVein Frontend
 
 ## Overview
 
-**NexVaultX Frontend** is the web application for
-[NexVaultX](https://github.com/NexVaultX), an open-source marketplace for
+**VoxelVein Frontend** is the web application for
+[VoxelVein](https://github.com/VoxelVein), an open-source marketplace for
 Minecraft creators.
 
 This repository contains the **frontend and server-side application layer**,
 built with TanStack Start, TanStack Router, and Nitro. It is part of the
-NexVaultX platform but does not include the full infrastructure stack.
+VoxelVein platform but does not include the full infrastructure stack.
 
 ### Features
 
@@ -111,7 +111,7 @@ Before starting development, ensure you have:
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/NexVaultX/frontend.git
+git clone https://github.com/VoxelVein/frontend.git
 cd frontend
 ```
 
@@ -128,14 +128,15 @@ variables:
 
 ```env
 BETTER_AUTH_SECRET=your-secret-here  # Must be at least 32 characters
-BETTER_AUTH_URL=http://localhost:6001
-DATABASE_URL=postgresql://user:password@localhost:5432/nexvaultx
+BETTER_AUTH_URL=http://localhost:3000
+DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
 MEILI_HOST=http://localhost:7700
 MEILI_MASTER_KEY=your-master-key      # Only needed when seeding
 MEILI_SEARCH_KEY=your-search-key
+MEILI_ADMIN_KEY=your-projects-write-key  # See docs/search/meilisearch.md
 API_URL=http://localhost:3002
 API_PORT=3002
-WEBHOOK_SECRET=your-webhook-secret    # Must be at least 16 characters
+WEBHOOK_SECRET=your-webhook-secret    # Required, at least 32 characters
 VITE_API_URL=http://localhost:3002
 NODE_ENV=development
 ```
@@ -154,11 +155,11 @@ pnpm dev
 Or run them in separate terminals:
 
 ```bash
-pnpm dev:web    # web app on http://localhost:6001
+pnpm dev:web    # web app on http://localhost:3000
 pnpm dev:api    # API server on http://localhost:3002
 ```
 
-The development server runs on `http://localhost:6001` and the API server
+The development server runs on `http://localhost:3000` and the API server
 on `http://localhost:3002`.
 
 > `pnpm dev` delegates to `pnpm dev:all`, so the two commands can never
@@ -171,7 +172,7 @@ on `http://localhost:3002`.
 | Command             | Description                                       |
 | ------------------- | ------------------------------------------------- |
 | `pnpm dev`          | Starts the complete dev environment (app + API)   |
-| `pnpm dev:web`      | Starts only the Vite app (port 6001)              |
+| `pnpm dev:web`      | Starts only the Vite app (port 3000)              |
 | `pnpm dev:api`      | Starts the ElysiaJS API server (watch)            |
 | `pnpm dev:all`      | Runs the app and API server together              |
 | `pnpm start:api`    | Starts the API server (no watch)                  |
@@ -244,7 +245,7 @@ The application uses **PostgreSQL** via **Drizzle ORM**.
 * The connection is configured via `DATABASE_URL`:
 
   ```env
-  DATABASE_URL=postgresql://user:password@localhost:5432/nexvaultx
+  DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
   ```
 
 * Database migrations are stored in the `drizzle/` directory.
@@ -259,7 +260,7 @@ The application uses **Better Auth** for authentication.
 
   ```env
   BETTER_AUTH_SECRET=your-secret-here
-  BETTER_AUTH_URL=http://localhost:6001
+  BETTER_AUTH_URL=http://localhost:3000
   ```
 
 * For local development, `BETTER_AUTH_URL` should be set to the local
@@ -273,7 +274,8 @@ A standalone **ElysiaJS** API server (`server/`) powers mod search and
 real-time mod events:
 
 * `GET /api/health` — liveness check
-* `GET /api/mods/search` — Meilisearch proxy used by the mods page
+* `GET /api/projects/search` — Meilisearch proxy used by the mods and
+  plugins pages
 * `GET /api/events` — Server-Sent Events (SSE) stream of mod events
 * `POST /api/webhooks/mods` — webhook endpoint (HMAC-SHA256 verified) that
   broadcasts `mod.created`, `mod.updated`, and `mod.deleted` events
@@ -445,16 +447,16 @@ docker compose -f compose.yaml -f compose.prod.yaml up -d
 ```
 
 The production Compose configuration builds and runs the production image
-with the Nitro server. The container listens on port `3000` and is exposed
+with the Nitro server. The container listens on port `6001` and is exposed
 on host port `1112`:
 
 ```text
-host :1112 → container :3000 (Nitro server)
+host :1112 → container :6001 (Nitro server)
 ```
 
 > The host port defaults to `1112` to avoid conflicts with other services
 > (for example, Dokploy commonly occupies host port `3000`). Override it
-> with the `PORT` environment variable if needed.
+> with the `WEB_PORT` environment variable if needed.
 
 ---
 

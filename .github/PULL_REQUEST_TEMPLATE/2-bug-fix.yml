@@ -1,0 +1,112 @@
+name: Bug fix
+description: A defect with an identifiable root cause
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A good bug fix names the root cause and leaves a test that fails
+        without it. If you cannot say why the bug happened, this is probably
+        a `3-feature.yml` or worth an issue first.
+
+        > Merge `main` into your branch and get every required check green
+        > before asking for review. A PR that is red or conflicted does not
+        > need a review yet.
+  - type: input
+    id: issue
+    attributes:
+      label: Related issue
+      description: Use `Fixes #123` to link and auto-close, or write why there is no issue.
+      placeholder: "Fixes #142"
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom
+      description: What a user sees, and what the correct result should have been.
+      placeholder: |
+        Uploading a 30 MB file with 20 MB of quota stored the file and then
+        showed a success toast. Expected: rejected with the quota error and
+        nothing stored.
+    validations:
+      required: true
+  - type: textarea
+    id: cause
+    attributes:
+      label: Root cause
+      description: >-
+        The specific defect, with `file:line` or `function`. "Off by one" and "it was a race" are not root causes; "the quota is read outside the insert transaction, so two concurrent uploads both pass the check" is.
+      placeholder: "src/lib/storage-quota.ts:42 checks the total before the insert instead of inside it"
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Layer the defect was in
+      options:
+        - Route or loader in src/routes
+        - Server function in src/lib/*.functions.ts
+        - API route in src/routes/api or server/routes
+        - Shared logic in src/lib
+        - Client hook or state
+        - Database schema or migration
+        - Search index
+        - Storage or upload path
+        - Infrastructure, Docker, or CI
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: regression-test
+    attributes:
+      label: Regression test
+      description: >-
+        The test that fails on `main` and passes on this branch, and the command output that proves both. If the fix genuinely cannot be tested, say why and describe the manual check that covers it.
+      placeholder: |
+        src/lib/__tests__/storage-quota.test.ts - "concurrent inserts cannot
+        both pass the quota check"
+
+        pnpm test src/lib/__tests__/storage-quota.test.ts
+        ✓ rejects the second insert once the first commits
+        Tests 1 failed | 12 passed
+    validations:
+      required: true
+  - type: textarea
+    id: manual-verification
+    attributes:
+      label: How you verified the fix
+      description: The manual path you walked and what you observed.
+    validations:
+      required: true
+  - type: dropdown
+    id: a11y-impact
+    attributes:
+      label: Accessibility impact
+      description: Required so a reviewer knows whether to walk the UI.
+      options:
+        - None, no user interface involved
+        - None, but the fix is in a component
+        - Keyboard path or focus management
+        - Semantics or ARIA
+        - Color or contrast
+        - Motion or reduced motion
+        - Not sure, needs a reviewer
+    validations:
+      required: true
+  - type: textarea
+    id: adjacent
+    attributes:
+      label: What you deliberately did not change
+      description: >-
+        Nearby problems you noticed and left alone. This stops a reviewer from reading them as oversights and saves the next person the archaeology.
+  - type: checkboxes
+    id: commit
+    attributes:
+      label: Commit hygiene
+      options:
+        - label: No test was deleted or weakened to make the suite pass
+          required: true
+        - label: No lint rule or type assertion was suppressed to make the fix compile
+          required: true
+        - label: The fix is a behavior change, not a symptom workaround
