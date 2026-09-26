@@ -39,6 +39,8 @@ docker build --target migrate -t voxelvein-migrate .
 `VITE_API_URL` is the public URL browsers use to reach the API. Vite
 inlines it into the client bundle at build time, so the web image build
 fails without it, and changing it means rebuilding the web image.
+`compose.yaml` passes it through from `.env` as a build argument, so under
+Dokploy set `VITE_API_URL` in the Environment tab.
 
 ## Run with Compose
 

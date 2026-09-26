@@ -21,6 +21,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Public URL browsers use to reach the API. Inlined into the client
+        # bundle at build time, so the Dockerfile refuses to build the web
+        # image without it. Not required here so the dev override, which
+        # stops at the deps stage, still works without it.
+        VITE_API_URL: ${VITE_API_URL:-}
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
