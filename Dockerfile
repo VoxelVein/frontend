@@ -105,7 +105,7 @@ RUN test -n "$VITE_API_URL" \
 FROM node:24-alpine AS runtime
 
 ENV NODE_ENV=production
-ENV PORT=6001
+ENV PORT=3000
 
 WORKDIR /app
 
@@ -117,9 +117,9 @@ RUN addgroup -S nodejs && adduser -S nodejs -G nodejs \
     && chown -R nodejs:nodejs /app
 USER nodejs
 
-EXPOSE 6001
+EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:6001/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 CMD ["node", ".output/server/index.mjs"]
