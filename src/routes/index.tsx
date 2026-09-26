@@ -13,9 +13,9 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 
 import { FeatureSection } from "@/components/feature-section";
-import { FeaturedProjects } from "@/components/featured-projects";
 import { Hero } from "@/components/hero";
 import { NewsSection } from "@/components/news-section";
+import { TechStack } from "@/components/tech-stack";
 
 const PLAYER_FEATURES = [
   {
@@ -85,7 +85,7 @@ const BROWSE_FEATURES = [
 const HomePage = () => (
   <>
     <Hero />
-    <FeaturedProjects />
+    <TechStack />
     <FeatureSection
       id="browse"
       headingId="browse-heading"
