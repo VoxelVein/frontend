@@ -17,9 +17,8 @@ const PrivacyPage = () => (
         heading: "Data Controller",
         body: (
           <p>
-            The data controller is Matéo Sauer, Dorfgasse 20, 99735 Kleinfurra,
-            Germany. For any privacy-related request, contact
-            mateo.sauer161013@gmail.com.
+            The data controller is VOMLabs. For any privacy-related request,
+            contact admin@vomlabs.com.
           </p>
         ),
       },
