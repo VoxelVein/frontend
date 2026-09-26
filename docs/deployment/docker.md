@@ -23,7 +23,7 @@ The stages are:
 4. **build** — runs `pnpm build`, producing the Nitro output in
    `.output/`. Requires the `VITE_API_URL` build argument.
 5. **runtime** — copies only `.output/` and runs the web server on
-   port 6001.
+   port 3000 (override with `PORT`).
 
 Every image runs as a non-root user (`nodejs`).
 
@@ -44,9 +44,15 @@ Dokploy set `VITE_API_URL` in the Environment tab.
 
 ## Run with Compose
 
-`compose.yaml` defines `migrate`, `api`, and `web`. `migrate` runs first;
-`api` and `web` only start after it exits successfully, so a deploy never
-serves new code against an old schema.
+`compose.yaml` defines `web`, `api`, and `meilisearch`. It is the file
+Dokploy deploys. It does not run migrations; apply them against the
+production database before deploying a schema change, for example with
+the `migrate` image:
+
+```bash
+docker run --rm -e DATABASE_URL -e BETTER_AUTH_SECRET -e BETTER_AUTH_URL \
+  voxelvein-migrate
+```
 
 ```bash
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build
@@ -54,9 +60,12 @@ docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
 The services read their runtime settings from `.env` next to the compose
 file (Dokploy writes it from the Environment tab). The web service reaches
-the API over the compose network (`API_URL=http://api:3002`). The
-production override publishes the web app on `${WEB_PORT}` (default 1112)
-and the API on `${API_HOST_PORT}` (default 1113).
+the API over the compose network (`API_URL=http://api:3002`). No host
+ports are published, so Traefik routes to the containers via Dokploy's
+Domains tab. To reach the stack from the host, add
+`-f compose.host-ports.yaml`, which publishes the web app on
+`${WEB_PORT}` (default 1112) and the API on `${API_HOST_PORT}`
+(default 1113).
 
 For a self-contained local stack with Postgres, Meilisearch, and Garage,
 use `docker-compose.yml` instead.

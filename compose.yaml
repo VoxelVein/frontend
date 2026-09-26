@@ -54,15 +54,18 @@ services:
     image: voxelvein-api:${TAG:-latest}
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: Dockerfile
+      target: api
     environment:
       NODE_ENV: production
       API_PORT: 3002
       MEILI_HOST: http://meilisearch:7700
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
-      CORS_ORIGIN: https://voxelvein.vomlabs.com
-      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-dev-webhook-secret-change-me}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://voxelvein.vomlabs.com}
+      # The API refuses to start without a random secret of 32+ characters,
+      # so fail the deploy up front instead of crash-looping the container.
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}
       # Required in production: "true" behind a proxy that sets
       # X-Forwarded-For (Traefik under Dokploy, hence the default), "false"
       # otherwise. The API refuses to start in production without it.
