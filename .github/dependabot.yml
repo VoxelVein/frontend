@@ -9,6 +9,11 @@ updates:
       timezone: "Europe/Berlin"
     open-pull-requests-limit: 10
     versioning-strategy: "increase"
+    ignore:
+      # Pinned to 0.2.x to match Elysia 1.4; see the override in
+      # pnpm-workspace.yaml.
+      - dependency-name: "exact-mirror"
+        update-types: ["version-update:semver-major"]
     labels:
       - "dependencies"
       - "automated"

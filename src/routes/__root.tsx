@@ -13,8 +13,9 @@ import type { ReactNode } from "react";
 import { CookieBanner } from "@/components/cookie-banner";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar/navbar";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 
 import appCss from "../styles.css?url";
 
@@ -110,14 +111,16 @@ export const Route = createRootRoute({
         The page you are looking for does not exist or has been moved. Check the
         URL or head back to the homepage.
       </p>
-      <Button
-        render={<Link to="/" />}
-        variant="default"
-        className="mt-8 min-h-11 px-6"
+      <Link
+        to="/"
+        className={cn(
+          buttonVariants({ variant: "default" }),
+          "mt-8 min-h-11 px-6"
+        )}
       >
         <IconHome size={16} />
         Back to Home
-      </Button>
+      </Link>
     </div>
   ),
   shellComponent: RootDocument,

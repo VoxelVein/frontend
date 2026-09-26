@@ -3,7 +3,8 @@ import { Link } from "@tanstack/react-router";
 
 import { Logo } from "@/components/logo";
 import { ChromaticTextReveal } from "@/components/motion/chromatic-text-reveal";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 
 const Hero = () => (
   <section className="px-4 pt-14 pb-12 sm:px-6 lg:px-8">
@@ -22,15 +23,16 @@ const Hero = () => (
       </p>
 
       <div className="animate-hero-fade-in-delay flex items-center justify-center">
-        <Button
-          render={<Link to="/mods" />}
-          variant="default"
-          size="lg"
-          className="ease-smooth min-h-11 transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
+        <Link
+          to="/mods"
+          className={cn(
+            buttonVariants({ size: "lg", variant: "default" }),
+            "ease-smooth min-h-11 transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
+          )}
         >
           Browse Mods
           <IconArrowRight size={16} />
-        </Button>
+        </Link>
       </div>
     </div>
   </section>

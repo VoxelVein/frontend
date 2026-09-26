@@ -17,6 +17,7 @@ import { VersionForm } from "@/components/dashboard/version-form";
 import { PageHeader } from "@/components/page-header";
 import { ProjectLink } from "@/components/projects/project-link";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
@@ -34,6 +35,7 @@ import {
   setProjectPublished,
   updateProject,
 } from "@/lib/projects.functions";
+import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
 const TABS = ["details", "versions", "danger"] as const;
@@ -105,19 +107,14 @@ const PublishPanel = ({
         >
           {isPublished ? "Unpublish" : "Publish"}
         </Button>
-        <Button
-          render={
-            <ProjectLink type={project.type} slug={project.slug}>
-              {null}
-            </ProjectLink>
-          }
-          nativeButton={false}
-          variant="ghost"
-          className="min-h-11"
+        <ProjectLink
+          type={project.type}
+          slug={project.slug}
+          className={cn(buttonVariants({ variant: "ghost" }), "min-h-11")}
         >
           <IconExternalLink size={16} aria-hidden="true" />
           View page
-        </Button>
+        </ProjectLink>
       </div>
     </section>
   );

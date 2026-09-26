@@ -2,6 +2,12 @@ packages: []
 
 overrides:
   "@esbuild-kit/core-utils>esbuild": "^0.25.0"
+  # Elysia 1.4 passes exact-mirror a `TypeCompiler` option that 1.x renamed to
+  # `Compile`, so with 1.x query unions (e.g. t.Integer) are not normalized and
+  # every start logs "TypeCompiler is required to use Union". Its peer range
+  # (>= 0.0.9) would otherwise resolve to 1.x, so exact-mirror is also a direct
+  # dependency pinned to 0.2.x. Drop both once Elysia supports 1.x.
+  "elysia>exact-mirror": "^0.2.7"
 
 allowBuilds:
   esbuild: true

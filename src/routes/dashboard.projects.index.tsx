@@ -9,10 +9,11 @@ import {
 import { VerificationNotice } from "@/components/dashboard/verification-notice";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { formatCount, formatDate } from "@/lib/format";
 import { PROJECT_TYPE_LABELS } from "@/lib/projects";
 import { listMyProjects } from "@/lib/projects.functions";
+import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/";
 
@@ -23,14 +24,13 @@ const STATUS_LABELS = {
 } as const;
 
 const NewProjectLink = () => (
-  <Button
-    render={<Link to="/dashboard/projects/new" />}
-    nativeButton={false}
-    className="min-h-11"
+  <Link
+    to="/dashboard/projects/new"
+    className={cn(buttonVariants({ variant: "default" }), "min-h-11")}
   >
     <IconPlus size={16} aria-hidden="true" />
     New project
-  </Button>
+  </Link>
 );
 
 const MyProjectsPage = () => {
