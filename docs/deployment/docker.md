@@ -31,31 +31,35 @@ Every image runs as a non-root user (`nodejs`).
 
 ```bash
 docker build --build-arg VITE_API_URL=https://api.example.com \
-  -t voxelvein-frontend .
+  --build-arg VITE_SITE_URL=https://example.com -t voxelvein-frontend .
 docker build --target api -t voxelvein-api .
 docker build --target migrate -t voxelvein-migrate .
 ```
 
-`VITE_API_URL` is the public URL browsers use to reach the API. Vite
-inlines it into the client bundle at build time, so the web image build
-fails without it, and changing it means rebuilding the web image.
-`compose.yaml` passes it through from `.env` as a build argument, so under
-Dokploy set `VITE_API_URL` in the Environment tab.
+`VITE_*` values are inlined into the client bundle at build time, so
+they are build arguments, and changing one means rebuilding the web
+image. The build fails without `VITE_API_URL` (public API URL) or
+`VITE_SITE_URL` (public web app URL). `VITE_TURNSTILE_SITE_KEY`,
+`VITE_GOOGLE_CLIENT_ID`, and `VITE_GITHUB_CLIENT_ID` are optional.
+`compose.yaml` passes all of them through from `.env`, taking the OAuth
+client IDs from `GOOGLE_CLIENT_ID` and `GITHUB_CLIENT_ID`.
 
 ## Run with Compose
 
-`compose.yaml` defines `migrate`, `web`, `api`, and `meilisearch`. It
-is the file Dokploy deploys. `migrate` applies pending migrations and
-exits; `web` only starts after it exits successfully, so a deploy never
-serves new code against an old schema. `api` does not use the database
-and starts independently.
+`compose.yaml` defines `db` (Postgres), `migrate`, `web`, `api`, and
+`meilisearch`. It is the file Dokploy deploys. `migrate` applies
+pending migrations and exits; `web` only starts after it exits
+successfully, so a deploy never serves new code against an old schema.
+`api` does not use the database and starts independently.
 
 ```bash
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 ```
 
-The services read their runtime settings from `.env` next to the compose
-file (Dokploy writes it from the Environment tab). The web service reaches
+`migrate`, `web`, and `api` load every variable from `.env` next to the
+compose file (Dokploy writes it from the Environment tab). `DATABASE_URL`
+defaults to the bundled `db` service; set it only to use an external
+database. The web service reaches
 the API over the compose network (`API_URL=http://api:3002`). No host
 ports are published, so Traefik routes to the containers via Dokploy's
 Domains tab. To reach the stack from the host, add
@@ -68,25 +72,41 @@ use `docker-compose.yml` instead.
 
 ## Environment variables
 
-| Variable               | Used by           | Required |
-| ---------------------- | ----------------- | -------- |
-| `VITE_API_URL`         | web (build arg)   | Yes      |
-| `DATABASE_URL`         | web, migrate      | Yes      |
-| `BETTER_AUTH_SECRET`   | web, migrate      | Yes      |
-| `BETTER_AUTH_URL`      | web, migrate      | Yes      |
-| `MEILI_HOST`           | web, api          | Yes      |
-| `MEILI_SEARCH_KEY`     | web, api          | Yes      |
-| `WEBHOOK_SECRET`       | api               | Yes      |
-| `CORS_ORIGIN`          | api               | Yes      |
-| `TRUST_PROXY`          | web, api          | Yes      |
-| `GOOGLE_CLIENT_ID`     | web               | No       |
-| `GOOGLE_CLIENT_SECRET` | web               | No       |
+| Variable                    | Used by             | Required    |
+| --------------------------- | ------------------- | ----------- |
+| `VITE_API_URL`              | web (build arg)     | Yes         |
+| `VITE_SITE_URL`             | web (build arg)     | Yes         |
+| `BETTER_AUTH_URL`           | web, migrate        | Yes         |
+| `BETTER_AUTH_SECRET`        | web, migrate        | Yes         |
+| `POSTGRES_PASSWORD`         | db                  | Yes         |
+| `MEILI_MASTER_KEY`          | meilisearch         | Yes         |
+| `WEBHOOK_SECRET`            | api                 | Yes         |
+| `CORS_ORIGIN`               | api                 | Yes         |
+| `VITE_TURNSTILE_SITE_KEY`   | web (build arg)     | For sign-in |
+| `TURNSTILE_SECRET`          | web                 | For sign-in |
+| `TURNSTILE_HOSTNAMES`       | web                 | For sign-in |
+| `MEILI_SEARCH_KEY`          | web, api            | No          |
+| `MEILI_ADMIN_KEY`           | web                 | No          |
+| `STORAGE_*`                 | web                 | For uploads |
+| `GOOGLE_CLIENT_ID`/`SECRET` | web (+ build arg)   | No          |
+| `GITHUB_CLIENT_ID`/`SECRET` | web (+ build arg)   | No          |
+| `TRUST_PROXY`               | web, api            | No          |
+| `DATABASE_URL`              | web, migrate        | No          |
 
 `VITE_API_URL` is the public API URL, `CORS_ORIGIN` the web app origin(s)
-allowed to call the API, and `TRUST_PROXY` is covered below.
+allowed to call the API, and `TRUST_PROXY` (default `true` in
+`compose.yaml`) is covered below. `MEILI_SEARCH_KEY` falls back to
+`MEILI_MASTER_KEY`.
 
-`migrate` needs `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` because
-`drizzle.config.ts` loads `env.config.ts`, which validates them.
+Password sign-in and sign-up are rejected unless all three Turnstile
+values are set. In production the secret must not be a Cloudflare
+testing secret and `TURNSTILE_HOSTNAMES` must not include `localhost`.
+
+`MEILI_ADMIN_KEY` lets the web app keep search in sync. It needs
+`documents.add`, `documents.delete`, `indexes.create`, and
+`settings.update` on the `projects` and `posts` indexes; without it,
+search stays empty. Mint it with the master key after the first deploy
+(see [Meilisearch](../search/meilisearch.md)) and redeploy.
 
 ## Client IPs and `TRUST_PROXY`
 
@@ -116,6 +136,7 @@ through unchanged.
 
 ## Related
 
+* [Deploying with Dokploy](dokploy.md)
 * [Setup](../development/setup.md)
 * [Commands](../development/commands.md)
 * [Migrations](../database/migrations.md)

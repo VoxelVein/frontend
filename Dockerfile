@@ -88,16 +88,28 @@ COPY --from=deps /app/pnpm-lock.yaml ./
 # Copy source
 COPY . .
 
-# VITE_* variables are inlined into the client bundle at build time, so the
-# public API origin has to be known here, not when the container starts.
+# VITE_* variables are inlined into the client bundle at build time, so they
+# have to be known here, not when the container starts. .env files are not
+# part of the build context, so each one is passed as a build argument.
 ARG VITE_API_URL
-ENV VITE_API_URL=${VITE_API_URL}
+ARG VITE_SITE_URL
+ARG VITE_TURNSTILE_SITE_KEY
+ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_GITHUB_CLIENT_ID
+ENV VITE_API_URL=${VITE_API_URL} \
+    VITE_SITE_URL=${VITE_SITE_URL} \
+    VITE_TURNSTILE_SITE_KEY=${VITE_TURNSTILE_SITE_KEY} \
+    VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID} \
+    VITE_GITHUB_CLIENT_ID=${VITE_GITHUB_CLIENT_ID}
 
 # Build the production bundle (Nitro output in .output/). Refuse to build
-# without VITE_API_URL: the bundle would otherwise ship without live updates.
+# without VITE_API_URL (the bundle would ship without live updates) or
+# VITE_SITE_URL (links and social previews would point at localhost).
 RUN test -n "$VITE_API_URL" \
-    || (echo "VITE_API_URL build arg is required (public URL of the API server)" >&2 && exit 1) \
-    && pnpm build
+    || { echo "VITE_API_URL build arg is required (public URL of the API server)" >&2; exit 1; }; \
+    test -n "$VITE_SITE_URL" \
+    || { echo "VITE_SITE_URL build arg is required (public URL of the web app)" >&2; exit 1; }; \
+    pnpm build
 
 ###############################################################################
 # Stage 5: Web runtime (default target, keep last)

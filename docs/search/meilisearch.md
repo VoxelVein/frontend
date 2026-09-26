@@ -26,9 +26,10 @@ published project in the `projects` index.
 * `MEILI_HOST` — Meilisearch base URL. Defaults to
   `http://localhost:7700`.
 * `MEILI_SEARCH_KEY` — search-only key used by the API server.
-* `MEILI_ADMIN_KEY` — key used by the web app to write project
-  documents. Scope it to `documents.add` and `documents.delete` on the
-  `projects` index.
+* `MEILI_ADMIN_KEY` — key used by the web app to keep the `projects`
+  and `posts` indexes in sync. It creates each index and applies its
+  settings on first use, so scope it to `documents.add`,
+  `documents.delete`, `indexes.create`, and `settings.update` on both.
 * `MEILI_MASTER_KEY` — only needed by `pnpm db:seed` and
   `pnpm db:reindex`, which change index settings.
 
@@ -38,9 +39,10 @@ Create the scoped write key once with the master key:
 curl -X POST "$MEILI_HOST/keys" \
   -H "Authorization: Bearer $MEILI_MASTER_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"name":"voxelvein-web-projects-writer",
-       "actions":["documents.add","documents.delete"],
-       "indexes":["projects"],"expiresAt":null}'
+  -d '{"name":"voxelvein-web-writer",
+       "actions":["documents.add","documents.delete",
+                  "indexes.create","settings.update"],
+       "indexes":["projects","posts"],"expiresAt":null}'
 ```
 
 Put the returned `key` into `MEILI_ADMIN_KEY`.
