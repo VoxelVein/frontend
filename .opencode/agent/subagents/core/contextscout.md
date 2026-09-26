@@ -1,22 +1,28 @@
 ---
-name: ContextScout
-description: Discovers and recommends context files from .opencode/context/ ranked by priority. Suggests ExternalScout when a framework/library is mentioned but not found internally.
+description: >-
+  Discovers and recommends context files from .opencode/context/ ranked by
+  priority. Suggests ExternalScout when a framework/library is mentioned but
+  not found internally.
 mode: subagent
-permission:
-  read:
-    "*": "allow"
-  grep:
-    "*": "allow"
-  glob:
-    "*": "allow"
-  bash:
-    "*": "deny"
-  edit:
-    "*": "deny"
-  write:
-    "*": "deny"
-  task:
-    "*": "deny"
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 # ContextScout

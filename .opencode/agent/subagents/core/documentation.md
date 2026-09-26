@@ -1,20 +1,31 @@
 ---
-name: DocWriter
 description: Documentation authoring agent
 mode: subagent
-temperature: 0.2
-permission:
-  bash:
-    "*": "deny"
-  edit:
-    "plan/**/*.md": "allow"
-    "**/*.md": "allow"
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
-  task:
-    contextscout: "allow"
-    "*": "deny"
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: edit
+    resource: "plan/**/*.md"
+    effect: allow
+  - action: edit
+    resource: "**/*.md"
+    effect: allow
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
 ---
 
 # DocWriter
@@ -73,7 +84,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find documentation standards", prompt="Find documentation formatting standards, structure conventions, tone guidelines, and example requirements for this project. I need to write/update docs for [feature/component] following established patterns.")
+subagent(agent="subagents/core/contextscout", description="Find documentation standards", prompt="Find documentation formatting standards, structure conventions, tone guidelines, and example requirements for this project. I need to write/update docs for [feature/component] following established patterns.")
 ```
 
 ### After ContextScout Returns

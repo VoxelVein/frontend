@@ -1,30 +1,67 @@
 ---
-name: TestEngineer
 description: Test authoring and TDD agent
 mode: subagent
-temperature: 0.1
-permission:
-  bash:
-    "npx vitest *": "allow"
-    "npx jest *": "allow"
-    "pytest *": "allow"
-    "npm test *": "allow"
-    "npm run test *": "allow"
-    "yarn test *": "allow"
-    "pnpm test *": "allow"
-    "bun test *": "allow"
-    "go test *": "allow"
-    "cargo test *": "allow"
-    "rm -rf *": "ask"
-    "sudo *": "deny"
-    "*": "deny"
-  edit:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
-  task:
-    contextscout: "allow"
-    externalscout: "allow"
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: npx vitest *
+    effect: allow
+  - action: shell
+    resource: npx jest *
+    effect: allow
+  - action: shell
+    resource: pytest *
+    effect: allow
+  - action: shell
+    resource: npm test *
+    effect: allow
+  - action: shell
+    resource: npm run test *
+    effect: allow
+  - action: shell
+    resource: yarn test *
+    effect: allow
+  - action: shell
+    resource: pnpm test *
+    effect: allow
+  - action: shell
+    resource: pnpm vitest *
+    effect: allow
+  - action: shell
+    resource: bun test *
+    effect: allow
+  - action: shell
+    resource: go test *
+    effect: allow
+  - action: shell
+    resource: cargo test *
+    effect: allow
+  - action: shell
+    resource: rm -rf *
+    effect: ask
+  - action: shell
+    resource: sudo *
+    effect: deny
+  - action: edit
+    resource: "**/*.env*"
+    effect: deny
+  - action: edit
+    resource: "**/*.key"
+    effect: deny
+  - action: edit
+    resource: "**/*.secret"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
+  - action: subagent
+    resource: subagents/core/externalscout
+    effect: allow
 ---
 
 # TestEngineer
@@ -84,7 +121,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find testing standards", prompt="Find testing standards, TDD patterns, coverage requirements, and test structure conventions for this project. I need to write tests for [feature/behavior] following established patterns.")
+subagent(agent="subagents/core/contextscout", description="Find testing standards", prompt="Find testing standards, TDD patterns, coverage requirements, and test structure conventions for this project. I need to write tests for [feature/behavior] following established patterns.")
 ```
 
 ### After ContextScout Returns

@@ -1,27 +1,49 @@
 ---
-name: BuildAgent
 description: Type check and build validation agent
 mode: subagent
-temperature: 0.1
-permission:
-  bash:
-    "tsc": "allow"
-    "mypy": "allow"
-    "go build": "allow"
-    "cargo check": "allow"
-    "cargo build": "allow"
-    "npm run build": "allow"
-    "yarn build": "allow"
-    "pnpm build": "allow"
-    "python -m build": "allow"
-    "*": "deny"
-  edit:
-    "**/*": "deny"
-  write:
-    "**/*": "deny"
-  task:
-    contextscout: "allow"
-    "*": "deny"
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: tsc *
+    effect: allow
+  - action: shell
+    resource: mypy *
+    effect: allow
+  - action: shell
+    resource: go build *
+    effect: allow
+  - action: shell
+    resource: cargo check *
+    effect: allow
+  - action: shell
+    resource: cargo build *
+    effect: allow
+  - action: shell
+    resource: pnpm typecheck *
+    effect: allow
+  - action: shell
+    resource: npm run build *
+    effect: allow
+  - action: shell
+    resource: yarn build *
+    effect: allow
+  - action: shell
+    resource: pnpm build *
+    effect: allow
+  - action: shell
+    resource: python -m build *
+    effect: allow
+  - action: edit
+    resource: "**/*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
 ---
 
 # BuildAgent
@@ -80,7 +102,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find build standards", prompt="Find build validation guidelines, type-checking requirements, and build command conventions for this project. I need to know what build tools and configurations are expected.")
+subagent(agent="subagents/core/contextscout", description="Find build standards", prompt="Find build validation guidelines, type-checking requirements, and build command conventions for this project. I need to know what build tools and configurations are expected.")
 ```
 
 ### After ContextScout Returns

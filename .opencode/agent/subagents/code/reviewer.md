@@ -1,17 +1,19 @@
 ---
-name: CodeReviewer
 description: Code review, security, and quality assurance agent
 mode: subagent
-temperature: 0.1
-permission:
-  bash:
-    "*": "deny"
-  edit:
-    "**/*": "deny"
-  write:
-    "**/*": "deny"
-  task:
-    contextscout: "allow"
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: edit
+    resource: "**/*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: subagents/core/contextscout
+    effect: allow
 ---
 
 # CodeReviewer
@@ -71,7 +73,7 @@ Call ContextScout immediately when ANY of these triggers apply:
 ### How to Invoke
 
 ```
-task(subagent_type="ContextScout", description="Find code review standards", prompt="Find code review guidelines, security scanning patterns, code quality standards, and naming conventions for this project. I need to review [feature/file] against established standards.")
+subagent(agent="subagents/core/contextscout", description="Find code review standards", prompt="Find code review guidelines, security scanning patterns, code quality standards, and naming conventions for this project. I need to review [feature/file] against established standards.")
 ```
 
 ### After ContextScout Returns

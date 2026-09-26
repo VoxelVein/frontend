@@ -1,22 +1,37 @@
 ---
-name: ExternalScout
-description: Fetches live, version-specific documentation for external libraries and frameworks using Context7 and other sources. Filters, sorts, and returns relevant documentation.
+description: >-
+  Fetches live, version-specific documentation for external libraries and
+  frameworks using Context7 and other sources. Filters, sorts, and returns
+  relevant documentation.
 mode: subagent
-temperature: 0.1
-permission:
-  read:
-    "**/*": "deny"
-    ".opencode/skills/context7/**": "allow"
-    ".tmp/external-context/**": "allow"
-  bash:
-    "*": "deny"
-    "curl -s https://context7.com/*": "allow"
-    "jq *": "allow"
-  skill:
-    "*": "deny"
-    "*context7*": "allow"
-  task:
-    "*": "deny"
+permissions:
+  - action: read
+    resource: "**/*"
+    effect: deny
+  - action: read
+    resource: ".opencode/skills/context7/**"
+    effect: allow
+  - action: read
+    resource: ".tmp/external-context/**"
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: curl -s https://context7.com/*
+    effect: allow
+  - action: shell
+    resource: jq *
+    effect: allow
+  - action: skill
+    resource: "*"
+    effect: deny
+  - action: skill
+    resource: "*context7*"
+    effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 # ExternalScout

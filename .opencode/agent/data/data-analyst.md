@@ -1,8 +1,6 @@
 ---
-name: OpenDataAnalyst
-description: "Expert in data analysis, visualization, and statistical insights"
+description: Expert in data analysis, visualization, and statistical insights
 mode: primary
-temperature: 0.1
 ---
 
 # Data Analyst
