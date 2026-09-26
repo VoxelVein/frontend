@@ -49,14 +49,16 @@ const SOCIAL_LINKS = [
 ] as const;
 
 const LINK_CLASS =
-  "text-muted-foreground hover:text-primary focus-visible:ring-ring ease-smooth inline-flex min-h-11 items-center text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none";
+  "text-muted-foreground hover:text-foreground focus-visible:ring-ring ease-smooth inline-flex min-h-11 items-center text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none";
 
 const FooterLinkItem = ({ link }: { link: FooterLink }) => {
   if (!link.available) {
     return (
-      <span className="text-muted-foreground/70 inline-flex min-h-11 items-center gap-2 text-sm">
+      <span className="text-muted-foreground/35 inline-flex min-h-11 cursor-not-allowed items-center gap-2 text-sm select-none">
         {link.label}
-        <span className="text-muted-foreground/50 text-xs">Soon</span>
+        <span className="text-muted-foreground/25 text-xs font-normal">
+          Soon
+        </span>
       </span>
     );
   }
