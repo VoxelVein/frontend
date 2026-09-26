@@ -14,7 +14,7 @@ for the longer-term plan.
 * [x] Create `/mods/$slug` mod detail page (content hosting)
 * [ ] Update web-design-guidelines SKILL.md (skeletons + empty states)
 * [ ] Use `cn` more across the application
-* [ ] Verification: typecheck, check, test, build, lint:md
+* [ ] Improve RBAC - More roles than "User" and "Admin"
 
 ## Completed
 
