@@ -1,6 +1,5 @@
 import {
   IconBox,
-  IconChevronDown,
   IconDeviceGamepad2,
   IconPackages,
   IconPalette,
@@ -9,12 +8,6 @@ import {
 } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const CONTENT_LINKS = [{ href: "/blog", label: "Blog" }] as const;
@@ -77,90 +70,50 @@ const activeLinkClassName = "bg-muted text-foreground";
 
 const NavbarLinks = () => {
   const matchRoute = useMatchRoute();
-  const isProjectsActive = !!matchRoute({ to: "/mods" });
+
+  const renderLink = (href: string, label: string) => {
+    const isActive = !!matchRoute({ fuzzy: true, to: href });
+
+    return (
+      <Link
+        key={href}
+        to={href}
+        preload="intent"
+        aria-current={isActive ? "page" : undefined}
+        className={cn(linkClassName, isActive && activeLinkClassName)}
+      >
+        {label}
+      </Link>
+    );
+  };
 
   return (
     <nav
       aria-label="Main navigation"
       className="hidden items-center gap-1 lg:flex"
     >
-      {CONTENT_LINKS.map((link) => {
-        const isActive = !!matchRoute({ to: link.href });
-
+      {PROJECT_ITEMS.map((item) => {
+        if (item.available) {
+          return renderLink(item.href, item.label);
+        }
+        // Upcoming sections only fit on wide screens; they are not links
+        // yet, so they are shown as plain text with a "Soon" note.
         return (
-          <Link
-            key={link.href}
-            to={link.href}
-            preload="intent"
-            aria-current={isActive ? "page" : undefined}
-            className={cn(linkClassName, isActive && activeLinkClassName)}
+          <span
+            key={item.href}
+            className="text-muted-foreground/70 hidden min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-medium xl:inline-flex"
           >
-            {link.label}
-          </Link>
+            {item.label}
+            <span className="border-border rounded-full border px-1.5 text-xs leading-4">
+              Soon
+            </span>
+          </span>
         );
       })}
 
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={(props) => (
-            <button
-              type="button"
-              aria-current={isProjectsActive ? "page" : undefined}
-              className={cn(
-                linkClassName,
-                isProjectsActive && activeLinkClassName
-              )}
-              {...props}
-            />
-          )}
-        >
-          Projects
-          <IconChevronDown
-            size={15}
-            stroke={1.8}
-            aria-hidden="true"
-            className="text-muted-foreground transition-transform duration-200 group-data-popup-open:rotate-180"
-          />
-        </DropdownMenuTrigger>
+      <span aria-hidden="true" className="bg-border mx-1 h-5 w-px" />
 
-        <DropdownMenuContent align="start" sideOffset={8} className="min-w-64">
-          {PROJECT_ITEMS.map((item) => {
-            const icon = (
-              <item.icon size={16} stroke={1.8} aria-hidden="true" />
-            );
-
-            if (!item.available) {
-              return (
-                <DropdownMenuItem
-                  key={item.href}
-                  disabled
-                  className="text-muted-foreground flex w-full cursor-default items-center gap-2 rounded-lg px-3 py-2.5 text-sm"
-                >
-                  {icon}
-                  <span className="flex-1">{item.label}</span>
-                  <span className="text-muted-foreground/70 text-xs">Soon</span>
-                </DropdownMenuItem>
-              );
-            }
-
-            return (
-              <DropdownMenuItem
-                key={item.href}
-                render={<Link to={item.href} preload="intent" />}
-                className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {icon}
-                <span className="flex flex-col">
-                  <span className="text-foreground">{item.label}</span>
-                  <span className="text-muted-foreground text-xs">
-                    {item.description}
-                  </span>
-                </span>
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {CONTENT_LINKS.map((link) => renderLink(link.href, link.label))}
     </nav>
   );
 };
