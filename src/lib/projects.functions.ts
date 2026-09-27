@@ -85,6 +85,9 @@ const loadProjectView = async (
         project.owner.username ??
         project.owner.name)
       : DELETED_USER_LABEL,
+    // Null when the owner is gone, which keeps the byline from linking to a
+    // profile that no longer exists.
+    authorUsername: project.owner?.username ?? null,
     category: project.category,
     description: project.description,
     downloads: project.downloads,

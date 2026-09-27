@@ -29,6 +29,7 @@ import { Route as ModsIndexRouteImport } from './routes/mods.index'
 import { Route as ModsSlugRouteImport } from './routes/mods.$slug'
 import { Route as PluginsIndexRouteImport } from './routes/plugins.index'
 import { Route as PluginsSlugRouteImport } from './routes/plugins.$slug'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiDownloadFileIdRouteImport } from './routes/api/download.$fileId'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
@@ -136,6 +137,11 @@ const PluginsSlugRoute = PluginsSlugRouteImport.update({
   path: '/plugins/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/mods/': typeof ModsIndexRoute
   '/plugins/': typeof PluginsIndexRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/dashboard': typeof DashboardIndexRoute
   '/mods': typeof ModsIndexRoute
   '/plugins': typeof PluginsIndexRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/mods/': typeof ModsIndexRoute
   '/plugins/': typeof PluginsIndexRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
+    | '/u/$username'
     | '/dashboard/'
     | '/mods/'
     | '/plugins/'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
+    | '/u/$username'
     | '/dashboard'
     | '/mods'
     | '/plugins'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
+    | '/u/$username'
     | '/dashboard/'
     | '/mods/'
     | '/plugins/'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   ModsSlugRoute: typeof ModsSlugRoute
   PluginsSlugRoute: typeof PluginsSlugRoute
+  UUsernameRoute: typeof UUsernameRoute
   ModsIndexRoute: typeof ModsIndexRoute
   PluginsIndexRoute: typeof PluginsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -505,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PluginsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -595,6 +615,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   ModsSlugRoute: ModsSlugRoute,
   PluginsSlugRoute: PluginsSlugRoute,
+  UUsernameRoute: UUsernameRoute,
   ModsIndexRoute: ModsIndexRoute,
   PluginsIndexRoute: PluginsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

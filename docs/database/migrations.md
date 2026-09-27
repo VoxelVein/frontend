@@ -60,7 +60,8 @@ The schema lives in `src/db/schema.ts` and currently defines:
 
 Better Auth tables:
 
-* `users` — user accounts
+* `users` — user accounts, with an optional Markdown `bio` shown on the
+  public profile
 * `sessions` — auth sessions
 * `accounts` — linked social/oauth accounts
 * `verifications` — verification tokens
@@ -77,6 +78,48 @@ Application tables:
 * `user_notifications` — per-user notifications, such as the result of a
   publishing review
 * `username_history` — previous usernames, to keep them unique
+
+## Journal timestamps decide what runs
+
+`drizzle/meta/_journal.json` orders migrations, and the `when` value is not
+cosmetic. The migrator applies a migration only when
+
+```text
+newest applied created_at < this migration's folderMillis
+```
+
+so a `when` that is **not newer than what has already been applied is skipped
+silently** — `pnpm db:migrate` reports success and the schema is quietly wrong.
+`when` also has to increase down the journal, because a migration stamped
+earlier than its predecessor is never reached once the later one has run.
+
+Two ways this bites:
+
+* **Fabricating a future timestamp.** Writing an entry by hand with a
+  rounded-up "next hour" value leaves the journal ahead of the real clock, and
+  every migration generated in the meantime is skipped. `0013` was stamped
+  28 minutes into the future this way; `0014` was generated inside that window
+  and would not have applied.
+* **Appending after a hand-written entry.** Always check the new entry's `when`
+  against the previous one before committing.
+
+To check a journal, entries must be strictly increasing:
+
+```bash
+python3 - <<'PY'
+import json
+
+with open("drizzle/meta/_journal.json") as handle:
+    stamps = [e["when"] for e in json.load(handle)["entries"]]
+
+print("monotonic:", stamps == sorted(stamps))
+PY
+```
+
+If a migration has already been applied to a shared database with a wrong
+stamp, correcting the journal alone is not enough — the
+`drizzle.__drizzle_migrations` ledger still holds the old `created_at`, and the
+migrator compares against that. Fix the row to match the corrected journal.
 
 ## Data migrations
 

@@ -13,6 +13,7 @@ import {
   isUsernameFree,
   resolveReservedUsername,
 } from "@/lib/account-lifecycle";
+import { bioInputSchema } from "@/lib/bio";
 import { isReservedUsername } from "@/lib/usernames";
 
 import env from "../../env.config";
@@ -304,6 +305,14 @@ export const auth = betterAuth({
 
   user: {
     additionalFields: {
+      // The one field a client may set directly. `validator` caps it here as
+      // well as in the form, so a direct call to the update endpoint cannot
+      // store a bio longer than the profile page is built to render.
+      bio: {
+        required: false,
+        type: "string",
+        validator: { input: bioInputSchema },
+      },
       deletionRequestedAt: { input: false, required: false, type: "date" },
       hasOwnedProject: {
         defaultValue: false,

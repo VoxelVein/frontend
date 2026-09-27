@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SettingsProfile } from "@/components/settings/settings-profile";
+import { BIO_MAX_LENGTH } from "@/lib/bio";
 import { formatDate } from "@/lib/format";
 import { USERNAME_CHANGE_COOLDOWN_MS } from "@/lib/usernames";
 
@@ -30,7 +31,7 @@ const {
   invalidateMock: vi.fn<() => Promise<void>>(),
   notifyMock: vi.fn<(signal: string) => void>(),
   updateUserMock: vi.fn<
-    (opts: { name: string }) => Promise<{
+    (opts: { bio?: null | string; name: string }) => Promise<{
       error: { message: string } | null;
     }>
   >(),
@@ -67,6 +68,7 @@ const renderProfile = (user: Parameters<typeof SettingsProfile>[0]["user"]) => {
 };
 
 const baseUser = {
+  bio: null,
   email: "steve@example.com",
   name: "Steve",
   username: "steve",
@@ -84,7 +86,7 @@ describe(SettingsProfile, () => {
     updateUserMock.mockReset().mockResolvedValue({ error: null });
   });
 
-  it("updates only the display name through updateUser", async () => {
+  it("updates the display name and bio, but never the username", async () => {
     renderProfile(baseUser);
 
     fireEvent.change(screen.getByLabelText("Display name"), {
@@ -93,13 +95,126 @@ describe(SettingsProfile, () => {
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => {
-      expect(updateUserMock).toHaveBeenCalledWith({ name: "Alex" });
+      expect(updateUserMock).toHaveBeenCalledWith({ bio: null, name: "Alex" });
     });
+    // The username has its own path, so it must not ride along here.
     expect(changeUsernameMock).not.toHaveBeenCalled();
     await expect(
       screen.findByText("Profile updated.")
     ).resolves.toBeInTheDocument();
     expect(notifyMock).toHaveBeenCalledWith("$sessionSignal");
+  });
+
+  it("shows the saved bio in the field", () => {
+    renderProfile({ ...baseUser, bio: "I make mods." });
+
+    expect(screen.getByLabelText("Bio (Markdown)")).toHaveValue("I make mods.");
+  });
+
+  it("starts the bio empty when the account has none", () => {
+    renderProfile(baseUser);
+
+    expect(screen.getByLabelText("Bio (Markdown)")).toHaveValue("");
+  });
+
+  it("saves the bio alongside the name", async () => {
+    renderProfile(baseUser);
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "I make mods and plugins." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(updateUserMock).toHaveBeenCalledWith({
+        bio: "I make mods and plugins.",
+        name: "Steve",
+      });
+    });
+  });
+
+  it("stores null when the bio is cleared rather than an empty string", async () => {
+    // Otherwise "no bio" and a bio that renders as nothing stay
+    // indistinguishable.
+    renderProfile({ ...baseUser, bio: "I make mods." });
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(updateUserMock).toHaveBeenCalledWith({ bio: null, name: "Steve" });
+    });
+  });
+
+  it("treats a whitespace-only bio as no bio", async () => {
+    renderProfile({ ...baseUser, bio: "I make mods." });
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "   \n  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(updateUserMock).toHaveBeenCalledWith({ bio: null, name: "Steve" });
+    });
+  });
+
+  it("trims the bio before saving it", async () => {
+    renderProfile(baseUser);
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "  I make mods.  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(updateUserMock).toHaveBeenCalledWith({
+        bio: "I make mods.",
+        name: "Steve",
+      });
+    });
+  });
+
+  it("refuses a bio past the cap and explains why", async () => {
+    renderProfile(baseUser);
+
+    const tooLong = "a".repeat(BIO_MAX_LENGTH + 1);
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: tooLong },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await expect(
+      screen.findByText(`Bio must be ${BIO_MAX_LENGTH} characters or fewer.`)
+    ).resolves.toBeInTheDocument();
+    expect(screen.getByLabelText("Bio (Markdown)")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    );
+    expect(updateUserMock).not.toHaveBeenCalled();
+  });
+
+  it("surfaces the server's message when the save is refused", async () => {
+    updateUserMock.mockResolvedValue({
+      error: { message: "Bio is too long." },
+    });
+    renderProfile(baseUser);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await expect(
+      screen.findByText("Bio is too long.")
+    ).resolves.toBeInTheDocument();
+  });
+
+  it("says the bio is Markdown and that it is public", () => {
+    renderProfile(baseUser);
+
+    expect(screen.getByText(/Markdown is supported/u)).toHaveTextContent(
+      "Shown on your public profile."
+    );
   });
 
   it("locks the username during the cooldown and says until when", () => {
