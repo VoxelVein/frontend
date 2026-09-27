@@ -48,7 +48,7 @@ expectations:
 
 ```bash
 # 1. Create agent file
-cat > .opencode/agent/subagents/development/api-specialist.md << 'EOF'
+cat > .opencode/agents/subagents/development/api-specialist.md << 'EOF'
 ---
 description: "Expert in REST and GraphQL API design"
 category: "development"

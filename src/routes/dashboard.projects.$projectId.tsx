@@ -1,4 +1,4 @@
-import { IconExternalLink, IconTrash } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import {
   createFileRoute,
   Link,
@@ -13,12 +13,11 @@ import { toast } from "sonner";
 import { optional, parse, picklist, object } from "valibot";
 
 import { ProjectForm } from "@/components/dashboard/project-form";
+import { PublishPanel } from "@/components/dashboard/publish-panel";
 import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
 import { PageHeader } from "@/components/page-header";
-import { ProjectLink } from "@/components/projects/project-link";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
@@ -37,10 +36,8 @@ import {
   deleteProject,
   deleteVersion,
   getEditableProject,
-  setProjectPublished,
   updateProject,
 } from "@/lib/projects.functions";
-import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
 const TABS = ["details", "versions", "danger"] as const;
@@ -50,86 +47,6 @@ const searchSchema = object({ tab: optional(picklist(TABS)) });
 
 const isTab = (value: string): value is Tab =>
   TABS.some((tab) => tab === value);
-
-const PublishPanel = ({
-  onChange,
-  project,
-}: {
-  onChange: () => Promise<void>;
-  project: ProjectView;
-}) => {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const isPublished = project.status === "published";
-  const isServer = !hasVersions(project.type);
-  const canPublish = isServer
-    ? project.server !== null
-    : project.versions.some((version) => version.files.length);
-
-  const toggle = async () => {
-    setError(null);
-    setPending(true);
-    try {
-      await setProjectPublished({
-        data: { projectId: project.id, published: !isPublished },
-      });
-      await onChange();
-      toast.success(isPublished ? "Moved back to drafts" : "Published");
-    } catch (toggleError) {
-      setError(errorMessage(toggleError, "Could not change visibility."));
-    }
-    setPending(false);
-  };
-
-  return (
-    <section
-      aria-labelledby="visibility-heading"
-      className="border-border bg-card rounded-xl border p-6"
-    >
-      <h2
-        id="visibility-heading"
-        className="text-foreground text-lg font-semibold"
-      >
-        {isPublished ? "Published" : "Draft"}
-      </h2>
-      <p className="text-muted-foreground mt-1 text-sm">
-        {isPublished
-          ? "Everyone can find and download this project."
-          : "Only you and admins can see this project."}
-        {!isPublished && !canPublish && isServer
-          ? " Add the server address before publishing."
-          : null}
-        {!isPublished && !canPublish && !isServer
-          ? " Upload a version with a file before publishing."
-          : null}
-      </p>
-      {error ? (
-        <p role="alert" className="text-destructive mt-3 text-sm">
-          {error}
-        </p>
-      ) : null}
-      <div className="mt-4 flex flex-wrap gap-3">
-        <Button
-          type="button"
-          variant={isPublished ? "outline" : "default"}
-          className="min-h-11"
-          disabled={pending || (!isPublished && !canPublish)}
-          onClick={toggle}
-        >
-          {isPublished ? "Unpublish" : "Publish"}
-        </Button>
-        <ProjectLink
-          type={project.type}
-          slug={project.slug}
-          className={cn(buttonVariants({ variant: "ghost" }), "min-h-11")}
-        >
-          <IconExternalLink size={16} aria-hidden="true" />
-          View page
-        </ProjectLink>
-      </div>
-    </section>
-  );
-};
 
 const VersionList = ({
   onChange,

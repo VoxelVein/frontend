@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePostSearch } from "@/hooks/use-post-search";
 import type { PostSummary } from "@/lib/posts";
-import type { PostSearchDocument } from "@/lib/posts-search";
 import {
   listPosts,
   postSearchAvailable,
@@ -26,7 +25,7 @@ const CardGrid = ({
   posts,
   useHits,
 }: {
-  hits: PostSearchDocument[];
+  hits: PostSummary[];
   isSearching: boolean;
   posts: PostSummary[];
   useHits: boolean;

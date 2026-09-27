@@ -414,33 +414,10 @@ files, so both are committed.
 | --- | --- | --- | --- | --- |
 | `context7` | `opencode.json`, `.mcp.json` | 2 | on | Live library docs |
 | `shadcn` | `opencode.json` | few | on | Registry, `components.json` |
-| `meilisearch` | opt-in only | 26 | **off** | Inspect/manage search indexes |
 
 **`context7` is the one to use.** Look up API signatures instead of
 recalling them — see the `context7` skill. Set `CONTEXT7_API_KEY` in your
 environment for a higher rate limit.
-
-**`meilisearch` is deliberately not committed.** It needs a credential
-that cannot live in a repo file, and it exposes destructive tools
-(`delete-index`, `delete-key`, `update-settings`). To opt in locally, add
-to `opencode.json`:
-
-```json
-"meilisearch": {
-  "type": "local",
-  "command": ["uvx", "-n", "meilisearch-mcp"],
-  "environment": {
-    "MEILI_HTTP_ADDR": "{env:MEILI_HTTP_ADDR}",
-    "MEILI_MASTER_KEY": "{env:MEILI_MCP_API_KEY}"
-  }
-}
-```
-
-Give it a **scoped** key via `MEILI_MCP_API_KEY` — not
-`MEILI_MASTER_KEY`. A master key in a committed config is a
-credential leak; a scoped key limits the blast radius. Note that
-`"enabled": false` does **not** prevent OpenCode 2.0.18 from starting a
-local server, which is why the entry is absent rather than disabled.
 
 ### Skills and commands
 

@@ -1,6 +1,6 @@
 ---
 name: drizzle-migrations
-description: Change the Postgres schema safely in this repo — generating a Drizzle migration, naming the file, reviewing the SQL, applying it, and handling the deploy and Meilisearch reindex consequences. Use when adding or altering a table, column, index, or constraint in src/db/schema.ts, when touching Better Auth's schema, or when a migration fails to apply. Triggers on "add a column", "change the schema", "migrate", "alter table", "add an index", or any edit to src/db/schema.ts.
+description: Change the Postgres schema safely in this repo — generating a Drizzle migration, naming the file, reviewing the SQL, applying it, and handling the deploy and search-index consequences. Use when adding or altering a table, column, index, or constraint in src/db/schema.ts, when touching Better Auth's schema, or when a migration fails to apply. Triggers on "add a column", "change the schema", "migrate", "alter table", "add an index", or any edit to src/db/schema.ts.
 version: 1.0.0
 author: voxelvein
 type: skill
@@ -101,19 +101,18 @@ pnpm db:migrate
 pnpm db:studio   # inspect the result
 ```
 
-### 6. Reindex Meilisearch if searchable fields changed
+### 6. Update the search index if a searchable field changed
 
-The search indexes are **not** kept in sync by migrations. If you renamed
-or changed anything indexed, drift is silent — search keeps returning the
-old shape until you reindex:
+Search reads `posts` and `projects` directly, so there is no derived index to
+resync and no reindex command. A changed field does need a matching index:
 
-```bash
-pnpm db:reindex         # projects
-pnpm db:reindex:posts   # blog posts
-```
-
-Searchable surfaces: `posts` and `projects`. If your change touches
-either, say so in the PR and note whether a reindex is required.
+- Changing a `tsvector` expression means editing it in **both** the migration
+  and `src/lib/search/text.ts`, identically. A GIN expression index is only
+  used when the query repeats the expression exactly, and a mismatch does not
+  error — it silently falls back to a sequential scan.
+- A new indexed expression needs its own `CREATE INDEX` in a generated
+  migration.
+- Verify with `EXPLAIN` that the index is used, not by reading the code.
 
 ## Deploy behaviour
 

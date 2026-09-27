@@ -1,8 +1,8 @@
 # Deploying with Dokploy
 
 `compose.yaml` is a self-contained stack for Dokploy: Postgres,
-migrations, the web app, the API, and Meilisearch. See
-[Docker](docker.md) for how the images and services fit together.
+migrations, the web app, and the API. See [Docker](docker.md) for how the
+images and services fit together.
 
 ## 1. Create the app
 
@@ -26,7 +26,6 @@ CORS_ORIGIN=https://voxelvein.vomlabs.com
 # Secrets
 BETTER_AUTH_SECRET=   # openssl rand -hex 32
 POSTGRES_PASSWORD=    # openssl rand -hex 24
-MEILI_MASTER_KEY=     # openssl rand -hex 24
 WEBHOOK_SECRET=       # openssl rand -hex 32
 
 # Cloudflare Turnstile (real keys; password sign-in fails without them)
@@ -66,32 +65,16 @@ The API needs its own public domain because browsers call it directly.
 
 ## 4. Deploy
 
-Click **Deploy**. `db` and `meilisearch` start first, `migrate` applies
-the database migrations and exits, then `web` starts. `api` starts once
-Meilisearch is healthy.
+Click **Deploy**. `db` starts first, `migrate` applies the database
+migrations and exits, then `web` starts. `api` starts independently.
 
-## 5. Enable search indexing
+Search needs no separate step: `migrate` creates the extension and
+indexes, and search works as soon as there is something to find. See
+[Search](../search/postgres.md).
 
-Search stays empty until the web app has a Meilisearch write key. Open
-the Dokploy terminal on the `meilisearch` container and run:
+## 5. Afterwards
 
-```bash
-curl -X POST localhost:7700/keys \
-  -H "Authorization: Bearer $MEILI_MASTER_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"voxelvein-web-writer",
-       "actions":["documents.add","documents.delete",
-                  "indexes.create","settings.update"],
-       "indexes":["projects","posts"],"expiresAt":null}'
-```
-
-Add the returned `key` as `MEILI_ADMIN_KEY` in the Environment tab and
-redeploy.
-
-## 6. Afterwards
-
-* Set up volume backups for `pgdata` (and `meili_data` if you want to
-  skip a reindex after a restore).
+* Set up volume backups for `pgdata`.
 * To make yourself admin, sign up on the site, then open the Dokploy
   terminal on the `db` container and run:
 

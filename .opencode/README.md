@@ -349,8 +349,8 @@ Before generating code, ContextScout discovers relevant patterns from your conte
 Unlike Cursor/Copilot where behavior is baked into plugins, OAC agents are markdown files. Edit them directly:
 
 ```bash
-nano .opencode/agent/core/opencoder.md  # local project install
-# Or: nano ~/.config/opencode/agent/core/opencoder.md  # global install
+nano .opencode/agents/core/opencoder.md  # local project install
+# Or: nano ~/.config/opencode/agents/core/opencoder.md  # global install
 # Add project rules, change workflows, customize behavior
 ```
 
@@ -618,8 +618,8 @@ Approve? [y/n]
 Edit agent files directly:
 
 ```bash
-nano .opencode/agent/core/opencoder.md  # local project install
-# Or: nano ~/.config/opencode/agent/core/opencoder.md  # global install
+nano .opencode/agents/core/opencoder.md  # local project install
+# Or: nano ~/.config/opencode/agents/core/opencoder.md  # global install
 ```
 
 Change the model in the frontmatter:
@@ -755,7 +755,7 @@ A: MVI principle: Only load what's needed, when it's needed. Context files <200 
 A: Smart pattern discovery agent. Finds relevant context files before code generation. Ranks by priority. Prevents wasted work.
 
 **Q: Can I edit agent behavior?**  
-A: Yes! Agents are markdown files. Edit them directly: `nano .opencode/agent/core/opencoder.md` (local) or `nano ~/.config/opencode/agent/core/opencoder.md` (global)
+A: Yes! Agents are markdown files. Edit them directly: `nano .opencode/agents/core/opencoder.md` (local) or `nano ~/.config/opencode/agents/core/opencoder.md` (global)
 
 **Q: How do approval gates work?**  
 A: Agents ALWAYS request approval before execution (write/edit/bash). You review plans before implementation. No surprises.

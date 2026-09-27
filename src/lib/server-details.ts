@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { projects, projectServerLinks, projectServers } from "@/db/schema";
@@ -70,24 +70,4 @@ export const loadServerDetails = async (
     links,
     port: server.port,
   };
-};
-
-/** Published servers that link to any of these projects. */
-export const findServersLinking = async (
-  projectIds: string[]
-): Promise<string[]> => {
-  if (projectIds.length === 0) {
-    return [];
-  }
-  const rows = await db
-    .selectDistinct({ serverId: projectServerLinks.serverId })
-    .from(projectServerLinks)
-    .innerJoin(projects, eq(projects.id, projectServerLinks.serverId))
-    .where(
-      and(
-        inArray(projectServerLinks.linkedProjectId, projectIds),
-        eq(projects.status, "published")
-      )
-    );
-  return rows.map((row) => row.serverId);
 };

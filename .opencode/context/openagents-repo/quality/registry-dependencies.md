@@ -363,7 +363,7 @@ dependencies:
 **5. Commit with descriptive message**:
 
 ```bash
-git add .opencode/agent/my-agent.md registry.json
+git add .opencode/agents/my-agent.md registry.json
 git commit -m "Add my-agent with coder-agent and code standards dependencies"
 ```
 
@@ -419,7 +419,7 @@ jq '.components[] | .[] | select(.dependencies[]? == "subagent:old-agent") | {id
 **3. Delete component**:
 
 ```bash
-rm .opencode/agent/subagents/old-agent.md
+rm .opencode/agents/subagents/old-agent.md
 ```
 
 **4. Update registry**:
@@ -454,7 +454,7 @@ rm .opencode/agent/subagents/old-agent.md
 /check-context-deps --fix
 
 # Option 2: Manual fix
-# Edit .opencode/agent/core/opencoder.md
+# Edit .opencode/agents/core/opencoder.md
 # Add to frontmatter:
 dependencies:
   - context:core/standards/code

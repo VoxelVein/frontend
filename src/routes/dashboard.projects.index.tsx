@@ -22,6 +22,7 @@ const formatVersionCount = (count: number): string =>
 
 const STATUS_LABELS = {
   draft: "Draft",
+  pending: "In review",
   published: "Published",
   removed: "Removed",
 } as const;

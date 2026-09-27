@@ -17,9 +17,9 @@ const toIsoDate = (value: Date | string): string | null => {
 };
 
 /**
- * The post fields a card renders. Both `PostSummary` (from the database) and
- * `PostSearchDocument` (from Meilisearch) satisfy it, so search hits and list
- * entries render through the same component.
+ * The post fields a card renders. Both `PostSummary` from the database and a
+ * search hit satisfy it, so search results and list entries render through the
+ * same component.
  */
 export interface PostCardData {
   createdAt: Date | string;
@@ -28,8 +28,22 @@ export interface PostCardData {
   title: string;
 }
 
-const PostCard = ({ post }: { post: PostCardData }) => {
+const HEADING_TAGS = { 2: "h2", 3: "h3" } as const;
+
+interface PostCardProps {
+  /**
+   * Heading level for the post title. Defaults to 2, which is correct on the
+   * blog index where the page heading is the `h1`. Pass 3 when the card sits
+   * inside a section that already provides an `h2`, so the title nests under it
+   * instead of competing with it.
+   */
+  headingLevel?: 2 | 3;
+  post: PostCardData;
+}
+
+const PostCard = ({ headingLevel = 2, post }: PostCardProps) => {
   const isoDate = toIsoDate(post.createdAt);
+  const Heading = HEADING_TAGS[headingLevel];
 
   return (
     <article className="border-border bg-card focus-within:border-foreground/20 relative flex h-full flex-col rounded-xl border p-5 transition-colors duration-300 focus-within:ring-1 motion-reduce:transition-none">
@@ -53,9 +67,9 @@ const PostCard = ({ post }: { post: PostCardData }) => {
         </p>
       )}
 
-      <h2 className="text-foreground mt-2 text-lg font-semibold tracking-tight">
+      <Heading className="text-foreground mt-2 text-lg font-semibold tracking-tight">
         {post.title}
-      </h2>
+      </Heading>
 
       {post.preview ? (
         <p className="text-muted-foreground mt-2 line-clamp-3 text-sm leading-6">

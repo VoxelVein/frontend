@@ -68,9 +68,9 @@ opencode-agents/
 
 | Component              | Location                                |
 | ---------------------- | --------------------------------------- |
-| **Core agents**        | `.opencode/agent/core/`                 |
-| **Category agents**    | `.opencode/agent/{category}/`           |
-| **Subagents**          | `.opencode/agent/subagents/`            |
+| **Core agents**        | `.opencode/agents/core/`                 |
+| **Category agents**    | `.opencode/agents/{category}/`           |
+| **Subagents**          | `.opencode/agents/subagents/`            |
 | **Commands**           | `.opencode/command/`                    |
 | **Context files**      | `.opencode/context/`                    |
 | **Prompt variants**    | `.opencode/prompts/{category}/{agent}/` |
@@ -91,9 +91,9 @@ opencode-agents/
 
 | What | Where |
 | --- | --- |
-| **New core agent** | `.opencode/agent/core/{name}.md` |
-| **New category agent** | `.opencode/agent/{category}/{name}.md` |
-| **New subagent** | `.opencode/agent/subagents/{category}/{name}.md` |
+| **New core agent** | `.opencode/agents/core/{name}.md` |
+| **New category agent** | `.opencode/agents/{category}/{name}.md` |
+| **New subagent** | `.opencode/agents/subagents/{category}/{name}.md` |
 | **New command** | `.opencode/command/{name}.md` |
 | **New context** | `.opencode/context/{category}/{name}.md` |
 | **Agent tests** | `evals/agents/{category}/{agent}/tests/` |
@@ -120,33 +120,33 @@ README.md                            # Main documentation
 ### Core Agents
 
 ```
-.opencode/agent/core/openagent.md
-.opencode/agent/core/opencoder.md
-.opencode/agent/meta/system-builder.md
+.opencode/agents/core/openagent.md
+.opencode/agents/core/opencoder.md
+.opencode/agents/meta/system-builder.md
 ```
 
 ### Development Agents
 
 ```
-.opencode/agent/subagents/development/frontend-specialist.md
-.opencode/agent/subagents/development/devops-specialist.md
+.opencode/agents/subagents/development/frontend-specialist.md
+.opencode/agents/subagents/development/devops-specialist.md
 ```
 
 ### Content Agents
 
 ```
-.opencode/agent/content/copywriter.md
-.opencode/agent/content/technical-writer.md
+.opencode/agents/content/copywriter.md
+.opencode/agents/content/technical-writer.md
 ```
 
 ### Key Subagents
 
 ```
-.opencode/agent/subagents/code/test-engineer.md
-.opencode/agent/subagents/code/reviewer.md
-.opencode/agent/subagents/code/coder-agent.md
-.opencode/agent/subagents/core/task-manager.md
-.opencode/agent/subagents/core/documentation.md
+.opencode/agents/subagents/code/test-engineer.md
+.opencode/agents/subagents/code/reviewer.md
+.opencode/agents/subagents/code/coder-agent.md
+.opencode/agents/subagents/core/task-manager.md
+.opencode/agents/subagents/core/documentation.md
 ```
 
 ### Core Context
@@ -193,13 +193,13 @@ evals/framework/src/types/            # TypeScript types
 ### Agents
 
 ```
-.opencode/agent/{category}/{agent-name}.md
+.opencode/agents/{category}/{agent-name}.md
 ```
 
 **Examples**:
 
-- `.opencode/agent/subagents/development/frontend-specialist.md`
-- `.opencode/agent/subagents/code/test-engineer.md`
+- `.opencode/agents/subagents/development/frontend-specialist.md`
+- `.opencode/agents/subagents/code/test-engineer.md`
 
 ### Context
 
@@ -263,13 +263,13 @@ scripts/{purpose}/{action}-{target}.sh
 
 ```bash
 # By name
-find .opencode/agent -name "{agent-name}.md"
+find .opencode/agents -name "{agent-name}.md"
 
 # By category
-ls .opencode/agent/{category}/
+ls .opencode/agents/{category}/
 
 # All agents
-find .opencode/agent -name "*.md" -not -path "*/subagents/*"
+find .opencode/agents -name "*.md" -not -path "*/subagents/*"
 ```
 
 ### Find Test File

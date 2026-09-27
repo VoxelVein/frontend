@@ -122,7 +122,7 @@ dependencies:
 ---
 ```
 
-**Subagent** (`.opencode/agent/subagents/category/your-agent.md`):
+**Subagent** (`.opencode/agents/subagents/category/your-agent.md`):
 
 ```yaml
 ---
@@ -203,7 +203,7 @@ Only edit `registry.json` manually if auto-detect doesn't work.
   "id": "agent-name",
   "name": "Agent Name",
   "type": "agent",
-  "path": ".opencode/agent/category/agent-name.md",
+  "path": ".opencode/agents/category/agent-name.md",
   "description": "Brief description",
   "category": "category",
   "tags": ["tag1", "tag2"],
@@ -234,7 +234,7 @@ Only edit `registry.json` manually if auto-detect doesn't work.
 
 ```bash
 # Example errors
-ERROR: Path does not exist: (example: .opencode/agent/core/missing.md)
+ERROR: Path does not exist: (example: .opencode/agents/core/missing.md)
 ERROR: Duplicate ID: frontend-specialist
 ERROR: Invalid category: invalid-category
 ERROR: Missing dependency: subagent:nonexistent

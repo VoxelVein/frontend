@@ -44,10 +44,9 @@ a fresh environment.
 
 | Command             | Description                                     |
 | ------------------- | ----------------------------------------------- |
-| `just infra`        | Start Postgres, Meilisearch, and Garage         |
+| `just infra`        | Start Postgres and Garage                       |
 | `pnpm storage:init` | Prepare the local Garage bucket and key         |
-| `pnpm db:seed`      | Create demo projects of every type, then reindex|
-| `pnpm db:reindex`   | Rebuild the search index from the database      |
+| `pnpm db:seed`      | Create demo projects of every type              |
 | `pnpm db:seed:admin`| Make an existing user an admin                  |
 | `pnpm mc:versions`  | Refresh the Minecraft version list from Mojang  |
 

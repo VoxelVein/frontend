@@ -84,28 +84,12 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
       DATABASE_URL: *database-url
-      MEILI_HOST: http://meilisearch:7700
-      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       API_URL: http://api:3002
       # Trust X-Forwarded-For for per-client download dedupe ("true"/"false").
       TRUST_PROXY: ${TRUST_PROXY:-true}
     depends_on:
       migrate:
         condition: service_completed_successfully
-    restart: unless-stopped
-
-  meilisearch:
-    image: getmeili/meilisearch:v1.35.1
-    environment:
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
-      MEILI_ENV: production
-    volumes:
-      - meili_data:/meili_data
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:7700/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
 
   api:
@@ -118,8 +102,6 @@ services:
     environment:
       NODE_ENV: production
       API_PORT: 3002
-      MEILI_HOST: http://meilisearch:7700
-      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:-${MEILI_MASTER_KEY}}
       CORS_ORIGIN: ${CORS_ORIGIN:-https://voxelvein.vomlabs.com}
       # The API refuses to start without a random secret of 32+ characters,
       # so fail the deploy up front instead of crash-looping the container.
@@ -128,11 +110,7 @@ services:
       # X-Forwarded-For (Traefik under Dokploy, hence the default), "false"
       # otherwise. The API refuses to start in production without it.
       TRUST_PROXY: ${TRUST_PROXY:-true}
-    depends_on:
-      meilisearch:
-        condition: service_healthy
     restart: unless-stopped
 
 volumes:
   pgdata:
-  meili_data:

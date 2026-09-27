@@ -50,7 +50,7 @@ Check each finding against the layer the code actually lives in.
 | Client data and state | `src/hooks/`, `src/components/` | Query, Pacer, Virtual |
 | Shared domain logic | `src/lib/*.ts` | Pure helpers, no route imports |
 | DB schema | `src/db/schema.ts`, `drizzle/` | Drizzle + Postgres |
-| Search | `src/lib/posts-index.ts`, `search-sync.ts` | Meilisearch |
+| Search | `src/lib/search/` | Postgres `pg_trgm` + full-text |
 | Storage | `src/lib/storage.ts`, `storage.functions.ts` | S3-compatible + presigned |
 | Tests | `src/**/__tests__/` | Vitest + Testing Library |
 
@@ -64,9 +64,9 @@ Check each finding against the layer the code actually lives in.
   goes straight to `db` is a finding.
 - `requireAdmin` guards admin mutations such as the post CRUD in
   `posts.functions.ts` and the admin list pages under `src/components/admin/`.
-  Admin search intentionally runs against Meilisearch directly because the
-  public route cannot verify a session; keep that filter hardcoded to
-  published-only so drafts can never reach an anonymous caller.
+  `searchPosts` hardcodes `published = true` while `searchPostsAdmin` takes
+  `includeUnpublished`; keep the public filter hardcoded so drafts can never
+  reach an anonymous caller.
 - Handlers under `src/routes/api/` do not inherit the server-function guards.
   Each one needs its own check: `download.$fileId.ts`,
   `projects.$projectId.versions.$versionId.files.ts`, and `auth/$.ts`.
@@ -102,8 +102,8 @@ Check each finding against the layer the code actually lives in.
 - Drizzle queries use bound parameters: `eq`, `inArray`, and the `sql` tagged
   template. String-concatenated SQL is a finding.
 - User input in a `like`/`ilike` pattern needs `%` and `_` escaped.
-- Meilisearch filters must be built as an array of validated clauses.
-  Interpolating a raw query into a filter expression is a finding.
+- Search filter values are validated against the same allowlists the UI
+  offers, and an unknown one is dropped rather than forwarded to the query.
 - Blog bodies render Markdown through `@tanstack/markdown`. Any
   `dangerouslySetInnerHTML` needs a sanitization comment justifying it; the
   codebase currently has none, and adding one is a review event.
@@ -112,8 +112,8 @@ Check each finding against the layer the code actually lives in.
 
 ### 4. Secrets and transport
 
-- `DATABASE_URL`, `BETTER_AUTH_SECRET`, `MEILI_MASTER_KEY`, storage
-  credentials, and `TURNSTILE_SECRET` stay server-side. Only
+- `DATABASE_URL`, `BETTER_AUTH_SECRET`, storage credentials, and
+  `TURNSTILE_SECRET` stay server-side. Only
   `VITE_GITHUB_CLIENT_ID` and `VITE_GOOGLE_CLIENT_ID` are public, because
   `env.config.ts` maps them deliberately. A new `VITE_` value must be
   public by definition.
@@ -126,9 +126,9 @@ Check each finding against the layer the code actually lives in.
   `document.cookie` writes.
 - There is no rate limiting anywhere in the app today. `download.$fileId.ts`
   dedupes counts per client key but does not limit request volume, and the
-  public `/api/projects/search` and webhook routes are unthrottled. Call
-  this out as a known gap rather than a surprise, and treat a new public
-  endpoint as needing a decision about limits.
+  unauthenticated search server functions and the webhook routes are
+  unthrottled. Call this out as a known gap rather than a surprise, and treat a
+  new public endpoint as needing a decision about limits.
 
 ### 5. Queries, indexes, and cache
 
@@ -139,15 +139,17 @@ Check each finding against the layer the code actually lives in.
   migration in `drizzle/NNNN_*.sql` plus its meta snapshot.
 - `.orderBy` or `.limit` without `.where` reads the whole table.
 - Project search is capped at `PAGE_SIZE` of 12 with `MAX_PAGE` of 1000 in
-  `server/routes/projects.ts`. Admin post search caps at 50. Both are
+  `src/lib/search/projects.ts`. Admin post search caps at 50. Both are
   deliberate bounds; raising one needs an argument about index cost.
 - `src/lib/project-search-cache.ts` is a 60s TTL, 50-entry LRU keyed by a
   serialized params tuple. A new cached read extends this module rather than
   starting a parallel cache.
-- Meilisearch and Drizzle must stay in step. `search-sync.ts` and
-  `posts-index.ts` own the write side; `pnpm db:reindex:posts` is the repair
-  path. A new searchable field needs an index settings change and a reindex,
-  otherwise search silently returns nothing for it.
+- The two `tsvector` expressions are written out in both
+  `drizzle/0010_postgres_search.sql` and `src/lib/search/text.ts`. A GIN
+  expression index is only used when the query repeats the expression
+  exactly, so divergence does not error — it silently degrades to a
+  sequential scan. A new searchable field needs a matching migration, and
+  `src/lib/__tests__/search-index.test.ts` asserts index usage.
 
 ### 6. Rendering and data flow
 
@@ -161,9 +163,9 @@ Check each finding against the layer the code actually lives in.
   `src/hooks/use-post-search.ts`. A new search field follows the same
   pattern; a hand-rolled `setTimeout` debounce is a finding.
 - Search responses can arrive out of order. `use-post-search.ts` already
-  discards superseded responses and exposes an availability probe that
-  deactivates the field when Meilisearch is down. A new search hook without
-  that guard is a finding.
+  discards superseded responses and probes whether there is anything to
+  search before showing the field. A new search hook without that guard is a
+  finding.
 - Every subscription, observer, and timer needs a cleanup. Missing cleanup in
   a search or SSE hook leaks listeners across route changes.
 - Data belongs in a route loader or a Query call. Fetching from `useEffect`
@@ -219,10 +221,10 @@ even when the code is otherwise correct.
 - Throw `new Error(...)` naming the operation that failed, and pass the
   original as `cause` so the stack survives. `project-search.functions.ts`
   shows the pattern.
-- Meilisearch, Postgres, and S3 all fail in practice. Search, upload, and
-  webhook paths need an explicit failure state. The existing degradation
-  pattern returns `available: false` and hides the search field; a new
-  search path should follow it rather than throwing into the render.
+- Postgres and S3 both fail in practice. Search, upload, and webhook paths
+  need an explicit failure state. An unreadable search result set degrades to
+  "no matches" rather than throwing into the render; a new search path
+  should follow that rather than surfacing an error boundary.
 - `server/routes/events.ts` is SSE. A client reconnect or disconnect must not
   leak a listener, and the heartbeat interval needs a matching clear.
 - `download.$fileId.ts` swallows a failed session lookup on purpose so an

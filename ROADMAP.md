@@ -47,11 +47,11 @@
 
 * Content hosting for mods and plugins: Postgres projects, versions, and
   files; uploads to S3-compatible storage (Garage locally, Cloudflare R2
-  in production); download counting; creator dashboard; Meilisearch sync
+  in production); download counting; creator dashboard; fuzzy search
 
-* Marketplace shell: homepage, projects hub, mods search with Meilisearch
-  and filters
-* ElysiaJS API server with webhooks, SSE live events, and search proxy
+* Marketplace shell: homepage, projects hub, mods search with typo-tolerant
+  matching and filters
+* ElysiaJS API server with webhooks and SSE live events
 * Better Auth with username/password, Google social sign-in, and passkeys
 * Settings management UI (profile, account, passkeys, sessions)
 * Navbar and footer polish (active states, landmarks, touch targets)

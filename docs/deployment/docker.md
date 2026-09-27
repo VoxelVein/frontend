@@ -46,8 +46,8 @@ client IDs from `GOOGLE_CLIENT_ID` and `GITHUB_CLIENT_ID`.
 
 ## Run with Compose
 
-`compose.yaml` defines `db` (Postgres), `migrate`, `web`, `api`, and
-`meilisearch`. It is the file Dokploy deploys. `migrate` applies
+`compose.yaml` defines `db` (Postgres), `migrate`, `web`, and `api`. It
+is the file Dokploy deploys. `migrate` applies
 pending migrations and exits; `web` only starts after it exits
 successfully, so a deploy never serves new code against an old schema.
 `api` does not use the database and starts independently.
@@ -67,8 +67,8 @@ Domains tab. To reach the stack from the host, add
 `${WEB_PORT}` (default 1112) and the API on `${API_HOST_PORT}`
 (default 1113).
 
-For a self-contained local stack with Postgres, Meilisearch, and Garage,
-use `docker-compose.yml` instead.
+For a self-contained local stack with Postgres and Garage, use
+`docker-compose.yml` instead.
 
 ## Environment variables
 
@@ -79,14 +79,11 @@ use `docker-compose.yml` instead.
 | `BETTER_AUTH_URL`           | web, migrate        | Yes         |
 | `BETTER_AUTH_SECRET`        | web, migrate        | Yes         |
 | `POSTGRES_PASSWORD`         | db                  | Yes         |
-| `MEILI_MASTER_KEY`          | meilisearch         | Yes         |
 | `WEBHOOK_SECRET`            | api                 | Yes         |
 | `CORS_ORIGIN`               | api                 | Yes         |
 | `VITE_TURNSTILE_SITE_KEY`   | web (build arg)     | For sign-in |
 | `TURNSTILE_SECRET`          | web                 | For sign-in |
 | `TURNSTILE_HOSTNAMES`       | web                 | For sign-in |
-| `MEILI_SEARCH_KEY`          | web, api            | No          |
-| `MEILI_ADMIN_KEY`           | web                 | No          |
 | `STORAGE_*`                 | web                 | For uploads |
 | `GOOGLE_CLIENT_ID`/`SECRET` | web (+ build arg)   | No          |
 | `GITHUB_CLIENT_ID`/`SECRET` | web (+ build arg)   | No          |
@@ -95,18 +92,11 @@ use `docker-compose.yml` instead.
 
 `VITE_API_URL` is the public API URL, `CORS_ORIGIN` the web app origin(s)
 allowed to call the API, and `TRUST_PROXY` (default `true` in
-`compose.yaml`) is covered below. `MEILI_SEARCH_KEY` falls back to
-`MEILI_MASTER_KEY`.
+`compose.yaml`) is covered below.
 
 Password sign-in and sign-up are rejected unless all three Turnstile
 values are set. In production the secret must not be a Cloudflare
 testing secret and `TURNSTILE_HOSTNAMES` must not include `localhost`.
-
-`MEILI_ADMIN_KEY` lets the web app keep search in sync. It needs
-`documents.add`, `documents.delete`, `indexes.create`, and
-`settings.update` on the `projects` and `posts` indexes; without it,
-search stays empty. Mint it with the master key after the first deploy
-(see [Meilisearch](../search/meilisearch.md)) and redeploy.
 
 ## Client IPs and `TRUST_PROXY`
 

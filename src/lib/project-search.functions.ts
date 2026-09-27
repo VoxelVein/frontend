@@ -8,11 +8,11 @@ import {
   LOADERS_BY_TYPE,
 } from "@/lib/projects";
 import type { ProjectDocument, ProjectType } from "@/lib/projects";
-
-import env from "../../env.config";
+import { searchProjectsInDatabase } from "@/lib/search/projects";
 
 const GAME_VERSIONS = new Set<string>(ALL_GAME_VERSIONS);
 
+const DEFAULT_SORT = "downloads:desc";
 const SORTS = ["downloads:desc", "updatedAt:desc", "name:asc"] as const;
 
 export interface ProjectSearchParams {
@@ -29,13 +29,32 @@ export interface ProjectSearchParams {
 
 export interface ProjectSearchResponse {
   estimatedTotalHits: number;
-  facetDistribution: Record<string, Record<string, number>> | undefined;
+  /**
+   * Facet name to value to count. `null` when the result set could not be read.
+   *
+   * Explicitly `null` rather than `undefined`: this object crosses the server
+   * function boundary as JSON, and a dropped `undefined` property would reach
+   * the client as a missing key instead.
+   */
+  facetDistribution: Record<string, Record<string, number>> | null;
   hits: ProjectDocument[];
   page: number;
   pageSize: number;
   query: string;
 }
 
+/**
+ * Searches published projects in Postgres.
+ *
+ * The database is already a hard dependency of the app, so querying it
+ * directly removes a network hop and a whole class of "search is unavailable"
+ * failure.
+ *
+ * Filter values are checked against the same allowlists the UI offers, and an
+ * unknown one is dropped rather than forwarded — which is all the old endpoint
+ * ever did, since it could only be reached with values the browser had already
+ * validated.
+ */
 export const searchProjects = createServerFn({ method: "GET" })
   .validator((data: ProjectSearchParams) => {
     if (!isProjectType(data.type)) {
@@ -43,60 +62,35 @@ export const searchProjects = createServerFn({ method: "GET" })
     }
     return data;
   })
-  .handler(async ({ data }): Promise<ProjectSearchResponse> => {
-    const params = new URLSearchParams({ type: data.type });
+  .handler(({ data }): Promise<ProjectSearchResponse> => {
     const categories = new Set<string>(CATEGORIES_BY_TYPE[data.type]);
     const loaders = new Set<string>(LOADERS_BY_TYPE[data.type]);
-
-    if (data.query) {
-      params.set("q", data.query);
-    }
-    if (data.category && categories.has(data.category)) {
-      params.set("category", data.category);
-    }
-    if (data.gameVersion && GAME_VERSIONS.has(data.gameVersion)) {
-      params.set("gameVersion", data.gameVersion);
-    }
-    if (data.loader && loaders.has(data.loader)) {
-      params.set("loader", data.loader);
-    }
-    if (
-      data.type === "server" &&
-      data.clientRequirement &&
-      isClientRequirement(data.clientRequirement)
-    ) {
-      params.set("clientRequirement", data.clientRequirement);
-    }
-    if (data.page && data.page > 1) {
-      params.set("page", String(data.page));
-    }
     // SAFETY: SORTS is a readonly tuple of strings; widening to readonly
     // string[] is safe for the membership check below.
-    params.set(
-      "sort",
-      (SORTS as readonly string[]).includes(data.sort)
-        ? data.sort
-        : "downloads:desc"
-    );
+    const sort = (SORTS as readonly string[]).includes(data.sort)
+      ? data.sort
+      : DEFAULT_SORT;
 
-    let response: Response;
-    try {
-      response = await fetch(
-        `${env.API_URL}/api/projects/search?${params.toString()}`,
-        { signal: AbortSignal.timeout(8000) }
-      );
-    } catch (fetchError) {
-      throw new Error(
-        "Could not reach the search service. Start the API server with `pnpm dev:all` and try again.",
-        { cause: fetchError }
-      );
-    }
-
-    if (!response.ok) {
-      throw new Error(`Search failed (${response.status})`);
-    }
-
-    // SAFETY: The Elysia /api/projects/search endpoint returns the same shape as
-    // the previous direct Meilisearch call (hits + estimatedTotalHits + query).
-    return response.json() as Promise<ProjectSearchResponse>;
+    return searchProjectsInDatabase({
+      category:
+        data.category && categories.has(data.category)
+          ? data.category
+          : undefined,
+      // Only servers have a client requirement.
+      clientRequirement:
+        data.type === "server" &&
+        data.clientRequirement &&
+        isClientRequirement(data.clientRequirement)
+          ? data.clientRequirement
+          : undefined,
+      gameVersion:
+        data.gameVersion && GAME_VERSIONS.has(data.gameVersion)
+          ? data.gameVersion
+          : undefined,
+      loader: data.loader && loaders.has(data.loader) ? data.loader : undefined,
+      page: data.page,
+      query: data.query,
+      sort,
+      type: data.type,
+    });
   });

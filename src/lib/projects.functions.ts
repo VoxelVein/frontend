@@ -44,8 +44,7 @@ import type {
   ServerInput,
   VersionInput,
 } from "@/lib/projects";
-import { syncProjectToSearch } from "@/lib/search-sync";
-import { findServersLinking, loadServerDetails } from "@/lib/server-details";
+import { loadServerDetails } from "@/lib/server-details";
 import { deleteObjects } from "@/lib/storage";
 
 const PG_UNIQUE_VIOLATION = "23505";
@@ -102,6 +101,9 @@ const loadProjectView = async (
         project.owner.username ??
         project.owner.name)
       : DELETED_USER_LABEL,
+    // Null when the owner is gone, which keeps the byline from linking to a
+    // profile that no longer exists.
+    authorUsername: project.owner?.username ?? null,
     category: project.category,
     description: project.description,
     downloads: project.downloads,
@@ -111,6 +113,7 @@ const loadProjectView = async (
     ownerId: project.ownerId,
     pendingDeletion: project.pendingDeletion,
     publishedAt: project.publishedAt?.toISOString() ?? null,
+    rejectionReason: project.rejectionReason,
     server:
       project.type === "server"
         ? await loadServerDetails(project.id, { includeHidden })
@@ -260,7 +263,6 @@ export const updateProject = createServerFn({ method: "POST" })
       throw new Error("Choose a category for this project type.");
     }
     await db.update(projects).set(fields).where(eq(projects.id, projectId));
-    await syncProjectToSearch(projectId);
   });
 
 const hasPrimaryFile = async (projectId: string): Promise<boolean> => {
@@ -271,48 +273,6 @@ const hasPrimaryFile = async (projectId: string): Promise<boolean> => {
     .where(eq(projectVersions.projectId, projectId));
   return (row?.files ?? 0) > 0;
 };
-
-const hasServerDetails = async (projectId: string): Promise<boolean> => {
-  const [row] = await db
-    .select({ projectId: projectServers.projectId })
-    .from(projectServers)
-    .where(eq(projectServers.projectId, projectId))
-    .limit(1);
-  return row !== undefined;
-};
-
-export const setProjectPublished = createServerFn({ method: "POST" })
-  .validator((data: { projectId: string; published: boolean }) => ({
-    ...parse(projectIdSchema, { projectId: data.projectId }),
-    published: data.published === true,
-  }))
-  .handler(async ({ data }): Promise<void> => {
-    const session = await getUploader();
-    const project = await requireEditableProject(session, data.projectId);
-
-    if (data.published) {
-      if (!hasVersions(project.type)) {
-        if (!(await hasServerDetails(project.id))) {
-          throw new Error("Add the server address before publishing.");
-        }
-      } else if (!(await hasPrimaryFile(project.id))) {
-        throw new Error("Upload at least one file before publishing.");
-      }
-    }
-
-    await db
-      .update(projects)
-      .set(
-        data.published
-          ? {
-              publishedAt: project.publishedAt ?? new Date(),
-              status: "published",
-            }
-          : { status: "draft" }
-      )
-      .where(eq(projects.id, project.id));
-    await syncProjectToSearch(project.id);
-  });
 
 export const createVersion = createServerFn({ method: "POST" })
   .validator((data: VersionInput) => parse(versionInputSchema, data))
@@ -451,7 +411,6 @@ export const saveServerDetails = createServerFn({ method: "POST" })
         .set({ updatedAt: new Date() })
         .where(eq(projects.id, projectId));
     });
-    await syncProjectToSearch(projectId);
   });
 
 /** Deletes a version and its stored files. */
@@ -488,7 +447,6 @@ export const deleteVersion = createServerFn({ method: "POST" })
         .set({ status: "draft" })
         .where(eq(projects.id, project.id));
     }
-    await syncProjectToSearch(project.id);
   });
 
 /** Permanently deletes a project with all versions and stored files. */
@@ -502,18 +460,12 @@ export const deleteProject = createServerFn({ method: "POST" })
       .select({ id: projectVersions.id })
       .from(projectVersions)
       .where(eq(projectVersions.projectId, project.id));
-    // Links cascade away with the project, so find the servers first.
-    const [files, linkingServers] = await Promise.all([
-      db
-        .select({ storageKey: projectFiles.storageKey })
-        .from(projectFiles)
-        .where(inArray(projectFiles.versionId, versionIds)),
-      findServersLinking([project.id]),
-    ]);
+    const files = await db
+      .select({ storageKey: projectFiles.storageKey })
+      .from(projectFiles)
+      .where(inArray(projectFiles.versionId, versionIds));
     await db.delete(projects).where(eq(projects.id, project.id));
     await deleteObjects(files.map((file) => file.storageKey));
-    await syncProjectToSearch(project.id);
-    await Promise.all(linkingServers.map((id) => syncProjectToSearch(id)));
   });
 
 /**
@@ -531,7 +483,6 @@ export const removeProject = createServerFn({ method: "POST" })
       .update(projects)
       .set({ status: "removed" })
       .where(eq(projects.id, data.projectId));
-    await syncProjectToSearch(data.projectId);
   });
 
 const protectedSchema = object({

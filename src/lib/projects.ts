@@ -35,7 +35,26 @@ export const PROJECT_TYPES = [
 ] as const;
 export type ProjectType = (typeof PROJECT_TYPES)[number];
 
-export const PROJECT_STATUSES = ["draft", "published", "removed"] as const;
+/**
+ * The lifecycle of a project.
+ *
+ * `pending` sits between `draft` and `published`: the creator has asked for
+ * the project to go public and an admin has not decided yet. It is deliberately
+ * a distinct value rather than a separate flag, because every public read path
+ * already filters on `status = 'published'`, so a project in `pending` is
+ * absent from search, downloads, trending and its own public page with no
+ * change to any of those queries.
+ *
+ * There is no `rejected` value. A rejection returns the project to `draft` and
+ * records why in `rejectionReason`, so the creator can fix it and resubmit
+ * rather than being stuck in a terminal state.
+ */
+export const PROJECT_STATUSES = [
+  "draft",
+  "pending",
+  "published",
+  "removed",
+] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
 export const RELEASE_CHANNELS = ["release", "beta", "alpha"] as const;
@@ -179,9 +198,15 @@ export const PROJECT_TYPE_PATHS = {
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 export const SLUG_MAX_LENGTH = 64;
 
-/** Search document for one published project, as stored in Meilisearch. */
+/** The shape search and trending both read for one published project. */
 export interface ProjectDocument {
   author: string;
+  /**
+   * The author's normalised username, which is what a profile URL is keyed on.
+   * Null when the account is gone, so callers can skip the link rather than
+   * point at a profile that 404s.
+   */
+  authorUsername: string | null;
   category: string;
   description: string;
   downloads: number;
@@ -484,6 +509,12 @@ export const DELETED_USER_LABEL = "Deleted user";
 
 export interface ProjectView {
   author: string;
+  /**
+   * The owner's normalised username, which is what a profile URL is keyed on.
+   * Null when the account is gone, so callers can skip the link rather than
+   * point at a profile that 404s.
+   */
+  authorUsername: string | null;
   category: string;
   description: string;
   downloads: number;
@@ -496,6 +527,12 @@ export interface ProjectView {
   /** Chosen for deletion along with the owner's account; hidden meanwhile. */
   pendingDeletion: boolean;
   publishedAt: string | null;
+  /**
+   * Why an admin last sent this project back to draft. Null unless a rejection
+   * is the most recent decision, so it is cleared the moment the creator
+   * resubmits.
+   */
+  rejectionReason: string | null;
   /** Join details; only servers have them, and only once saved. */
   server: ProjectServerView | null;
   slug: string;
