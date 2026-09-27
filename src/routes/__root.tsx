@@ -157,14 +157,49 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
+      // Icons. Browsers pick the last entry they support, so the .ico goes
+      // first as the universal fallback and the scalable SVG goes last.
+      //
+      // `sizes: "any"` on the .ico is deliberate: the file carries 16/24/32/64
+      // internally, and a concrete `sizes` value makes the browser only
+      // consider it for that one size and ignore the rest.
       {
         rel: "icon",
         href: "/favicon.ico",
+        sizes: "any",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        href: "/favicon-16x16.png",
+        sizes: "16x16",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        href: "/favicon-32x32.png",
         sizes: "32x32",
       },
       {
+        // favicon.svg, not logo.svg: the SVG icons carry the white border, and
+        // logo.svg must stay border-free because the navbar uses it as a CSS
+        // mask-image, where a white ring would show up in the header logo.
+        rel: "icon",
+        type: "image/svg+xml",
+        href: "/favicon.svg",
+      },
+      // iOS Safari ignores favicon.ico for the home screen and screenshots the
+      // page instead when this is missing.
+      {
+        rel: "apple-touch-icon",
+        href: "/apple-touch-icon.png",
+        sizes: "180x180",
+      },
+      // Must match the real filename in public/. The android-chrome-*.png
+      // icons are only reachable through the manifest, never from a <link>.
+      {
         rel: "manifest",
-        href: "/manifest.json",
+        href: "/site.webmanifest",
       },
     ],
     scripts: [
