@@ -25,10 +25,18 @@ import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as ModpacksIndexRouteImport } from './routes/modpacks.index'
+import { Route as ModpacksSlugRouteImport } from './routes/modpacks.$slug'
 import { Route as ModsIndexRouteImport } from './routes/mods.index'
 import { Route as ModsSlugRouteImport } from './routes/mods.$slug'
 import { Route as PluginsIndexRouteImport } from './routes/plugins.index'
 import { Route as PluginsSlugRouteImport } from './routes/plugins.$slug'
+import { Route as ResourcePacksIndexRouteImport } from './routes/resource-packs.index'
+import { Route as ResourcePacksSlugRouteImport } from './routes/resource-packs.$slug'
+import { Route as ServersIndexRouteImport } from './routes/servers.index'
+import { Route as ServersSlugRouteImport } from './routes/servers.$slug'
+import { Route as ShadersIndexRouteImport } from './routes/shaders.index'
+import { Route as ShadersSlugRouteImport } from './routes/shaders.$slug'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiDownloadFileIdRouteImport } from './routes/api/download.$fileId'
@@ -117,6 +125,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ModpacksIndexRoute = ModpacksIndexRouteImport.update({
+  id: '/modpacks/',
+  path: '/modpacks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModpacksSlugRoute = ModpacksSlugRouteImport.update({
+  id: '/modpacks/$slug',
+  path: '/modpacks/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModsIndexRoute = ModsIndexRouteImport.update({
   id: '/mods/',
   path: '/mods/',
@@ -135,6 +153,36 @@ const PluginsIndexRoute = PluginsIndexRouteImport.update({
 const PluginsSlugRoute = PluginsSlugRouteImport.update({
   id: '/plugins/$slug',
   path: '/plugins/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcePacksIndexRoute = ResourcePacksIndexRouteImport.update({
+  id: '/resource-packs/',
+  path: '/resource-packs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcePacksSlugRoute = ResourcePacksSlugRouteImport.update({
+  id: '/resource-packs/$slug',
+  path: '/resource-packs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServersIndexRoute = ServersIndexRouteImport.update({
+  id: '/servers/',
+  path: '/servers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServersSlugRoute = ServersSlugRouteImport.update({
+  id: '/servers/$slug',
+  path: '/servers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShadersIndexRoute = ShadersIndexRouteImport.update({
+  id: '/shaders/',
+  path: '/shaders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShadersSlugRoute = ShadersSlugRouteImport.update({
+  id: '/shaders/$slug',
+  path: '/shaders/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UUsernameRoute = UUsernameRouteImport.update({
@@ -191,12 +239,20 @@ export interface FileRoutesByFullPath {
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/modpacks/$slug': typeof ModpacksSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
+  '/resource-packs/$slug': typeof ResourcePacksSlugRoute
+  '/servers/$slug': typeof ServersSlugRoute
+  '/shaders/$slug': typeof ShadersSlugRoute
   '/u/$username': typeof UUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
   '/plugins/': typeof PluginsIndexRoute
+  '/resource-packs/': typeof ResourcePacksIndexRoute
+  '/servers/': typeof ServersIndexRoute
+  '/shaders/': typeof ShadersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
@@ -219,12 +275,20 @@ export interface FileRoutesByTo {
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/modpacks/$slug': typeof ModpacksSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
+  '/resource-packs/$slug': typeof ResourcePacksSlugRoute
+  '/servers/$slug': typeof ServersSlugRoute
+  '/shaders/$slug': typeof ShadersSlugRoute
   '/u/$username': typeof UUsernameRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/modpacks': typeof ModpacksIndexRoute
   '/mods': typeof ModsIndexRoute
   '/plugins': typeof PluginsIndexRoute
+  '/resource-packs': typeof ResourcePacksIndexRoute
+  '/servers': typeof ServersIndexRoute
+  '/shaders': typeof ShadersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
@@ -249,12 +313,20 @@ export interface FileRoutesById {
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/modpacks/$slug': typeof ModpacksSlugRoute
   '/mods/$slug': typeof ModsSlugRoute
   '/plugins/$slug': typeof PluginsSlugRoute
+  '/resource-packs/$slug': typeof ResourcePacksSlugRoute
+  '/servers/$slug': typeof ServersSlugRoute
+  '/shaders/$slug': typeof ShadersSlugRoute
   '/u/$username': typeof UUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
   '/plugins/': typeof PluginsIndexRoute
+  '/resource-packs/': typeof ResourcePacksIndexRoute
+  '/servers/': typeof ServersIndexRoute
+  '/shaders/': typeof ShadersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
@@ -280,12 +352,20 @@ export interface FileRouteTypes {
     | '/terms-of-use'
     | '/welcome'
     | '/blog/$slug'
+    | '/modpacks/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
+    | '/resource-packs/$slug'
+    | '/servers/$slug'
+    | '/shaders/$slug'
     | '/u/$username'
     | '/dashboard/'
+    | '/modpacks/'
     | '/mods/'
     | '/plugins/'
+    | '/resource-packs/'
+    | '/servers/'
+    | '/shaders/'
     | '/api/auth/$'
     | '/api/download/$fileId'
     | '/dashboard/projects/$projectId'
@@ -308,12 +388,20 @@ export interface FileRouteTypes {
     | '/terms-of-use'
     | '/welcome'
     | '/blog/$slug'
+    | '/modpacks/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
+    | '/resource-packs/$slug'
+    | '/servers/$slug'
+    | '/shaders/$slug'
     | '/u/$username'
     | '/dashboard'
+    | '/modpacks'
     | '/mods'
     | '/plugins'
+    | '/resource-packs'
+    | '/servers'
+    | '/shaders'
     | '/api/auth/$'
     | '/api/download/$fileId'
     | '/dashboard/projects/$projectId'
@@ -337,12 +425,20 @@ export interface FileRouteTypes {
     | '/terms-of-use'
     | '/welcome'
     | '/blog/$slug'
+    | '/modpacks/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
+    | '/resource-packs/$slug'
+    | '/servers/$slug'
+    | '/shaders/$slug'
     | '/u/$username'
     | '/dashboard/'
+    | '/modpacks/'
     | '/mods/'
     | '/plugins/'
+    | '/resource-packs/'
+    | '/servers/'
+    | '/shaders/'
     | '/api/auth/$'
     | '/api/download/$fileId'
     | '/dashboard/projects/$projectId'
@@ -366,11 +462,19 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
   WelcomeRoute: typeof WelcomeRoute
+  ModpacksSlugRoute: typeof ModpacksSlugRoute
   ModsSlugRoute: typeof ModsSlugRoute
   PluginsSlugRoute: typeof PluginsSlugRoute
+  ResourcePacksSlugRoute: typeof ResourcePacksSlugRoute
+  ServersSlugRoute: typeof ServersSlugRoute
+  ShadersSlugRoute: typeof ShadersSlugRoute
   UUsernameRoute: typeof UUsernameRoute
+  ModpacksIndexRoute: typeof ModpacksIndexRoute
   ModsIndexRoute: typeof ModsIndexRoute
   PluginsIndexRoute: typeof PluginsIndexRoute
+  ResourcePacksIndexRoute: typeof ResourcePacksIndexRoute
+  ServersIndexRoute: typeof ServersIndexRoute
+  ShadersIndexRoute: typeof ShadersIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiDownloadFileIdRoute: typeof ApiDownloadFileIdRoute
   ApiProjectsProjectIdVersionsVersionIdFilesRoute: typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
@@ -490,6 +594,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/modpacks/': {
+      id: '/modpacks/'
+      path: '/modpacks'
+      fullPath: '/modpacks/'
+      preLoaderRoute: typeof ModpacksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modpacks/$slug': {
+      id: '/modpacks/$slug'
+      path: '/modpacks/$slug'
+      fullPath: '/modpacks/$slug'
+      preLoaderRoute: typeof ModpacksSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mods/': {
       id: '/mods/'
       path: '/mods'
@@ -516,6 +634,48 @@ declare module '@tanstack/react-router' {
       path: '/plugins/$slug'
       fullPath: '/plugins/$slug'
       preLoaderRoute: typeof PluginsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resource-packs/': {
+      id: '/resource-packs/'
+      path: '/resource-packs'
+      fullPath: '/resource-packs/'
+      preLoaderRoute: typeof ResourcePacksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resource-packs/$slug': {
+      id: '/resource-packs/$slug'
+      path: '/resource-packs/$slug'
+      fullPath: '/resource-packs/$slug'
+      preLoaderRoute: typeof ResourcePacksSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servers/': {
+      id: '/servers/'
+      path: '/servers'
+      fullPath: '/servers/'
+      preLoaderRoute: typeof ServersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servers/$slug': {
+      id: '/servers/$slug'
+      path: '/servers/$slug'
+      fullPath: '/servers/$slug'
+      preLoaderRoute: typeof ServersSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shaders/': {
+      id: '/shaders/'
+      path: '/shaders'
+      fullPath: '/shaders/'
+      preLoaderRoute: typeof ShadersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shaders/$slug': {
+      id: '/shaders/$slug'
+      path: '/shaders/$slug'
+      fullPath: '/shaders/$slug'
+      preLoaderRoute: typeof ShadersSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$username': {
@@ -613,11 +773,19 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TermsOfUseRoute: TermsOfUseRoute,
   WelcomeRoute: WelcomeRoute,
+  ModpacksSlugRoute: ModpacksSlugRoute,
   ModsSlugRoute: ModsSlugRoute,
   PluginsSlugRoute: PluginsSlugRoute,
+  ResourcePacksSlugRoute: ResourcePacksSlugRoute,
+  ServersSlugRoute: ServersSlugRoute,
+  ShadersSlugRoute: ShadersSlugRoute,
   UUsernameRoute: UUsernameRoute,
+  ModpacksIndexRoute: ModpacksIndexRoute,
   ModsIndexRoute: ModsIndexRoute,
   PluginsIndexRoute: PluginsIndexRoute,
+  ResourcePacksIndexRoute: ResourcePacksIndexRoute,
+  ServersIndexRoute: ServersIndexRoute,
+  ShadersIndexRoute: ShadersIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiDownloadFileIdRoute: ApiDownloadFileIdRoute,
   ApiProjectsProjectIdVersionsVersionIdFilesRoute:

@@ -14,6 +14,14 @@ import { PageHeader } from "@/components/page-header";
 import { ProjectCard } from "@/components/projects/project-card";
 import { Button } from "@/components/ui/button";
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxField,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -21,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { filterGameVersions } from "@/lib/game-version-search";
 import { toSearchErrorMessage } from "@/lib/project-browser-loader";
 import type { ProjectBrowserData } from "@/lib/project-browser-loader";
 import { projectSearchCache } from "@/lib/project-search-cache";
@@ -31,11 +40,15 @@ import type {
 } from "@/lib/project-search.functions";
 import {
   CATEGORIES_BY_TYPE,
-  GAME_VERSIONS,
+  CLIENT_REQUIREMENT_LABELS,
+  CLIENT_REQUIREMENTS,
+  hasLoaders,
+  LOADER_LABELS,
   LOADERS_BY_TYPE,
   PROJECT_TYPE_LABELS,
 } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
+import { cn } from "@/lib/utils";
 
 const DEFAULT_SORT = "downloads:desc";
 
@@ -117,6 +130,8 @@ const SearchBar = ({
 
 interface FiltersProps {
   category: string;
+  clientRequirement: string;
+  onClientRequirementChange: (value: string | null) => void;
   gameVersion: string;
   loader: string;
   onCategoryChange: (value: string | null) => void;
@@ -127,16 +142,94 @@ interface FiltersProps {
   type: ProjectType;
 }
 
-const ALL_LOADERS_LABELS = {
-  mod: "All loaders",
-  plugin: "All platforms",
-} as const satisfies Record<ProjectType, string>;
+const CLIENT_REQUIREMENT_OPTIONS = [
+  { label: "Any client", value: "" },
+  ...CLIENT_REQUIREMENTS.map((value) => ({
+    label: CLIENT_REQUIREMENT_LABELS[value],
+    value,
+  })),
+];
+
+const ClientRequirementFilter = ({
+  onChange,
+  value,
+}: {
+  onChange: (value: string | null) => void;
+  value: string;
+}) => (
+  <div>
+    <label className="sr-only" htmlFor="server-client-requirement">
+      Client requirement
+    </label>
+    <Select
+      items={CLIENT_REQUIREMENT_OPTIONS}
+      value={value}
+      onValueChange={onChange}
+    >
+      <SelectTrigger id="server-client-requirement" className="min-h-11 w-full">
+        <SelectValue placeholder="Any client" />
+      </SelectTrigger>
+      <SelectContent>
+        {CLIENT_REQUIREMENT_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
+
+const GameVersionFilter = ({
+  onChange,
+  type,
+  value,
+}: {
+  onChange: (value: string | null) => void;
+  type: ProjectType;
+  value: string;
+}) => {
+  const [query, setQuery] = useState("");
+  const options = filterGameVersions(query, true, false);
+
+  return (
+    <Combobox
+      items={options}
+      filteredItems={options}
+      value={value || null}
+      onValueChange={(next: string | null) => {
+        setQuery("");
+        onChange(next);
+      }}
+      inputValue={query}
+      onInputValueChange={setQuery}
+    >
+      <ComboboxField
+        id={`${type}-game-version`}
+        placeholder={value ? `Minecraft ${value}` : "All versions"}
+        className={value ? "placeholder:text-foreground" : undefined}
+      />
+      <ComboboxContent>
+        <ComboboxEmpty>No matching versions.</ComboboxEmpty>
+        <ComboboxList>
+          {(item: string) => (
+            <ComboboxItem key={item} value={item}>
+              Minecraft {item}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
+  );
+};
 
 const capitalize = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
 
 const Filters = ({
   category,
+  clientRequirement,
+  onClientRequirementChange,
   gameVersion,
   loader,
   onCategoryChange,
@@ -146,7 +239,14 @@ const Filters = ({
   sort,
   type,
 }: FiltersProps) => (
-  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <div
+    className={cn(
+      "mt-4 grid gap-3 sm:grid-cols-2",
+      hasLoaders(type) || type === "server"
+        ? "lg:grid-cols-4"
+        : "lg:grid-cols-3"
+    )}
+  >
     <div>
       <label className="sr-only" htmlFor={`${type}-category`}>
         Category
@@ -180,59 +280,71 @@ const Filters = ({
       <label className="sr-only" htmlFor={`${type}-game-version`}>
         Game version
       </label>
-      <Select
-        items={[
-          { label: "All versions", value: "" },
-          ...GAME_VERSIONS.map((value) => ({
-            label: `Minecraft ${value}`,
-            value,
-          })),
-        ]}
-        value={gameVersion}
-        onValueChange={onGameVersionChange}
-      >
-        <SelectTrigger id={`${type}-game-version`} className="min-h-11 w-full">
-          <SelectValue placeholder="All versions" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">All versions</SelectItem>
-          {GAME_VERSIONS.map((value) => (
-            <SelectItem key={value} value={value}>
-              Minecraft {value}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex gap-1">
+        <GameVersionFilter
+          type={type}
+          value={gameVersion}
+          onChange={onGameVersionChange}
+        />
+        {gameVersion ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-lg"
+            className="size-11 shrink-0"
+            aria-label="Show all versions"
+            onClick={() => onGameVersionChange(null)}
+          >
+            <IconX size={16} aria-hidden="true" />
+          </Button>
+        ) : null}
+      </div>
     </div>
 
-    <div>
-      <label className="sr-only" htmlFor={`${type}-loader`}>
-        {type === "mod" ? "Loader" : "Platform"}
-      </label>
-      <Select
-        items={[
-          { label: ALL_LOADERS_LABELS[type], value: "" },
-          ...LOADERS_BY_TYPE[type].map((value) => ({
-            label: capitalize(value),
-            value,
-          })),
-        ]}
-        value={loader}
-        onValueChange={onLoaderChange}
-      >
-        <SelectTrigger id={`${type}-loader`} className="min-h-11 w-full">
-          <SelectValue placeholder={ALL_LOADERS_LABELS[type]} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">{ALL_LOADERS_LABELS[type]}</SelectItem>
-          {LOADERS_BY_TYPE[type].map((value) => (
-            <SelectItem key={value} value={value}>
-              {capitalize(value)}
+    {type === "server" ? (
+      <ClientRequirementFilter
+        value={clientRequirement}
+        onChange={onClientRequirementChange}
+      />
+    ) : null}
+
+    {hasLoaders(type) ? (
+      <div>
+        <label className="sr-only" htmlFor={`${type}-loader`}>
+          {LOADER_LABELS[type].singular}
+        </label>
+        <Select
+          items={[
+            {
+              label: `All ${LOADER_LABELS[type].plural.toLowerCase()}`,
+              value: "",
+            },
+            ...LOADERS_BY_TYPE[type].map((value) => ({
+              label: capitalize(value),
+              value,
+            })),
+          ]}
+          value={loader}
+          onValueChange={onLoaderChange}
+        >
+          <SelectTrigger id={`${type}-loader`} className="min-h-11 w-full">
+            <SelectValue
+              placeholder={`All ${LOADER_LABELS[type].plural.toLowerCase()}`}
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">
+              All {LOADER_LABELS[type].plural.toLowerCase()}
             </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+            {LOADERS_BY_TYPE[type].map((value) => (
+              <SelectItem key={value} value={value}>
+                {capitalize(value)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    ) : null}
 
     <div>
       <label className="sr-only" htmlFor={`${type}-sort`}>
@@ -427,8 +539,16 @@ const Results = ({
 
 const PAGE_DESCRIPTIONS = {
   mod: "Discover performance, technology, adventure, and more — search Minecraft mods.",
+  modpack:
+    "Play curated collections of mods, from lightweight packs to kitchen-sink adventures.",
   plugin:
     "Find administration, economy, protection, and minigame plugins for Minecraft servers.",
+  resourcepack:
+    "Change how Minecraft looks and sounds with textures, models, and audio packs.",
+  server:
+    "Find a Minecraft server to join, from survival and creative to minigames and modded worlds.",
+  shader:
+    "Add realistic lighting, shadows, and atmosphere to Minecraft with shader packs.",
 } as const satisfies Record<ProjectType, string>;
 
 interface ProjectBrowserProps extends ProjectBrowserData {
@@ -446,6 +566,7 @@ export const ProjectBrowser = ({
   const [category, setCategory] = useState("");
   const [gameVersion, setGameVersion] = useState("");
   const [loader, setLoader] = useState("");
+  const [clientRequirement, setClientRequirement] = useState("");
   const [sort, setSort] = useState(DEFAULT_SORT);
   const [page, setPage] = useState(1);
   const [liveEvent, setLiveEvent] = useState<LiveModEvent | null>(null);
@@ -500,6 +621,7 @@ export const ProjectBrowser = ({
 
     runSearch({
       category,
+      clientRequirement,
       gameVersion,
       loader,
       page,
@@ -509,6 +631,7 @@ export const ProjectBrowser = ({
     });
   }, [
     category,
+    clientRequirement,
     debouncedQuery,
     gameVersion,
     loader,
@@ -546,7 +669,13 @@ export const ProjectBrowser = ({
     };
   }, []);
 
-  const hasFilters = Boolean(category || gameVersion || loader || query);
+  const hasFilters = [
+    category,
+    clientRequirement,
+    gameVersion,
+    loader,
+    query,
+  ].some(Boolean);
   const showSkeletons = isSearching && !result && !error;
   const showEmpty =
     !isSearching && !error && result && result.hits.length === 0;
@@ -565,6 +694,7 @@ export const ProjectBrowser = ({
     setCategory("");
     setGameVersion("");
     setLoader("");
+    setClientRequirement("");
     setPage(1);
     dispatch({ type: "SEARCH_START" });
   };
@@ -573,6 +703,7 @@ export const ProjectBrowser = ({
     dispatch({ type: "RETRY" });
     runSearch({
       category,
+      clientRequirement,
       gameVersion,
       loader,
       page,
@@ -584,7 +715,16 @@ export const ProjectBrowser = ({
 
   const refreshFromLiveEvent = () => {
     setLiveEvent(null);
-    const params = { category, gameVersion, loader, page, query, sort, type };
+    const params = {
+      category,
+      clientRequirement,
+      gameVersion,
+      loader,
+      page,
+      query,
+      sort,
+      type,
+    };
     projectSearchCache.delete(params);
     runSearch(params);
   };
@@ -607,6 +747,8 @@ export const ProjectBrowser = ({
 
       <Filters
         category={category}
+        clientRequirement={clientRequirement}
+        onClientRequirementChange={changeFilter(setClientRequirement)}
         gameVersion={gameVersion}
         loader={loader}
         onCategoryChange={changeFilter(setCategory)}

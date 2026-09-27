@@ -98,26 +98,12 @@ const NavbarMobileMenu = ({
             </p>
 
             {PROJECT_ITEMS.map((item) => {
-              // SAFETY: Only available items render a Link; unavailable routes are not registered yet.
-              const href = item.href as "/mods";
-              const isActive = !!matchRoute({ to: href });
-
-              if (!item.available) {
-                return (
-                  <span
-                    key={item.href}
-                    className="text-muted-foreground/70 flex min-h-11 items-center justify-between rounded-lg px-3 py-3 text-sm font-medium"
-                  >
-                    {item.label}
-                    <span className="text-xs">Soon</span>
-                  </span>
-                );
-              }
+              const isActive = !!matchRoute({ fuzzy: true, to: item.href });
 
               return (
                 <Link
                   key={item.href}
-                  to={href}
+                  to={item.href}
                   preload="intent"
                   aria-current={isActive ? "page" : undefined}
                   onClick={onClose}

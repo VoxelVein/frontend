@@ -14,11 +14,11 @@ interface FooterLink {
 
 const PROJECT_LINKS: readonly FooterLink[] = [
   { available: true, href: "/mods", label: "Mods" },
-  { available: false, href: "/modpacks", label: "Modpacks" },
+  { available: true, href: "/modpacks", label: "Modpacks" },
   { available: true, href: "/plugins", label: "Plugins" },
-  { available: false, href: "/resource-packs", label: "Resource Packs" },
-  { available: false, href: "/shaders", label: "Shaders" },
-  { available: false, href: "/servers", label: "Servers" },
+  { available: true, href: "/resource-packs", label: "Resource Packs" },
+  { available: true, href: "/shaders", label: "Shaders" },
+  { available: true, href: "/servers", label: "Servers" },
 ];
 
 const RESOURCE_LINKS: readonly FooterLink[] = [

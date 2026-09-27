@@ -11,11 +11,14 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { formatCount, formatDate } from "@/lib/format";
-import { PROJECT_TYPE_LABELS } from "@/lib/projects";
+import { hasVersions, PROJECT_TYPE_LABELS } from "@/lib/projects";
 import { listMyProjects } from "@/lib/projects.functions";
 import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/";
+
+const formatVersionCount = (count: number): string =>
+  `${formatCount(count)} ${count === 1 ? "version" : "versions"}`;
 
 const STATUS_LABELS = {
   draft: "Draft",
@@ -72,9 +75,10 @@ const MyProjectsPage = () => {
                   </span>
                   <span className="text-muted-foreground block text-sm">
                     {PROJECT_TYPE_LABELS[project.type].singular} ·{" "}
-                    {STATUS_LABELS[project.status]} ·{" "}
-                    {formatCount(project.versionCount)}{" "}
-                    {project.versionCount === 1 ? "version" : "versions"}
+                    {STATUS_LABELS[project.status]}
+                    {hasVersions(project.type)
+                      ? ` · ${formatVersionCount(project.versionCount)}`
+                      : null}
                   </span>
                 </span>
                 <span className="text-muted-foreground text-sm">

@@ -7,6 +7,13 @@ export interface DemoProject {
   gameVersions: string[];
   loaders: string[];
   name: string;
+  /** Join details; only for `server` projects, which have no version. */
+  server?: {
+    address: string;
+    /** Demo projects to link, by slug. */
+    links: { required: boolean; slug: string }[];
+    port: number | null;
+  };
   slug: string;
   summary: string;
   tags: string[];
@@ -220,5 +227,138 @@ export const DEMO_PROJECTS: DemoProject[] = [
     tags: ["chat", "proxy"],
     type: "plugin",
     version: "0.9.0",
+  },
+  {
+    category: "technology",
+    downloads: 2_400_000,
+    gameVersions: ["1.21.1", "1.21"],
+    loaders: ["neoforge"],
+    name: "Create: Above and Beyond",
+    slug: "create-above-and-beyond",
+    summary:
+      "A guided tech progression pack built around Create's mechanical automation.",
+    tags: ["create", "quests", "progression"],
+    type: "modpack",
+    version: "2.1.0",
+  },
+  {
+    category: "lightweight",
+    downloads: 5_100_000,
+    gameVersions: ["1.21.4", "1.21.1", "1.21", "1.20.1"],
+    loaders: ["fabric", "quilt"],
+    name: "Fabulously Optimized",
+    slug: "fabulously-optimized",
+    summary:
+      "A performance-focused pack that keeps vanilla gameplay while doubling frame rates.",
+    tags: ["performance", "vanilla-plus"],
+    type: "modpack",
+    version: "6.4.0",
+  },
+  {
+    category: "faithful",
+    downloads: 8_700_000,
+    gameVersions: ["1.21.4", "1.21.1", "1.21", "1.20.4", "1.20.1"],
+    loaders: [],
+    name: "Faithful 32x",
+    slug: "faithful-32x",
+    summary:
+      "The vanilla look at twice the resolution, redrawn texture by texture.",
+    tags: ["32x", "vanilla"],
+    type: "resourcepack",
+    version: "1.21.4-r1",
+  },
+  {
+    category: "utility",
+    downloads: 1_300_000,
+    gameVersions: ["1.21.4", "1.21.1", "1.21", "1.20.1"],
+    loaders: [],
+    name: "Fresh Animations",
+    slug: "fresh-animations",
+    summary: "Brings mobs to life with smoother, more expressive animations.",
+    tags: ["animations", "entities"],
+    type: "resourcepack",
+    version: "1.9.2",
+  },
+  {
+    category: "realistic",
+    downloads: 6_200_000,
+    gameVersions: ["1.21.4", "1.21.1", "1.21", "1.20.4", "1.20.1"],
+    loaders: ["iris", "optifine"],
+    name: "Complementary Reimagined",
+    slug: "complementary-reimagined",
+    summary:
+      "Soft lighting and rich atmosphere that stays true to Minecraft's style.",
+    tags: ["lighting", "atmosphere"],
+    type: "shader",
+    version: "r5.4",
+  },
+  {
+    category: "performance",
+    downloads: 3_900_000,
+    gameVersions: ["1.21.4", "1.21.1", "1.21", "1.20.1"],
+    loaders: ["iris"],
+    name: "Sildur's Enhanced Default",
+    slug: "sildurs-enhanced-default",
+    summary: "Light-weight shaders that run well on older graphics cards.",
+    tags: ["lightweight", "fps"],
+    type: "shader",
+    version: "1.14",
+  },
+  {
+    category: "modded",
+    downloads: 0,
+    gameVersions: ["1.21.1", "1.21"],
+    loaders: [],
+    name: "Brass & Steam SMP",
+    server: {
+      address: "play.brass-steam.example",
+      links: [{ required: true, slug: "create-above-and-beyond" }],
+      port: null,
+    },
+    slug: "brass-and-steam-smp",
+    summary:
+      "A friendly modded survival server running Create: Above and Beyond.",
+    tags: ["smp", "create", "whitelist"],
+    type: "server",
+    version: "",
+  },
+  {
+    category: "minigames",
+    downloads: 0,
+    gameVersions: ["1.21.4", "1.21.1", "1.21", "1.20.4", "1.20.1"],
+    loaders: [],
+    name: "Pixel Party",
+    server: {
+      address: "mc.pixelparty.example",
+      links: [],
+      port: 25_570,
+    },
+    slug: "pixel-party",
+    summary: "Quick rounds of parkour, spleef, and build battles for everyone.",
+    tags: ["minigames", "parkour"],
+    type: "server",
+    version: "",
+  },
+  {
+    category: "survival",
+    downloads: 0,
+    gameVersions: ["1.21.4", "1.21.1", "1.21"],
+    loaders: [],
+    name: "Golden Hour Survival",
+    server: {
+      address: "goldenhour.example",
+      links: [
+        { required: false, slug: "complementary-reimagined" },
+        { required: false, slug: "fresh-animations" },
+        { required: false, slug: "sodium" },
+      ],
+      port: null,
+    },
+    slug: "golden-hour-survival",
+    summary:
+      "Vanilla survival with a recommended set of shaders and visual mods.",
+    tags: ["survival", "shaders"],
+    type: "server",
+    version: "",
   },
 ];

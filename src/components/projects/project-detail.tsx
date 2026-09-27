@@ -1,23 +1,32 @@
 import {
   IconArrowLeft,
   IconCalendar,
+  IconCopy,
+  IconPackages,
   IconDownload,
   IconPencil,
   IconShieldCheck,
   IconTag,
+  IconWorld,
 } from "@tabler/icons-react";
 import { Markdown } from "@tanstack/markdown/react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { ProjectLink } from "@/components/projects/project-link";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
-import { PROJECT_TYPE_LABELS } from "@/lib/projects";
+import {
+  formatServerAddress,
+  PROJECT_TYPE_LABELS,
+  PROJECT_TYPE_PATHS,
+} from "@/lib/projects";
 import type {
+  ProjectServerView,
   ProjectType,
   ProjectVersionView,
   ProjectView,
@@ -29,7 +38,7 @@ const badgeClassName =
 
 const BackLink = ({ type }: { type: ProjectType }) => (
   <Link
-    to={type === "mod" ? "/mods" : "/plugins"}
+    to={PROJECT_TYPE_PATHS[type]}
     className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
   >
     <IconArrowLeft size={16} aria-hidden="true" />
@@ -152,6 +161,195 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
   );
 };
 
+const COPIED_RESET_MS = 2000;
+
+const ServerClientContent = ({ server }: { server: ProjectServerView }) => {
+  if (server.links.length === 0) {
+    return (
+      <div>
+        <h3 className="text-foreground text-sm font-semibold">
+          Client content
+        </h3>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Vanilla client: join without installing anything.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h3 className="text-foreground text-sm font-semibold">Client content</h3>
+      <p className="text-muted-foreground mt-1 text-sm">
+        {server.clientRequirement === "required"
+          ? "Install the required content below to join."
+          : "Nothing is required to join; these are recommended."}
+      </p>
+      <ul className="mt-3 grid gap-2">
+        {server.links.map((link) => (
+          <li
+            key={link.id}
+            className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <IconPackages
+                size={20}
+                aria-hidden="true"
+                className="text-muted-foreground shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="text-foreground font-medium">{link.name}</p>
+                <p className="text-muted-foreground text-sm">
+                  {PROJECT_TYPE_LABELS[link.type].singular} ·{" "}
+                  {link.required ? "Required" : "Recommended"}
+                </p>
+              </div>
+            </div>
+            <ProjectLink
+              type={link.type}
+              slug={link.slug}
+              className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            >
+              View {PROJECT_TYPE_LABELS[link.type].singular.toLowerCase()}
+              <span className="sr-only"> {link.name}</span>
+            </ProjectLink>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const ServerJoin = ({ server }: { server: ProjectServerView | null }) => {
+  const [copyStatus, setCopyStatus] = useState("");
+
+  if (!server) {
+    return (
+      <p className="text-muted-foreground mt-3 text-sm">
+        The owner has not added the server address yet.
+      </p>
+    );
+  }
+
+  const address = formatServerAddress(server.address, server.port);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopyStatus("Address copied.");
+    } catch {
+      setCopyStatus("Could not copy. Select the address and copy it.");
+    }
+    setTimeout(() => setCopyStatus(""), COPIED_RESET_MS);
+  };
+
+  return (
+    <div className="mt-3 grid gap-4">
+      <div className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+            Server address
+          </p>
+          <p className="text-foreground mt-1 font-mono text-lg break-all select-all">
+            {address}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          onClick={() => copy()}
+        >
+          <IconCopy size={16} aria-hidden="true" />
+          Copy address
+        </Button>
+        <p
+          aria-live="polite"
+          className="text-muted-foreground w-full text-sm empty:hidden"
+        >
+          {copyStatus}
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-foreground text-sm font-semibold">
+          Supported versions
+        </h3>
+        <p className="text-muted-foreground mt-1 text-sm">
+          {server.gameVersions.join(", ")}
+        </p>
+      </div>
+
+      <ServerClientContent server={server} />
+    </div>
+  );
+};
+
+const ProjectStats = ({ project }: { project: ProjectView }) => {
+  const [latest] = project.versions;
+  const isServer = project.type === "server";
+  return (
+    <dl className="mt-8 grid gap-4 sm:grid-cols-3">
+      {isServer ? (
+        <StatCard
+          label="Supported versions"
+          icon={<IconWorld size={16} aria-hidden="true" />}
+          value={formatCount(project.server?.gameVersions.length ?? 0)}
+        />
+      ) : (
+        <StatCard
+          label="Downloads"
+          icon={<IconDownload size={16} aria-hidden="true" />}
+          value={formatCount(project.downloads)}
+        />
+      )}
+      {isServer ? (
+        <StatCard
+          label="Latest supported"
+          icon={<IconTag size={16} aria-hidden="true" />}
+          value={project.server?.gameVersions[0] ?? "None yet"}
+        />
+      ) : (
+        <StatCard
+          label="Latest version"
+          icon={<IconTag size={16} aria-hidden="true" />}
+          value={latest?.versionNumber ?? "None yet"}
+        />
+      )}
+      <StatCard
+        label="Updated"
+        icon={<IconCalendar size={16} aria-hidden="true" />}
+        value={formatDate(project.updatedAt)}
+      />
+    </dl>
+  );
+};
+
+/** Versions table for downloadable types, join details for servers. */
+const ProjectDownloads = ({ project }: { project: ProjectView }) => {
+  if (project.type === "server") {
+    return (
+      <section aria-labelledby="join-heading" className="mt-10">
+        <h2 id="join-heading" className="text-foreground text-lg font-semibold">
+          Join
+        </h2>
+        <ServerJoin server={project.server} />
+      </section>
+    );
+  }
+  return (
+    <section aria-labelledby="versions-heading" className="mt-10">
+      <h2
+        id="versions-heading"
+        className="text-foreground text-lg font-semibold"
+      >
+        Versions
+      </h2>
+      <VersionsTable versions={project.versions} />
+    </section>
+  );
+};
+
 interface ProtectionControlProps {
   isProtected: boolean;
   isSaving: boolean;
@@ -212,7 +410,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user.role === "admin";
   const canManage = session?.user.id === project.ownerId || isAdmin;
-  const [latest] = project.versions;
+
   const [protectedOverride, setProtectedOverride] =
     useState<ProtectedOverride | null>(null);
   const [isSavingProtection, setIsSavingProtection] = useState(false);
@@ -324,23 +522,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         {project.summary}
       </p>
 
-      <dl className="mt-8 grid gap-4 sm:grid-cols-3">
-        <StatCard
-          label="Downloads"
-          icon={<IconDownload size={16} aria-hidden="true" />}
-          value={formatCount(project.downloads)}
-        />
-        <StatCard
-          label="Latest version"
-          icon={<IconTag size={16} aria-hidden="true" />}
-          value={latest?.versionNumber ?? "None yet"}
-        />
-        <StatCard
-          label="Updated"
-          icon={<IconCalendar size={16} aria-hidden="true" />}
-          value={formatDate(project.updatedAt)}
-        />
-      </dl>
+      <ProjectStats project={project} />
 
       {project.description ? (
         <section aria-labelledby="description-heading" className="mt-10">
@@ -356,15 +538,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         </section>
       ) : null}
 
-      <section aria-labelledby="versions-heading" className="mt-10">
-        <h2
-          id="versions-heading"
-          className="text-foreground text-lg font-semibold"
-        >
-          Versions
-        </h2>
-        <VersionsTable versions={project.versions} />
-      </section>
+      <ProjectDownloads project={project} />
 
       {project.tags.length > 0 ? (
         <section aria-labelledby="tags-heading" className="mt-10">

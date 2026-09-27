@@ -72,6 +72,7 @@ const project = (overrides: Partial<ProjectView> = {}): ProjectView => ({
   pendingDeletion: false,
   publishedAt: null,
   rejectionReason: null,
+  server: null,
   slug: "sodium",
   status: "draft",
   summary: "Fast.",

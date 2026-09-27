@@ -39,7 +39,7 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 ## Content
 
-* [Projects and Files](content/projects.md) — mods and plugins, versions,
+* [Projects and Files](content/projects.md) — every project type, versions,
   uploads, downloads, and permissions
 * [Object Storage](storage/object-storage.md) — Garage for development,
   Cloudflare R2 for production

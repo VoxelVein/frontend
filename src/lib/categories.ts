@@ -1,10 +1,10 @@
 import {
   IconBox,
-  IconDeviceGamepad2,
   IconPackages,
   IconPalette,
   IconPhoto,
   IconServer,
+  IconWorld,
 } from "@tabler/icons-react";
 import type { Icon } from "@tabler/icons-react";
 
@@ -15,6 +15,11 @@ interface MinecraftCategory {
    * destination that 404s.
    */
   available: boolean;
+  /**
+   * Shown inline in the navbar from `lg`. The rest wait for `xl` and sit in
+   * the navbar's "More" menu until then, so every category stays reachable.
+   */
+  alwaysInline: boolean;
   description: string;
   href: string;
   icon: Icon;
@@ -32,13 +37,15 @@ interface MinecraftCategory {
 const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
+    alwaysInline: true,
     description: "Enhance Minecraft with new features, mechanics, and content.",
     href: "/mods",
     icon: IconBox,
     label: "Mods",
   },
   {
-    available: false,
+    available: true,
+    alwaysInline: true,
     description: "Discover curated collections of mods for every playstyle.",
     href: "/modpacks",
     icon: IconPackages,
@@ -46,30 +53,34 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   },
   {
     available: true,
+    alwaysInline: true,
     description: "Extend your Minecraft server with powerful plugins.",
     href: "/plugins",
     icon: IconServer,
     label: "Plugins",
   },
   {
-    available: false,
+    available: true,
+    alwaysInline: false,
     description: "Change the look and feel of your Minecraft experience.",
     href: "/resource-packs",
-    icon: IconDeviceGamepad2,
+    icon: IconPhoto,
     label: "Resource Packs",
   },
   {
-    available: false,
+    available: true,
+    alwaysInline: false,
     description: "Stunning visual effects for your world.",
     href: "/shaders",
     icon: IconPalette,
     label: "Shaders",
   },
   {
-    available: false,
+    available: true,
+    alwaysInline: false,
     description: "Communities and worlds to play in with others.",
     href: "/servers",
-    icon: IconPhoto,
+    icon: IconWorld,
     label: "Servers",
   },
 ];
