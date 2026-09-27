@@ -1,6 +1,6 @@
 ---
 name: context7
-description: Fetch current, version-specific documentation for the libraries this project actually uses (TanStack Start/Router/Query, Elysia, Drizzle ORM, Better Auth, Meilisearch, Vite, Tailwind, shadcn) via the Context7 MCP server. Use before writing or reviewing any code against a third-party API, when an error message names a library, when upgrading a dependency, or whenever you are unsure whether a remembered API still exists. Triggers on "latest docs for", "how do I use", "does this API still", "correct way to", or any unfamiliar import from node_modules.
+description: Fetch current, version-specific documentation for the libraries this project actually uses (TanStack Start/Router/Query, Elysia, Drizzle ORM, Better Auth, Vite, Tailwind, shadcn) via the Context7 MCP server. Use before writing or reviewing any code against a third-party API, when an error message names a library, when upgrading a dependency, or whenever you are unsure whether a remembered API still exists. Triggers on "latest docs for", "how do I use", "does this API still", "correct way to", or any unfamiliar import from node_modules.
 version: 2.0.0
 author: voxelvein
 type: skill
@@ -58,7 +58,7 @@ up the right version.
 | HTTP API routes | Elysia |
 | Schema and migrations | Drizzle ORM, drizzle-kit |
 | Auth, passkeys, OAuth | Better Auth |
-| Search | Meilisearch (`meilisearch` JS client) |
+| Search | Postgres `pg_trgm` and full-text (see `docs/search/postgres.md`) |
 | Build/dev server | Vite 8 |
 | Styling | Tailwind CSS 4 |
 | Components | shadcn/ui (built on Base UI) |

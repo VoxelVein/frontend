@@ -53,10 +53,10 @@ npm run eval:sdk -- --agent=core/openagent --pattern="delegation/01-contextscout
 
 ```bash
 # View agent frontmatter
-head -30 .opencode/agent/subagents/core/contextscout.md
+head -30 .opencode/agents/subagents/core/contextscout.md
 
 # Check tool permissions
-grep -A 10 "^tools:" .opencode/agent/subagents/core/contextscout.md
+grep -A 10 "^tools:" .opencode/agents/subagents/core/contextscout.md
 ```
 
 ### Check Test Config
@@ -154,7 +154,7 @@ cat evals/results/latest.json | jq '.tests[0].violations.details'
 ### Agent Files
 
 ```
-.opencode/agent/subagents/core/{subagent}.md
+.opencode/agents/subagents/core/{subagent}.md
 ```
 
 ### Test Files

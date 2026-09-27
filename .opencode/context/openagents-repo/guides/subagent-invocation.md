@@ -83,7 +83,7 @@ task(
 
 // ❌ Using registry path
 task(
-  subagent_type=".opencode/agent/subagents/core/task-manager.md",
+  subagent_type=".opencode/agents/subagents/core/task-manager.md",
   ...
 )
 ```
@@ -280,7 +280,7 @@ read(
 1. **Find incorrect invocations**:
 
    ```bash
-   grep -r 'subagent_type="subagents/' .opencode/agent --include="*.md"
+   grep -r 'subagent_type="subagents/' .opencode/agents --include="*.md"
    ```
 
 2. **Replace with correct format**:
@@ -348,7 +348,7 @@ if subagent_type not in available_types:
 **Solutions**:
 
 1. Check registry for correct name
-2. Verify subagent exists in `.opencode/agent/subagents/`
+2. Verify subagent exists in `.opencode/agents/subagents/`
 3. Use exact name from registry `name` field
 4. If subagent not registered, use direct operations instead
 
@@ -377,7 +377,7 @@ if subagent_type not in available_types:
 ## Related Files
 
 - **Registry**: `registry.json` - Component catalog
-- **Subagents**: `.opencode/agent/subagents/` - Subagent definitions
+- **Subagents**: `.opencode/agents/subagents/` - Subagent definitions
 - **Validation**: `scripts/registry/validate-registry.sh`
 
 ---
