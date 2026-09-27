@@ -40,6 +40,8 @@ import type {
 } from "@/lib/project-search.functions";
 import {
   CATEGORIES_BY_TYPE,
+  CLIENT_REQUIREMENT_LABELS,
+  CLIENT_REQUIREMENTS,
   hasLoaders,
   LOADER_LABELS,
   LOADERS_BY_TYPE,
@@ -128,6 +130,8 @@ const SearchBar = ({
 
 interface FiltersProps {
   category: string;
+  clientRequirement: string;
+  onClientRequirementChange: (value: string | null) => void;
   gameVersion: string;
   loader: string;
   onCategoryChange: (value: string | null) => void;
@@ -137,6 +141,44 @@ interface FiltersProps {
   sort: string;
   type: ProjectType;
 }
+
+const CLIENT_REQUIREMENT_OPTIONS = [
+  { label: "Any client", value: "" },
+  ...CLIENT_REQUIREMENTS.map((value) => ({
+    label: CLIENT_REQUIREMENT_LABELS[value],
+    value,
+  })),
+];
+
+const ClientRequirementFilter = ({
+  onChange,
+  value,
+}: {
+  onChange: (value: string | null) => void;
+  value: string;
+}) => (
+  <div>
+    <label className="sr-only" htmlFor="server-client-requirement">
+      Client requirement
+    </label>
+    <Select
+      items={CLIENT_REQUIREMENT_OPTIONS}
+      value={value}
+      onValueChange={onChange}
+    >
+      <SelectTrigger id="server-client-requirement" className="min-h-11 w-full">
+        <SelectValue placeholder="Any client" />
+      </SelectTrigger>
+      <SelectContent>
+        {CLIENT_REQUIREMENT_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
 
 const GameVersionFilter = ({
   onChange,
@@ -186,6 +228,8 @@ const capitalize = (value: string) =>
 
 const Filters = ({
   category,
+  clientRequirement,
+  onClientRequirementChange,
   gameVersion,
   loader,
   onCategoryChange,
@@ -198,7 +242,9 @@ const Filters = ({
   <div
     className={cn(
       "mt-4 grid gap-3 sm:grid-cols-2",
-      hasLoaders(type) ? "lg:grid-cols-4" : "lg:grid-cols-3"
+      hasLoaders(type) || type === "server"
+        ? "lg:grid-cols-4"
+        : "lg:grid-cols-3"
     )}
   >
     <div>
@@ -254,6 +300,13 @@ const Filters = ({
         ) : null}
       </div>
     </div>
+
+    {type === "server" ? (
+      <ClientRequirementFilter
+        value={clientRequirement}
+        onChange={onClientRequirementChange}
+      />
+    ) : null}
 
     {hasLoaders(type) ? (
       <div>
@@ -513,6 +566,7 @@ export const ProjectBrowser = ({
   const [category, setCategory] = useState("");
   const [gameVersion, setGameVersion] = useState("");
   const [loader, setLoader] = useState("");
+  const [clientRequirement, setClientRequirement] = useState("");
   const [sort, setSort] = useState(DEFAULT_SORT);
   const [page, setPage] = useState(1);
   const [liveEvent, setLiveEvent] = useState<LiveModEvent | null>(null);
@@ -567,6 +621,7 @@ export const ProjectBrowser = ({
 
     runSearch({
       category,
+      clientRequirement,
       gameVersion,
       loader,
       page,
@@ -576,6 +631,7 @@ export const ProjectBrowser = ({
     });
   }, [
     category,
+    clientRequirement,
     debouncedQuery,
     gameVersion,
     loader,
@@ -613,7 +669,13 @@ export const ProjectBrowser = ({
     };
   }, []);
 
-  const hasFilters = Boolean(category || gameVersion || loader || query);
+  const hasFilters = [
+    category,
+    clientRequirement,
+    gameVersion,
+    loader,
+    query,
+  ].some(Boolean);
   const showSkeletons = isSearching && !result && !error;
   const showEmpty =
     !isSearching && !error && result && result.hits.length === 0;
@@ -632,6 +694,7 @@ export const ProjectBrowser = ({
     setCategory("");
     setGameVersion("");
     setLoader("");
+    setClientRequirement("");
     setPage(1);
     dispatch({ type: "SEARCH_START" });
   };
@@ -640,6 +703,7 @@ export const ProjectBrowser = ({
     dispatch({ type: "RETRY" });
     runSearch({
       category,
+      clientRequirement,
       gameVersion,
       loader,
       page,
@@ -651,7 +715,16 @@ export const ProjectBrowser = ({
 
   const refreshFromLiveEvent = () => {
     setLiveEvent(null);
-    const params = { category, gameVersion, loader, page, query, sort, type };
+    const params = {
+      category,
+      clientRequirement,
+      gameVersion,
+      loader,
+      page,
+      query,
+      sort,
+      type,
+    };
     projectSearchCache.delete(params);
     runSearch(params);
   };
@@ -674,6 +747,8 @@ export const ProjectBrowser = ({
 
       <Filters
         category={category}
+        clientRequirement={clientRequirement}
+        onClientRequirementChange={changeFilter(setClientRequirement)}
         gameVersion={gameVersion}
         loader={loader}
         onCategoryChange={changeFilter(setCategory)}

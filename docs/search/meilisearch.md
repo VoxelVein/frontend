@@ -1,6 +1,8 @@
 # Meilisearch Search
 
-Meilisearch powers the `/mods` and `/plugins` pages. The browser never
+Meilisearch powers the browse page of every project type (`/mods`,
+`/modpacks`, `/plugins`, `/resource-packs`, `/shaders`, `/servers`). The
+browser never
 talks to Meilisearch directly. Search runs through the ElysiaJS API
 server, so the search key stays server-side.
 
@@ -67,7 +69,8 @@ pnpm db:reindex   # full reindex only
 The reindex:
 
 1. Deletes the legacy `mods` index if it still exists
-2. Marks `type`, `category`, `gameVersions`, and `loaders` as filterable
+2. Marks `type`, `category`, `gameVersions`, `loaders`, and
+   `clientRequirement` (servers only) as filterable
 3. Marks `name`, `description`, `author`, `tags`, and `category` as
    searchable
 4. Marks `downloads`, `updatedAt`, and `name` as sortable

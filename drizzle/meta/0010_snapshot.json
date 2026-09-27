@@ -1,5 +1,5 @@
 {
-  "id": "57cfb670-05ac-4071-afc0-49af0887f19f",
+  "id": "772e4364-06bd-43f2-b411-b125142961fd",
   "prevId": "2930f32f-a002-4ce5-8b3d-1eff2fa1538c",
   "version": "7",
   "dialect": "postgresql",
@@ -617,6 +617,85 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.project_server_links": {
+      "name": "project_server_links",
+      "schema": "",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "linked_project_id": {
+          "name": "linked_project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "server_id": {
+          "name": "server_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "project_server_links_linkedProjectId_idx": {
+          "name": "project_server_links_linkedProjectId_idx",
+          "columns": [
+            {
+              "expression": "linked_project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "project_server_links_linked_project_id_projects_id_fk": {
+          "name": "project_server_links_linked_project_id_projects_id_fk",
+          "tableFrom": "project_server_links",
+          "tableTo": "projects",
+          "columnsFrom": ["linked_project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "project_server_links_server_id_project_servers_project_id_fk": {
+          "name": "project_server_links_server_id_project_servers_project_id_fk",
+          "tableFrom": "project_server_links",
+          "tableTo": "project_servers",
+          "columnsFrom": ["server_id"],
+          "columnsTo": ["project_id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "project_server_links_server_id_linked_project_id_pk": {
+          "name": "project_server_links_server_id_linked_project_id_pk",
+          "columns": ["server_id", "linked_project_id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.project_servers": {
       "name": "project_servers",
       "schema": "",
@@ -633,19 +712,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'"
-        },
-        "modpack_id": {
-          "name": "modpack_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "modpack_required": {
-          "name": "modpack_required",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "port": {
           "name": "port",
@@ -667,33 +733,8 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "project_servers_modpackId_idx": {
-          "name": "project_servers_modpackId_idx",
-          "columns": [
-            {
-              "expression": "modpack_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "project_servers_modpack_id_projects_id_fk": {
-          "name": "project_servers_modpack_id_projects_id_fk",
-          "tableFrom": "project_servers",
-          "tableTo": "projects",
-          "columnsFrom": ["modpack_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
         "project_servers_project_id_projects_id_fk": {
           "name": "project_servers_project_id_projects_id_fk",
           "tableFrom": "project_servers",

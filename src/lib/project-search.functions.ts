@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import {
   CATEGORIES_BY_TYPE,
   GAME_VERSIONS as ALL_GAME_VERSIONS,
+  isClientRequirement,
   isProjectType,
   LOADERS_BY_TYPE,
 } from "@/lib/projects";
@@ -16,6 +17,8 @@ const SORTS = ["downloads:desc", "updatedAt:desc", "name:asc"] as const;
 
 export interface ProjectSearchParams {
   category?: string;
+  /** Servers only. */
+  clientRequirement?: string;
   gameVersion?: string;
   loader?: string;
   page?: number;
@@ -56,6 +59,13 @@ export const searchProjects = createServerFn({ method: "GET" })
     }
     if (data.loader && loaders.has(data.loader)) {
       params.set("loader", data.loader);
+    }
+    if (
+      data.type === "server" &&
+      data.clientRequirement &&
+      isClientRequirement(data.clientRequirement)
+    ) {
+      params.set("clientRequirement", data.clientRequirement);
     }
     if (data.page && data.page > 1) {
       params.set("page", String(data.page));

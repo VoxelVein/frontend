@@ -23,8 +23,9 @@ Tables are defined in `src/db/schema.ts` (migration
   whether it is the version's primary file.
 * `project_servers` (migration `drizzle/0010_add_project_servers.sql`):
   one row per server project with its address, optional port (empty means
-  25565), supported game versions, and an optional linked modpack that is
-  either required or recommended.
+  25565), and supported game versions.
+* `project_server_links`: mods, modpacks, shaders, and resource packs a
+  server links to, in any mix, each marked required or recommended.
 
 Shared constants and validation schemas (categories, loaders, slug rules,
 URL paths per type) are in `src/lib/projects.ts`.
@@ -75,8 +76,8 @@ the provider) and admins can upload.
    (`createProject` in `src/lib/projects.functions.ts`).
 2. On `/dashboard/projects/<id>?tab=versions`, the owner creates a
    version (`createVersion`) and uploads its file. For servers the same
-   tab is called "Server" and saves the join details
-   (`saveServerDetails`); a linked modpack must be published.
+   tab is called "Server" and saves the join details and linked content
+   (`saveServerDetails`). New links must point at published projects.
 3. `setProjectPublished` publishes the project once at least one file
    exists, or for servers once join details are saved. Unpublishing moves
    it back to draft.
@@ -136,6 +137,15 @@ Every request gets the redirect, but only plausible downloads are counted
 The dedup cache is in memory, so it resets on restart and is per process.
 The search index picks up new counts when a project changes or on
 `pnpm db:reindex`.
+
+## Server client requirements
+
+Each server's search document carries a `clientRequirement`, derived from
+its published links (`clientRequirementFor` in `src/lib/projects.ts`):
+`required` when any link is required, `recommended` when there are only
+optional links, and `vanilla` when nothing is linked. The Servers page
+filters on it. When a linked project is published, hidden, or deleted,
+the servers linking to it are reindexed too.
 
 ## Search sync
 

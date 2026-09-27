@@ -7,6 +7,7 @@ import { db } from "@/db";
 import {
   projectFiles,
   projects,
+  projectServerLinks,
   projectServers,
   projectVersions,
   users,
@@ -25,6 +26,7 @@ import {
   hasLoaders,
   hasVersions,
   isCategoryForType,
+  isServerLinkType,
   LOADERS_BY_TYPE,
   PROJECT_TYPE_LABELS,
   projectInputSchema,
@@ -36,13 +38,14 @@ import {
 import type {
   ProjectInput,
   ProjectListItem,
-  ProjectServerView,
+  ProjectType,
   ProjectUpdateInput,
   ProjectView,
   ServerInput,
   VersionInput,
 } from "@/lib/projects";
 import { syncProjectToSearch } from "@/lib/search-sync";
+import { findServersLinking, loadServerDetails } from "@/lib/server-details";
 import { deleteObjects } from "@/lib/storage";
 
 const PG_UNIQUE_VIOLATION = "23505";
@@ -68,47 +71,9 @@ const getSessionOrNull = (): Promise<Session | null> =>
 const getUploader = (): Promise<Session> =>
   requireUploader(getRequestHeaders());
 
-/** Join details for a server project, or null before they are saved. */
-const loadServerView = async (
-  projectId: string
-): Promise<ProjectServerView | null> => {
-  const [server] = await db
-    .select()
-    .from(projectServers)
-    .where(eq(projectServers.projectId, projectId))
-    .limit(1);
-  if (!server) {
-    return null;
-  }
-
-  // Only a published, visible modpack is shown to players.
-  const [modpack] = server.modpackId
-    ? await db
-        .select({ name: projects.name, slug: projects.slug })
-        .from(projects)
-        .where(
-          and(
-            eq(projects.id, server.modpackId),
-            eq(projects.type, "modpack"),
-            eq(projects.status, "published"),
-            eq(projects.pendingDeletion, false)
-          )
-        )
-        .limit(1)
-    : [];
-
-  return {
-    address: server.address,
-    gameVersions: server.gameVersions,
-    modpack: modpack ?? null,
-    modpackId: server.modpackId,
-    modpackRequired: server.modpackRequired,
-    port: server.port,
-  };
-};
-
 const loadProjectView = async (
-  where: ReturnType<typeof eq>
+  where: ReturnType<typeof eq>,
+  { includeHidden = false }: { includeHidden?: boolean } = {}
 ): Promise<ProjectView | null> => {
   const project = await db.query.projects.findFirst({
     where,
@@ -146,7 +111,10 @@ const loadProjectView = async (
     ownerId: project.ownerId,
     pendingDeletion: project.pendingDeletion,
     publishedAt: project.publishedAt?.toISOString() ?? null,
-    server: project.type === "server" ? await loadServerView(project.id) : null,
+    server:
+      project.type === "server"
+        ? await loadServerDetails(project.id, { includeHidden })
+        : null,
     slug: project.slug,
     status: project.status,
     summary: project.summary,
@@ -209,7 +177,9 @@ export const getEditableProject = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ProjectView> => {
     const session = await getUploader();
     await requireEditableProject(session, data.projectId);
-    const project = await loadProjectView(eq(projects.id, data.projectId));
+    const project = await loadProjectView(eq(projects.id, data.projectId), {
+      includeHidden: true,
+    });
     if (!project) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.notFound);
     }
@@ -393,47 +363,94 @@ export const createVersion = createServerFn({ method: "POST" })
     }
   });
 
-/** Creates or replaces a server project's join details. */
+interface LinkTarget {
+  id: string;
+  pendingDeletion: boolean;
+  status: string;
+  type: ProjectType;
+}
+
+const isLinkable = (target: LinkTarget, alreadyLinked: Set<string>) => {
+  if (!isServerLinkType(target.type)) {
+    return false;
+  }
+  const visible = target.status === "published" && !target.pendingDeletion;
+  return visible || alreadyLinked.has(target.id);
+};
+
+/** Creates or replaces a server project's join details and links. */
 export const saveServerDetails = createServerFn({ method: "POST" })
   .validator((data: ServerInput) => parse(serverInputSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await getUploader();
-    const { projectId, ...fields } = data;
+    const { links, projectId, ...fields } = data;
     const project = await requireEditableProject(session, projectId);
     if (project.type !== "server") {
       throw new Error("Only servers have join details.");
     }
 
-    if (fields.modpackId) {
-      const [modpack] = await db
-        .select({ id: projects.id })
-        .from(projects)
-        .where(
-          and(
-            eq(projects.id, fields.modpackId),
-            eq(projects.type, "modpack"),
-            eq(projects.status, "published")
-          )
-        )
-        .limit(1);
-      if (!modpack) {
-        throw new Error("Choose a published modpack.");
+    const linkedIds = links.map((link) => link.projectId);
+    if (linkedIds.includes(projectId)) {
+      throw new Error("A server cannot link to itself.");
+    }
+    const targets =
+      linkedIds.length > 0
+        ? await db
+            .select({
+              id: projects.id,
+              pendingDeletion: projects.pendingDeletion,
+              status: projects.status,
+              type: projects.type,
+            })
+            .from(projects)
+            .where(inArray(projects.id, linkedIds))
+        : [];
+    const targetsById = new Map(targets.map((target) => [target.id, target]));
+    // Links saved earlier may point at projects that were unpublished since;
+    // keep those, but only accept new links to published projects.
+    const existing = await db
+      .select({ linkedProjectId: projectServerLinks.linkedProjectId })
+      .from(projectServerLinks)
+      .where(eq(projectServerLinks.serverId, projectId));
+    const alreadyLinked = new Set(existing.map((row) => row.linkedProjectId));
+    for (const link of links) {
+      const target = targetsById.get(link.projectId);
+      if (!target || !isLinkable(target, alreadyLinked)) {
+        throw new Error(
+          "Link only published mods, modpacks, shaders, or resource packs."
+        );
       }
     }
 
     const values = {
       ...fields,
       gameVersions: [...new Set(fields.gameVersions)],
-      modpackRequired: fields.modpackId ? fields.modpackRequired : false,
     };
-    await db
-      .insert(projectServers)
-      .values({ ...values, projectId })
-      .onConflictDoUpdate({ set: values, target: projectServers.projectId });
-    await db
-      .update(projects)
-      .set({ updatedAt: new Date() })
-      .where(eq(projects.id, projectId));
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(projectServers)
+        .values({ ...values, projectId })
+        .onConflictDoUpdate({ set: values, target: projectServers.projectId });
+      await tx
+        .delete(projectServerLinks)
+        .where(eq(projectServerLinks.serverId, projectId));
+      if (links.length > 0) {
+        // Stagger timestamps so the saved order survives the reload.
+        const now = Date.now();
+        await tx.insert(projectServerLinks).values(
+          links.map((link, index) => ({
+            createdAt: new Date(now + index),
+            linkedProjectId: link.projectId,
+            required: link.required,
+            serverId: projectId,
+          }))
+        );
+      }
+      await tx
+        .update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
+    });
     await syncProjectToSearch(projectId);
   });
 
@@ -485,14 +502,18 @@ export const deleteProject = createServerFn({ method: "POST" })
       .select({ id: projectVersions.id })
       .from(projectVersions)
       .where(eq(projectVersions.projectId, project.id));
-    const files = await db
-      .select({ storageKey: projectFiles.storageKey })
-      .from(projectFiles)
-      .where(inArray(projectFiles.versionId, versionIds));
-
+    // Links cascade away with the project, so find the servers first.
+    const [files, linkingServers] = await Promise.all([
+      db
+        .select({ storageKey: projectFiles.storageKey })
+        .from(projectFiles)
+        .where(inArray(projectFiles.versionId, versionIds)),
+      findServersLinking([project.id]),
+    ]);
     await db.delete(projects).where(eq(projects.id, project.id));
     await deleteObjects(files.map((file) => file.storageKey));
     await syncProjectToSearch(project.id);
+    await Promise.all(linkingServers.map((id) => syncProjectToSearch(id)));
   });
 
 /**
