@@ -27,50 +27,49 @@ const ProfileSkeleton = () => (
   </div>
 );
 
-const ProfilePage = ({ profile }: { profile: PublicProfile }) => (
-  <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14">
-    <PageHeader
-      title={profile.displayUsername}
-      description={`${profile.name} · Joined ${formatDate(profile.joinedAt)}`}
-    />
-
-    {profile.bio ? (
-      // The same renderer and typography as a project description. A heading an
-      // author writes here becomes a real heading, so a bio is prose rather
-      // than a lead-in paragraph.
-      <div className="markdown-body mt-6 max-w-prose">
-        <Markdown>{profile.bio}</Markdown>
-      </div>
-    ) : null}
-
-    <section aria-labelledby="profile-projects-heading" className="mt-12">
-      <h2
-        id="profile-projects-heading"
-        className="text-foreground text-lg font-semibold"
-      >
-        Projects
-      </h2>
-
-      {profile.projects.length === 0 ? (
-        <EmptyState
-          variant="inline"
-          title="No public projects yet"
-          description="Projects appear here once they are published."
-        />
-      ) : (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {profile.projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      )}
-    </section>
-  </div>
-);
-
 const ProfileRoute = () => {
   const profile = useLoaderData({ from: "/u/$username" });
-  return <ProfilePage profile={profile} />;
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14">
+      <PageHeader
+        title={profile.displayUsername}
+        description={`${profile.name} · Joined ${formatDate(profile.joinedAt)}`}
+      />
+
+      {profile.bio ? (
+        // The same renderer and typography as a project description, so a
+        // heading an author writes becomes a real heading and their bio is
+        // prose rather than a lead-in paragraph.
+        <div className="markdown-body mt-6 max-w-prose">
+          <Markdown>{profile.bio}</Markdown>
+        </div>
+      ) : null}
+
+      <section aria-labelledby="profile-projects-heading" className="mt-12">
+        <h2
+          id="profile-projects-heading"
+          className="text-foreground text-lg font-semibold"
+        >
+          Projects
+        </h2>
+
+        {profile.projects.length === 0 ? (
+          <EmptyState
+            variant="inline"
+            title="No public projects yet"
+            description="Projects appear here once they are published."
+          />
+        ) : (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {profile.projects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
 };
 
 export const Route = createFileRoute("/u/$username")({

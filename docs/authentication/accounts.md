@@ -77,6 +77,57 @@ The `accounts:purge` Nitro task runs hourly (configured in
 period, including the chosen projects, their stored files, and search
 entries, and clears expired username reservations.
 
+## Bios and public profiles
+
+Every account has an optional bio, edited in **Settings → Profile** and
+shown on a public profile page at `/u/<username>`. The rules live in
+`src/lib/bio.ts`; the lookup is `src/lib/user-profiles.ts`, wrapped by
+`getPublicProfile` in `src/lib/user-profiles.functions.ts`.
+
+* The bio is **Markdown**, rendered with `@tanstack/markdown/react` in the
+  same `.markdown-body` container as a project description, so raw HTML and
+  executable URLs are escaped by the parser's defaults.
+* It is capped at 500 characters, enforced in the form and again on the
+  server by Better Auth's `validator.input` for `bio`. A direct call to the
+  update endpoint cannot store a longer one.
+* Clearing the field stores `null` rather than an empty string, so "no bio"
+  stays distinct from a bio that renders as nothing. Whitespace-only is
+  treated as no bio.
+* `bio` is the one user field Better Auth accepts as input
+  (`input` is not `false`), so it is saved through
+  `authClient.updateUser` alongside the display name.
+
+### The profile URL is keyed on `username`, not `displayUsername`
+
+The URL uses `users.username`, which is unique and stored lowercase.
+`users.displayUsername` has no unique constraint and differs only in
+capitalisation, so it cannot identify a profile. The page heading shows
+`displayUsername`, so `/u/ada` can be titled "Ada".
+
+The requested name is normalised before lookup, so `/u/Ada` and `/u/ada`
+are the same profile.
+
+**Changing your username breaks links to your old profile.** A permanent
+redirect is not possible: `username_history` rows are deleted once their
+reservation expires, so the old name is only recoverable for 14 days. A
+redirect would work briefly and then quietly stop, which is worse than a
+consistent 404. An unknown name, an account with no username, and an
+account that has requested deletion all resolve to a real 404 rather than
+a "not found" page served with a 200, because this URL is linked from
+every project byline.
+
+### What a profile shows
+
+Only `published` projects that are not marked for deletion. Drafts,
+projects awaiting review, and removed projects are absent, and a user with
+no published projects still gets a page with an empty grid.
+
+An account that has requested deletion resolves to null, so the bio and
+display name do not outlive the request. The `by` byline on a project links
+to the author's profile, except when the owner is gone — then
+`authorUsername` is null and the name stays plain text rather than linking
+to a page that 404s.
+
 ## Large projects
 
 Admins mark a project as large on its page. Large projects are never
