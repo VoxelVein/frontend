@@ -1,0 +1,31 @@
+-- Supersedes the prose in 0010_postgres_search; adds no schema change.
+--
+-- 0010 is already applied, so its two historical mentions of the external
+-- search engine it replaced are left exactly as written: an applied migration
+-- is a historical record, and rewriting it would misrepresent what ran. This
+-- migration is the current statement of how search works.
+--
+-- Search is Postgres-native. There is no separate search service, no key to
+-- configure, and no index to keep in step with the tables it was built from.
+-- The pieces are:
+--
+--   - public.immutable_array_to_string(text[], text), created by 0010, so a
+--     text[] column can appear in an index expression.
+--   - projects_search_vector_idx and posts_search_vector_idx, GIN indexes over
+--     weighted tsvector expressions.
+--   - projects_name_trgm_idx, projects_summary_trgm_idx, posts_title_trgm_idx,
+--     GIN indexes with gin_trgm_ops for the fuzzy and substring branches.
+--
+-- The vector expressions exist twice on purpose: once here, and once in
+-- src/lib/search/text.ts. Postgres uses a GIN expression index only when the
+-- query repeats the expression exactly, so the two copies must stay identical.
+-- Divergence does not raise an error, it silently degrades to a sequential scan.
+-- src/lib/__tests__/search-index.test.ts asserts they agree.
+--
+-- Verified against a 302,408-row table: `field % query` and
+-- `field ILIKE '%query%'` both plan as a Bitmap Index Scan on the gin_trgm_ops
+-- index, while the superficially equivalent `similarity(field, query) > 0.3`
+-- plans as a Seq Scan. That is why the predicate uses the `%` operator.
+--
+-- See docs/search/postgres.md.
+SELECT 1;

@@ -20,21 +20,6 @@ services:
       timeout: 5s
       retries: 5
 
-  meilisearch:
-    image: getmeili/meilisearch:v1.35.1
-    environment:
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
-      MEILI_ENV: ${MEILI_ENV:-production}
-    ports:
-      - "127.0.0.1:${MEILI_PORT:-7700}:7700"
-    volumes:
-      - meili_data:/meili_data
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:7700/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   garage:
     image: dxflrs/garage:v2.4.1
     # Development object storage (S3-compatible). Production uses
@@ -80,8 +65,6 @@ services:
       NODE_ENV: production
       API_PORT: 3002
       CORS_ORIGIN: ${BETTER_AUTH_URL:-http://localhost:3001}
-      MEILI_HOST: http://meilisearch:7700
-      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:?MEILI_SEARCH_KEY is required}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}
       # Ports are published directly here, with no proxy in front, so
       # X-Forwarded-For is client-controlled and must not be trusted.
@@ -89,8 +72,6 @@ services:
     ports:
       - "${API_PORT:-3002}:3002"
     depends_on:
-      meilisearch:
-        condition: service_healthy
       migrate:
         condition: service_completed_successfully
     restart: unless-stopped
@@ -110,14 +91,10 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
-      MEILI_HOST: http://meilisearch:7700
-      MEILI_SEARCH_KEY: ${MEILI_SEARCH_KEY:?MEILI_SEARCH_KEY is required}
     ports:
       - "${WEB_PORT:-3001}:6001"
     depends_on:
       db:
-        condition: service_healthy
-      meilisearch:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
@@ -125,6 +102,5 @@ services:
 
 volumes:
   pgdata:
-  meili_data:
   garage_meta:
   garage_data:

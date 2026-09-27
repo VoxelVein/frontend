@@ -56,7 +56,6 @@ VoxelVein platform but does not include the full infrastructure stack.
 * Drizzle ORM (database access and schema management)
 * PostgreSQL (relational database)
 * ElysiaJS (standalone API server with webhooks and SSE)
-* Meilisearch (content search)
 * Vitest (testing)
 * Oxlint (linting)
 * Oxfmt (formatting)
@@ -79,7 +78,6 @@ VoxelVein platform but does not include the full infrastructure stack.
 | **Drizzle ORM**     | Database access and schema management |
 | **PostgreSQL**      | Relational database                   |
 | **ElysiaJS**        | Standalone API server (webhooks, SSE) |
-| **Meilisearch**     | Content search engine                 |
 | **Vite**            | Development and build tooling         |
 | **Nitro**           | Production server runtime             |
 | **Unpic**           | Image optimization (CDN-backed images)|
@@ -130,10 +128,6 @@ variables:
 BETTER_AUTH_SECRET=your-secret-here  # Must be at least 32 characters
 BETTER_AUTH_URL=http://localhost:3000
 DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
-MEILI_HOST=http://localhost:7700
-MEILI_MASTER_KEY=your-master-key      # Only needed when seeding
-MEILI_SEARCH_KEY=your-search-key
-MEILI_ADMIN_KEY=your-projects-write-key  # See docs/search/meilisearch.md
 API_URL=http://localhost:3002
 API_PORT=3002
 WEBHOOK_SECRET=your-webhook-secret    # Required, at least 32 characters
@@ -224,8 +218,8 @@ src/
 
 server/
 ├── index.ts      # ElysiaJS entry point (Node adapter)
-├── lib/          # Event registry, Meilisearch client
-└── routes/       # health, mods search, SSE events, webhooks
+├── lib/          # Event registry
+└── routes/       # health, SSE events, webhooks
 ```
 
 The Vite configuration integrates TanStack Start, TanStack Router, Tailwind
@@ -274,8 +268,6 @@ A standalone **ElysiaJS** API server (`server/`) powers mod search and
 real-time mod events:
 
 * `GET /api/health` — liveness check
-* `GET /api/projects/search` — Meilisearch proxy used by the mods and
-  plugins pages
 * `GET /api/events` — Server-Sent Events (SSE) stream of mod events
 * `POST /api/webhooks/mods` — webhook endpoint (HMAC-SHA256 verified) that
   broadcasts `mod.created`, `mod.updated`, and `mod.deleted` events

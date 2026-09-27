@@ -121,7 +121,7 @@ const modFixture: ProjectDocument = {
 const responseFixture = (hits: ProjectDocument[]): ProjectSearchResponse => ({
   estimatedTotalHits: hits.length,
   // oxlint-disable-next-line sonarjs/no-undefined-assignment -- Test fixture mirrors the server response shape
-  facetDistribution: undefined,
+  facetDistribution: null,
   hits,
   page: 1,
   pageSize: 12,

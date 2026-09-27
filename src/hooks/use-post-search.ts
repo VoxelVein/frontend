@@ -1,7 +1,7 @@
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import type { PostSearchDocument } from "@/lib/posts-search";
+import type { PostSummary } from "@/lib/posts";
 
 /** How long typing settles before a query is sent. */
 const SEARCH_DEBOUNCE_MS = 300;
@@ -9,14 +9,13 @@ const SEARCH_DEBOUNCE_MS = 300;
 interface SearchState {
   error: string | null;
   isSearching: boolean;
-  hits: PostSearchDocument[] | null;
+  hits: PostSummary[] | null;
 }
 
 type SearchAction =
   | { type: "START" }
-  | { type: "SUCCESS"; hits: PostSearchDocument[] }
+  | { type: "SUCCESS"; hits: PostSummary[] }
   | { type: "CLEARED" }
-  | { type: "UNAVAILABLE" }
   | { type: "ERROR"; error: string };
 
 const searchReducer = (
@@ -31,9 +30,6 @@ const searchReducer = (
       return { error: null, isSearching: false, hits: action.hits };
     }
     case "CLEARED": {
-      return { error: null, isSearching: false, hits: null };
-    }
-    case "UNAVAILABLE": {
       return { error: null, isSearching: false, hits: null };
     }
     case "ERROR": {
@@ -51,11 +47,8 @@ export interface UsePostSearchOptions {
    * hook probe once on mount; a boolean skips the probe entirely.
    */
   availability: boolean | null;
-  /** Runs one query. A response with `available: false` deactivates search. */
-  fetchResults: (query: string) => Promise<{
-    available: boolean;
-    hits: PostSearchDocument[];
-  }>;
+  /** Runs one query. */
+  fetchResults: (query: string) => Promise<{ hits: PostSummary[] }>;
   /**
    * Asks whether search works at all. Only consulted when `availability` is
    * `null`, so a caller that already knows the answer can omit it.
@@ -68,21 +61,21 @@ export interface UsePostSearchResult {
   query: string;
   onQueryChange: (value: string) => void;
   /** Results for the active query; empty when no search is running. */
-  hits: PostSearchDocument[];
+  hits: PostSummary[];
   /** True when a query is active and search has not been deactivated. */
   isActive: boolean;
   isSearching: boolean;
   error: string | null;
-  /** False once search is known to be unusable, so the field can be hidden. */
+  /** False when there is nothing to search, so the field can be hidden. */
   isAvailable: boolean;
 }
 
 /**
- * Drives a blog search field over Meilisearch.
+ * Drives a blog search field over Postgres.
  *
- * Search is optional infrastructure, so the field only appears once it is known
- * to work and disappears again if Meilisearch goes away mid-session, rather
- * than leaving a box that quietly returns nothing.
+ * The field only appears once there is something to search for, and results come
+ * straight from the table, so there is no index to fall out of step with the
+ * posts it indexes.
  */
 export const usePostSearch = ({
   availability,
@@ -94,7 +87,6 @@ export const usePostSearch = ({
     wait: SEARCH_DEBOUNCE_MS,
   });
   const [probed, setProbed] = useState<boolean | null>(null);
-  const [isDeactivated, setIsDeactivated] = useState(false);
   const [state, dispatch] = useReducer(searchReducer, {
     error: null,
     isSearching: false,
@@ -127,7 +119,7 @@ export const usePostSearch = ({
 
   // Derived rather than stored, so a caller that already knows the answer
   // (from a loader) never triggers a state update to record it.
-  const isAvailable = !isDeactivated && (availability ?? probed ?? false);
+  const isAvailable = availability ?? probed ?? false;
 
   useEffect(() => {
     if (availability !== null || !probe) {
@@ -173,12 +165,6 @@ export const usePostSearch = ({
 
       pendingRef.current = false;
 
-      if (!data.available) {
-        setIsDeactivated(true);
-        dispatch({ type: "UNAVAILABLE" });
-        return;
-      }
-
       dispatch({ hits: data.hits, type: "SUCCESS" });
     } catch (searchError) {
       if (requestIdRef.current === thisRequestId) {
@@ -220,7 +206,7 @@ export const usePostSearch = ({
 
     pendingRef.current = true;
 
-    // oxlint-disable-next-line react/set-state-in-effect -- This effect synchronizes with Meilisearch, an external system, and every setState inside runSearch happens after its await, so it cannot cascade a render.
+    // oxlint-disable-next-line react/set-state-in-effect -- This effect synchronizes with Postgres, an external system, and every setState inside runSearch happens after its await, so it cannot cascade a render.
     runSearch(trimmedQuery);
   }, [isAvailable, runSearch, trimmedQuery]);
 

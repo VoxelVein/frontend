@@ -46,8 +46,8 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 ## Search
 
-* [Meilisearch](search/meilisearch.md) — index, reindex, and query
-  project search
+* [Search](search/postgres.md) — fuzzy and full-text search over
+  Postgres, with no separate service
 
 ## API
 

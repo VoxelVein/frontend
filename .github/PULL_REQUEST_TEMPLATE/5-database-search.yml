@@ -8,7 +8,7 @@ body:
         merge. Backward compatibility with the currently deployed app is the
         question a reviewer will ask first. See
         [docs/database/migrations.md](https://github.com/VoxelVein/frontend/blob/main/docs/database/migrations.md)
-        and [docs/search/meilisearch.md](https://github.com/VoxelVein/frontend/blob/main/docs/search/meilisearch.md).
+        and [docs/search/postgres.md](https://github.com/VoxelVein/frontend/blob/main/docs/search/postgres.md).
 
         > Merge `main` into your branch and get every required check green
         > before asking for review. A PR that is red or conflicted does not
@@ -29,8 +29,8 @@ body:
         - Schema migration
         - Query or repository change only, no migration
         - Index added or changed
-        - Meilisearch settings or document shape
-        - Seed, reindex, or maintenance script
+        - Search query, match predicate, or search vector
+        - Seed or maintenance script
     validations:
       required: true
   - type: textarea
@@ -66,14 +66,15 @@ body:
   - type: checkboxes
     id: search
     attributes:
-      label: Search index
-      description: Meilisearch drifts silently, so a miss here is invisible until a user reports it.
+      label: Search
+      description: >-
+        A search index that is present but unused degrades to a sequential scan without erroring, so this is invisible until someone measures it.
       options:
-        - label: No searchable field or index setting changed
-        - label: Index settings updated in src/lib/posts-index.ts or the equivalent
-        - label: The write path in search-sync.ts pushes the new field
-        - label: A reindex is required, and the command is written out below
-        - label: Verified with a real query, not only by inspecting the code
+        - label: No searchable field, match predicate, or search vector changed
+        - label: A changed tsvector expression is byte-identical in the migration and in src/lib/search/text.ts
+        - label: A new indexed expression has a matching index in a generated migration
+        - label: Verified with EXPLAIN that the index is actually used, not only by inspecting the code
+        - label: Verified with a real query, including a typo, not only by inspecting the code
   - type: checkboxes
     id: efficiency
     attributes:
@@ -95,12 +96,12 @@ body:
     validations:
       required: false
   - type: textarea
-    id: reindex-command
+    id: backfill-command
     attributes:
-      label: Reindex or backfill command
+      label: Backfill command
       description: >-
-        Only if one is needed. The project-local Drizzle binary is required; `pnpm dlx drizzle-kit` fails in a fresh environment.
-      placeholder: "pnpm db:reindex:posts"
+        Only if one is needed. Search reads the table directly, so a changed index needs no backfill; a new column that existing rows must populate does. The project-local Drizzle binary is required; `pnpm dlx drizzle-kit` fails in a fresh environment.
+      placeholder: "pnpm tsx scripts/backfill-project-slugs.ts"
     validations:
       required: false
   - type: textarea
