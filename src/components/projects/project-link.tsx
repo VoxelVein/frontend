@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { PROJECT_TYPE_PATHS } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
 
 interface ProjectLinkProps {
@@ -16,27 +17,13 @@ export const ProjectLink = ({
   className,
   slug,
   type,
-}: ProjectLinkProps) => {
-  if (type === "plugin") {
-    return (
-      <Link
-        to="/plugins/$slug"
-        params={{ slug }}
-        preload="intent"
-        className={className}
-      >
-        {children}
-      </Link>
-    );
-  }
-  return (
-    <Link
-      to="/mods/$slug"
-      params={{ slug }}
-      preload="intent"
-      className={className}
-    >
-      {children}
-    </Link>
-  );
-};
+}: ProjectLinkProps) => (
+  <Link
+    to={`${PROJECT_TYPE_PATHS[type]}/$slug`}
+    params={{ slug }}
+    preload="intent"
+    className={className}
+  >
+    {children}
+  </Link>
+);

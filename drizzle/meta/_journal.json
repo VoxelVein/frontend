@@ -71,6 +71,13 @@
       "when": 1790453111911,
       "tag": "0009_account_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790528783632,
+      "tag": "0010_add_project_servers",
+      "breakpoints": true
     }
   ]
 }

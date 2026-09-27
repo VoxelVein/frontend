@@ -5,8 +5,12 @@ import {
   UNSTABLE_MINECRAFT_VERSIONS,
   formatMinecraftVersion,
   getMinecraftVersion,
+  getReleasesInLine,
+  getVersionLine,
+  isSnapshotVersion,
+  RELEASE_GAME_VERSIONS,
 } from "@/lib/minecraft-versions";
-import { GAME_VERSIONS } from "@/lib/projects";
+import { GAME_VERSIONS, isGameVersion } from "@/lib/projects";
 
 describe("Minecraft version catalog", () => {
   it("has no duplicate ids", () => {
@@ -34,33 +38,20 @@ describe("Minecraft version catalog", () => {
     expect(outOfOrder).toStrictEqual([]);
   });
 
-  describe("agreement with GAME_VERSIONS", () => {
-    // GAME_VERSIONS has to stay a literal tuple for picklist(), so the two
-    // cannot be linked by inference. These assertions are the link.
-    it("offers every stable release in the catalog", () => {
-      const stable = MINECRAFT_VERSIONS.filter((v) => v.stable).map(
-        (v) => v.id
-      );
-      expect(GAME_VERSIONS).toStrictEqual(expect.arrayContaining(stable));
+  describe("agreement with the Mojang manifest", () => {
+    // The catalog only adds codenames; the manifest decides what users can
+    // pick. A catalog entry missing from it would label an unselectable id.
+    it("only describes versions the manifest offers", () => {
+      const missing = MINECRAFT_VERSIONS.filter(
+        (version) => version.stable && !isGameVersion(version.id)
+      ).map((version) => version.id);
+      expect(missing).toStrictEqual([]);
     });
 
-    it("never offers a snapshot-only release", () => {
+    it("marks snapshot-only catalog entries as snapshots or omits them", () => {
       for (const version of UNSTABLE_MINECRAFT_VERSIONS) {
-        expect(GAME_VERSIONS).not.toContain(version.id);
+        expect(RELEASE_GAME_VERSIONS).not.toContain(version.id);
       }
-    });
-
-    it("keeps the legacy ids that predate the catalog", () => {
-      // Projects already reference these. Removing them would orphan stored
-      // data, and the catalog has no entry to reintroduce them from.
-      expect(GAME_VERSIONS).toStrictEqual(
-        expect.arrayContaining(["1.20.4", "1.20.1", "1.19.4", "1.18.2"])
-      );
-    });
-
-    it("lists versions newest first for the picker", () => {
-      expect(GAME_VERSIONS[0]).toBe("26.2");
-      expect(GAME_VERSIONS.at(-1)).toBe("1.18.2");
     });
   });
 
@@ -89,5 +80,69 @@ describe("Minecraft version catalog", () => {
       // Legacy ids stay selectable, so the label must not degrade to nothing.
       expect(formatMinecraftVersion("1.18.2")).toBe("Minecraft 1.18.2");
     });
+  });
+});
+
+describe("Mojang version manifest", () => {
+  it("has no duplicate ids", () => {
+    expect(new Set(GAME_VERSIONS).size).toBe(GAME_VERSIONS.length);
+  });
+
+  it("offers releases and snapshots", () => {
+    expect(RELEASE_GAME_VERSIONS.length).toBeGreaterThan(90);
+    expect(GAME_VERSIONS.length).toBeGreaterThan(RELEASE_GAME_VERSIONS.length);
+    expect(isSnapshotVersion("24w14a")).toBeTruthy();
+    expect(isSnapshotVersion("1.20.1")).toBeFalsy();
+  });
+
+  it("keeps every version projects already reference", () => {
+    // Stored versions must stay valid after the switch from the old list.
+    for (const id of [
+      "26.2",
+      "26.1",
+      "1.21.11",
+      "1.21",
+      "1.20.4",
+      "1.20.1",
+      "1.19.4",
+      "1.18.2",
+    ]) {
+      expect(isGameVersion(id)).toBeTruthy();
+    }
+  });
+
+  it("lists releases newest first", () => {
+    const oldest = RELEASE_GAME_VERSIONS.at(-1);
+    expect(oldest).toBe("1.0");
+    expect(RELEASE_GAME_VERSIONS.indexOf("1.21")).toBeLessThan(
+      RELEASE_GAME_VERSIONS.indexOf("1.20.6")
+    );
+  });
+
+  it("rejects ids Mojang never shipped", () => {
+    expect(isGameVersion("1.99")).toBeFalsy();
+    expect(isGameVersion("")).toBeFalsy();
+  });
+});
+
+describe(getVersionLine, () => {
+  it("groups releases by their first two parts", () => {
+    expect(getVersionLine("1.20.4")).toBe("1.20");
+    expect(getVersionLine("1.20")).toBe("1.20");
+    expect(getVersionLine("26.1.2")).toBe("26.1");
+  });
+
+  it("puts snapshots in no line", () => {
+    expect(getVersionLine("24w14a")).toBeNull();
+    expect(getVersionLine("1.21-pre1")).toBeNull();
+  });
+});
+
+describe(getReleasesInLine, () => {
+  it("lists a line's releases newest first", () => {
+    const line = getReleasesInLine("1.20");
+    expect(line[0]).toBe("1.20.6");
+    expect(line.at(-1)).toBe("1.20");
+    expect(line).not.toContain("1.21");
   });
 });

@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { safeParse } from "valibot";
 
 import { CheckboxGroup } from "@/components/dashboard/checkbox-group";
+import { GameVersionPicker } from "@/components/dashboard/game-version-picker";
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,9 @@ import {
 } from "@/lib/form-errors";
 import type { FieldErrors } from "@/lib/form-errors";
 import { formatBytes } from "@/lib/format";
-import { formatMinecraftVersion } from "@/lib/minecraft-versions";
 import {
-  GAME_VERSIONS,
+  hasLoaders,
+  LOADER_LABELS,
   LOADERS_BY_TYPE,
   RELEASE_CHANNELS,
   versionInputSchema,
@@ -30,6 +31,10 @@ import {
 import type { ProjectType, ReleaseChannel } from "@/lib/projects";
 import { createVersion, deleteVersion } from "@/lib/projects.functions";
 import { uploadVersionFile } from "@/lib/upload-client";
+import {
+  ALLOWED_EXTENSIONS_BY_TYPE,
+  contentTypeFor,
+} from "@/lib/upload-validation";
 
 interface VersionFormProps {
   onCreated: () => Promise<void> | void;
@@ -59,8 +64,13 @@ export const VersionForm = ({
   const [progress, setProgress] = useState<number | null>(null);
   const [fileInputKey, setFileInputKey] = useState(0);
 
-  const loaderLegend = projectType === "mod" ? "Loaders" : "Platforms";
   const pending = progress !== null;
+  const extensions = ALLOWED_EXTENSIONS_BY_TYPE[projectType];
+  const extensionList = extensions.join(" or ");
+  const accept = [
+    ...extensions,
+    ...new Set(extensions.map((extension) => contentTypeFor(extension))),
+  ].join(",");
 
   const reset = () => {
     setVersionNumber("");
@@ -86,9 +96,12 @@ export const VersionForm = ({
       ? new Map<string, string>()
       : toFieldErrors(result.issues);
     if (!file) {
-      fieldErrors.set("file", "Choose a .jar file to upload.");
+      fieldErrors.set("file", `Choose a ${extensionList} file to upload.`);
     }
-    if (!result.success || !file) {
+    if (hasLoaders(projectType) && loaders.length === 0) {
+      fieldErrors.set("loaders", "Choose at least one loader.");
+    }
+    if (!result.success || fieldErrors.size > 0 || !file) {
       setErrors(fieldErrors);
       return;
     }
@@ -164,25 +177,24 @@ export const VersionForm = ({
         </div>
       </div>
 
-      <CheckboxGroup
+      <GameVersionPicker
         id="version-game-versions"
-        legend="Game versions"
-        options={GAME_VERSIONS}
         values={gameVersions}
         onChange={setGameVersions}
-        formatLabel={formatMinecraftVersion}
         error={errors.get("gameVersions")}
       />
 
-      <CheckboxGroup
-        id="version-loaders"
-        legend={loaderLegend}
-        options={LOADERS_BY_TYPE[projectType]}
-        values={loaders}
-        onChange={setLoaders}
-        formatLabel={capitalize}
-        error={errors.get("loaders")}
-      />
+      {hasLoaders(projectType) ? (
+        <CheckboxGroup
+          id="version-loaders"
+          legend={LOADER_LABELS[projectType].plural}
+          options={LOADERS_BY_TYPE[projectType]}
+          values={loaders}
+          onChange={setLoaders}
+          formatLabel={capitalize}
+          error={errors.get("loaders")}
+        />
+      ) : null}
 
       <FormTextarea
         id="version-changelog"
@@ -199,13 +211,13 @@ export const VersionForm = ({
         id="version-file"
         label="File"
         type="file"
-        accept=".jar,application/java-archive"
+        accept={accept}
         onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         error={errors.get("file")}
         helperText={
           file
             ? `${file.name} · ${formatBytes(file.size)}`
-            : "A .jar file, up to 100 MB."
+            : `A ${extensionList} file, up to 100 MB.`
         }
         className="file:text-foreground py-2 file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
         required

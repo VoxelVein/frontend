@@ -2,7 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { Meilisearch } from "meilisearch";
 
 import { db } from "@/db";
-import { projects, projectVersions, users } from "@/db/schema";
+import { projects, projectServers, projectVersions, users } from "@/db/schema";
 import { DELETED_USER_LABEL } from "@/lib/projects";
 import type { ProjectDocument } from "@/lib/projects";
 
@@ -104,6 +104,16 @@ export const buildProjectDocument = async (
     .where(eq(projectVersions.projectId, projectId))
     .orderBy(desc(projectVersions.createdAt));
 
+  // Servers have no versions; their supported versions live on the listing.
+  const [server] =
+    project.type === "server"
+      ? await db
+          .select({ gameVersions: projectServers.gameVersions })
+          .from(projectServers)
+          .where(eq(projectServers.projectId, projectId))
+          .limit(1)
+      : [];
+
   return {
     author:
       project.authorDisplayUsername ??
@@ -113,7 +123,10 @@ export const buildProjectDocument = async (
     category: project.category,
     description: project.summary,
     downloads: project.downloads,
-    gameVersions: unique(versions.map((version) => version.gameVersions)),
+    gameVersions: unique([
+      server?.gameVersions ?? [],
+      ...versions.map((version) => version.gameVersions),
+    ]),
     id: project.id,
     loaders: unique(versions.map((version) => version.loaders)),
     name: project.name,

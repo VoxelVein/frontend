@@ -46,9 +46,10 @@ a fresh environment.
 | ------------------- | ----------------------------------------------- |
 | `just infra`        | Start Postgres, Meilisearch, and Garage         |
 | `pnpm storage:init` | Prepare the local Garage bucket and key         |
-| `pnpm db:seed`      | Create demo mods and plugins, then reindex      |
+| `pnpm db:seed`      | Create demo projects of every type, then reindex|
 | `pnpm db:reindex`   | Rebuild the search index from the database      |
 | `pnpm db:seed:admin`| Make an existing user an admin                  |
+| `pnpm mc:versions`  | Refresh the Minecraft version list from Mojang  |
 
 See [Object Storage](../storage/object-storage.md) and
 [Projects and Files](../content/projects.md).
