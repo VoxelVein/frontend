@@ -91,9 +91,10 @@ const PrivacyPage = () => (
         heading: "Third-Party Services",
         body: (
           <p>
-            The platform uses third-party services for search (Meilisearch),
-            authentication (Better Auth), and hosting. These services may
-            process data on our behalf under their own terms.
+            The platform uses third-party services for authentication (Better
+            Auth) and hosting. These services may process data on our behalf
+            under their own terms. Search runs on our own database and sends no
+            query to a third party.
           </p>
         ),
       },

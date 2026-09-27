@@ -31,7 +31,7 @@ Profiles are pre-configured component bundles in `registry.json` that users inst
 // ✅ Agent exists in components
 {
   "id": "devops-specialist",
-  "path": ".opencode/agent/subagents/development/devops-specialist.md"
+  "path": ".opencode/agents/subagents/development/devops-specialist.md"
 }
 
 // ❌ But NOT in developer profile
@@ -266,7 +266,7 @@ Save this as: `scripts/registry/validate-profile-coverage.sh`
    REGISTRY_URL="file://$(pwd)/registry.json" bash <(curl -s https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/main/install.sh) developer
 
    # Check if agent was installed
-   ls .opencode/agent/category/your-agent.md
+   ls .opencode/agents/category/your-agent.md
    ```
 
 ---

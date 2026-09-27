@@ -120,4 +120,4 @@ The Garage variables are not used in production.
 ## Related
 
 * [Projects and Files](../content/projects.md)
-* [Meilisearch](../search/meilisearch.md)
+* [Search](../search/postgres.md)

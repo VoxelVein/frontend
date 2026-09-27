@@ -6,7 +6,7 @@ import type { ProjectSearchResponse } from "@/lib/project-search.functions";
 const responseFixture = (query: string): ProjectSearchResponse => ({
   estimatedTotalHits: 1,
   // oxlint-disable-next-line sonarjs/no-undefined-assignment -- Test fixture mirrors the server response shape
-  facetDistribution: undefined,
+  facetDistribution: null,
   hits: [],
   page: 1,
   pageSize: 12,

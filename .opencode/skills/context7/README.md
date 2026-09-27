@@ -103,5 +103,5 @@ To add a new library to the registry:
 
 ## Related
 
-- **ExternalScout**: `.opencode/agent/subagents/core/externalscout.md`
-- **ContextScout**: `.opencode/agent/subagents/core/contextscout.md`
+- **ExternalScout**: `.opencode/agents/subagents/core/externalscout.md`
+- **ContextScout**: `.opencode/agents/subagents/core/contextscout.md`

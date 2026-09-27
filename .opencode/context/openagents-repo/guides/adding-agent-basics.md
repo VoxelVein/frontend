@@ -37,7 +37,7 @@ Adding a new agent involves:
 ### Create File with Frontmatter
 
 ```bash
-touch .opencode/agent/{category}/{agent-name}.md
+touch .opencode/agents/{category}/{agent-name}.md
 ```
 
 ```markdown

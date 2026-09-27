@@ -104,6 +104,7 @@ class EventSourceMock {
 
 const modFixture: ProjectDocument = {
   author: "JellySquid",
+  authorUsername: "jellysquid",
   category: "performance",
   description: "A rendering engine replacement.",
   downloads: 14_200_000,
@@ -121,7 +122,7 @@ const modFixture: ProjectDocument = {
 const responseFixture = (hits: ProjectDocument[]): ProjectSearchResponse => ({
   estimatedTotalHits: hits.length,
   // oxlint-disable-next-line sonarjs/no-undefined-assignment -- Test fixture mirrors the server response shape
-  facetDistribution: undefined,
+  facetDistribution: null,
   hits,
   page: 1,
   pageSize: 12,

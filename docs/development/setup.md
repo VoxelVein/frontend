@@ -30,8 +30,6 @@ Required variables:
 | `DATABASE_URL`       | PostgreSQL connection string         |
 | `BETTER_AUTH_SECRET` | Secret for signing sessions (32+)    |
 | `BETTER_AUTH_URL`    | Public URL of the app                |
-| `MEILI_HOST`         | Meilisearch base URL                 |
-| `MEILI_SEARCH_KEY`   | Meilisearch search key               |
 | `API_URL`            | API server base URL                  |
 | `API_PORT`           | API server port (default `3002`)     |
 | `WEBHOOK_SECRET`     | Webhook HMAC secret (32+, required)  |
@@ -47,8 +45,6 @@ Optional variables:
 | `GITHUB_CLIENT_ID`          | GitHub OAuth client ID            |
 | `GITHUB_CLIENT_SECRET`      | GitHub OAuth client secret        |
 | `VITE_GITHUB_CLIENT_ID`     | GitHub OAuth client ID (client)   |
-| `MEILI_MASTER_KEY`          | Meilisearch admin key (seeding)   |
-| `MEILI_ADMIN_KEY`           | Meilisearch project write key     |
 | `STORAGE_*`                 | Object storage (file uploads)     |
 | `PORT`                      | Port the app listens on (3000)    |
 | `WEB_PORT`                  | Host port docker publishes (3000) |

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { UserMenu } from "@/components/navbar/user-menu";
+import { UserNotifications } from "@/components/navbar/user-notifications";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -90,7 +91,12 @@ const AuthSignedIn = ({
   onSignOut: () => void;
 }) => {
   if (variant === "desktop") {
-    return <UserMenu user={user} onSignOut={onSignOut} />;
+    return (
+      <div className="flex items-center gap-1">
+        <UserNotifications />
+        <UserMenu user={user} onSignOut={onSignOut} />
+      </div>
+    );
   }
   return <MobileUserCard user={user} onSignOut={onSignOut} />;
 };

@@ -129,7 +129,7 @@ Agents:
 
 ## Subagents
 
-**Location**: `.opencode/agent/subagents/`
+**Location**: `.opencode/agents/subagents/`
 
 **Purpose**: Delegated specialists for specific subtasks
 
@@ -187,16 +187,16 @@ The system supports multiple path formats for backward compatibility:
 
 ```bash
 # Short ID (backward compatible)
-"openagent" → resolves to → ".opencode/agent/core/openagent.md"
+"openagent" → resolves to → ".opencode/agents/core/openagent.md"
 
 # Category path
-"core/openagent" → resolves to → ".opencode/agent/core/openagent.md"
+"core/openagent" → resolves to → ".opencode/agents/core/openagent.md"
 
 # Full category path
-"development/frontend-specialist" → resolves to → ".opencode/agent/subagents/development/frontend-specialist.md"
+"development/frontend-specialist" → resolves to → ".opencode/agents/subagents/development/frontend-specialist.md"
 
 # Subagent path
-"TestEngineer" → resolves to → ".opencode/agent/subagents/code/test-engineer.md"
+"TestEngineer" → resolves to → ".opencode/agents/subagents/code/test-engineer.md"
 ```
 
 ### Resolution Rules
@@ -267,7 +267,7 @@ Loads: `.opencode/context/ui/web/react-patterns.md`
 
 ```bash
 # Create agent file
-touch .opencode/agent/{category}/{agent-name}.md
+touch .opencode/agents/{category}/{agent-name}.md
 
 # Add frontmatter and content
 # (See guides/adding-agent.md for details)

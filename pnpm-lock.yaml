@@ -111,9 +111,6 @@ importers:
       exact-mirror:
         specifier: ^0.2.7
         version: 0.2.7(@sinclair/typebox@0.34.52)
-      meilisearch:
-        specifier: ^0.62.0
-        version: 0.62.0
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -4919,10 +4916,6 @@ packages:
   media-typer@1.1.1:
     resolution: {integrity: sha512-yz3xRaG20c6/BOzvYoDaGtPmGscs7YivItZEEqe6GbwNfHuxu9YNmvnEkMzKldAGY4/80pRcQRZSEnhquk9XuQ==}
     engines: {node: '>= 0.8'}
-
-  meilisearch@0.62.0:
-    resolution: {integrity: sha512-/ETDW7mmWI2NcSmtJdTPhbjsIbs3VcuapszX5X6JhdHB0XbszPOhqd3EB2bEylL0HK7dgwh/4Z3MdyuycWVf5A==}
-    engines: {node: ^20.19.0 || >=22.12.0}
 
   memoirist@0.4.0:
     resolution: {integrity: sha512-zxTgA0mSYELa66DimuNQDvyLq36AwDlTuVRbnQtB+VuTcKWm5Qc4z3WkSpgsFWHNhexqkIooqpv4hdcqrX5Nmg==}
@@ -10891,8 +10884,6 @@ snapshots:
   mdurl@2.1.0: {}
 
   media-typer@1.1.1: {}
-
-  meilisearch@0.62.0: {}
 
   memoirist@0.4.0: {}
 

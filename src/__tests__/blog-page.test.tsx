@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PostSummary } from "@/lib/posts";
-import type { PostSearchDocument } from "@/lib/posts-search";
 import { Route } from "@/routes/blog";
 
 const {
@@ -16,9 +15,8 @@ const {
   postSearchAvailableMock: vi.fn<() => Promise<boolean>>(),
   searchPostsMock: vi.fn<
     (opts: { data: { query: string } }) => Promise<{
-      available: boolean;
       estimatedTotalHits: number;
-      hits: PostSearchDocument[];
+      hits: PostSummary[];
       query: string;
     }>
   >(),
@@ -72,10 +70,8 @@ const postSummary: PostSummary = {
   updatedAt: "2026-01-15T10:30:00.000Z",
 };
 
-const searchHit: PostSearchDocument = {
-  content: "Body text about voxel veins.",
+const searchHit: PostSummary = {
   createdAt: "2026-02-01T09:00:00.000Z",
-  createdAtTs: Date.parse("2026-02-01T09:00:00.000Z"),
   excerpt: null,
   id: "post-2",
   preview: "Preview of the second post.",
@@ -116,7 +112,7 @@ describe("BlogPage", () => {
     expect(screen.getByText("Preview of the first post.")).toBeInTheDocument();
   });
 
-  it("hides the search field when Meilisearch is unavailable", () => {
+  it("hides the search field when there is nothing to search", () => {
     useLoaderDataMock.mockReturnValue({
       posts: [postSummary],
       searchAvailable: false,
@@ -131,9 +127,8 @@ describe("BlogPage", () => {
     expect(screen.getByText("First post")).toBeInTheDocument();
   });
 
-  it("searches through Meilisearch and shows the hits", async () => {
+  it("searches the posts table and shows the hits", async () => {
     searchPostsMock.mockResolvedValue({
-      available: true,
       estimatedTotalHits: 1,
       hits: [searchHit],
       query: "veins",
@@ -149,30 +144,26 @@ describe("BlogPage", () => {
     expect(searchPostsMock).toHaveBeenCalledWith({ data: { query: "veins" } });
   });
 
-  it("deactivates search when a query reports it is unavailable", async () => {
-    searchPostsMock.mockResolvedValue({
-      available: false,
-      estimatedTotalHits: 0,
-      hits: [],
-      query: "veins",
-    });
+  it("reports a failed search and keeps the field usable", async () => {
+    searchPostsMock.mockRejectedValue(new Error("Search is unavailable."));
 
     render(<BlogPage />);
     typeQuery("veins");
 
     await waitFor(() => {
-      expect(
-        screen.queryByRole("searchbox", { name: "Search blog posts" })
-      ).not.toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Search is unavailable."
+      );
     });
 
-    // Falling back to the database listing beats leaving a field that does nothing.
-    expect(screen.getByText("First post")).toBeInTheDocument();
+    // A transient failure must not cost the reader the search field.
+    expect(
+      screen.getByRole("searchbox", { name: "Search blog posts" })
+    ).toBeInTheDocument();
   });
 
   it("reports when a search finds nothing", async () => {
     searchPostsMock.mockResolvedValue({
-      available: true,
       estimatedTotalHits: 0,
       hits: [],
       query: "nothing",

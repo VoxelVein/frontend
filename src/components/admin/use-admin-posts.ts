@@ -101,9 +101,9 @@ const toMessage = (cause: unknown, fallback: string) => {
 };
 
 /**
- * The post fields a row in the Posts tab renders. `PostSummary` (from the
- * database) and `PostSearchDocument` (from Meilisearch) both satisfy it, so
- * search hits and list entries render through the same row.
+ * The post fields a row in the Posts tab renders. Both `PostSummary` from the
+ * database and a search hit satisfy it, so search results and list entries
+ * render through the same row.
  */
 export interface AdminPostRow {
   createdAt: Date | string;

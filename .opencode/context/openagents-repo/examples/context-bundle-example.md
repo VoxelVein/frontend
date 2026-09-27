@@ -54,7 +54,7 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
 
 **From Repository Context**:
 
-- Agent file must be in `.opencode/agent/data/` directory (category-based organization)
+- Agent file must be in `.opencode/agents/data/` directory (category-based organization)
 - Must include proper frontmatter metadata (id, name, description, category, type, version, etc.)
 - Must follow naming convention: `data-analyst.md` (kebab-case)
 - Must include tags for discoverability
@@ -70,7 +70,7 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
 
 **File Structure**:
 
-- Agent file: `.opencode/agent/data/data-analyst.md`
+- Agent file: `.opencode/agents/data/data-analyst.md`
 - Eval directory: `evals/agents/data/data-analyst/`
 - Eval config: `evals/agents/data/data-analyst/config/eval-config.yaml`
 - Eval tests: `evals/agents/data/data-analyst/tests/`
@@ -91,7 +91,7 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
 
 **Create**:
 
-- `.opencode/agent/data/data-analyst.md` - Main agent definition with frontmatter and prompt
+- `.opencode/agents/data/data-analyst.md` - Main agent definition with frontmatter and prompt
 - `evals/agents/data/data-analyst/config/eval-config.yaml` - Eval configuration
 - `evals/agents/data/data-analyst/tests/smoke-test.yaml` - Basic smoke test
 - `evals/agents/data/data-analyst/tests/data-analysis-test.yaml` - Data analysis capability test
@@ -186,7 +186,7 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
    - Testing requirements (core-concepts/evals.md)
 
 2. **Create Agent File**:
-   - Create `.opencode/agent/data/data-analyst.md`
+   - Create `.opencode/agents/data/data-analyst.md`
    - Add frontmatter with all required metadata
    - Write agent prompt with:
      - Context section (system, domain, task, execution context)

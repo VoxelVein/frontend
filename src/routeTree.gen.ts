@@ -37,6 +37,7 @@ import { Route as ServersIndexRouteImport } from './routes/servers.index'
 import { Route as ServersSlugRouteImport } from './routes/servers.$slug'
 import { Route as ShadersIndexRouteImport } from './routes/shaders.index'
 import { Route as ShadersSlugRouteImport } from './routes/shaders.$slug'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiDownloadFileIdRouteImport } from './routes/api/download.$fileId'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
@@ -184,6 +185,11 @@ const ShadersSlugRoute = ShadersSlugRouteImport.update({
   path: '/shaders/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/resource-packs/$slug': typeof ResourcePacksSlugRoute
   '/servers/$slug': typeof ServersSlugRoute
   '/shaders/$slug': typeof ShadersSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/resource-packs/$slug': typeof ResourcePacksSlugRoute
   '/servers/$slug': typeof ServersSlugRoute
   '/shaders/$slug': typeof ShadersSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/dashboard': typeof DashboardIndexRoute
   '/modpacks': typeof ModpacksIndexRoute
   '/mods': typeof ModsIndexRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/resource-packs/$slug': typeof ResourcePacksSlugRoute
   '/servers/$slug': typeof ServersSlugRoute
   '/shaders/$slug': typeof ShadersSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
@@ -349,6 +358,7 @@ export interface FileRouteTypes {
     | '/resource-packs/$slug'
     | '/servers/$slug'
     | '/shaders/$slug'
+    | '/u/$username'
     | '/dashboard/'
     | '/modpacks/'
     | '/mods/'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     | '/resource-packs/$slug'
     | '/servers/$slug'
     | '/shaders/$slug'
+    | '/u/$username'
     | '/dashboard'
     | '/modpacks'
     | '/mods'
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/resource-packs/$slug'
     | '/servers/$slug'
     | '/shaders/$slug'
+    | '/u/$username'
     | '/dashboard/'
     | '/modpacks/'
     | '/mods/'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   ResourcePacksSlugRoute: typeof ResourcePacksSlugRoute
   ServersSlugRoute: typeof ServersSlugRoute
   ShadersSlugRoute: typeof ShadersSlugRoute
+  UUsernameRoute: typeof UUsernameRoute
   ModpacksIndexRoute: typeof ModpacksIndexRoute
   ModsIndexRoute: typeof ModsIndexRoute
   PluginsIndexRoute: typeof PluginsIndexRoute
@@ -665,6 +678,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShadersSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -759,6 +779,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcePacksSlugRoute: ResourcePacksSlugRoute,
   ServersSlugRoute: ServersSlugRoute,
   ShadersSlugRoute: ShadersSlugRoute,
+  UUsernameRoute: UUsernameRoute,
   ModpacksIndexRoute: ModpacksIndexRoute,
   ModsIndexRoute: ModsIndexRoute,
   PluginsIndexRoute: PluginsIndexRoute,

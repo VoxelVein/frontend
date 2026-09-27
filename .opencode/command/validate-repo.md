@@ -41,7 +41,7 @@ For each command in `.opencode/command/`:
 
 ### 4. Agents
 
-- `.opencode/agent/` files exist and have valid frontmatter
+- `.opencode/agents/` files exist and have valid frontmatter
 - No references to removed directories (`.agents/`)
 - Subagent references are valid
 

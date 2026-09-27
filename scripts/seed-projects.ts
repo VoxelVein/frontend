@@ -1,20 +1,19 @@
 /**
- * Seeds demo projects of every type for local development, then rebuilds the
- * Meilisearch projects index from the database.
+ * Seeds demo projects of every type for local development.
  *
- *   pnpm db:seed:projects            # create missing demo projects + reindex
- *   pnpm db:seed:projects --reindex  # only rebuild the search index
+ *   pnpm db:seed:projects
  *
  * Demo projects belong to the first admin (see `pnpm db:seed:admin`). Each
  * gets one version with a tiny generated archive uploaded to object storage;
- * servers get join details instead.
+ * servers get join details and links instead.
+ *
+ * There is no search index to rebuild afterwards: search reads these rows
+ * directly.
  */
 import { crc32 } from "node:zlib";
 
 import { eq, inArray } from "drizzle-orm";
-import { Meilisearch } from "meilisearch";
 
-import env from "../env.config.ts";
 import { db, pool } from "../src/db/index.ts";
 import {
   projectFiles,
@@ -24,11 +23,6 @@ import {
   projectVersions,
   users,
 } from "../src/db/schema.ts";
-import {
-  buildProjectDocument,
-  PROJECTS_INDEX,
-  PROJECTS_INDEX_SETTINGS,
-} from "../src/lib/search-sync.ts";
 import { uploadStream } from "../src/lib/storage.ts";
 import {
   ALLOWED_EXTENSIONS_BY_TYPE,
@@ -36,9 +30,6 @@ import {
 } from "../src/lib/upload-validation.ts";
 import { DEMO_PROJECTS } from "./fixtures/demo-projects.ts";
 import type { DemoProject } from "./fixtures/demo-projects.ts";
-
-const LEGACY_INDEX = "mods";
-const reindexOnly = process.argv.includes("--reindex");
 
 /** Builds a valid single-entry, uncompressed zip (every .jar is a zip). */
 const buildJar = (entryName: string, content: string): Uint8Array => {
@@ -212,41 +203,8 @@ const seedProjects = async () => {
   );
 };
 
-const reindex = async () => {
-  if (!env.MEILI_MASTER_KEY) {
-    throw new Error("MEILI_MASTER_KEY is required to rebuild the index.");
-  }
-  const client = new Meilisearch({
-    apiKey: env.MEILI_MASTER_KEY,
-    host: env.MEILI_HOST,
-  });
-
-  await client.deleteIndexIfExists(LEGACY_INDEX);
-  const index = client.index(PROJECTS_INDEX);
-  const settingsTask = await index.updateSettings(PROJECTS_INDEX_SETTINGS);
-  await client.tasks.waitForTask(settingsTask.taskUid);
-  const clearTask = await index.deleteAllDocuments();
-  await client.tasks.waitForTask(clearTask.taskUid);
-
-  const published = await db
-    .select({ id: projects.id })
-    .from(projects)
-    .where(eq(projects.status, "published"));
-  const documents = await Promise.all(
-    published.map((project) => buildProjectDocument(project.id))
-  );
-  const task = await index.addDocuments(
-    documents.filter((document) => document !== null)
-  );
-  await client.tasks.waitForTask(task.taskUid);
-  console.log(`Indexed ${published.length} published projects.`);
-};
-
 try {
-  if (!reindexOnly) {
-    await seedProjects();
-  }
-  await reindex();
+  await seedProjects();
 } finally {
   await pool.end();
 }

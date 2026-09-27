@@ -56,13 +56,13 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
           <Link
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              "hidden min-h-11 shrink-0 sm:inline-flex"
+              "hidden min-h-12 shrink-0 sm:inline-flex"
             )}
             preload="intent"
             to="/mods"
           >
-            Browse all
-            <IconArrowRight aria-hidden size={16} />
+            <span>Browse all</span>
+            <IconArrowRight aria-hidden size={18} />
           </Link>
         </Reveal>
 
