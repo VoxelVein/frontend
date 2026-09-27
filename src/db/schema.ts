@@ -22,6 +22,10 @@ export const users = pgTable("users", {
   banExpires: timestamp("ban_expires"),
   banReason: text("ban_reason"),
   banned: boolean("banned").default(false).notNull(),
+  // Markdown shown on the public profile. Nullable rather than empty-string
+  // default so "no bio" stays distinguishable from a bio that renders to
+  // nothing. Length is capped in src/lib/bio.ts, not here.
+  bio: text("bio"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   // Set when the owner asked to delete an account that owns or owned a
   // project. The account is banned meanwhile and purged 14 days later unless

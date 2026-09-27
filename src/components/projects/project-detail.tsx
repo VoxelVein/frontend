@@ -300,7 +300,22 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
             {project.name}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            by {project.author}
+            by{" "}
+            {project.authorUsername ? (
+              // The only route to an author's profile, so it is a real link
+              // rather than a name that looks clickable.
+              <Link
+                to="/u/$username"
+                params={{ username: project.authorUsername }}
+                className="text-foreground hover:text-primary focus-visible:ring-ring focus-visible:ring-ring/50 rounded-sm underline-offset-2 hover:underline focus-visible:ring-3 focus-visible:outline-none"
+              >
+                {project.author}
+              </Link>
+            ) : (
+              // No account left behind the project, so there is no profile to
+              // link to and the name stays plain text.
+              project.author
+            )}
           </p>
         </div>
       </header>
