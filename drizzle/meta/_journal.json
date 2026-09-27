@@ -71,6 +71,20 @@
       "when": 1790453111911,
       "tag": "0009_account_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790467200000,
+      "tag": "0010_postgres_search",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790486400000,
+      "tag": "0011_document_postgres_search",
+      "breakpoints": true
     }
   ]
 }

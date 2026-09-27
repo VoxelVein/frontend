@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAdminPosts } from "@/components/admin/use-admin-posts";
 import type { Post, PostSummary } from "@/lib/posts";
-import type { PostSearchDocument } from "@/lib/posts-search";
 
 const {
   deletePostMock,
@@ -19,9 +18,8 @@ const {
   postSearchAvailableMock: vi.fn<() => Promise<boolean>>(),
   searchPostsAdminMock: vi.fn<
     (opts: { data: { query: string } }) => Promise<{
-      available: boolean;
       estimatedTotalHits: number;
-      hits: PostSearchDocument[];
+      hits: PostSummary[];
       query: string;
     }>
   >(),
@@ -104,10 +102,8 @@ interface HeldRefresh {
  */
 const heldRefresh: HeldRefresh = { resolve: () => {} };
 
-const draftHit: PostSearchDocument = {
-  content: "Draft body.",
+const draftHit: PostSummary = {
   createdAt: "2026-02-01T09:00:00.000Z",
-  createdAtTs: Date.parse("2026-02-01T09:00:00.000Z"),
   excerpt: null,
   id: "draft-1",
   preview: "Preview of the draft.",
@@ -290,7 +286,7 @@ describe("useAdminPosts search", () => {
     searchPostsAdminMock.mockReset();
   });
 
-  it("hides the search field when Meilisearch is unavailable", async () => {
+  it("hides the search field when there is nothing to search", async () => {
     postSearchAvailableMock.mockResolvedValue(false);
 
     const { result } = renderHook(() => useAdminPosts());
@@ -302,7 +298,6 @@ describe("useAdminPosts search", () => {
 
   it("searches drafts through the admin path", async () => {
     searchPostsAdminMock.mockResolvedValue({
-      available: true,
       estimatedTotalHits: 1,
       hits: [draftHit],
       query: "draft",
@@ -331,7 +326,6 @@ describe("useAdminPosts search", () => {
 
   it("falls back to the loaded list when the query is cleared", async () => {
     searchPostsAdminMock.mockResolvedValue({
-      available: true,
       estimatedTotalHits: 1,
       hits: [draftHit],
       query: "draft",
@@ -364,7 +358,6 @@ describe("useAdminPosts search", () => {
 
   it("does not re-search or stay busy when a trailing space is typed", async () => {
     searchPostsAdminMock.mockResolvedValue({
-      available: true,
       estimatedTotalHits: 1,
       hits: [draftHit],
       query: "draft",
@@ -402,7 +395,6 @@ describe("useAdminPosts search", () => {
 
   it("does not stay busy when an edit returns to the previous query", async () => {
     searchPostsAdminMock.mockResolvedValue({
-      available: true,
       estimatedTotalHits: 1,
       hits: [draftHit],
       query: "draft",

@@ -3,8 +3,8 @@ import { and, eq, max, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { projects, projectVersions } from "@/db/schema";
+import { buildProjectDocument } from "@/lib/project-document";
 import type { ProjectDocument } from "@/lib/projects";
-import { buildProjectDocument } from "@/lib/search-sync";
 import { pickTrending } from "@/lib/trending";
 
 /** The list is recomputed at most this often, however many visitors ask. */

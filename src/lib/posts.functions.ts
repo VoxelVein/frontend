@@ -8,18 +8,8 @@ import { posts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { postInputSchema, postUpdateSchema, resolvePreview } from "@/lib/posts";
 import type { Post, PostInput, PostSummary } from "@/lib/posts";
-import {
-  scheduleReindex,
-  scheduleReindexDelete,
-  withIndex,
-} from "@/lib/posts-index";
-import { UNAVAILABLE_POST_SEARCH } from "@/lib/posts-search";
-import type {
-  PostSearchDocument,
-  PostSearchResponse,
-} from "@/lib/posts-search";
-
-import env from "../../env.config";
+import { hasSearchablePosts, searchPostsInDatabase } from "@/lib/search/posts";
+import type { PostSearchResult } from "@/lib/search/posts";
 
 const getAdminSessionOrNull = async () => {
   const headers = getRequestHeaders();
@@ -42,6 +32,38 @@ const getAdminSession = async () => {
   return session;
 };
 
+const postSummaryColumns = {
+  content: posts.content,
+  createdAt: posts.createdAt,
+  excerpt: posts.excerpt,
+  id: posts.id,
+  published: posts.published,
+  slug: posts.slug,
+  title: posts.title,
+  updatedAt: posts.updatedAt,
+} as const;
+
+interface PostSummaryRow {
+  content: string;
+  createdAt: Date;
+  excerpt: string | null;
+  id: string;
+  published: boolean;
+  slug: string;
+  title: string;
+  updatedAt: Date;
+}
+
+/**
+ * Derives each teaser from the stored body. The body itself is dropped here and
+ * never leaves the server.
+ */
+const toPostSummaries = (rows: PostSummaryRow[]): PostSummary[] =>
+  rows.map(({ content, ...row }) => ({
+    ...row,
+    preview: resolvePreview({ content, excerpt: row.excerpt }),
+  }));
+
 export const listPosts = createServerFn({ method: "GET" })
   .validator((data: { includeUnpublished?: boolean }) => data)
   .handler(async ({ data }): Promise<PostSummary[]> => {
@@ -52,122 +74,78 @@ export const listPosts = createServerFn({ method: "GET" })
     }
 
     const rows = await db
-      .select({
-        content: posts.content,
-        createdAt: posts.createdAt,
-        excerpt: posts.excerpt,
-        id: posts.id,
-        published: posts.published,
-        slug: posts.slug,
-        title: posts.title,
-        updatedAt: posts.updatedAt,
-      })
+      .select(postSummaryColumns)
       .from(posts)
       .where(includeUnpublished ? undefined : eq(posts.published, true))
       .orderBy(desc(posts.createdAt));
 
-    // The body never leaves the server: it is only used to derive the teaser.
-    return rows.map(({ content, ...row }) => ({
-      ...row,
-      preview: resolvePreview({ content, excerpt: row.excerpt }),
-    }));
+    return toPostSummaries(rows);
   });
 
-const SEARCH_TIMEOUT_MS = 8000;
+/** How many posts the home page shows. */
+const LATEST_POSTS_LIMIT = 3;
+
+/** The list is recomputed at most this often, however many visitors ask. */
+export const POSTS_REFRESH_MS = 5 * 60 * 1000;
 
 /**
- * Public post search, proxied through the API server so the browser never
- * holds a Meilisearch key.
+ * The newest published posts, for the home page.
  *
- * A 503 means Meilisearch is unconfigured or down. That is reported as
- * `available: false` rather than thrown, so callers can hide their search UI
- * instead of showing an error.
+ * Reads Postgres rather than a search index, so the section renders correctly
+ * straight after a deploy with no reindex step, and cannot drift out of sync
+ * with the database the way a derived index can.
+ */
+export const getLatestPosts = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PostSummary[]> =>
+    toPostSummaries(
+      await db
+        .select(postSummaryColumns)
+        .from(posts)
+        .where(eq(posts.published, true))
+        .orderBy(desc(posts.createdAt))
+        .limit(LATEST_POSTS_LIMIT)
+    )
+);
+
+/**
+ * Public post search, published posts only.
+ *
+ * Reads Postgres directly. Search needs no separate service, so there is no
+ * extra hop and no way for it to be "temporarily unavailable".
  */
 export const searchPosts = createServerFn({ method: "GET" })
   .validator((data: { query: string }) => data)
-  .handler(async ({ data }): Promise<PostSearchResponse> => {
-    const params = new URLSearchParams();
-
-    if (data.query) {
-      params.set("q", data.query);
-    }
-
-    let response: Response;
-
-    try {
-      response = await fetch(
-        `${env.API_URL}/api/posts/search?${params.toString()}`,
-        { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) }
-      );
-    } catch (searchError) {
-      throw new Error(
-        "Could not reach the search service. Start the API server with `pnpm dev:all` and try again.",
-        { cause: searchError }
-      );
-    }
-
-    if (response.status === 503) {
-      return { ...UNAVAILABLE_POST_SEARCH, query: data.query };
-    }
-
-    if (!response.ok) {
-      throw new Error(`Search failed (${response.status})`);
-    }
-
-    // SAFETY: GET /api/posts/search is the only caller of this endpoint and
-    // Elysia validates its response shape, so the parsed body is always
-    // { available, estimatedTotalHits, hits, query }.
-    return response.json() as Promise<PostSearchResponse>;
-  });
+  .handler(({ data }): Promise<PostSearchResult> =>
+    searchPostsInDatabase({ query: data.query })
+  );
 
 /**
  * Admin post search, including drafts.
  *
- * Runs against Meilisearch directly rather than through the API server: the
- * public route cannot verify a session, and it hardcodes a published-only
- * filter precisely so drafts can never leak to anonymous callers.
+ * The published-only filter is hardcoded above rather than passed in, so no code
+ * path can widen it and leak a draft to an anonymous caller.
  */
 export const searchPostsAdmin = createServerFn({ method: "GET" })
   .validator((data: { query: string }) => data)
-  .handler(async ({ data }): Promise<PostSearchResponse> => {
+  .handler(async ({ data }): Promise<PostSearchResult> => {
     await getAdminSession();
 
-    const result = await withIndex((index) =>
-      index.search<PostSearchDocument>(data.query, {
-        limit: 50,
-        sort: ["createdAtTs:desc"],
-      })
-    );
-
-    if (result === null) {
-      return { ...UNAVAILABLE_POST_SEARCH, query: data.query };
-    }
-
-    return {
-      available: true,
-      estimatedTotalHits: result.estimatedTotalHits,
-      hits: result.hits,
-      query: result.query,
-    };
+    return searchPostsInDatabase({
+      includeUnpublished: true,
+      query: data.query,
+    });
   });
 
 /**
- * Whether blog search can actually serve results.
+ * Whether blog search has anything to search.
  *
- * The UI hides its search field when this is false, so a Meilisearch outage
- * degrades the page instead of showing a field that does nothing.
- *
- * An index that is reachable but still empty counts as unavailable: the
- * reindex queue only ever sees posts as they are written, so a fresh
- * deployment has an empty index until `pnpm db:reindex:posts` has run. Search
- * that silently returns nothing is worse than no search at all.
+ * The UI hides its search field when this is false, because a search box over an
+ * empty blog is a dead control. Reading the table cannot get this wrong: it used
+ * to probe the search index, which meant a fresh deployment hid search until
+ * someone remembered to run the reindex script.
  */
 export const postSearchAvailable = createServerFn({ method: "GET" }).handler(
-  async (): Promise<boolean> => {
-    const result = await withIndex((index) => index.search("", { limit: 1 }));
-
-    return result !== null && result.estimatedTotalHits > 0;
-  }
+  (): Promise<boolean> => hasSearchablePosts()
 );
 
 export const getPost = createServerFn({ method: "GET" })
@@ -229,8 +207,6 @@ export const createPost = createServerFn({ method: "POST" })
       })
       .returning();
 
-    scheduleReindex(row);
-
     return { ...row, preview: resolvePreview(row) };
   });
 
@@ -257,8 +233,6 @@ export const updatePost = createServerFn({ method: "POST" })
       throw new Error("Post not found.");
     }
 
-    scheduleReindex(row);
-
     return { ...row, preview: resolvePreview(row) };
   });
 
@@ -272,8 +246,6 @@ export const deletePost = createServerFn({ method: "POST" })
     if (result.rowCount === 0) {
       throw new Error("Post not found.");
     }
-
-    scheduleReindexDelete(data.id);
 
     return { ok: true };
   });

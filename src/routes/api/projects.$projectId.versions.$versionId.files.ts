@@ -11,7 +11,6 @@ import {
   requireUploader,
 } from "@/lib/project-access";
 import type { ProjectFileView } from "@/lib/projects";
-import { syncProjectToSearch } from "@/lib/search-sync";
 import {
   deleteObjects,
   loadStorageConfig,
@@ -188,7 +187,6 @@ const handleUpload = async (
     .update(projects)
     .set({ updatedAt: new Date() })
     .where(eq(projects.id, project.id));
-  await syncProjectToSearch(project.id);
 
   const file: ProjectFileView = {
     filename,

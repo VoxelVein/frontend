@@ -65,7 +65,7 @@ body:
         - label: Access control decided, using a guard from src/lib/project-access.ts or auth.functions.ts
         - label: Input validated with Valibot, or the input is not user-controlled
         - label: A migration was added for the schema change
-        - label: The Meilisearch index was updated if a searchable field changed
+        - label: The search query and its index agree if a searchable field changed
         - label: The failure path degrades deliberately rather than throwing into the render
         - label: Accessibility was checked, or there is no interface involved
         - label: Tests cover the new behavior

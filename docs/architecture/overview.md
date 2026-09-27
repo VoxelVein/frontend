@@ -6,17 +6,17 @@ ElysiaJS API server for search and real-time events.
 
 ## Stack
 
-| Layer      | Technology                              |
-| ---------- | --------------------------------------- |
-| Framework  | TanStack Start (file-based routing)     |
-| UI         | React 19, Tailwind CSS v4, Base UI      |
-| Animation  | CSS transitions (`EASE_OUT_CSS`)        |
-| Auth       | Better Auth                             |
-| Database   | PostgreSQL, Drizzle ORM                 |
-| Search     | Meilisearch                             |
-| API        | ElysiaJS (webhooks, SSE)                |
-| Validation | Valibot                                 |
-| Lint       | Ultracite (Oxlint + Oxfmt)              |
+| Layer      | Technology                          |
+| ---------- | ----------------------------------- |
+| Framework  | TanStack Start (file-based routing) |
+| UI         | React 19, Tailwind CSS v4, Base UI  |
+| Animation  | CSS transitions (`EASE_OUT_CSS`)    |
+| Auth       | Better Auth                         |
+| Database   | PostgreSQL, Drizzle ORM             |
+| Search     | PostgreSQL (`pg_trgm` + full-text)  |
+| API        | ElysiaJS (webhooks, SSE)            |
+| Validation | Valibot                             |
+| Lint       | Ultracite (Oxlint + Oxfmt)          |
 
 ## Directory layout
 
@@ -31,8 +31,8 @@ src/
   styles.css        Tailwind theme and global styles
 server/
   index.ts          ElysiaJS entry point (Node adapter)
-  lib/              Event registry, Meilisearch client
-  routes/           health, mods search, SSE events, webhooks
+  lib/              Event registry
+  routes/           health, SSE events, webhooks
 drizzle/            Generated SQL migrations
 docs/               Guides (this documentation)
 ```
@@ -48,10 +48,10 @@ docs/               Guides (this documentation)
    `src/lib/auth-client.ts`.
 4. Drizzle reads and writes PostgreSQL through the pool in
    `src/db/index.ts`.
-5. Project search runs through the ElysiaJS API server: the mods and
-   plugins pages call `searchProjects`, which proxies to
-   `GET /api/projects/search` on the API server, which queries
-   Meilisearch.
+5. Search queries PostgreSQL directly from a server function. The mods
+   and plugins pages call `searchProjects`, which matches with a
+   `tsvector` and trigram similarity in one query. See
+   [Search](../search/postgres.md).
 6. Project files are uploaded to and downloaded from S3-compatible
    object storage through the web app's API routes. See
    [Projects and Files](../content/projects.md).

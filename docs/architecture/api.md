@@ -1,10 +1,11 @@
 # API Server
 
 VoxelVein runs a standalone **ElysiaJS** API server (`server/`) on its own
-port. It is the single entry point for mod search and real-time mod
-events. The web app never talks to Meilisearch directly — the API server
-proxies search and streams events to the browser over Server-Sent Events
-(SSE).
+port. It is the single entry point for webhooks and real-time mod events,
+which it streams to the browser over Server-Sent Events (SSE).
+
+Search is not part of this server: the web app queries Postgres for that
+directly. See [Search](../search/postgres.md).
 
 ## Running the server
 
@@ -29,8 +30,6 @@ pnpm dev:all
 | `WEBHOOK_SECRET`             | HMAC secret for webhooks (required, 32+)    |
 | `VITE_API_URL`               | API base URL used by the browser (SSE)      |
 | `CORS_ORIGIN`                | Comma-separated allowed origins (optional)  |
-| `MEILI_HOST`                 | Meilisearch base URL                        |
-| `MEILI_SEARCH_KEY`           | Meilisearch search key (required)           |
 | `SSE_MAX_CONNECTIONS`        | Max concurrent SSE streams (default `500`)  |
 | `SSE_MAX_CONNECTIONS_PER_IP` | Max SSE streams per client (default `5`)    |
 | `TRUST_PROXY`                | `true`/`false`; required in production      |
@@ -39,27 +38,14 @@ The server loads `.env.local` via `server/env.ts` (imported first in every
 env-consuming module) and otherwise reads `process.env`, so it works in CI
 without a local env file.
 
-The API server never uses `MEILI_MASTER_KEY` for public search.
+This server needs no database connection: it publishes and streams events
+only.
 
 ## Endpoints
 
 ### `GET /api/health`
 
 Liveness check. Returns `{ ok: true }` when the server is up.
-
-### `GET /api/projects/search`
-
-Proxies project search to Meilisearch. `type` is required (`mod` or
-`plugin`). Optional parameters: `q`, `category`, `gameVersion`, `loader`,
-`sort`, and `page`. Returns `hits`, `estimatedTotalHits`,
-`facetDistribution`, `page`, `pageSize`, and `query`. Sort values are
-whitelisted (`downloads:desc`, `updatedAt:desc`, `name:asc`). `category`
-and `loader` must be valid for the given type, and `gameVersion` must be
-a known version, all from `src/lib/projects.ts`. Anything else returns
-`422`.
-
-Uploads and downloads are served by the web app, not this server. See
-[Projects and Files](../content/projects.md).
 
 ### `GET /api/events`
 
@@ -154,17 +140,15 @@ server/
 ├── index.ts              # Elysia entry point (Node adapter, CORS)
 ├── env.ts                # Loads .env.local before env reads
 ├── lib/
-│   ├── events.ts         # Subscriber registry + AsyncQueue for SSE
-│   └── meilisearch.ts    # Meilisearch client factory
+│   └── events.ts         # Subscriber registry + AsyncQueue for SSE
 └── routes/
     ├── health.ts         # GET /api/health
-    ├── projects.ts       # GET /api/projects/search
     ├── events.ts         # GET /api/events (SSE)
     └── webhooks.ts       # POST /api/webhooks/mods
 ```
 
 ## Related
 
-* [Meilisearch](../search/meilisearch.md)
+* [Search](../search/postgres.md)
 * [Architecture Overview](overview.md)
 * [Commands](../development/commands.md)

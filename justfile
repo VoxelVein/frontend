@@ -72,9 +72,9 @@ docker-dev:
 # Build and run the production environment with Docker
 docker-prod:
     docker compose -f compose.yaml -f compose.prod.yaml up -d --build
-# Start local infrastructure (Postgres, Meilisearch, Garage)
+# Start local infrastructure (Postgres, Garage)
 infra:
-    docker compose -f docker-compose.yml --env-file .env.local up -d db meilisearch garage
+    docker compose -f docker-compose.yml --env-file .env.local up -d db garage
 
 # Prepare the local Garage bucket and access key (idempotent)
 storage-init:

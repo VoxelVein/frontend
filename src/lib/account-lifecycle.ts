@@ -12,7 +12,6 @@ import {
   usernameHistory,
   users,
 } from "@/db/schema";
-import { syncProjectToSearch } from "@/lib/search-sync";
 import { deleteObjects } from "@/lib/storage";
 import {
   getNextUsernameChange,
@@ -121,10 +120,6 @@ const firstFreeUsername = async (
     [...current, ...reserved].map(({ username }) => username)
   );
   return candidates.find((candidate) => !taken.has(candidate)) ?? null;
-};
-
-const syncProjectsToSearch = async (projectIds: string[]): Promise<void> => {
-  await Promise.all(projectIds.map((id) => syncProjectToSearch(id)));
 };
 
 /**
@@ -392,7 +387,6 @@ const deleteProjectsCompletely = async (projectIds: string[]) => {
       console.error("Could not delete stored files of deleted projects", error);
     }
   }
-  await syncProjectsToSearch(projectIds);
 };
 
 /**
@@ -406,19 +400,18 @@ export const purgeAccount = async (userId: string): Promise<void> => {
     .where(eq(projects.ownerId, userId));
 
   const doomed: string[] = [];
-  const kept: string[] = [];
   for (const project of owned) {
-    (project.pendingDeletion ? doomed : kept).push(project.id);
+    if (project.pendingDeletion) {
+      doomed.push(project.id);
+    }
   }
 
   await deleteProjectsCompletely(doomed);
 
   // Sessions, sign-in accounts, passkeys, and username reservations cascade;
-  // kept projects lose their owner through `on delete set null`.
+  // kept projects lose their owner through `on delete set null`, after which they
+  // read as "Deleted user" straight from the table.
   await db.delete(users).where(eq(users.id, userId));
-
-  // Kept projects now show "Deleted user" as their author.
-  await syncProjectsToSearch(kept);
 };
 
 export type DeletionResult =
@@ -498,8 +491,6 @@ export const requestAccountDeletion = async ({
     await tx.delete(sessions).where(eq(sessions.userId, userId));
   });
 
-  await syncProjectsToSearch(toDelete);
-
   await notifyAdmins(
     protectedProjects.map((project) => ({
       message: `${who} requested account deletion. "${project.name}" is a protected project, so it is kept without an owner when the account is deleted on ${purgeDate}.`,
@@ -524,13 +515,14 @@ export const restoreAccount = async (userId: string): Promise<void> => {
     throw new AccountError("This account is not scheduled for deletion.");
   }
 
-  const hidden = await db
+  // Unhiding is a plain column update: search reads the table, so the projects
+  // reappear without an index to rebuild.
+  await db
     .update(projects)
     .set({ pendingDeletion: false })
     .where(
       and(eq(projects.ownerId, userId), eq(projects.pendingDeletion, true))
-    )
-    .returning({ id: projects.id });
+    );
   await db
     .update(users)
     .set({
@@ -540,8 +532,6 @@ export const restoreAccount = async (userId: string): Promise<void> => {
       deletionRequestedAt: null,
     })
     .where(eq(users.id, userId));
-
-  await syncProjectsToSearch(hidden.map(({ id }) => id));
 };
 
 export interface PendingDeletion {
