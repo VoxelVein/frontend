@@ -21,7 +21,9 @@ import type { FieldErrors } from "@/lib/form-errors";
 import {
   CATEGORIES_BY_TYPE,
   isCategoryForType,
+  isProjectType,
   PROJECT_TYPE_LABELS,
+  PROJECT_TYPE_PATHS,
   PROJECT_TYPES,
   projectInputSchema,
   SLUG_MAX_LENGTH,
@@ -151,7 +153,7 @@ export const ProjectForm = ({
             }))}
             value={values.type}
             onValueChange={(value) => {
-              if (value === "mod" || value === "plugin") {
+              if (value && isProjectType(value)) {
                 changeType(value);
               }
             }}
@@ -190,7 +192,7 @@ export const ProjectForm = ({
             update("slug", event.target.value);
           }}
           error={errors.get("slug")}
-          helperText={`Your page will live at /${values.type}s/${values.slug || "your-slug"}. It can't be changed later.`}
+          helperText={`Your page will live at ${PROJECT_TYPE_PATHS[values.type]}/${values.slug || "your-slug"}. It can't be changed later.`}
           autoComplete="off"
           spellCheck={false}
           required

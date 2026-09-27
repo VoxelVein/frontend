@@ -1,4 +1,5 @@
 import type { ProjectFileView } from "@/lib/projects";
+import { contentTypeFor } from "@/lib/upload-validation";
 
 const UNSAFE_FILENAME_CHARACTERS = /[^A-Za-z0-9._+-]+/gu;
 const LEADING_SEPARATORS = /^[._+-]+/u;
@@ -40,14 +41,15 @@ export const uploadVersionFile = ({
   projectId,
   versionId,
 }: UploadOptions): Promise<ProjectFileView> => {
-  const filename = encodeURIComponent(toUploadFilename(file.name));
+  const uploadName = toUploadFilename(file.name);
+  const filename = encodeURIComponent(uploadName);
   const url = `/api/projects/${projectId}/versions/${versionId}/files?filename=${filename}`;
 
   // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest has no promise API.
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("PUT", url);
-    request.setRequestHeader("content-type", "application/java-archive");
+    request.setRequestHeader("content-type", contentTypeFor(uploadName));
     request.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) {
         onProgress?.(event.loaded / event.total);

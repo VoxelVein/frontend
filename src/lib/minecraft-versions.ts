@@ -1,16 +1,18 @@
 /**
- * Minecraft release catalog.
+ * Minecraft release catalog: codenames and dates for recent releases.
  *
- * `GAME_VERSIONS` in `@/lib/projects` is the literal tuple that the upload form
- * and the valibot schema both read, and a literal tuple cannot be derived from
- * this catalog without losing its type. So the two are kept in sync by a test
- * (`minecraft-versions.test.ts`) rather than by inference: every id offered to
- * a user must exist here and be a stable release.
+ * This is display copy only. The list of versions a user can pick lives in
+ * the generated `minecraft-version-manifest.ts` (`pnpm mc:versions`), which is
+ * what `GAME_VERSIONS` in `@/lib/projects` and all validation read. A test
+ * checks that every id in this catalog is also in the manifest.
  *
  * Release metadata is carried over from the `xROT` branch and is not verified
  * against Mojang's official announcements. Treat `update`/`fullRelease` as
  * display copy, not as a source of truth.
  */
+
+import { MINECRAFT_VERSION_MANIFEST } from "@/lib/minecraft-version-manifest";
+import type { MinecraftVersionKind } from "@/lib/minecraft-version-manifest";
 
 export const MINECRAFT_VERSION_SERIES = ["26", "1.21"] as const;
 
@@ -39,7 +41,7 @@ export const MINECRAFT_VERSIONS = [
     id: "26.3",
     name: "26.3",
     series: "26",
-    stable: false,
+    stable: true,
     update: "Wilderness Bound",
   },
   {
@@ -193,3 +195,34 @@ export const formatMinecraftVersion = (id: string): string => {
   }
   return `Minecraft ${version.id} (${version.update})`;
 };
+
+const KIND_BY_ID = new Map<string, MinecraftVersionKind>(
+  MINECRAFT_VERSION_MANIFEST.map(([id, kind]) => [id, kind])
+);
+
+/** Full releases from the manifest, newest first. */
+export const RELEASE_GAME_VERSIONS: readonly string[] =
+  MINECRAFT_VERSION_MANIFEST.flatMap(([id, kind]) =>
+    kind === "release" ? [id] : []
+  );
+
+/** True for snapshots, pre-releases, and release candidates. */
+export const isSnapshotVersion = (id: string): boolean =>
+  KIND_BY_ID.get(id) === "snapshot";
+
+const RELEASE_ID = /^\d+\.\d+(?:\.\d+)?$/u;
+
+/**
+ * The line a release belongs to: `1.20.4` and `1.20` are both in `1.20`, and
+ * `26.1.2` is in `26.1`. Null for snapshots, which belong to no line.
+ */
+export const getVersionLine = (id: string): string | null => {
+  if (!RELEASE_ID.test(id)) {
+    return null;
+  }
+  return id.split(".").slice(0, 2).join(".");
+};
+
+/** Releases of one line (`1.20` → `1.20.6` … `1.20`), newest first. */
+export const getReleasesInLine = (line: string): string[] =>
+  RELEASE_GAME_VERSIONS.filter((id) => getVersionLine(id) === line);

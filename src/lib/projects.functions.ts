@@ -4,7 +4,14 @@ import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
 import { boolean, object, parse, pipe, string, uuid } from "valibot";
 
 import { db } from "@/db";
-import { projectFiles, projects, projectVersions, users } from "@/db/schema";
+import {
+  projectFiles,
+  projects,
+  projectServerLinks,
+  projectServers,
+  projectVersions,
+  users,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import {
   isAdmin,
@@ -16,20 +23,28 @@ import {
 import type { Session } from "@/lib/project-access";
 import {
   DELETED_USER_LABEL,
+  hasLoaders,
+  hasVersions,
   isCategoryForType,
+  isServerLinkType,
   LOADERS_BY_TYPE,
+  PROJECT_TYPE_LABELS,
   projectInputSchema,
   projectSlugSchema,
   projectUpdateSchema,
+  serverInputSchema,
   versionInputSchema,
 } from "@/lib/projects";
 import type {
   ProjectInput,
   ProjectListItem,
+  ProjectType,
   ProjectUpdateInput,
   ProjectView,
+  ServerInput,
   VersionInput,
 } from "@/lib/projects";
+import { loadServerDetails } from "@/lib/server-details";
 import { deleteObjects } from "@/lib/storage";
 
 const PG_UNIQUE_VIOLATION = "23505";
@@ -56,7 +71,8 @@ const getUploader = (): Promise<Session> =>
   requireUploader(getRequestHeaders());
 
 const loadProjectView = async (
-  where: ReturnType<typeof eq>
+  where: ReturnType<typeof eq>,
+  { includeHidden = false }: { includeHidden?: boolean } = {}
 ): Promise<ProjectView | null> => {
   const project = await db.query.projects.findFirst({
     where,
@@ -98,6 +114,10 @@ const loadProjectView = async (
     pendingDeletion: project.pendingDeletion,
     publishedAt: project.publishedAt?.toISOString() ?? null,
     rejectionReason: project.rejectionReason,
+    server:
+      project.type === "server"
+        ? await loadServerDetails(project.id, { includeHidden })
+        : null,
     slug: project.slug,
     status: project.status,
     summary: project.summary,
@@ -160,7 +180,9 @@ export const getEditableProject = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ProjectView> => {
     const session = await getUploader();
     await requireEditableProject(session, data.projectId);
-    const project = await loadProjectView(eq(projects.id, data.projectId));
+    const project = await loadProjectView(eq(projects.id, data.projectId), {
+      includeHidden: true,
+    });
     if (!project) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.notFound);
     }
@@ -259,9 +281,18 @@ export const createVersion = createServerFn({ method: "POST" })
     const { projectId, ...fields } = data;
     const project = await requireEditableProject(session, projectId);
 
+    const labels = PROJECT_TYPE_LABELS[project.type];
+    if (!hasVersions(project.type)) {
+      throw new Error(`${labels.plural} do not have versions.`);
+    }
     const allowedLoaders = new Set<string>(LOADERS_BY_TYPE[project.type]);
     if (!fields.loaders.every((loader) => allowedLoaders.has(loader))) {
-      throw new Error(`Choose loaders that fit a ${project.type}.`);
+      throw new Error(
+        `Choose loaders that fit a ${labels.singular.toLowerCase()}.`
+      );
+    }
+    if (hasLoaders(project.type) && fields.loaders.length === 0) {
+      throw new Error("Choose at least one loader.");
     }
 
     try {
@@ -290,6 +321,96 @@ export const createVersion = createServerFn({ method: "POST" })
       }
       throw error;
     }
+  });
+
+interface LinkTarget {
+  id: string;
+  pendingDeletion: boolean;
+  status: string;
+  type: ProjectType;
+}
+
+const isLinkable = (target: LinkTarget, alreadyLinked: Set<string>) => {
+  if (!isServerLinkType(target.type)) {
+    return false;
+  }
+  const visible = target.status === "published" && !target.pendingDeletion;
+  return visible || alreadyLinked.has(target.id);
+};
+
+/** Creates or replaces a server project's join details and links. */
+export const saveServerDetails = createServerFn({ method: "POST" })
+  .validator((data: ServerInput) => parse(serverInputSchema, data))
+  .handler(async ({ data }): Promise<void> => {
+    const session = await getUploader();
+    const { links, projectId, ...fields } = data;
+    const project = await requireEditableProject(session, projectId);
+    if (project.type !== "server") {
+      throw new Error("Only servers have join details.");
+    }
+
+    const linkedIds = links.map((link) => link.projectId);
+    if (linkedIds.includes(projectId)) {
+      throw new Error("A server cannot link to itself.");
+    }
+    const targets =
+      linkedIds.length > 0
+        ? await db
+            .select({
+              id: projects.id,
+              pendingDeletion: projects.pendingDeletion,
+              status: projects.status,
+              type: projects.type,
+            })
+            .from(projects)
+            .where(inArray(projects.id, linkedIds))
+        : [];
+    const targetsById = new Map(targets.map((target) => [target.id, target]));
+    // Links saved earlier may point at projects that were unpublished since;
+    // keep those, but only accept new links to published projects.
+    const existing = await db
+      .select({ linkedProjectId: projectServerLinks.linkedProjectId })
+      .from(projectServerLinks)
+      .where(eq(projectServerLinks.serverId, projectId));
+    const alreadyLinked = new Set(existing.map((row) => row.linkedProjectId));
+    for (const link of links) {
+      const target = targetsById.get(link.projectId);
+      if (!target || !isLinkable(target, alreadyLinked)) {
+        throw new Error(
+          "Link only published mods, modpacks, shaders, or resource packs."
+        );
+      }
+    }
+
+    const values = {
+      ...fields,
+      gameVersions: [...new Set(fields.gameVersions)],
+    };
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(projectServers)
+        .values({ ...values, projectId })
+        .onConflictDoUpdate({ set: values, target: projectServers.projectId });
+      await tx
+        .delete(projectServerLinks)
+        .where(eq(projectServerLinks.serverId, projectId));
+      if (links.length > 0) {
+        // Stagger timestamps so the saved order survives the reload.
+        const now = Date.now();
+        await tx.insert(projectServerLinks).values(
+          links.map((link, index) => ({
+            createdAt: new Date(now + index),
+            linkedProjectId: link.projectId,
+            required: link.required,
+            serverId: projectId,
+          }))
+        );
+      }
+      await tx
+        .update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
+    });
   });
 
 /** Deletes a version and its stored files. */
@@ -343,7 +464,6 @@ export const deleteProject = createServerFn({ method: "POST" })
       .select({ storageKey: projectFiles.storageKey })
       .from(projectFiles)
       .where(inArray(projectFiles.versionId, versionIds));
-
     await db.delete(projects).where(eq(projects.id, project.id));
     await deleteObjects(files.map((file) => file.storageKey));
   });

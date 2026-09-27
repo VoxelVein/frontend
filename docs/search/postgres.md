@@ -78,9 +78,10 @@ migration for the matching index, plus a matching edit in
 
 ```ts
 {
-  type: "mod" | "plugin";
+  type: ProjectType; // any of PROJECT_TYPES
   query: string;
   category?: string;
+  clientRequirement?: "required" | "recommended" | "vanilla"; // servers
   gameVersion?: string;
   loader?: string;
   page?: number;
@@ -96,7 +97,9 @@ includes `hits`, `estimatedTotalHits`, and `facetDistribution`.
 `gameVersions` and `loaders` live on `project_versions`, not `projects`, so
 filtering unions them across versions in a CTE. A project with no
 published versions left-joins to no facets at all, which is why those two
-fields are nullable in a hit.
+fields are nullable in a hit. Servers have no versions; their game versions
+come from `project_servers`, and their `clientRequirement` is computed from
+published rows in `project_server_links`.
 
 Only published projects are ever returned: `status = 'published' AND NOT
 pendingDeletion` is applied in the query, so an unpublished project cannot

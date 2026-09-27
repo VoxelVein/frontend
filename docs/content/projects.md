@@ -1,7 +1,9 @@
 # Projects and Files
 
-Mods and plugins are **projects**. A project has **versions**, and each
-version has one or more uploaded **files**. Metadata lives in Postgres,
+Mods, modpacks, plugins, resource packs, shaders, and servers are
+**projects**. Every type except servers has **versions**, and each
+version has one or more uploaded **files**. Servers are listings with
+join details instead. Metadata lives in Postgres,
 files live in [object storage](../storage/object-storage.md), and
 published projects are [searchable](../search/postgres.md) straight
 from Postgres.
@@ -11,17 +13,44 @@ from Postgres.
 Tables are defined in `src/db/schema.ts` (migration
 `drizzle/0005_add_projects.sql`):
 
-* `projects`: `slug` (unique, used in URLs), `type` (`mod` or `plugin`),
-  `status` (`draft`, `pending`, `published`, or `removed`), owner,
-  category, tags, summary, Markdown description, and a download counter.
+* `projects`: `slug` (unique, used in URLs), `type` (`mod`, `modpack`,
+  `plugin`, `resourcepack`, `shader`, or `server`), `status` (`draft`,
+  `pending`, `published`, or `removed`), owner, category, tags, summary,
+  Markdown description, and a download counter.
 * `project_versions`: version number (unique per project), release
   channel (`release`, `beta`, `alpha`), game versions, loaders or
   platforms, changelog, and a download counter.
 * `project_files`: filename, size, SHA-1, SHA-512, storage key, and
   whether it is the version's primary file.
+* `project_servers` (migration `drizzle/0010_add_project_servers.sql`):
+  one row per server project with its address, optional port (empty means
+  25565), and supported game versions.
+* `project_server_links`: mods, modpacks, shaders, and resource packs a
+  server links to, in any mix, each marked required or recommended.
 
-Shared constants and validation schemas (categories, loaders, plugin
-platforms, slug rules) are in `src/lib/projects.ts`.
+Shared constants and validation schemas (categories, loaders, slug rules,
+URL paths per type) are in `src/lib/projects.ts`.
+
+| Type           | URL               | Files               |
+| -------------- | ----------------- | ------------------- |
+| `mod`          | `/mods`           | `.jar`              |
+| `modpack`      | `/modpacks`       | `.mrpack` or `.zip` |
+| `plugin`       | `/plugins`        | `.jar`              |
+| `resourcepack` | `/resource-packs` | `.zip`              |
+| `shader`       | `/shaders`        | `.zip`              |
+| `server`       | `/servers`        | None                |
+
+Mods and modpacks list mod loaders, plugins list server platforms, and
+shaders list shader loaders. Resource packs and servers have none.
+
+## Game versions
+
+The selectable Minecraft versions are every release and snapshot in
+Mojang's launcher manifest. They are generated into
+`src/lib/minecraft-version-manifest.ts`; run `pnpm mc:versions` after
+Mojang ships a version and commit the result. Uploaders pick versions in
+a searchable field: typing a line such as `1.20` offers to add all of its
+releases at once, and snapshots stay hidden until "Show snapshots" is on.
 
 ## Who can do what
 
@@ -52,10 +81,12 @@ public; only an admin can.
 1. `/dashboard/projects/new` creates a **draft**
    (`createProject` in `src/lib/projects.functions.ts`).
 2. On `/dashboard/projects/<id>?tab=versions`, the owner creates a
-   version (`createVersion`) and uploads its file.
+   version (`createVersion`) and uploads its file. For servers the same
+   tab is called "Server" and saves the join details and linked content
+   (`saveServerDetails`). New links must point at published projects.
 3. **Submit for review** (`submitProjectForReview`) moves the draft to
-   `pending`, once at least one version exists. The project stays hidden
-   from the site.
+   `pending`, once at least one version exists, or for servers once join
+   details are saved. The project stays hidden from the site.
 4. An admin decides in `/admin?tab=reviews`:
    * **Approve** (`approveProject`) moves it to `published` and notifies
      the creator.
@@ -113,8 +144,10 @@ The route:
 1. Rejects requests whose `Origin` is not the app's own origin.
 2. Checks the session, ownership, and that the version belongs to the
    project.
-3. Accepts only `.jar` names made of letters, numbers, `.`, `-`, `_`, and
-   `+`. The client rewrites other characters before uploading.
+3. Accepts only names with an extension the project type allows (see the
+   table above) made of letters, numbers, `.`, `-`, `_`, and `+`. The
+   client rewrites other characters before uploading. Servers take no
+   files.
 4. Checks the `PK\x03\x04` zip signature, then streams the body to
    storage while hashing it.
 
@@ -126,7 +159,7 @@ The route:
 | `404`  | Unknown project or version                        |
 | `409`  | The version already has a file with that name     |
 | `413`  | Larger than `STORAGE_MAX_FILE_BYTES`              |
-| `415`  | Not a `.jar` file                                 |
+| `415`  | Wrong file type for the project, or a server      |
 | `503`  | Storage is not configured or unreachable          |
 | `507`  | The storage quota (`STORAGE_QUOTA_BYTES`) is full |
 
@@ -152,6 +185,16 @@ Every request gets the redirect, but only plausible downloads are counted
 
 The dedup cache is in memory, so it resets on restart and is per process.
 
+## Server client requirements
+
+Search derives each server's `clientRequirement` from its published links,
+in SQL (`src/lib/search/projects.ts`) and in `clientRequirementFor`
+(`src/lib/projects.ts`), which must agree: `required` when any link is
+required, `recommended` when there are only optional links, and `vanilla`
+when nothing is linked. The Servers page filters on it. Because it is
+computed at query time, unpublishing a linked mod changes the server's
+requirement right away.
+
 ## Search
 
 Search reads these tables directly, so there is no index to sync after a
@@ -159,8 +202,9 @@ publish, edit, upload, or delete. See [Search](../search/postgres.md).
 
 ## Demo data
 
-`pnpm db:seed` creates demo mods and plugins owned by the first admin.
-Each gets one version with a small generated `.jar`.
+`pnpm db:seed` creates demo projects of every type owned by the first
+admin. Each gets one version with a small generated archive; demo servers
+get join details, and two of them link to demo content.
 
 ## Related
 

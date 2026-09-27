@@ -30,6 +30,7 @@ const buildCacheKey = (params: ProjectSearchParams): string =>
     params.category ?? "",
     params.gameVersion ?? "",
     params.loader ?? "",
+    params.clientRequirement ?? "",
     params.sort,
     params.page ?? 1,
   ]);

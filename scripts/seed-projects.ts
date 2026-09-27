@@ -1,10 +1,11 @@
 /**
- * Seeds demo mods and plugins for local development.
+ * Seeds demo projects of every type for local development.
  *
  *   pnpm db:seed:projects
  *
  * Demo projects belong to the first admin (see `pnpm db:seed:admin`). Each
- * gets one version with a tiny generated .jar uploaded to object storage.
+ * gets one version with a tiny generated archive uploaded to object storage;
+ * servers get join details and links instead.
  *
  * There is no search index to rebuild afterwards: search reads these rows
  * directly.
@@ -17,11 +18,16 @@ import { db, pool } from "../src/db/index.ts";
 import {
   projectFiles,
   projects,
+  projectServerLinks,
+  projectServers,
   projectVersions,
   users,
 } from "../src/db/schema.ts";
 import { uploadStream } from "../src/lib/storage.ts";
-import { JAR_CONTENT_TYPE } from "../src/lib/upload-validation.ts";
+import {
+  ALLOWED_EXTENSIONS_BY_TYPE,
+  contentTypeFor,
+} from "../src/lib/upload-validation.ts";
 import { DEMO_PROJECTS } from "./fixtures/demo-projects.ts";
 import type { DemoProject } from "./fixtures/demo-projects.ts";
 
@@ -92,6 +98,42 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
     })
     .returning({ id: projects.id });
 
+  if (demo.server) {
+    const { links, ...server } = demo.server;
+    await db.insert(projectServers).values({
+      ...server,
+      gameVersions: demo.gameVersions,
+      projectId: project.id,
+    });
+    const linked = await db
+      .select({ id: projects.id, slug: projects.slug })
+      .from(projects)
+      .where(
+        inArray(
+          projects.slug,
+          links.map((link) => link.slug)
+        )
+      );
+    const idBySlug = new Map(linked.map((row) => [row.slug, row.id]));
+    const rows = links.flatMap((link, index) => {
+      const linkedProjectId = idBySlug.get(link.slug);
+      return linkedProjectId
+        ? [
+            {
+              createdAt: new Date(Date.now() + index),
+              linkedProjectId,
+              required: link.required,
+              serverId: project.id,
+            },
+          ]
+        : [];
+    });
+    if (rows.length > 0) {
+      await db.insert(projectServerLinks).values(rows);
+    }
+    return;
+  }
+
   const [version] = await db
     .insert(projectVersions)
     .values({
@@ -104,7 +146,8 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
     .returning({ id: projectVersions.id });
 
   const fileId = crypto.randomUUID();
-  const filename = `${demo.slug}-${demo.version}.jar`;
+  const [extension = ".jar"] = ALLOWED_EXTENSIONS_BY_TYPE[demo.type];
+  const filename = `${demo.slug}-${demo.version}${extension}`;
   const storageKey = `projects/${project.id}/${version.id}/${fileId}/${filename}`;
   const jar = buildJar(
     "demo.txt",
@@ -112,7 +155,7 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
   );
   const stored = await uploadStream({
     body: new Blob([new Uint8Array(jar)]).stream(),
-    contentType: JAR_CONTENT_TYPE,
+    contentType: contentTypeFor(filename),
     filename,
     key: storageKey,
   });
@@ -145,12 +188,16 @@ const seedProjects = async () => {
   const existingSlugs = new Set(existing.map((row) => row.slug));
   const missing = DEMO_PROJECTS.filter((demo) => !existingSlugs.has(demo.slug));
 
-  await Promise.all(
-    missing.map(async (demo) => {
-      await seedProject(demo, ownerId);
-      console.log(`  + ${demo.type} ${demo.slug}`);
-    })
-  );
+  const seedAll = (demos: DemoProject[]) =>
+    Promise.all(
+      demos.map(async (demo) => {
+        await seedProject(demo, ownerId);
+        console.log(`  + ${demo.type} ${demo.slug}`);
+      })
+    );
+  // Servers link to other demo projects, so those must exist first.
+  await seedAll(missing.filter((demo) => !demo.server));
+  await seedAll(missing.filter((demo) => demo.server));
   console.log(
     `Seeded ${missing.length} demo projects (${existingSlugs.size} already existed).`
   );

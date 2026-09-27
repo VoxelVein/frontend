@@ -23,10 +23,12 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   };
 });
 
-const AVAILABLE_LINKS = [
-  { href: "/mods", label: "Browse Mods" },
-  { href: "/plugins", label: "Browse Plugins" },
-] as const;
+const AVAILABLE_LINKS = MINECRAFT_CATEGORIES.filter(
+  (category) => category.available
+).map((category) => ({
+  href: category.href,
+  label: `Browse ${category.label}`,
+}));
 
 const UNAVAILABLE_LABELS = MINECRAFT_CATEGORIES.filter(
   (category) => !category.available
@@ -93,7 +95,9 @@ describe(ExploreSection, () => {
   it("marks categories without a route as coming soon instead of linking them", () => {
     render(<ExploreSection />);
 
-    expect(screen.getAllByText("Soon")).toHaveLength(UNAVAILABLE_LABELS.length);
+    expect(screen.queryAllByText("Soon")).toHaveLength(
+      UNAVAILABLE_LABELS.length
+    );
     for (const label of UNAVAILABLE_LABELS) {
       expect(
         screen.queryByRole("link", {

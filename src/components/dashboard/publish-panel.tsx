@@ -11,6 +11,7 @@ import {
   unpublishProject,
   withdrawProjectReview,
 } from "@/lib/project-moderation.functions";
+import { hasVersions } from "@/lib/projects";
 import type { ProjectView } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +79,11 @@ interface Transition {
   success: string;
 }
 
+const missingForReview = (isServer: boolean) =>
+  isServer
+    ? " Add the server address before submitting it."
+    : " Upload a version with a file before submitting it.";
+
 export const PublishPanel = ({
   onChange,
   project,
@@ -87,7 +93,11 @@ export const PublishPanel = ({
 }) => {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const hasVersion = project.versions.some((version) => version.files.length);
+  const isServer = !hasVersions(project.type);
+  // Servers are listings: saved join details stand in for an uploaded file.
+  const isReady = isServer
+    ? project.server !== null
+    : project.versions.some((version) => version.files.length);
   const visibility = VISIBILITY[project.status];
 
   // The one transition this status allows, or null when there is none. Held as
@@ -97,7 +107,7 @@ export const PublishPanel = ({
     switch (project.status) {
       case "draft": {
         // Nothing to publish without a file, so no transition is offered.
-        return hasVersion
+        return isReady
           ? {
               run: () =>
                 submitProjectForReview({ data: { projectId: project.id } }),
@@ -152,8 +162,8 @@ export const PublishPanel = ({
       </h2>
       <p className="text-muted-foreground mt-1 text-sm">
         {visibility.description}
-        {project.status === "draft" && !hasVersion
-          ? " Upload a version with a file before submitting it."
+        {project.status === "draft" && !isReady
+          ? missingForReview(isServer)
           : null}
       </p>
       {error ? (

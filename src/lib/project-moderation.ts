@@ -4,6 +4,7 @@ import { object, maxLength, pipe, string, trim, uuid } from "valibot";
 import { db } from "@/db";
 import {
   projects,
+  projectServers,
   projectVersions,
   userNotifications,
   users,
@@ -22,6 +23,8 @@ export const MODERATION_ERROR = {
   notPending: "not-pending",
   /** The project has no uploaded file, so publishing it would serve nothing. */
   noFiles: "no-files",
+  /** A server has no address yet, so nobody could join it. */
+  noServerDetails: "no-server-details",
   /** The rejection reason was empty or whitespace only. */
   reasonRequired: "reason-required",
 } as const;
@@ -34,6 +37,8 @@ const MESSAGES: Record<ModerationErrorCode, string> = {
     "This project is not waiting for review. Refresh to see its current state.",
   [MODERATION_ERROR.noFiles]:
     "This project has no uploaded file, so there is nothing to publish yet.",
+  [MODERATION_ERROR.noServerDetails]:
+    "Add the server address before submitting it for review.",
   [MODERATION_ERROR.reasonRequired]: "Give a reason so the creator can fix it.",
 };
 
@@ -174,8 +179,28 @@ export const listPendingReviews = async (): Promise<PendingReview[]> => {
  * Clears any previous rejection reason: it described the last decision, and
  * leaving it would show a stale explanation next to a fresh submission.
  */
+/** Whether a server project has saved join details. */
+export const hasServerDetails = async (projectId: string): Promise<boolean> => {
+  const [row] = await db
+    .select({ projectId: projectServers.projectId })
+    .from(projectServers)
+    .where(eq(projectServers.projectId, projectId))
+    .limit(1);
+  return row !== undefined;
+};
+
 export const submitForReview = async (projectId: string): Promise<void> => {
-  if (!(await hasVersion(projectId))) {
+  const [project] = await db
+    .select({ type: projects.type })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+  // Servers are listings: they need join details instead of a version.
+  if (project?.type === "server") {
+    if (!(await hasServerDetails(projectId))) {
+      throw new ModerationError(MODERATION_ERROR.noServerDetails);
+    }
+  } else if (!(await hasVersion(projectId))) {
     throw new ModerationError(MODERATION_ERROR.noFiles);
   }
 

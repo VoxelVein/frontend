@@ -18,7 +18,7 @@ import type {
   ProjectSearchResponse,
 } from "@/lib/project-search.functions";
 import type { ProjectDocument } from "@/lib/projects";
-import { PROJECT_TYPES } from "@/lib/projects";
+import { CLIENT_REQUIREMENTS, PROJECT_TYPES } from "@/lib/projects";
 import { matchProject, rankProject, toTextQuery } from "@/lib/search/text";
 
 const DEFAULT_SORT = "downloads:desc";
@@ -51,6 +51,36 @@ const FALLBACK_AUTHOR = "Unknown creator";
  * A project with no published versions produces no rows here, which is why the
  * caller left-joins and why `gameVersions` and `loaders` are nullable in a hit.
  */
+/**
+ * What a server's players need on their client, from its published links:
+ * `required` if any link is required, `recommended` if there are only
+ * optional links, `vanilla` with none. Must match `clientRequirementFor` in
+ * `@/lib/projects`. Null for every other project type.
+ */
+const clientRequirementSQL = sql`
+  case
+    when projects.type <> 'server' then null
+    when exists (
+      select 1
+      from project_server_links links
+      join projects linked on linked.id = links.linked_project_id
+      where links.server_id = projects.id
+        and links.required
+        and linked.status = 'published'
+        and linked.pending_deletion = false
+    ) then 'required'
+    when exists (
+      select 1
+      from project_server_links links
+      join projects linked on linked.id = links.linked_project_id
+      where links.server_id = projects.id
+        and linked.status = 'published'
+        and linked.pending_deletion = false
+    ) then 'recommended'
+    else 'vanilla'
+  end
+`;
+
 const versionFacets = sql`
   select
     "projectId",
@@ -86,8 +116,14 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
         projects.tags,
         projects.type,
         projects.updated_at as "updatedAt",
-        version_facets."gameVersions",
+        -- Servers have no versions; their supported versions live on the
+        -- listing instead.
+        coalesce(
+          project_servers.game_versions,
+          version_facets."gameVersions"
+        ) as "gameVersions",
         version_facets.loaders,
+        ${clientRequirementSQL} as "clientRequirement",
         coalesce(
           users.display_username,
           users.username,
@@ -116,6 +152,7 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
       -- Left join: a kept project whose owner deleted their account has none.
       left join users on users.id = projects.owner_id
       left join version_facets on version_facets."projectId" = projects.id
+      left join project_servers on project_servers.project_id = projects.id
       where projects.status = 'published'
         and projects.pending_deletion = false
         and projects.type = ${params.type}
@@ -125,11 +162,17 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
         )
         and (
           ${params.gameVersion ?? null}::text is null
-          or ${params.gameVersion ?? null} = any(version_facets."gameVersions")
+          or ${params.gameVersion ?? null} = any(
+            coalesce(project_servers.game_versions, version_facets."gameVersions")
+          )
         )
         and (
           ${params.loader ?? null}::text is null
           or ${params.loader ?? null} = any(version_facets.loaders)
+        )
+        and (
+          ${params.clientRequirement ?? null}::text is null
+          or ${clientRequirementSQL} = ${params.clientRequirement ?? null}
         )
         ${isSearching ? sql`and ${matchProject(q, textQuery)}` : sql``}
     )
@@ -167,6 +210,7 @@ const projectHitSchema = object({
   author: string(),
   authorUsername: nullish(string()),
   category: string(),
+  clientRequirement: nullish(picklist(CLIENT_REQUIREMENTS)),
   description: string(),
   downloads: number(),
   gameVersions: nullish(array(string())),
@@ -195,13 +239,23 @@ const projectSearchRowSchema = object({
  * `timestamp` without a zone or milliseconds, which would then parse as local
  * time and render the wrong day.
  */
-const toDocument = (hit: ProjectHit): ProjectDocument => ({
-  ...hit,
-  authorUsername: hit.authorUsername ?? null,
-  gameVersions: hit.gameVersions ?? [],
-  loaders: hit.loaders ?? [],
-  updatedAt: new Date(hit.updatedAt).toISOString(),
-});
+const toDocument = ({
+  clientRequirement,
+  ...hit
+}: ProjectHit): ProjectDocument => {
+  const document: ProjectDocument = {
+    ...hit,
+    authorUsername: hit.authorUsername ?? null,
+    gameVersions: hit.gameVersions ?? [],
+    loaders: hit.loaders ?? [],
+    updatedAt: new Date(hit.updatedAt).toISOString(),
+  };
+  // Only servers have one; other hits leave the key out entirely.
+  if (clientRequirement) {
+    document.clientRequirement = clientRequirement;
+  }
+  return document;
+};
 
 /**
  * Runs a project search against Postgres.

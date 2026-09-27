@@ -5,6 +5,7 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -245,6 +246,48 @@ export const projects = pgTable(
     // listMyProjects filters on `owner_id` and orders by `updated_at`
     // descending. The ownerId index alone cannot supply that sort.
     index("projects_ownerId_updatedAt_idx").on(table.ownerId, table.updatedAt),
+  ]
+);
+
+/**
+ * Join details for `server` projects, which list a server instead of
+ * shipping files. One row per server project.
+ */
+export const projectServers = pgTable("project_servers", {
+  // Hostname or IP address, without a port.
+  address: text("address").notNull(),
+  gameVersions: text("game_versions").array().default([]).notNull(),
+  // Null means the Minecraft default, 25565.
+  port: integer("port"),
+  projectId: uuid("project_id")
+    .primaryKey()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+/**
+ * Mods, modpacks, shaders, and resource packs a server links to, each either
+ * required to join or only recommended.
+ */
+export const projectServerLinks = pgTable(
+  "project_server_links",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    linkedProjectId: uuid("linked_project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    required: boolean("required").default(false).notNull(),
+    serverId: uuid("server_id")
+      .notNull()
+      .references(() => projectServers.projectId, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.serverId, table.linkedProjectId] }),
+    // Finds the servers to reindex when a linked project changes.
+    index("project_server_links_linkedProjectId_idx").on(table.linkedProjectId),
   ]
 );
 
