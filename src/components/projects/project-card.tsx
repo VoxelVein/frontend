@@ -5,7 +5,7 @@ import { formatCount } from "@/lib/format";
 import type { ProjectDocument } from "@/lib/projects";
 
 const ProjectCard = ({ project }: { project: ProjectDocument }) => (
-  <article className="group border-border bg-card hover:border-border/80 focus-within:border-foreground/20 focus-within:ring-ring relative flex h-full flex-col rounded-xl border p-5 shadow-xs transition-all duration-200 focus-within:ring-1 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none">
+  <article className="group border-border bg-card hover:border-border/80 focus-within:border-foreground/20 focus-within:ring-ring relative flex h-full flex-col rounded-xl border p-5 shadow-xs transition-[color,box-shadow,transform] duration-200 focus-within:ring-1 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none">
     {/* Full card focus overlay matching card corner radius */}
     <ProjectLink
       type={project.type}
@@ -67,7 +67,7 @@ const ProjectCard = ({ project }: { project: ProjectDocument }) => (
       </div>
 
       {project.gameVersions?.[0] && (
-        <span className="border-border/50 bg-muted/60 text-muted-foreground max-w-[110px] truncate rounded border px-1.5 py-0.5 font-mono text-[11px] font-medium">
+        <span className="border-border/50 bg-muted/60 text-muted-foreground max-w-[110px] truncate rounded border px-1.5 py-0.5 font-mono text-xs font-medium">
           {project.gameVersions[0]}
         </span>
       )}
