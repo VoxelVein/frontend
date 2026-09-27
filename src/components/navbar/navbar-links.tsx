@@ -1,12 +1,4 @@
-import {
-  IconBox,
-  IconChevronDown,
-  IconDeviceGamepad2,
-  IconPackages,
-  IconPalette,
-  IconPhoto,
-  IconServer,
-} from "@tabler/icons-react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
@@ -16,60 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MINECRAFT_CATEGORIES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
 const CONTENT_LINKS = [{ href: "/blog", label: "Blog" }] as const;
 
-const PROJECT_ITEMS: readonly {
-  available: boolean;
-  description: string;
-  href: string;
-  icon: typeof IconBox;
-  label: string;
-}[] = [
-  {
-    available: true,
-    description: "Browse Minecraft mods",
-    href: "/mods",
-    icon: IconBox,
-    label: "Mods",
-  },
-  {
-    available: false,
-    description: "Curated mod collections",
-    href: "/modpacks",
-    icon: IconPackages,
-    label: "Modpacks",
-  },
-  {
-    available: true,
-    description: "Server-side plugins",
-    href: "/plugins",
-    icon: IconServer,
-    label: "Plugins",
-  },
-  {
-    available: false,
-    description: "Visual and audio packs",
-    href: "/resource-packs",
-    icon: IconDeviceGamepad2,
-    label: "Resource Packs",
-  },
-  {
-    available: false,
-    description: "Stunning visual effects",
-    href: "/shaders",
-    icon: IconPalette,
-    label: "Shaders",
-  },
-  {
-    available: false,
-    description: "Communities and worlds",
-    href: "/servers",
-    icon: IconPhoto,
-    label: "Servers",
-  },
-];
+// Shared with the landing page's explore section, so a category's route and
+// availability can never drift between the two.
+const PROJECT_ITEMS = MINECRAFT_CATEGORIES;
 
 const linkClassName =
   "text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
