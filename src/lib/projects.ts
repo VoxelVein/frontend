@@ -126,6 +126,12 @@ export const SLUG_MAX_LENGTH = 64;
 /** The shape search and trending both read for one published project. */
 export interface ProjectDocument {
   author: string;
+  /**
+   * The author's normalised username, which is what a profile URL is keyed on.
+   * Null when the account is gone, so callers can skip the link rather than
+   * point at a profile that 404s.
+   */
+  authorUsername: string | null;
   category: string;
   description: string;
   downloads: number;
@@ -289,6 +295,12 @@ export const DELETED_USER_LABEL = "Deleted user";
 
 export interface ProjectView {
   author: string;
+  /**
+   * The owner's normalised username, which is what a profile URL is keyed on.
+   * Null when the account is gone, so callers can skip the link rather than
+   * point at a profile that 404s.
+   */
+  authorUsername: string | null;
   category: string;
   description: string;
   downloads: number;

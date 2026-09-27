@@ -5,53 +5,72 @@ import { formatCount } from "@/lib/format";
 import type { ProjectDocument } from "@/lib/projects";
 
 const ProjectCard = ({ project }: { project: ProjectDocument }) => (
-  <article className="group border-border bg-card focus-within:border-foreground/20 relative flex h-full flex-col rounded-2xl border p-5 transition-colors duration-300 focus-within:ring-1 motion-reduce:transition-none">
+  <article className="group border-border bg-card hover:border-border/80 focus-within:border-foreground/20 focus-within:ring-ring relative flex h-full flex-col rounded-xl border p-5 shadow-xs transition-all duration-200 focus-within:ring-1 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none">
+    {/* Full card focus overlay matching card corner radius */}
     <ProjectLink
       type={project.type}
       slug={project.slug}
-      className="focus-visible:ring-ring absolute inset-0 z-10 rounded-2xl focus-visible:ring-2 focus-visible:outline-none"
+      className="focus-visible:ring-ring absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
     >
       <span className="sr-only">View {project.name}</span>
     </ProjectLink>
 
-    <div className="flex items-start gap-4">
-      <div className="border-border bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl border text-lg font-bold">
+    {/* Header */}
+    <div className="flex items-start gap-3.5">
+      <div className="border-primary/20 bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border text-base font-bold shadow-inner">
         {project.name.charAt(0)}
       </div>
 
-      <div className="min-w-0 pt-0.5">
-        <span className="text-primary/80 border-primary/20 bg-primary/5 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium tracking-wide uppercase">
+      <div className="min-w-0 flex-1">
+        <span className="border-primary/20 bg-primary/10 text-primary inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
           {project.category}
         </span>
 
-        <h3 className="text-foreground mt-2 truncate text-base font-semibold">
+        <h3 className="text-foreground mt-1 truncate text-base font-semibold transition-colors duration-200">
           {project.name}
         </h3>
 
         <p className="text-muted-foreground truncate text-xs">
-          by {project.author}
+          by{" "}
+          <span className="text-foreground/80 font-medium">
+            {project.author}
+          </span>
         </p>
       </div>
     </div>
 
-    <p className="text-muted-foreground mt-3 line-clamp-2 text-sm leading-6">
+    {/* Description */}
+    <p className="text-muted-foreground mt-3.5 line-clamp-2 flex-1 text-sm leading-relaxed">
       {project.description}
     </p>
 
-    <div className="text-muted-foreground mt-auto flex items-center justify-between gap-4 pt-4 text-xs">
-      <div className="flex items-center gap-4">
-        <span className="inline-flex items-center gap-1.5">
-          <IconDownload size={14} aria-hidden="true" />
+    {/* Footer Metadata */}
+    <div className="border-border/60 text-muted-foreground mt-4 flex items-center justify-between gap-3 border-t pt-3.5 text-xs">
+      <div className="flex items-center gap-3.5">
+        <span className="inline-flex items-center gap-1.5 font-medium">
+          <IconDownload
+            size={14}
+            className="text-muted-foreground/70"
+            aria-hidden="true"
+          />
           {formatCount(project.downloads)}
         </span>
 
-        <span className="inline-flex items-center gap-1.5">
-          <IconTag size={14} aria-hidden="true" />
+        <span className="inline-flex items-center gap-1.5 font-medium">
+          <IconTag
+            size={14}
+            className="text-muted-foreground/70"
+            aria-hidden="true"
+          />
           {project.version}
         </span>
       </div>
 
-      <span className="truncate">{project.gameVersions[0] ?? ""}</span>
+      {project.gameVersions?.[0] && (
+        <span className="border-border/50 bg-muted/60 text-muted-foreground max-w-[110px] truncate rounded border px-1.5 py-0.5 font-mono text-[11px] font-medium">
+          {project.gameVersions[0]}
+        </span>
+      )}
     </div>
   </article>
 );

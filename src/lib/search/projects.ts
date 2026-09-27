@@ -94,6 +94,10 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
           users.name,
           ${FALLBACK_AUTHOR}
         ) as author,
+        -- Left as null rather than coalesced: a null here is what tells the UI
+        -- not to link a byline at all, which is correct when the account is
+        -- gone. Coalescing would produce a link to a profile that 404s.
+        users.username as "authorUsername",
         -- Coalesced, not null: a project with no versions yet is still
         -- browsable, and buildProjectDocument shaped the document this
         -- replaced the same way, so the hit type stays a plain string.
@@ -161,6 +165,7 @@ const facetCountsSchema = record(string(), record(string(), number()));
  */
 const projectHitSchema = object({
   author: string(),
+  authorUsername: nullish(string()),
   category: string(),
   description: string(),
   downloads: number(),
@@ -192,6 +197,7 @@ const projectSearchRowSchema = object({
  */
 const toDocument = (hit: ProjectHit): ProjectDocument => ({
   ...hit,
+  authorUsername: hit.authorUsername ?? null,
   gameVersions: hit.gameVersions ?? [],
   loaders: hit.loaders ?? [],
   updatedAt: new Date(hit.updatedAt).toISOString(),

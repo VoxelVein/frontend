@@ -4,6 +4,7 @@ import { useState } from "react";
 import { check, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
+import { FormTextarea } from "@/components/form-textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +20,13 @@ import {
 } from "@/hooks/use-username-availability";
 import { changeUsername, confirmUsername } from "@/lib/account.functions";
 import { authClient } from "@/lib/auth-client";
+import { BIO_MAX_LENGTH, bioSchema, normalizeBio } from "@/lib/bio";
 import { formatDate } from "@/lib/format";
 import { getNextUsernameChange } from "@/lib/usernames";
 
 interface SettingsProfileUser {
   name: string;
+  bio?: string | null;
   email?: string | null;
   username?: string | null;
   displayUsername?: string | null;
@@ -39,6 +42,8 @@ const nameSchema = pipe(
   string(),
   check((value) => value.trim().length > 0, "Name is required.")
 );
+
+const BIO_HELPER = `Markdown is supported. Up to ${BIO_MAX_LENGTH} characters. Shown on your public profile.`;
 
 const USERNAME_CHANGE_NOTE =
   "After changing, you can't change it again for 14 days. Your old username keeps working for sign-in for 14 days.";
@@ -63,13 +68,16 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   // truth; TanStack Form only re-syncs defaultValues while the form is
   // untouched, so the session prop never overwrites in-progress edits.
   const form = useForm({
-    defaultValues: { name: user.name },
+    defaultValues: { bio: user.bio ?? "", name: user.name },
     onSubmit: async ({ value }) => {
       setFormError(null);
       setSuccess(false);
-      // Only the name: usernames go through their own server functions,
-      // which enforce the cooldown and reservations.
+      // Only the name and the bio: usernames go through their own server
+      // functions, which enforce the cooldown and reservations.
       const { error } = await authClient.updateUser({
+        // A cleared field stores null rather than "", so "no bio" stays
+        // distinguishable from a bio that happens to render as nothing.
+        bio: normalizeBio(value.bio),
         name: value.name.trim(),
       });
       if (error) {
@@ -99,7 +107,7 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
           >
             Profile
           </h2>
-          <CardDescription>Update your display name.</CardDescription>
+          <CardDescription>Update your display name and bio.</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -143,6 +151,27 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
                   onBlur={field.handleBlur}
                   error={field.state.meta.errors[0]?.message}
                   required
+                />
+              )}
+            </form.Field>
+
+            <form.Field
+              name="bio"
+              validators={{
+                onChange: bioSchema,
+                onSubmit: bioSchema,
+              }}
+            >
+              {(field) => (
+                <FormTextarea
+                  id="profile-bio"
+                  label="Bio (Markdown)"
+                  rows={4}
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  error={field.state.meta.errors[0]?.message}
+                  helperText={BIO_HELPER}
                 />
               )}
             </form.Field>

@@ -104,6 +104,7 @@ class EventSourceMock {
 
 const modFixture: ProjectDocument = {
   author: "JellySquid",
+  authorUsername: "jellysquid",
   category: "performance",
   description: "A rendering engine replacement.",
   downloads: 14_200_000,
