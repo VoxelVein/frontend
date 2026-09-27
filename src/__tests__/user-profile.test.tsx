@@ -3,8 +3,12 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ProjectDocument } from "@/lib/projects";
-import type { PublicProfile } from "@/lib/user-profiles.functions";
-import { Route } from "@/routes/u/$username";
+import type { PublicProfile } from "@/lib/user-profiles";
+
+// Relative rather than aliased: the `$username` in the file name is what
+// TanStack's route files are called, and the alias resolver does not treat it
+// as a literal segment.
+import { Route } from "../routes/u.$username";
 
 const { useLoaderDataMock } = vi.hoisted(() => ({
   useLoaderDataMock: vi.fn<() => PublicProfile>(),
@@ -38,10 +42,26 @@ vi.mock("@/components/projects/project-card", () => ({
   ),
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route's loader reaches the database at import time; the loader's own gating is verified against a real database, so a stub keeps this test on rendering
+vi.mock("@/lib/user-profiles.functions", () => ({
+  getPublicProfile: vi.fn<() => Promise<null>>(),
+}));
+
+interface HeadResult {
+  meta: { content?: string; name?: string; title?: string }[];
+}
+
 const ProfilePage = Route.options.component;
 if (!ProfilePage) {
   throw new Error("ProfilePage component not found");
 }
+
+// SAFETY: The real head callback takes a full route-match object, but it reads
+// only loaderData. Narrowing to that one field keeps the test off TanStack's
+// match types without weakening what the assertions check.
+const head = Route.options.head as (args: {
+  loaderData?: PublicProfile;
+}) => HeadResult;
 
 const project = (
   overrides: Partial<ProjectDocument> = {}
@@ -73,11 +93,11 @@ const profile = (overrides: Partial<PublicProfile> = {}): PublicProfile => ({
   ...overrides,
 });
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
+describe("the profile page", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-describe("ProfilePage", () => {
   it("shows the display username as the page heading", () => {
     useLoaderDataMock.mockReturnValue(
       profile({ displayUsername: "ada.codes" })
@@ -145,25 +165,22 @@ describe("ProfilePage", () => {
   });
 
   it("describes the page with the bio stripped to plain text", () => {
-    const head = Route.options.head?.({
+    const result = head({
       loaderData: profile({ bio: "I make **fast** mods." }),
-      // SAFETY: the head callback reads only loaderData; the cast supplies the
-      // rest of the route match shape it does not touch.
-      params: {},
-    } as Parameters<NonNullable<typeof Route.options.head>>[0]);
+    });
 
     // Markdown syntax must not reach a meta description, which is text.
-    expect(JSON.stringify(head)).toContain("I make fast mods.");
-    expect(JSON.stringify(head)).not.toContain("**");
+    expect(result.meta).toContainEqual({
+      content: "I make fast mods.",
+      name: "description",
+    });
   });
 
   it("leaves out the meta description when there is no bio", () => {
-    const head = Route.options.head?.({
-      loaderData: profile({ bio: null }),
-      // SAFETY: as above; the callback reads only loaderData.
-      params: {},
-    } as Parameters<NonNullable<typeof Route.options.head>>[0]);
+    const result = head({ loaderData: profile({ bio: null }) });
 
-    expect(JSON.stringify(head)).not.toContain("description");
+    expect(result.meta).not.toContainEqual(
+      expect.objectContaining({ name: "description" })
+    );
   });
 });
