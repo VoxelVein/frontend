@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 
 import {
   CATEGORIES_BY_TYPE,
+  CLIENT_REQUIREMENTS,
   GAME_VERSIONS as ALL_GAME_VERSIONS,
   LOADERS_BY_TYPE,
   isProjectType,
@@ -30,6 +31,7 @@ const isUnknown = (value: string | undefined, allowed: Set<string>) =>
 
 interface FilterParams {
   category?: string;
+  clientRequirement?: string;
   gameVersion?: string;
   loader?: string;
   type: ProjectType;
@@ -38,7 +40,12 @@ interface FilterParams {
 const hasUnknownFilter = (params: FilterParams): boolean =>
   isUnknown(params.category, new Set(CATEGORIES_BY_TYPE[params.type])) ||
   isUnknown(params.gameVersion, GAME_VERSIONS) ||
-  isUnknown(params.loader, new Set(LOADERS_BY_TYPE[params.type]));
+  isUnknown(params.loader, new Set(LOADERS_BY_TYPE[params.type])) ||
+  // Only servers have a client requirement.
+  isUnknown(
+    params.clientRequirement,
+    new Set(params.type === "server" ? CLIENT_REQUIREMENTS : [])
+  );
 
 const buildFilter = (params: FilterParams): string[] => {
   const filters = [`type = ${quote(params.type)}`];
@@ -51,6 +58,9 @@ const buildFilter = (params: FilterParams): string[] => {
   }
   if (params.loader) {
     filters.push(`loaders = ${quote(params.loader)}`);
+  }
+  if (params.clientRequirement) {
+    filters.push(`clientRequirement = ${quote(params.clientRequirement)}`);
   }
 
   return filters;
@@ -119,6 +129,7 @@ export const projectsRoute = new Elysia().get(
       category: t.Optional(t.String()),
       gameVersion: t.Optional(t.String()),
       loader: t.Optional(t.String()),
+      clientRequirement: t.Optional(t.String()),
       sort: t.Optional(t.String()),
       page: t.Optional(t.Integer({ minimum: 1, maximum: MAX_PAGE })),
     }),

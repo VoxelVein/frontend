@@ -2,16 +2,23 @@ import { desc, eq } from "drizzle-orm";
 import { Meilisearch } from "meilisearch";
 
 import { db } from "@/db";
-import { projects, projectServers, projectVersions, users } from "@/db/schema";
+import { projects, projectVersions, users } from "@/db/schema";
 import { DELETED_USER_LABEL } from "@/lib/projects";
 import type { ProjectDocument } from "@/lib/projects";
+import { findServersLinking, loadServerDetails } from "@/lib/server-details";
 
 import env from "../../env.config";
 
 export const PROJECTS_INDEX = "projects";
 
 export const PROJECTS_INDEX_SETTINGS = {
-  filterableAttributes: ["type", "category", "gameVersions", "loaders"],
+  filterableAttributes: [
+    "type",
+    "category",
+    "gameVersions",
+    "loaders",
+    "clientRequirement",
+  ],
   searchableAttributes: ["name", "description", "author", "tags", "category"],
   sortableAttributes: ["downloads", "updatedAt", "name"],
   typoTolerance: {
@@ -105,16 +112,10 @@ export const buildProjectDocument = async (
     .orderBy(desc(projectVersions.createdAt));
 
   // Servers have no versions; their supported versions live on the listing.
-  const [server] =
-    project.type === "server"
-      ? await db
-          .select({ gameVersions: projectServers.gameVersions })
-          .from(projectServers)
-          .where(eq(projectServers.projectId, projectId))
-          .limit(1)
-      : [];
+  const server =
+    project.type === "server" ? await loadServerDetails(projectId) : null;
 
-  return {
+  const document: ProjectDocument = {
     author:
       project.authorDisplayUsername ??
       project.authorUsername ??
@@ -136,6 +137,10 @@ export const buildProjectDocument = async (
     updatedAt: project.updatedAt.toISOString(),
     version: versions[0]?.versionNumber ?? "",
   };
+  if (server) {
+    document.clientRequirement = server.clientRequirement;
+  }
+  return document;
 };
 
 /**
@@ -164,6 +169,20 @@ export const syncProjectToSearch = async (projectId: string): Promise<void> => {
     await (document
       ? index.addDocuments([document])
       : index.deleteDocument(projectId));
+
+    // A server's client requirement counts only published links, so servers
+    // linking here change when this project is published or hidden.
+    const servers = await findServersLinking([projectId]);
+    const serverDocuments = await Promise.all(
+      servers.map((serverId) => buildProjectDocument(serverId))
+    );
+    const refreshed = serverDocuments.filter(
+      (serverDocument): serverDocument is ProjectDocument =>
+        serverDocument !== null
+    );
+    if (refreshed.length > 0) {
+      await index.addDocuments(refreshed);
+    }
   } catch (error) {
     console.error(`Could not update search for project ${projectId}`, error);
   }

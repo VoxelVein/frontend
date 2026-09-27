@@ -19,6 +19,7 @@ import { db, pool } from "../src/db/index.ts";
 import {
   projectFiles,
   projects,
+  projectServerLinks,
   projectServers,
   projectVersions,
   users,
@@ -107,20 +108,38 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
     .returning({ id: projects.id });
 
   if (demo.server) {
-    const { modpackSlug, ...server } = demo.server;
-    const [modpack] = modpackSlug
-      ? await db
-          .select({ id: projects.id })
-          .from(projects)
-          .where(eq(projects.slug, modpackSlug))
-          .limit(1)
-      : [];
+    const { links, ...server } = demo.server;
     await db.insert(projectServers).values({
       ...server,
       gameVersions: demo.gameVersions,
-      modpackId: modpack?.id ?? null,
       projectId: project.id,
     });
+    const linked = await db
+      .select({ id: projects.id, slug: projects.slug })
+      .from(projects)
+      .where(
+        inArray(
+          projects.slug,
+          links.map((link) => link.slug)
+        )
+      );
+    const idBySlug = new Map(linked.map((row) => [row.slug, row.id]));
+    const rows = links.flatMap((link, index) => {
+      const linkedProjectId = idBySlug.get(link.slug);
+      return linkedProjectId
+        ? [
+            {
+              createdAt: new Date(Date.now() + index),
+              linkedProjectId,
+              required: link.required,
+              serverId: project.id,
+            },
+          ]
+        : [];
+    });
+    if (rows.length > 0) {
+      await db.insert(projectServerLinks).values(rows);
+    }
     return;
   }
 
@@ -185,7 +204,7 @@ const seedProjects = async () => {
         console.log(`  + ${demo.type} ${demo.slug}`);
       })
     );
-  // Servers link to demo modpacks, so those must exist first.
+  // Servers link to other demo projects, so those must exist first.
   await seedAll(missing.filter((demo) => !demo.server));
   await seedAll(missing.filter((demo) => demo.server));
   console.log(

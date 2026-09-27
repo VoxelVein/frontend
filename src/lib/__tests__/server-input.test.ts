@@ -2,6 +2,7 @@ import { safeParse } from "valibot";
 import { describe, expect, it } from "vitest";
 
 import {
+  clientRequirementFor,
   formatServerAddress,
   isServerAddress,
   serverInputSchema,
@@ -13,8 +14,7 @@ const PROJECT_ID = "5f0c9a3e-2b1d-4c7e-9f6a-1b2c3d4e5f60";
 const input = (overrides: Partial<ServerInput> = {}): ServerInput => ({
   address: "play.example.net",
   gameVersions: ["1.21"],
-  modpackId: null,
-  modpackRequired: false,
+  links: [],
   port: null,
   projectId: PROJECT_ID,
   ...overrides,
@@ -78,6 +78,51 @@ describe("server join details", () => {
     expect(
       safeParse(serverInputSchema, input({ port: 1.5 })).success
     ).toBeFalsy();
+  });
+});
+
+describe("server links", () => {
+  const LINKED = "0b7e3c1a-8f2d-4e6b-9a1c-2d3e4f5a6b7c";
+
+  it("accepts a mix of required and recommended links", () => {
+    expect(
+      safeParse(
+        serverInputSchema,
+        input({ links: [{ projectId: LINKED, required: true }] })
+      ).success
+    ).toBeTruthy();
+  });
+
+  it("rejects linking the same project twice", () => {
+    expect(
+      safeParse(
+        serverInputSchema,
+        input({
+          links: [
+            { projectId: LINKED, required: true },
+            { projectId: LINKED, required: false },
+          ],
+        })
+      ).success
+    ).toBeFalsy();
+  });
+});
+
+describe(clientRequirementFor, () => {
+  it("is vanilla with nothing linked", () => {
+    expect(clientRequirementFor([])).toBe("vanilla");
+  });
+
+  it("is recommended when every link is optional", () => {
+    expect(
+      clientRequirementFor([{ required: false }, { required: false }])
+    ).toBe("recommended");
+  });
+
+  it("is required when any link is required", () => {
+    expect(
+      clientRequirementFor([{ required: false }, { required: true }])
+    ).toBe("required");
   });
 });
 

@@ -10,9 +10,8 @@ export interface DemoProject {
   /** Join details; only for `server` projects, which have no version. */
   server?: {
     address: string;
-    modpackRequired: boolean;
-    /** Slug of a demo modpack to link. */
-    modpackSlug: string | null;
+    /** Demo projects to link, by slug. */
+    links: { required: boolean; slug: string }[];
     port: number | null;
   };
   slug: string;
@@ -313,8 +312,7 @@ export const DEMO_PROJECTS: DemoProject[] = [
     name: "Brass & Steam SMP",
     server: {
       address: "play.brass-steam.example",
-      modpackRequired: true,
-      modpackSlug: "create-above-and-beyond",
+      links: [{ required: true, slug: "create-above-and-beyond" }],
       port: null,
     },
     slug: "brass-and-steam-smp",
@@ -332,13 +330,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     name: "Pixel Party",
     server: {
       address: "mc.pixelparty.example",
-      modpackRequired: false,
-      modpackSlug: null,
+      links: [],
       port: 25_570,
     },
     slug: "pixel-party",
     summary: "Quick rounds of parkour, spleef, and build battles for everyone.",
     tags: ["minigames", "parkour"],
+    type: "server",
+    version: "",
+  },
+  {
+    category: "survival",
+    downloads: 0,
+    gameVersions: ["1.21.4", "1.21.1", "1.21"],
+    loaders: [],
+    name: "Golden Hour Survival",
+    server: {
+      address: "goldenhour.example",
+      links: [
+        { required: false, slug: "complementary-reimagined" },
+        { required: false, slug: "fresh-animations" },
+        { required: false, slug: "sodium" },
+      ],
+      port: null,
+    },
+    slug: "golden-hour-survival",
+    summary:
+      "Vanilla survival with a recommended set of shaders and visual mods.",
+    tags: ["survival", "shaders"],
     type: "server",
     version: "",
   },

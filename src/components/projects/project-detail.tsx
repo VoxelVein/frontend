@@ -13,6 +13,7 @@ import { Markdown } from "@tanstack/markdown/react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { ProjectLink } from "@/components/projects/project-link";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -162,6 +163,63 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
 
 const COPIED_RESET_MS = 2000;
 
+const ServerClientContent = ({ server }: { server: ProjectServerView }) => {
+  if (server.links.length === 0) {
+    return (
+      <div>
+        <h3 className="text-foreground text-sm font-semibold">
+          Client content
+        </h3>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Vanilla client: join without installing anything.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h3 className="text-foreground text-sm font-semibold">Client content</h3>
+      <p className="text-muted-foreground mt-1 text-sm">
+        {server.clientRequirement === "required"
+          ? "Install the required content below to join."
+          : "Nothing is required to join; these are recommended."}
+      </p>
+      <ul className="mt-3 grid gap-2">
+        {server.links.map((link) => (
+          <li
+            key={link.id}
+            className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <IconPackages
+                size={20}
+                aria-hidden="true"
+                className="text-muted-foreground shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="text-foreground font-medium">{link.name}</p>
+                <p className="text-muted-foreground text-sm">
+                  {PROJECT_TYPE_LABELS[link.type].singular} ·{" "}
+                  {link.required ? "Required" : "Recommended"}
+                </p>
+              </div>
+            </div>
+            <ProjectLink
+              type={link.type}
+              slug={link.slug}
+              className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            >
+              View {PROJECT_TYPE_LABELS[link.type].singular.toLowerCase()}
+              <span className="sr-only"> {link.name}</span>
+            </ProjectLink>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const ServerJoin = ({ server }: { server: ProjectServerView | null }) => {
   const [copyStatus, setCopyStatus] = useState("");
 
@@ -222,36 +280,7 @@ const ServerJoin = ({ server }: { server: ProjectServerView | null }) => {
         </p>
       </div>
 
-      {server.modpack ? (
-        <div className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <IconPackages
-              size={20}
-              aria-hidden="true"
-              className="text-muted-foreground shrink-0"
-            />
-            <div className="min-w-0">
-              <p className="text-foreground font-medium">
-                {server.modpack.name}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {server.modpackRequired
-                  ? "Required modpack: install it to join."
-                  : "Recommended modpack."}
-              </p>
-            </div>
-          </div>
-          <Link
-            to="/modpacks/$slug"
-            params={{ slug: server.modpack.slug }}
-            preload="intent"
-            className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-          >
-            View modpack
-            <span className="sr-only"> {server.modpack.name}</span>
-          </Link>
-        </div>
-      ) : null}
+      <ServerClientContent server={server} />
     </div>
   );
 };

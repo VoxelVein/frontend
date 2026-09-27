@@ -194,6 +194,8 @@ export interface ProjectDocument {
   type: ProjectType;
   updatedAt: string;
   version: string;
+  /** Servers only: what players need on their client to join. */
+  clientRequirement?: ClientRequirement;
 }
 
 export const isProjectType = (value: string): value is ProjectType =>
@@ -334,6 +336,60 @@ const IPV6_PATTERN = /^[0-9a-f]{0,4}(?::[0-9a-f]{0,4}){2,7}$/iu;
 export const isServerAddress = (value: string): boolean =>
   HOSTNAME_PATTERN.test(value) || IPV6_PATTERN.test(value);
 
+/** Project types a server can ask or suggest players to install. */
+export const SERVER_LINK_TYPES = [
+  "modpack",
+  "mod",
+  "shader",
+  "resourcepack",
+] as const;
+export type ServerLinkType = (typeof SERVER_LINK_TYPES)[number];
+
+export const isServerLinkType = (type: ProjectType): type is ServerLinkType =>
+  // SAFETY: widening to readonly string[] is only used for the membership
+  // check.
+  (SERVER_LINK_TYPES as readonly string[]).includes(type);
+
+export const MAX_SERVER_LINKS = 20;
+
+/**
+ * What a player needs on their own client to join a server, derived from
+ * its linked content: something required, only suggestions, or nothing.
+ */
+export const CLIENT_REQUIREMENTS = [
+  "required",
+  "recommended",
+  "vanilla",
+] as const;
+export type ClientRequirement = (typeof CLIENT_REQUIREMENTS)[number];
+
+export const CLIENT_REQUIREMENT_LABELS = {
+  recommended: "Recommends client content",
+  required: "Requires client content",
+  vanilla: "Vanilla client",
+} as const satisfies Record<ClientRequirement, string>;
+
+export const isClientRequirement = (
+  value: string
+): value is ClientRequirement =>
+  // SAFETY: widening to readonly string[] is only used for the membership
+  // check.
+  (CLIENT_REQUIREMENTS as readonly string[]).includes(value);
+
+export const clientRequirementFor = (
+  links: readonly { required: boolean }[]
+): ClientRequirement => {
+  if (links.some((link) => link.required)) {
+    return "required";
+  }
+  return links.length > 0 ? "recommended" : "vanilla";
+};
+
+const serverLinkSchema = object({
+  projectId: pipe(string(), uuid()),
+  required: boolean(),
+});
+
 export const serverInputSchema = object({
   address: pipe(
     string(),
@@ -347,8 +403,15 @@ export const serverInputSchema = object({
     )
   ),
   gameVersions: gameVersionsSchema,
-  modpackId: nullable(pipe(string(), uuid())),
-  modpackRequired: boolean(),
+  links: pipe(
+    array(serverLinkSchema),
+    maxLength(MAX_SERVER_LINKS, `Link at most ${MAX_SERVER_LINKS} projects.`),
+    check(
+      (links) =>
+        new Set(links.map((link) => link.projectId)).size === links.length,
+      "Each project can only be linked once."
+    )
+  ),
   port: nullable(
     pipe(
       number(),
@@ -373,14 +436,23 @@ export const formatServerAddress = (
   return address.includes(":") ? `[${address}]:${port}` : `${address}:${port}`;
 };
 
+/** A mod, modpack, shader, or resource pack linked to a server. */
+export interface ServerLinkView {
+  id: string;
+  name: string;
+  /** False while the linked project is not published; owners still see it. */
+  published: boolean;
+  required: boolean;
+  slug: string;
+  type: ServerLinkType;
+}
+
 export interface ProjectServerView {
   address: string;
+  clientRequirement: ClientRequirement;
   gameVersions: string[];
-  /** The linked modpack, only while it is published. */
-  modpack: { name: string; slug: string } | null;
-  /** Saved even while the modpack is hidden, so the owner's form keeps it. */
-  modpackId: string | null;
-  modpackRequired: boolean;
+  /** Required first, then recommended, each in the order they were added. */
+  links: ServerLinkView[];
   port: number | null;
 }
 
