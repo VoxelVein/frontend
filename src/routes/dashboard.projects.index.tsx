@@ -19,6 +19,7 @@ const ROUTE_ID = "/dashboard/projects/";
 
 const STATUS_LABELS = {
   draft: "Draft",
+  pending: "In review",
   published: "Published",
   removed: "Removed",
 } as const;

@@ -85,6 +85,20 @@
       "when": 1790486400000,
       "tag": "0011_document_postgres_search",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790505437683,
+      "tag": "0012_add_project_moderation",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790509037683,
+      "tag": "0013_queue_published_projects_for_review",
+      "breakpoints": true
     }
   ]
 }
