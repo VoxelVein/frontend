@@ -51,7 +51,7 @@ The registry is a centralized catalog (`registry.json`) that tracks all componen
   "id": "frontend-specialist",
   "name": "Frontend Specialist",
   "type": "agent",
-  "path": ".opencode/agent/subagents/development/frontend-specialist.md",
+  "path": ".opencode/agents/subagents/development/frontend-specialist.md",
   "description": "Expert in React, Vue, and modern CSS",
   "category": "development",
   "tags": ["react", "vue", "css", "frontend"],
@@ -104,8 +104,8 @@ The auto-detect system scans `.opencode/` and automatically updates the registry
 
 ### What Gets Detected
 
-✅ **Agents** - `.opencode/agent/{category}/*.md`  
-✅ **Subagents** - `.opencode/agent/subagents/**/*.md`  
+✅ **Agents** - `.opencode/agents/{category}/*.md`  
+✅ **Subagents** - `.opencode/agents/subagents/**/*.md`  
 ✅ **Commands** - `.opencode/command/**/*.md`  
 ✅ **Tools** - `.opencode/tool/**/index.ts`  
 ✅ **Contexts** - `.opencode/context/**/*.md`
@@ -150,7 +150,7 @@ tags: ["tag1", "tag2"] # Optional
 
 ```bash
 # Example errors
-ERROR: Path does not exist: (example: .opencode/agent/core/missing.md)
+ERROR: Path does not exist: (example: .opencode/agents/core/missing.md)
 ERROR: Duplicate ID: frontend-specialist
 ERROR: Invalid category: invalid-category
 ERROR: Missing dependency: subagent:nonexistent
@@ -358,7 +358,7 @@ When installing components that already exist:
 ### Interactive Mode
 
 ```bash
-File exists: .opencode/agent/core/openagent.md
+File exists: .opencode/agents/core/openagent.md
 [S]kip, [O]verwrite, [B]ackup, [A]ll skip, [F]orce all?
 ```
 

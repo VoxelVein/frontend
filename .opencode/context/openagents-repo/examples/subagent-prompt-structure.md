@@ -278,8 +278,8 @@ Before deploying optimized prompt:
 
 **Files**:
 
-- Optimized: `.opencode/agent/subagents/core/contextscout.md`
-- Backup: (example: `.opencode/agent/ContextScout-original-backup.md`)
+- Optimized: `.opencode/agents/subagents/core/contextscout.md`
+- Backup: (example: `.opencode/agents/ContextScout-original-backup.md`)
 
 ---
 

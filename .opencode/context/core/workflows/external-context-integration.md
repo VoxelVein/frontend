@@ -478,7 +478,7 @@ CoderAgent reads subtask JSON and:
 
 ## References
 
-- **ExternalScout**: `.opencode/agent/subagents/core/externalscout.md`
+- **ExternalScout**: `.opencode/agents/subagents/core/externalscout.md`
 - **External Context Management**: `.opencode/context/core/workflows/external-context-management.md`
 - **Task Delegation**: `.opencode/context/core/workflows/task-delegation-basics.md`
 - **Management Script**: `scripts/external-context/manage-external-context.sh`
