@@ -27,9 +27,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 
 interface AdminUser {
+  displayUsername?: string | null;
   email: string;
   id: string;
   name: string;
+  username?: string | null;
 }
 
 interface AdminSession {
@@ -146,6 +148,21 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
   timeStyle: "short",
 });
+
+/**
+ * How a user is named in the picker.
+ *
+ * The handle comes first because it is what people know each other by on the
+ * site, and the email is what an admin is usually looking up. `displayUsername`
+ * is the typed capitalisation of `username`, so it is the nicer of the two to
+ * show; accounts that never chose one fall back to the plain username.
+ */
+const userLabel = (user: AdminUser): string => {
+  const handle = user.displayUsername ?? user.username;
+  return handle
+    ? `${user.name} (@${handle}) — ${user.email}`
+    : `${user.name} — ${user.email}`;
+};
 
 const parseUserAgent = (userAgent: string) => {
   let browser = "Browser";
@@ -429,7 +446,18 @@ const AdminSessions = () => {
                 id="admin-session-user"
                 className="min-h-11 w-full max-w-sm"
               >
-                <SelectValue placeholder="Select a user…" />
+                {/* Base UI renders the raw value with no formatter, and the
+                    value here is a user id, so the trigger would show a UUID
+                    instead of the person. Formatting it needs the loaded list,
+                    which is why the label is looked up rather than stored. */}
+                <SelectValue placeholder="Select a user…">
+                  {(value: string | null) => {
+                    const user = usersState.users.find(
+                      (candidate) => candidate.id === value
+                    );
+                    return user ? userLabel(user) : null;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {usersState.users.length === 0 ? (
@@ -439,7 +467,7 @@ const AdminSessions = () => {
                 ) : (
                   usersState.users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name} ({user.email})
+                      {userLabel(user)}
                     </SelectItem>
                   ))
                 )}

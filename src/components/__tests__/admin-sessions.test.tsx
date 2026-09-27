@@ -144,6 +144,71 @@ describe(AdminSessions, () => {
     toastErrorMock.mockReset();
   });
 
+  it("names the selected user in the picker instead of their id", async () => {
+    render(<AdminSessions />);
+
+    await selectUser("Alice");
+
+    // Base UI renders the raw select value with no formatter, and the value is
+    // a user id, so the trigger has to format it or it shows a UUID.
+    // The trigger is named by its <label>, so its text is the selection.
+    const trigger = screen.getByLabelText("User");
+    expect(trigger.textContent).toContain("Alice");
+    expect(trigger.textContent).toContain("alice@example.com");
+    expect(trigger.textContent).not.toContain(ALICE.id);
+  });
+
+  it("shows the handle in the picker when the user has one", async () => {
+    listUsersMock.mockResolvedValue({
+      data: {
+        users: [
+          { ...ALICE, displayUsername: "AliceC", username: "alicec" },
+          BOB,
+        ],
+      },
+      error: null,
+    });
+    render(<AdminSessions />);
+
+    await selectUser("AliceC");
+
+    const trigger = screen.getByLabelText("User");
+    expect(trigger.textContent).toContain("@AliceC");
+  });
+
+  it("falls back to the plain username when no display name was chosen", async () => {
+    listUsersMock.mockResolvedValue({
+      data: {
+        users: [{ ...ALICE, displayUsername: null, username: "alicec" }, BOB],
+      },
+      error: null,
+    });
+    render(<AdminSessions />);
+
+    await selectUser("alicec");
+
+    const trigger = screen.getByLabelText("User");
+    expect(trigger.textContent).toContain("@alicec");
+  });
+
+  it("omits the handle for an account that never chose one", async () => {
+    listUsersMock.mockResolvedValue({
+      data: {
+        users: [{ ...ALICE, displayUsername: null, username: null }, BOB],
+      },
+      error: null,
+    });
+    render(<AdminSessions />);
+
+    await selectUser("Alice");
+
+    // The trigger is named by its <label>, so its text is the selection.
+    const trigger = screen.getByLabelText("User");
+    expect(trigger.textContent).toContain("alice@example.com");
+    // The handle marker is "(@" — the email's own "@" would match otherwise.
+    expect(trigger.textContent).not.toContain("(@");
+  });
+
   it("reports a failed session load once", async () => {
     listUserSessionsMock.mockResolvedValue(failure);
     render(<AdminSessions />);
