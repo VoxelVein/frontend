@@ -222,6 +222,34 @@ export const projects = pgTable(
   ]
 );
 
+/**
+ * Join details for `server` projects, which list a server instead of
+ * shipping files. One row per server project.
+ */
+export const projectServers = pgTable(
+  "project_servers",
+  {
+    // Hostname or IP address, without a port.
+    address: text("address").notNull(),
+    gameVersions: text("game_versions").array().default([]).notNull(),
+    // Optional modpack players need or are recommended to install.
+    modpackId: uuid("modpack_id").references(() => projects.id, {
+      onDelete: "set null",
+    }),
+    modpackRequired: boolean("modpack_required").default(false).notNull(),
+    // Null means the Minecraft default, 25565.
+    port: integer("port"),
+    projectId: uuid("project_id")
+      .primaryKey()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("project_servers_modpackId_idx").on(table.modpackId)]
+);
+
 /** Inbox entries shown to every admin in the admin panel. */
 export const adminNotifications = pgTable(
   "admin_notifications",

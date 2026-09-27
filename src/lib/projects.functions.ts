@@ -4,7 +4,13 @@ import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
 import { boolean, object, parse, pipe, string, uuid } from "valibot";
 
 import { db } from "@/db";
-import { projectFiles, projects, projectVersions, users } from "@/db/schema";
+import {
+  projectFiles,
+  projects,
+  projectServers,
+  projectVersions,
+  users,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import {
   isAdmin,
@@ -16,18 +22,24 @@ import {
 import type { Session } from "@/lib/project-access";
 import {
   DELETED_USER_LABEL,
+  hasLoaders,
+  hasVersions,
   isCategoryForType,
   LOADERS_BY_TYPE,
+  PROJECT_TYPE_LABELS,
   projectInputSchema,
   projectSlugSchema,
   projectUpdateSchema,
+  serverInputSchema,
   versionInputSchema,
 } from "@/lib/projects";
 import type {
   ProjectInput,
   ProjectListItem,
+  ProjectServerView,
   ProjectUpdateInput,
   ProjectView,
+  ServerInput,
   VersionInput,
 } from "@/lib/projects";
 import { syncProjectToSearch } from "@/lib/search-sync";
@@ -55,6 +67,45 @@ const getSessionOrNull = (): Promise<Session | null> =>
 
 const getUploader = (): Promise<Session> =>
   requireUploader(getRequestHeaders());
+
+/** Join details for a server project, or null before they are saved. */
+const loadServerView = async (
+  projectId: string
+): Promise<ProjectServerView | null> => {
+  const [server] = await db
+    .select()
+    .from(projectServers)
+    .where(eq(projectServers.projectId, projectId))
+    .limit(1);
+  if (!server) {
+    return null;
+  }
+
+  // Only a published, visible modpack is shown to players.
+  const [modpack] = server.modpackId
+    ? await db
+        .select({ name: projects.name, slug: projects.slug })
+        .from(projects)
+        .where(
+          and(
+            eq(projects.id, server.modpackId),
+            eq(projects.type, "modpack"),
+            eq(projects.status, "published"),
+            eq(projects.pendingDeletion, false)
+          )
+        )
+        .limit(1)
+    : [];
+
+  return {
+    address: server.address,
+    gameVersions: server.gameVersions,
+    modpack: modpack ?? null,
+    modpackId: server.modpackId,
+    modpackRequired: server.modpackRequired,
+    port: server.port,
+  };
+};
 
 const loadProjectView = async (
   where: ReturnType<typeof eq>
@@ -95,6 +146,7 @@ const loadProjectView = async (
     ownerId: project.ownerId,
     pendingDeletion: project.pendingDeletion,
     publishedAt: project.publishedAt?.toISOString() ?? null,
+    server: project.type === "server" ? await loadServerView(project.id) : null,
     slug: project.slug,
     status: project.status,
     summary: project.summary,
@@ -250,6 +302,15 @@ const hasPrimaryFile = async (projectId: string): Promise<boolean> => {
   return (row?.files ?? 0) > 0;
 };
 
+const hasServerDetails = async (projectId: string): Promise<boolean> => {
+  const [row] = await db
+    .select({ projectId: projectServers.projectId })
+    .from(projectServers)
+    .where(eq(projectServers.projectId, projectId))
+    .limit(1);
+  return row !== undefined;
+};
+
 export const setProjectPublished = createServerFn({ method: "POST" })
   .validator((data: { projectId: string; published: boolean }) => ({
     ...parse(projectIdSchema, { projectId: data.projectId }),
@@ -259,8 +320,14 @@ export const setProjectPublished = createServerFn({ method: "POST" })
     const session = await getUploader();
     const project = await requireEditableProject(session, data.projectId);
 
-    if (data.published && !(await hasPrimaryFile(project.id))) {
-      throw new Error("Upload at least one file before publishing.");
+    if (data.published) {
+      if (!hasVersions(project.type)) {
+        if (!(await hasServerDetails(project.id))) {
+          throw new Error("Add the server address before publishing.");
+        }
+      } else if (!(await hasPrimaryFile(project.id))) {
+        throw new Error("Upload at least one file before publishing.");
+      }
     }
 
     await db
@@ -284,9 +351,18 @@ export const createVersion = createServerFn({ method: "POST" })
     const { projectId, ...fields } = data;
     const project = await requireEditableProject(session, projectId);
 
+    const labels = PROJECT_TYPE_LABELS[project.type];
+    if (!hasVersions(project.type)) {
+      throw new Error(`${labels.plural} do not have versions.`);
+    }
     const allowedLoaders = new Set<string>(LOADERS_BY_TYPE[project.type]);
     if (!fields.loaders.every((loader) => allowedLoaders.has(loader))) {
-      throw new Error(`Choose loaders that fit a ${project.type}.`);
+      throw new Error(
+        `Choose loaders that fit a ${labels.singular.toLowerCase()}.`
+      );
+    }
+    if (hasLoaders(project.type) && fields.loaders.length === 0) {
+      throw new Error("Choose at least one loader.");
     }
 
     try {
@@ -315,6 +391,50 @@ export const createVersion = createServerFn({ method: "POST" })
       }
       throw error;
     }
+  });
+
+/** Creates or replaces a server project's join details. */
+export const saveServerDetails = createServerFn({ method: "POST" })
+  .validator((data: ServerInput) => parse(serverInputSchema, data))
+  .handler(async ({ data }): Promise<void> => {
+    const session = await getUploader();
+    const { projectId, ...fields } = data;
+    const project = await requireEditableProject(session, projectId);
+    if (project.type !== "server") {
+      throw new Error("Only servers have join details.");
+    }
+
+    if (fields.modpackId) {
+      const [modpack] = await db
+        .select({ id: projects.id })
+        .from(projects)
+        .where(
+          and(
+            eq(projects.id, fields.modpackId),
+            eq(projects.type, "modpack"),
+            eq(projects.status, "published")
+          )
+        )
+        .limit(1);
+      if (!modpack) {
+        throw new Error("Choose a published modpack.");
+      }
+    }
+
+    const values = {
+      ...fields,
+      gameVersions: [...new Set(fields.gameVersions)],
+      modpackRequired: fields.modpackId ? fields.modpackRequired : false,
+    };
+    await db
+      .insert(projectServers)
+      .values({ ...values, projectId })
+      .onConflictDoUpdate({ set: values, target: projectServers.projectId });
+    await db
+      .update(projects)
+      .set({ updatedAt: new Date() })
+      .where(eq(projects.id, projectId));
+    await syncProjectToSearch(projectId);
   });
 
 /** Deletes a version and its stored files. */

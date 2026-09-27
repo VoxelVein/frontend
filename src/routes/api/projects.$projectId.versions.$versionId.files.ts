@@ -26,8 +26,9 @@ import {
   quotaExceededError,
 } from "@/lib/storage-quota";
 import {
+  ALLOWED_EXTENSIONS_BY_TYPE,
+  contentTypeFor,
   hasZipMagic,
-  JAR_CONTENT_TYPE,
   peekStream,
   sanitizeFilename,
 } from "@/lib/upload-validation";
@@ -108,13 +109,18 @@ const handleUpload = async (
     return errorResponse(404, "Version not found.");
   }
 
+  const extensions = ALLOWED_EXTENSIONS_BY_TYPE[project.type];
+  if (extensions.length === 0) {
+    return errorResponse(415, "This project type does not take files.");
+  }
   const filename = sanitizeFilename(
-    new URL(request.url).searchParams.get("filename")
+    new URL(request.url).searchParams.get("filename"),
+    project.type
   );
   if (!filename) {
     return errorResponse(
       415,
-      "Upload a .jar file whose name uses only letters, numbers, dots, dashes, underscores, and plus signs."
+      `Upload a ${extensions.join(" or ")} file whose name uses only letters, numbers, dots, dashes, underscores, and plus signs.`
     );
   }
 
@@ -151,14 +157,14 @@ const handleUpload = async (
 
   const { head, stream } = await peekStream(request.body, ZIP_MAGIC_LENGTH);
   if (!hasZipMagic(head)) {
-    return errorResponse(415, "The file is not a valid .jar archive.");
+    return errorResponse(415, "The file is not a valid archive.");
   }
 
   const fileId = crypto.randomUUID();
   const storageKey = `projects/${project.id}/${version.id}/${fileId}/${filename}`;
   const stored = await uploadWithinQuota({
     body: stream,
-    contentType: JAR_CONTENT_TYPE,
+    contentType: contentTypeFor(filename),
     filename,
     key: storageKey,
     maxBytes: remainingBytes ?? undefined,

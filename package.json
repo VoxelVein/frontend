@@ -1,6 +1,6 @@
 {
   "name": "voxelvein-frontend",
-  "version": "ALPHA-0.13.1",
+  "version": "ALPHA-0.14.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,6 +22,7 @@
     "db:seed:admin": "tsx scripts/seed-admin.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "mc:versions": "tsx scripts/sync-minecraft-versions.ts",
     "storage:init": "./scripts/garage-init.sh",
     "lint": "oxlint",
     "lint:md": "markdownlint-cli2",

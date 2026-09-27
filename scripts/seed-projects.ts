@@ -1,12 +1,13 @@
 /**
- * Seeds demo mods and plugins for local development, then rebuilds the
+ * Seeds demo projects of every type for local development, then rebuilds the
  * Meilisearch projects index from the database.
  *
  *   pnpm db:seed:projects            # create missing demo projects + reindex
  *   pnpm db:seed:projects --reindex  # only rebuild the search index
  *
  * Demo projects belong to the first admin (see `pnpm db:seed:admin`). Each
- * gets one version with a tiny generated .jar uploaded to object storage.
+ * gets one version with a tiny generated archive uploaded to object storage;
+ * servers get join details instead.
  */
 import { crc32 } from "node:zlib";
 
@@ -18,6 +19,7 @@ import { db, pool } from "../src/db/index.ts";
 import {
   projectFiles,
   projects,
+  projectServers,
   projectVersions,
   users,
 } from "../src/db/schema.ts";
@@ -27,7 +29,10 @@ import {
   PROJECTS_INDEX_SETTINGS,
 } from "../src/lib/search-sync.ts";
 import { uploadStream } from "../src/lib/storage.ts";
-import { JAR_CONTENT_TYPE } from "../src/lib/upload-validation.ts";
+import {
+  ALLOWED_EXTENSIONS_BY_TYPE,
+  contentTypeFor,
+} from "../src/lib/upload-validation.ts";
 import { DEMO_PROJECTS } from "./fixtures/demo-projects.ts";
 import type { DemoProject } from "./fixtures/demo-projects.ts";
 
@@ -101,6 +106,24 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
     })
     .returning({ id: projects.id });
 
+  if (demo.server) {
+    const { modpackSlug, ...server } = demo.server;
+    const [modpack] = modpackSlug
+      ? await db
+          .select({ id: projects.id })
+          .from(projects)
+          .where(eq(projects.slug, modpackSlug))
+          .limit(1)
+      : [];
+    await db.insert(projectServers).values({
+      ...server,
+      gameVersions: demo.gameVersions,
+      modpackId: modpack?.id ?? null,
+      projectId: project.id,
+    });
+    return;
+  }
+
   const [version] = await db
     .insert(projectVersions)
     .values({
@@ -113,7 +136,8 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
     .returning({ id: projectVersions.id });
 
   const fileId = crypto.randomUUID();
-  const filename = `${demo.slug}-${demo.version}.jar`;
+  const [extension = ".jar"] = ALLOWED_EXTENSIONS_BY_TYPE[demo.type];
+  const filename = `${demo.slug}-${demo.version}${extension}`;
   const storageKey = `projects/${project.id}/${version.id}/${fileId}/${filename}`;
   const jar = buildJar(
     "demo.txt",
@@ -121,7 +145,7 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
   );
   const stored = await uploadStream({
     body: new Blob([new Uint8Array(jar)]).stream(),
-    contentType: JAR_CONTENT_TYPE,
+    contentType: contentTypeFor(filename),
     filename,
     key: storageKey,
   });
@@ -154,12 +178,16 @@ const seedProjects = async () => {
   const existingSlugs = new Set(existing.map((row) => row.slug));
   const missing = DEMO_PROJECTS.filter((demo) => !existingSlugs.has(demo.slug));
 
-  await Promise.all(
-    missing.map(async (demo) => {
-      await seedProject(demo, ownerId);
-      console.log(`  + ${demo.type} ${demo.slug}`);
-    })
-  );
+  const seedAll = (demos: DemoProject[]) =>
+    Promise.all(
+      demos.map(async (demo) => {
+        await seedProject(demo, ownerId);
+        console.log(`  + ${demo.type} ${demo.slug}`);
+      })
+    );
+  // Servers link to demo modpacks, so those must exist first.
+  await seedAll(missing.filter((demo) => !demo.server));
+  await seedAll(missing.filter((demo) => demo.server));
   console.log(
     `Seeded ${missing.length} demo projects (${existingSlugs.size} already existed).`
   );

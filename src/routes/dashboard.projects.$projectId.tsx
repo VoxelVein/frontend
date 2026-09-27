@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { optional, parse, picklist, object } from "valibot";
 
 import { ProjectForm } from "@/components/dashboard/project-form";
+import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
 import { PageHeader } from "@/components/page-header";
 import { ProjectLink } from "@/components/projects/project-link";
@@ -22,7 +23,11 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
-import { PROJECT_TYPE_LABELS } from "@/lib/projects";
+import {
+  hasVersions,
+  PROJECT_TYPE_LABELS,
+  PROJECT_TYPE_PATHS,
+} from "@/lib/projects";
 import type {
   ProjectInput,
   ProjectVersionView,
@@ -56,7 +61,10 @@ const PublishPanel = ({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isPublished = project.status === "published";
-  const hasFiles = project.versions.some((version) => version.files.length);
+  const isServer = !hasVersions(project.type);
+  const canPublish = isServer
+    ? project.server !== null
+    : project.versions.some((version) => version.files.length);
 
   const toggle = async () => {
     setError(null);
@@ -88,7 +96,10 @@ const PublishPanel = ({
         {isPublished
           ? "Everyone can find and download this project."
           : "Only you and admins can see this project."}
-        {!isPublished && !hasFiles
+        {!isPublished && !canPublish && isServer
+          ? " Add the server address before publishing."
+          : null}
+        {!isPublished && !canPublish && !isServer
           ? " Upload a version with a file before publishing."
           : null}
       </p>
@@ -102,7 +113,7 @@ const PublishPanel = ({
           type="button"
           variant={isPublished ? "outline" : "default"}
           className="min-h-11"
-          disabled={pending || (!isPublished && !hasFiles)}
+          disabled={pending || (!isPublished && !canPublish)}
           onClick={toggle}
         >
           {isPublished ? "Unpublish" : "Publish"}
@@ -309,7 +320,7 @@ const ManageProjectPage = () => {
       <div className="mt-4">
         <PageHeader
           title={project.name}
-          description={`${PROJECT_TYPE_LABELS[project.type].singular} · /${project.type}s/${project.slug}`}
+          description={`${PROJECT_TYPE_LABELS[project.type].singular} · ${PROJECT_TYPE_PATHS[project.type]}/${project.slug}`}
         />
       </div>
 
@@ -328,7 +339,9 @@ const ManageProjectPage = () => {
       >
         <TabsList aria-label="Project sections">
           <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="versions">Versions</TabsTrigger>
+          <TabsTrigger value="versions">
+            {hasVersions(project.type) ? "Versions" : "Server"}
+          </TabsTrigger>
           <TabsTrigger value="danger">Danger zone</TabsTrigger>
         </TabsList>
 
@@ -350,33 +363,49 @@ const ManageProjectPage = () => {
           />
         </TabsContent>
 
-        <TabsContent value="versions" className="grid gap-10 pt-4">
-          <section aria-labelledby="new-version-heading">
-            <h2
-              id="new-version-heading"
-              className="text-foreground mb-4 text-lg font-semibold"
-            >
-              New version
-            </h2>
-            <VersionForm
+        {hasVersions(project.type) ? null : (
+          <TabsContent value="versions" className="pt-4">
+            <ServerForm
+              key={project.updatedAt}
               projectId={project.id}
-              projectType={project.type}
-              onCreated={async () => {
+              server={project.server}
+              onSaved={async () => {
                 await reload();
-                toast.success("Version uploaded");
+                toast.success("Server saved");
               }}
             />
-          </section>
-          <section aria-labelledby="versions-heading">
-            <h2
-              id="versions-heading"
-              className="text-foreground mb-4 text-lg font-semibold"
-            >
-              Versions
-            </h2>
-            <VersionList versions={project.versions} onChange={reload} />
-          </section>
-        </TabsContent>
+          </TabsContent>
+        )}
+
+        {hasVersions(project.type) ? (
+          <TabsContent value="versions" className="grid gap-10 pt-4">
+            <section aria-labelledby="new-version-heading">
+              <h2
+                id="new-version-heading"
+                className="text-foreground mb-4 text-lg font-semibold"
+              >
+                New version
+              </h2>
+              <VersionForm
+                projectId={project.id}
+                projectType={project.type}
+                onCreated={async () => {
+                  await reload();
+                  toast.success("Version uploaded");
+                }}
+              />
+            </section>
+            <section aria-labelledby="versions-heading">
+              <h2
+                id="versions-heading"
+                className="text-foreground mb-4 text-lg font-semibold"
+              >
+                Versions
+              </h2>
+              <VersionList versions={project.versions} onChange={reload} />
+            </section>
+          </TabsContent>
+        ) : null}
 
         <TabsContent value="danger" className="pt-4">
           <DangerZone project={project} />
