@@ -30,7 +30,6 @@ import type {
   ProjectView,
   VersionInput,
 } from "@/lib/projects";
-import { syncProjectToSearch } from "@/lib/search-sync";
 import { deleteObjects } from "@/lib/storage";
 
 const PG_UNIQUE_VIOLATION = "23505";
@@ -95,6 +94,7 @@ const loadProjectView = async (
     ownerId: project.ownerId,
     pendingDeletion: project.pendingDeletion,
     publishedAt: project.publishedAt?.toISOString() ?? null,
+    rejectionReason: project.rejectionReason,
     slug: project.slug,
     status: project.status,
     summary: project.summary,
@@ -238,7 +238,6 @@ export const updateProject = createServerFn({ method: "POST" })
       throw new Error("Choose a category for this project type.");
     }
     await db.update(projects).set(fields).where(eq(projects.id, projectId));
-    await syncProjectToSearch(projectId);
   });
 
 const hasPrimaryFile = async (projectId: string): Promise<boolean> => {
@@ -249,33 +248,6 @@ const hasPrimaryFile = async (projectId: string): Promise<boolean> => {
     .where(eq(projectVersions.projectId, projectId));
   return (row?.files ?? 0) > 0;
 };
-
-export const setProjectPublished = createServerFn({ method: "POST" })
-  .validator((data: { projectId: string; published: boolean }) => ({
-    ...parse(projectIdSchema, { projectId: data.projectId }),
-    published: data.published === true,
-  }))
-  .handler(async ({ data }): Promise<void> => {
-    const session = await getUploader();
-    const project = await requireEditableProject(session, data.projectId);
-
-    if (data.published && !(await hasPrimaryFile(project.id))) {
-      throw new Error("Upload at least one file before publishing.");
-    }
-
-    await db
-      .update(projects)
-      .set(
-        data.published
-          ? {
-              publishedAt: project.publishedAt ?? new Date(),
-              status: "published",
-            }
-          : { status: "draft" }
-      )
-      .where(eq(projects.id, project.id));
-    await syncProjectToSearch(project.id);
-  });
 
 export const createVersion = createServerFn({ method: "POST" })
   .validator((data: VersionInput) => parse(versionInputSchema, data))
@@ -351,7 +323,6 @@ export const deleteVersion = createServerFn({ method: "POST" })
         .set({ status: "draft" })
         .where(eq(projects.id, project.id));
     }
-    await syncProjectToSearch(project.id);
   });
 
 /** Permanently deletes a project with all versions and stored files. */
@@ -372,7 +343,6 @@ export const deleteProject = createServerFn({ method: "POST" })
 
     await db.delete(projects).where(eq(projects.id, project.id));
     await deleteObjects(files.map((file) => file.storageKey));
-    await syncProjectToSearch(project.id);
   });
 
 /**
@@ -390,7 +360,6 @@ export const removeProject = createServerFn({ method: "POST" })
       .update(projects)
       .set({ status: "removed" })
       .where(eq(projects.id, data.projectId));
-    await syncProjectToSearch(data.projectId);
   });
 
 const protectedSchema = object({

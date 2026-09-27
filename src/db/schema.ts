@@ -11,6 +11,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import type { UserNotificationType } from "../lib/notifications";
 import type {
   ProjectStatus,
   ProjectType,
@@ -202,8 +203,22 @@ export const projects = pgTable(
     // removed when the account is purged.
     pendingDeletion: boolean("pending_deletion").default(false).notNull(),
     publishedAt: timestamp("published_at"),
+    // Why an admin sent the project back to draft. Cleared when the creator
+    // resubmits, so it only ever describes the most recent rejection.
+    rejectionReason: text("rejection_reason"),
+    // When an admin last decided on this project, and who. Null while the
+    // project has never been reviewed. Set null if the reviewing admin's
+    // account is deleted, which is why it is a soft reference rather than a
+    // required one.
+    reviewedAt: timestamp("reviewed_at"),
+    reviewedBy: text("reviewed_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     slug: text("slug").notNull().unique(),
     status: text("status").$type<ProjectStatus>().default("draft").notNull(),
+    // When the creator asked for review. Null unless status is "pending", and
+    // the review queue orders by it so the oldest request is served first.
+    submittedAt: timestamp("submitted_at"),
     summary: text("summary").notNull(),
     tags: text("tags").array().default([]).notNull(),
     type: text("type").$type<ProjectType>().notNull(),
@@ -215,6 +230,13 @@ export const projects = pgTable(
   (table) => [
     index("projects_ownerId_idx").on(table.ownerId),
     index("projects_status_idx").on(table.status),
+    // The review queue filters on `status = 'pending'` and orders by
+    // `submitted_at` ascending, oldest request first. The status index alone
+    // cannot supply that sort, so it would read and sort every pending row.
+    index("projects_status_submittedAt_idx").on(
+      table.status,
+      table.submittedAt
+    ),
     index("projects_type_idx").on(table.type),
     // listMyProjects filters on `owner_id` and orders by `updated_at`
     // descending. The ownerId index alone cannot supply that sort.
@@ -364,9 +386,62 @@ export const projectVersionsRelations = relations(
   })
 );
 
+/**
+ * Notifications addressed to one user, shown in the navbar.
+ *
+ * Distinct from `admin_notifications`, which is a shared inbox every admin
+ * reads. A row here belongs to a single account and is deleted with it, and
+ * with the project it refers to, because a notification pointing at a
+ * deleted project has nothing left to say.
+ */
+export const userNotifications = pgTable(
+  "user_notifications",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    message: text("message").notNull(),
+    projectId: uuid("project_id")
+      .references(() => projects.id, { onDelete: "cascade" })
+      .notNull(),
+    readAt: timestamp("read_at"),
+    title: text("title").notNull(),
+    type: text("type").$type<UserNotificationType>().notNull(),
+    userId: text("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => [
+    // The unread badge is read on every page load, so it gets its own index
+    // rather than reusing the listing one.
+    index("user_notifications_userId_readAt_idx").on(
+      table.userId,
+      table.readAt
+    ),
+    // The dropdown lists newest first, which this index supplies directly.
+    index("user_notifications_userId_createdAt_idx").on(
+      table.userId,
+      table.createdAt
+    ),
+  ]
+);
+
 export const projectFilesRelations = relations(projectFiles, ({ one }) => ({
   version: one(projectVersions, {
     fields: [projectFiles.versionId],
     references: [projectVersions.id],
   }),
 }));
+
+export const userNotificationsRelations = relations(
+  userNotifications,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [userNotifications.projectId],
+      references: [projects.id],
+    }),
+    user: one(users, {
+      fields: [userNotifications.userId],
+      references: [users.id],
+    }),
+  })
+);

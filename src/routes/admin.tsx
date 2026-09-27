@@ -10,6 +10,7 @@ import { object, optional, parse, picklist } from "valibot";
 import { AdminAccountDeletions } from "@/components/admin/admin-account-deletions";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { AdminPosts } from "@/components/admin/admin-posts";
+import { AdminReviews } from "@/components/admin/admin-reviews";
 import { AdminSessions } from "@/components/admin/admin-sessions";
 import { AdminStorage } from "@/components/admin/admin-storage";
 import { AdminUsers } from "@/components/admin/admin-users";
@@ -17,6 +18,7 @@ import { PageHeader } from "@/components/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { countUnreadAdminNotifications } from "@/lib/admin-accounts.functions";
 import { requireAdmin } from "@/lib/auth.functions";
+import { countPendingReviews } from "@/lib/project-moderation.functions";
 
 const adminSearchSchema = object({
   tab: optional(
@@ -24,6 +26,7 @@ const adminSearchSchema = object({
       "deletions",
       "notifications",
       "posts",
+      "reviews",
       "sessions",
       "storage",
       "users",
@@ -41,34 +44,79 @@ const fetchUnreadCount = async (): Promise<number | null> => {
   }
 };
 
-const NotificationsTabLabel = ({ unread }: { unread: number }) => (
+/** Projects awaiting a publishing decision, or null when it could not be read. */
+const fetchPendingReviewCount = async (): Promise<number | null> => {
+  try {
+    return await countPendingReviews();
+  } catch {
+    // Same reasoning as the notifications badge: the Reviews tab is the place
+    // that reports load errors, so a failed count must not break the page.
+    return null;
+  }
+};
+
+/**
+ * A tab label with an unread/pending count.
+ *
+ * `srSuffix` supplies the words the screen reader reads after the number, so
+ * "3" is announced as "3 unread" or "3 pending" rather than a bare digit.
+ */
+const CountBadge = ({
+  count,
+  noun,
+  srSuffix,
+}: {
+  count: number;
+  noun: string;
+  srSuffix: string;
+}) => (
   <>
-    Notifications
-    {unread > 0 ? (
+    {noun}
+    {count > 0 ? (
       <>
         <span
           aria-hidden="true"
           className="bg-primary text-primary-foreground inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold"
         >
-          {unread}
+          {count}
         </span>
-        <span className="sr-only">, {unread} unread</span>
+        <span className="sr-only">
+          , {count} {srSuffix}
+        </span>
       </>
     ) : null}
   </>
+);
+
+const NotificationsTabLabel = ({ unread }: { unread: number }) => (
+  <CountBadge count={unread} noun="Notifications" srSuffix="unread" />
+);
+
+const ReviewsTabLabel = ({ pending }: { pending: number }) => (
+  <CountBadge count={pending} noun="Reviews" srSuffix="pending" />
 );
 
 const AdminPage = () => {
   const navigate = useNavigate();
   const { tab = "users" } = useSearch({ from: "/admin" });
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingReviews, setPendingReviews] = useState(0);
 
   useEffect(() => {
     let isCurrent = true;
     const loadOnMount = async () => {
-      const unread = await fetchUnreadCount();
-      if (isCurrent && unread !== null) {
+      const [unread, pending] = await Promise.all([
+        fetchUnreadCount(),
+        fetchPendingReviewCount(),
+      ]);
+      if (!isCurrent) {
+        return;
+      }
+      if (unread !== null) {
         setUnreadCount(unread);
+      }
+      if (pending !== null) {
+        setPendingReviews(pending);
       }
     };
     void loadOnMount();
@@ -81,6 +129,13 @@ const AdminPage = () => {
     const unread = await fetchUnreadCount();
     if (unread !== null) {
       setUnreadCount(unread);
+    }
+  };
+
+  const refreshPendingReviews = async () => {
+    const pending = await fetchPendingReviewCount();
+    if (pending !== null) {
+      setPendingReviews(pending);
     }
   };
 
@@ -111,6 +166,9 @@ const AdminPage = () => {
             <NotificationsTabLabel unread={unreadCount} />
           </TabsTrigger>
           <TabsTrigger value="deletions">Deletions</TabsTrigger>
+          <TabsTrigger value="reviews">
+            <ReviewsTabLabel pending={pendingReviews} />
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -135,6 +193,10 @@ const AdminPage = () => {
 
         <TabsContent value="deletions">
           <AdminAccountDeletions />
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <AdminReviews onDecided={refreshPendingReviews} />
         </TabsContent>
       </Tabs>
     </div>

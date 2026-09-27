@@ -45,6 +45,7 @@ const PROJECT: ProjectView = {
   ownerId: "user-alice",
   pendingDeletion: false,
   publishedAt: "2026-09-01T00:00:00.000Z",
+  rejectionReason: null,
   slug: "big-mod",
   status: "published",
   summary: "A big mod.",
