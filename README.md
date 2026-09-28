@@ -34,58 +34,102 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 ### Features
 
-#### Product
+#### Content
 
-* Minecraft content marketplace experience
-* Content discovery and browsing
-* Creator-focused interfaces
-* Responsive web interface
-* Dark-mode-first design
-* Accessible component foundation
-* Server-rendered application
+* Six project types — **mods**, **modpacks**, **plugins**, **resource
+  packs**, **shaders**, and **servers** — each with a browse page and a
+  detail page
+* Typo-tolerant, full-text search straight from PostgreSQL (no search
+  service)
+* Filter by category, Minecraft version, loader/platform, and client
+  requirement; sort by downloads, activity, or name
+* Trending projects and a news section on the home page
+* S3-compatible object storage for uploads, with per-file and site-wide
+  quota enforcement
+* Versioned releases with release channels, changelogs, and game-version
+  and loader metadata
+* Server listings with join address, port, client requirement, and links
+  to required or recommended mods
+* Download counting with per-client deduplication
+
+#### Creators and community
+
+* Creator dashboard: create projects, upload versions, manage server
+  details
+* Moderated publishing: a project goes `draft` → `pending` → `published`
+  through an admin review queue
+* Blog with Markdown posts, admin post management, and post search
+* Public author profiles at `/u/<username>` with a Markdown bio
+* Public profiles for every project type, with a version picker and
+  download links
+
+#### Accounts and administration
+
+* Better Auth with email/password, Google, GitHub, and passkeys
+* Cloudflare Turnstile on password sign-in and sign-up
+* Settings for profile, username, bio, sign-in methods, passkeys,
+  sessions, and a guided account-deletion flow
+* Admin panel: users, sessions, posts, storage, notifications, pending
+  account deletions, and the publishing review queue
+* Public legal pages and a cookie consent banner
+
+#### Interface
+
+* Server-rendered with progressive enhancement
+* Light and dark themes with a view-transition theme switch
+* Responsive, mobile-first layout
+* WCAG 2.2 AA accessibility as a baseline requirement
+* Cookie banner, skip link, and reduced-motion support throughout
 
 #### Engineering
 
-* React 19
-* TypeScript
+* React 19 and TypeScript
 * TanStack Start (full-stack React framework with SSR)
 * TanStack Router (file-based, type-safe routing)
-* Tailwind CSS v4
+* TanStack Query and TanStack Form (server state and forms)
+* Tailwind CSS v4 with OKLCH design tokens
 * Base UI + shadcn-style components (UI foundation)
-* Better Auth (authentication)
-* Drizzle ORM (database access and schema management)
-* PostgreSQL (relational database)
-* ElysiaJS (standalone API server with webhooks and SSE)
-* Vitest (testing)
-* Oxlint (linting)
-* Oxfmt (formatting)
-* Ultracite (unified code-quality checks and fixes)
-* PNPM (package management)
+* Better Auth (authentication, passkeys, admin plugin)
+* Drizzle ORM and PostgreSQL (database access and schema management)
+* ElysiaJS (standalone API server with signed webhooks and SSE)
+* Valibot (shared validation on client and server)
+* Nitro (production server runtime and scheduled tasks)
+* Vitest and Testing Library (testing)
+* Ultracite on Oxlint + Oxfmt (linting and formatting)
+* markdownlint (documentation)
+* pnpm (package management)
 
 ---
 
 ## Tech Stack
 
-| Technology          | Purpose                               |
-| ------------------- | ------------------------------------- |
-| **React 19**        | User interface                        |
-| **TypeScript**      | Static typing                         |
-| **TanStack Start**  | Full-stack React framework and SSR    |
-| **TanStack Router** | Type-safe, file-based routing         |
-| **Tailwind CSS v4** | Styling                               |
-| **Base UI**         | Accessible UI primitives              |
-| **Better Auth**     | Authentication                        |
-| **Drizzle ORM**     | Database access and schema management |
-| **PostgreSQL**      | Relational database                   |
-| **ElysiaJS**        | Standalone API server (webhooks, SSE) |
-| **Vite**            | Development and build tooling         |
-| **Nitro**           | Production server runtime             |
-| **Unpic**           | Image optimization (CDN-backed images)|
-| **Vitest**          | Testing                               |
-| **Oxlint**          | Linting                               |
-| **Oxfmt**           | Formatting                            |
-| **Ultracite**       | Unified code-quality checks and fixes |
-| **PNPM**            | Package management                    |
+| Technology          | Purpose                                    |
+| ------------------- | ------------------------------------------ |
+| **React 19**        | User interface                             |
+| **TypeScript**      | Static typing                              |
+| **TanStack Start**  | Full-stack React framework and SSR         |
+| **TanStack Router** | Type-safe, file-based routing              |
+| **TanStack Query**  | Server state, caching, background refresh  |
+| **TanStack Form**   | Form state and validation                  |
+| **Tailwind CSS v4** | Styling                                    |
+| **Base UI**         | Accessible UI primitives                   |
+| **Better Auth**     | Authentication, passkeys, admin plugin     |
+| **Drizzle ORM**     | Database access and schema management      |
+| **PostgreSQL**      | Relational database and search             |
+| **ElysiaJS**        | Standalone API server (webhooks, SSE)      |
+| **Valibot**         | Validation schemas shared across the stack |
+| **Vite**            | Development and build tooling              |
+| **Nitro**           | Production server runtime and tasks        |
+| **Vitest**          | Testing                                    |
+| **Oxlint**          | Linting                                    |
+| **Oxfmt**           | Formatting                                 |
+| **Ultracite**       | Unified code-quality checks and fixes      |
+| **markdownlint**    | Documentation linting                      |
+| **PNPM**            | Package management                         |
+
+> Image optimization is not in place. There are no content images yet
+> (projects use a letter avatar), so Unpic is not installed. See
+> [ROADMAP.md](ROADMAP.md).
 
 ---
 
@@ -121,19 +165,29 @@ pnpm install
 
 ### Configure the Environment
 
-Create a `.env.local` file in the root directory with the following
-variables:
+Copy the example file and fill in the values. `.env.example` documents
+every supported variable:
+
+```bash
+cp .env.example .env.local
+```
+
+The minimum needed to boot the web app:
 
 ```env
-BETTER_AUTH_SECRET=your-secret-here  # Must be at least 32 characters
-BETTER_AUTH_URL=http://localhost:3000
 DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
+BETTER_AUTH_SECRET=your-secret-here  # At least 32 characters
+BETTER_AUTH_URL=http://localhost:3000
+VITE_SITE_URL=http://localhost:3000
 API_URL=http://localhost:3002
-API_PORT=3002
-WEBHOOK_SECRET=your-webhook-secret    # Required, at least 32 characters
 VITE_API_URL=http://localhost:3002
 NODE_ENV=development
 ```
+
+The API server additionally requires `WEBHOOK_SECRET` (at least 32
+characters) and refuses to start without it. Object storage, Google,
+GitHub, and Cloudflare Turnstile are all optional and each one simply
+disables its own feature when unset.
 
 > Never commit `.env.local` or real credentials to the repository.
 
@@ -163,26 +217,52 @@ on `http://localhost:3002`.
 
 ## Available Commands
 
-| Command             | Description                                       |
-| ------------------- | ------------------------------------------------- |
-| `pnpm dev`          | Starts the complete dev environment (app + API)   |
-| `pnpm dev:web`      | Starts only the Vite app (port 3000)              |
-| `pnpm dev:api`      | Starts the ElysiaJS API server (watch)            |
-| `pnpm dev:all`      | Runs the app and API server together              |
-| `pnpm start:api`    | Starts the API server (no watch)                  |
-| `pnpm send:webhook` | Sends a test mod webhook to the API               |
-| `pnpm build`        | Builds the production bundle                      |
-| `pnpm preview`      | Previews the production build                     |
-| `pnpm start`        | Starts the built Nitro server                     |
-| `pnpm test`         | Runs the Vitest test suite                        |
-| `pnpm test:coverage`| Runs the Vitest suite with coverage               |
-| `pnpm typecheck`    | Runs the TypeScript type checker                  |
-| `pnpm lint`         | Runs the Oxlint linter                            |
-| `pnpm lint:md`      | Runs markdownlint on Markdown files               |
-| `pnpm format`       | Runs the Oxfmt formatter                          |
-| `pnpm check`        | Runs the Ultracite checker                        |
-| `pnpm fix`          | Applies Ultracite checks                          |
-| `pnpm prepare`      | Initializes Husky Git hooks                       |
+### Development
+
+| Command             | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| `pnpm dev`          | Starts the complete dev environment (app + API) |
+| `pnpm dev:web`      | Starts only the Vite app (port 3000)            |
+| `pnpm dev:api`      | Starts the ElysiaJS API server (watch)          |
+| `pnpm dev:all`      | Runs the app and API server together            |
+| `pnpm start:api`    | Starts the API server (no watch)                |
+| `pnpm send:webhook` | Sends a test mod webhook to the API             |
+| `pnpm build`        | Builds the production bundle                    |
+| `pnpm preview`      | Previews the production build                   |
+| `pnpm start`        | Starts the built Nitro server                   |
+| `pnpm check:bundle` | Checks the main chunk against the size budget   |
+
+### Quality
+
+| Command              | Description                         |
+| -------------------- | ----------------------------------- |
+| `pnpm typecheck`     | Runs the TypeScript type checker    |
+| `pnpm test`          | Runs the Vitest test suite          |
+| `pnpm test:coverage` | Runs the Vitest suite with coverage |
+| `pnpm check`         | Lint and format check (read-only)   |
+| `pnpm fix`           | Lint and format auto-fix            |
+| `pnpm lint`          | Runs the Oxlint linter only         |
+| `pnpm format`        | Formats source files with Oxfmt     |
+| `pnpm lint:md`       | Runs markdownlint on Markdown files |
+| `pnpm lint:md:fix`   | Auto-fixes Markdown issues          |
+| `pnpm prepare`       | Initializes Husky Git hooks         |
+
+### Database, content, and infrastructure
+
+| Command                 | Description                              |
+| ----------------------- | ---------------------------------------- |
+| `pnpm db:migrate`       | Applies pending Drizzle migrations       |
+| `pnpm db:studio`        | Opens Drizzle Studio                     |
+| `pnpm db:seed`          | Seeds demo projects and blog posts       |
+| `pnpm db:seed:projects` | Seeds demo projects of every type        |
+| `pnpm db:seed:posts`    | Seeds demo blog posts                    |
+| `pnpm db:seed:admin`    | Promotes an existing user to admin       |
+| `pnpm mc:versions`      | Refreshes the Minecraft version manifest |
+| `pnpm storage:init`     | Prepares the local Garage bucket and key |
+
+> To generate a migration, use the project-local Drizzle binary:
+> `./node_modules/.bin/drizzle-kit generate`. There is no `db:generate`
+> script, and `pnpm dlx drizzle-kit` fails in a fresh environment.
 
 ---
 
@@ -206,27 +286,42 @@ Run `just` with no arguments to list all recipes.
 
 ## Architecture
 
-The application follows this structure:
+The repository contains two servers and one shared library tree:
 
 ```text
 src/
-├── components/   # UI components (Base UI + shadcn-style)
-├── routes/       # TanStack Start file-based routes
-├── lib/          # Shared utilities and configuration
-├── db/           # Drizzle ORM schema and client
-└── styles/       # Global styles and design tokens
+├── components/     # UI components, grouped by feature
+│   ├── admin/      # Admin panel tabs
+│   ├── blog/       # Blog cards and search
+│   ├── dashboard/  # Creator project, version, and server forms
+│   ├── legal/      # Shared legal-document renderer
+│   ├── motion/     # Theme toggle, rotating text, view transitions
+│   ├── navbar/     # Navbar, mobile drawer, user menu
+│   ├── projects/   # Project browser, card, detail page
+│   ├── settings/   # Settings tabs
+│   └── ui/         # Base UI + shadcn primitives
+├── db/             # Drizzle client and schema
+├── hooks/          # Reduced motion, username availability, post search
+├── lib/            # Auth, projects, search, storage, server functions
+├── routes/         # TanStack Start file-based routes
+├── tasks/          # Nitro scheduled tasks
+├── test/           # Vitest setup
+├── router.tsx      # Router, QueryClient, SSR query integration
+├── start.ts        # Security headers and CSRF middleware
+└── styles.css      # Tailwind theme and design tokens
 
-server/
-├── index.ts      # ElysiaJS entry point (Node adapter)
-├── lib/          # Event registry
-└── routes/       # health, SSE events, webhooks
+server/             # Standalone ElysiaJS API server
+├── index.ts        # Entry point (Node adapter, CORS)
+├── lib/            # Event registry and async queue
+└── routes/         # health, SSE events, webhooks
 ```
 
-The Vite configuration integrates TanStack Start, TanStack Router, Tailwind
-CSS, TanStack DevTools, Nitro, and React. The ElysiaJS API server runs as a
-standalone service on its own port and is the single entry point for mod
-search and real-time mod events. See
-[docs/architecture/api.md](docs/architecture/api.md) for details.
+The Vite configuration integrates TanStack Start, TanStack Router,
+TanStack DevTools, Tailwind CSS, Nitro, and React. Nitro also runs the
+hourly `accounts:purge` scheduled task.
+
+See [docs/architecture/overview.md](docs/architecture/overview.md) for how
+a request flows through the stack.
 
 ---
 
@@ -242,7 +337,17 @@ The application uses **PostgreSQL** via **Drizzle ORM**.
   DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
   ```
 
-* Database migrations are stored in the `drizzle/` directory.
+* Migrations are stored in `drizzle/`. Apply them with `pnpm db:migrate`.
+* Search is part of the database, not a separate service: `pg_trgm` and
+  full-text indexes created by the migrations back every query. See
+  [docs/search/postgres.md](docs/search/postgres.md).
+
+To bring up Postgres and local object storage together:
+
+```bash
+just infra           # docker-compose.yml: Postgres + Garage
+just storage-init    # create the bucket and access key
+```
 
 ---
 
@@ -253,28 +358,36 @@ The application uses **Better Auth** for authentication.
 * Required configuration:
 
   ```env
-  BETTER_AUTH_SECRET=your-secret-here
+  BETTER_AUTH_SECRET=your-secret-here   # At least 32 characters
   BETTER_AUTH_URL=http://localhost:3000
   ```
 
-* For local development, `BETTER_AUTH_URL` should be set to the local
-  application URL.
+* Sign-in methods: email/password, Google, GitHub, and passkeys. Google
+  and GitHub each need their own `*_CLIENT_ID` and `*_CLIENT_SECRET`;
+  without them the provider and its button are simply absent.
+* Password sign-in and sign-up are gated by Cloudflare Turnstile. Without
+  `VITE_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET` the widget does not
+  render and those two endpoints fail closed with `503`.
+* Usernames are separate from the display name, with a 14-day change
+  cooldown and a reservation window for a previous name.
+
+See [docs/authentication/](docs/authentication/accounts.md) for usernames,
+sessions, passkeys, and account deletion.
 
 ---
 
 ## API Server and Real-Time Updates
 
-A standalone **ElysiaJS** API server (`server/`) powers mod search and
-real-time mod events:
+A standalone **ElysiaJS** API server (`server/`) handles real-time events:
 
 * `GET /api/health` — liveness check
 * `GET /api/events` — Server-Sent Events (SSE) stream of mod events
 * `POST /api/webhooks/mods` — webhook endpoint (HMAC-SHA256 verified) that
   broadcasts `mod.created`, `mod.updated`, and `mod.deleted` events
 
-The mods page subscribes to the SSE stream and shows a live banner when a
-mod changes, with a one-click refresh that bypasses the search cache. Send
-a test event with:
+Every project browse page subscribes to the SSE stream and shows a live
+banner when something changes, with a one-click refresh that bypasses the
+search cache. Send a test event with:
 
 ```bash
 pnpm send:webhook mod.created "My Mod"
@@ -289,23 +402,29 @@ WEBHOOK_SECRET=your-webhook-secret
 VITE_API_URL=http://localhost:3002
 ```
 
-See [docs/architecture/api.md](docs/architecture/api.md) for the full API
-reference.
+The server has no database connection: it publishes and streams events
+only. Search lives in Postgres, not here. See
+[docs/architecture/api.md](docs/architecture/api.md) for the full
+reference, and [docs/content/projects.md](docs/content/projects.md) for
+the web app's own upload and download endpoints.
 
 ---
 
 ## Legal Pages
 
-The following legal pages exist as **placeholders** and must be reviewed by
-a qualified professional before production:
+These pages exist as **placeholders** and must be reviewed by a qualified
+professional before production. `/legal` still carries `Unknown` for the
+operator's name and address, and no route is named `/impressum`:
 
-* `/impressum` — Impressum (German legal notice)
+* `/legal` — Legal notes (§ 5 DDG service-provider notice)
 * `/privacy` — Privacy Policy
 * `/cookies` — Cookie Policy
 * `/terms` — Terms of Service
 * `/terms-of-use` — Terms of Use
 * `/disclaimer` — Disclaimer
 
+All six share the renderer in
+[`src/components/legal/legal-page.tsx`](src/components/legal/legal-page.tsx).
 The cookie consent banner is implemented in
 [`src/components/cookie-banner.tsx`](src/components/cookie-banner.tsx).
 
@@ -347,12 +466,14 @@ feature branch → main → prod → production deployment
 
 ## Code Quality
 
-Before opening a pull request, run the following commands:
+Before opening a pull request, run the same checks CI runs:
 
 ```bash
 pnpm check
 pnpm typecheck
 pnpm test
+pnpm build
+pnpm check:bundle --no-build
 pnpm lint:md
 ```
 
@@ -370,20 +491,29 @@ pnpm format
 
 The project uses **Ultracite**, **Oxlint**, and **Oxfmt** for code-quality
 enforcement, and **markdownlint** (via `markdownlint-cli2` with the GitHub
-ruleset) for documentation.
+ruleset) for documentation. A Husky pre-commit hook runs `ultracite fix` and
+re-stages your files, so formatting is applied automatically at commit time.
 
 ---
 
 ## Testing
 
-Tests use **Vitest** with Testing Library. Run the test suite with:
+Tests use **Vitest** with Testing Library and jsdom. Run the suite with:
 
 ```bash
 pnpm test
 ```
 
-The repository is configured to succeed when no tests are present, allowing
-the test command to remain part of the workflow.
+Coverage is scoped to a hand-picked list of files with thresholds (80%
+lines, statements, and functions; 70% branches):
+
+```bash
+pnpm test:coverage
+```
+
+Tests live next to what they cover in `__tests__` folders — route tests in
+`src/__tests__`, component tests in `src/components/__tests__`, and library
+tests in `src/lib/__tests__`.
 
 ---
 
@@ -407,13 +537,16 @@ Start the production server:
 pnpm start
 ```
 
-The application uses **Nitro** for its production server output.
+The application uses **Nitro** for its production server output. The
+production image also ships the standalone API server and a one-shot
+migration runner as separate build targets — see
+[docs/deployment/docker.md](docs/deployment/docker.md).
 
 ---
 
 ## Docker
 
-### Development
+### Development with Docker
 
 Run the development environment with Docker:
 
@@ -422,33 +555,51 @@ docker compose -f compose.yaml -f compose.dev.yaml up
 ```
 
 The development Compose configuration mounts the source tree and runs the
-complete development environment (Vite app + ElysiaJS API server) with hot
-reload. The container listens on port `6001` and is exposed on host port
-`1112`:
+complete development environment (Vite app + ElysiaJS API server in the
+same container) with hot reload. Vite is pinned to container port `6001`
+and the API to `3002`, published on host ports `1112` and `3002` by
+default:
 
 ```text
 host :1112 → container :6001 (Vite dev server)
+host :3002 → container :3002 (API server)
 ```
 
-### Production
+`migrate` and the standalone `api` service are put behind a Compose profile
+in this file, so migrations stay a manual `pnpm db:migrate`.
+
+### Production with Docker
 
 Run the production environment with Docker:
 
 ```bash
-docker compose -f compose.yaml -f compose.prod.yaml up -d
+docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 ```
 
-The production Compose configuration builds and runs the production image
-with the Nitro server. The container listens on port `6001` and is exposed
-on host port `1112`:
+`db` starts first, the one-shot `migrate` service applies pending
+migrations and exits, and `web` only starts after it succeeds, so a deploy
+never serves new code against an old schema. `api` starts independently.
+
+This stack publishes **no host ports**: under Dokploy, Traefik routes
+straight to the container network. To reach it from the host, add the
+opt-in port file:
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml \
+  -f compose.host-ports.yaml up -d
+```
 
 ```text
-host :1112 → container :6001 (Nitro server)
+host :1112 → container :3000 (Nitro server)
+host :1113 → container :3002 (API server)
 ```
 
-> The host port defaults to `1112` to avoid conflicts with other services
-> (for example, Dokploy commonly occupies host port `3000`). Override it
-> with the `WEB_PORT` environment variable if needed.
+> The host ports default to `1112`/`1113` to avoid conflicts with other
+> services on a shared host. Override them with `WEB_PORT` and
+> `API_HOST_PORT`.
+
+For a self-contained local stack that also includes Garage for object
+storage, use `docker-compose.yml` instead.
 
 ---
 
@@ -460,8 +611,12 @@ Production deployment follows this workflow:
 main → prod → automatic production deployment
 ```
 
-Changes merged from `main` into `prod` are automatically deployed to
-production.
+Changes merged from `main` into `prod` are automatically deployed. The
+`deploy` workflow builds the web, API, and migration images, pushes them to
+`ghcr.io` tagged with the `package.json` version and the commit SHA, and
+fails unless the `VITE_API_URL` and `VITE_SITE_URL` repository variables are
+set. See [docs/deployment/dokploy.md](docs/deployment/dokploy.md) for the
+Dokploy setup.
 
 ---
 

@@ -1,17 +1,38 @@
 # Projects and Files
 
 Mods, modpacks, plugins, resource packs, shaders, and servers are
-**projects**. Every type except servers has **versions**, and each
+**projects**. All six types are fully implemented: each has a browse page,
+a detail page, a creator form, and search filters. Every type except
+servers has **versions**, and each
 version has one or more uploaded **files**. Servers are listings with
 join details instead. Metadata lives in Postgres,
 files live in [object storage](../storage/object-storage.md), and
 published projects are [searchable](../search/postgres.md) straight
 from Postgres.
 
+## Pages
+
+Each type has a browse page and a detail page:
+
+| Type           | Browse            | Detail                  |
+| -------------- | ----------------- | ----------------------- |
+| `mod`          | `/mods`           | `/mods/$slug`           |
+| `modpack`      | `/modpacks`       | `/modpacks/$slug`       |
+| `plugin`       | `/plugins`        | `/plugins/$slug`        |
+| `resourcepack` | `/resource-packs` | `/resource-packs/$slug` |
+| `shader`       | `/shaders`        | `/shaders/$slug`        |
+| `server`       | `/servers`        | `/servers/$slug`        |
+
+All six browse pages render the same `ProjectBrowser` component with a
+different type, so filters, sorting, pagination, the SSE live banner, and
+the empty/error states behave identically everywhere. The category list
+lives in one place, `src/lib/categories.ts`, and drives the navbar menu,
+the navbar overflow menu, the footer, and the home page's explore grid, so
+a category can never be advertised in one place and missing in another.
+
 ## Data model
 
-Tables are defined in `src/db/schema.ts` (migration
-`drizzle/0005_add_projects.sql`):
+Tables are defined in `src/db/schema.ts`:
 
 * `projects`: `slug` (unique, used in URLs), `type` (`mod`, `modpack`,
   `plugin`, `resourcepack`, `shader`, or `server`), `status` (`draft`,
@@ -22,11 +43,16 @@ Tables are defined in `src/db/schema.ts` (migration
   platforms, changelog, and a download counter.
 * `project_files`: filename, size, SHA-1, SHA-512, storage key, and
   whether it is the version's primary file.
-* `project_servers` (migration `drizzle/0010_add_project_servers.sql`):
+* `project_servers` (migration `drizzle/0015_add_project_servers.sql`):
   one row per server project with its address, optional port (empty means
   25565), and supported game versions.
 * `project_server_links`: mods, modpacks, shaders, and resource packs a
-  server links to, in any mix, each marked required or recommended.
+  server links to, in any mix, each marked required or recommended. A
+  server links to at most `MAX_SERVER_LINKS` (20) projects.
+* `projects.is_protected`: set by an admin, keeps a project out of its
+  owner's account deletion.
+* `projects.pending_deletion`: hides a project immediately while its
+  deletion is still reversible.
 
 Shared constants and validation schemas (categories, loaders, slug rules,
 URL paths per type) are in `src/lib/projects.ts`.
@@ -52,26 +78,49 @@ Mojang ships a version and commit the result. Uploaders pick versions in
 a searchable field: typing a line such as `1.20` offers to add all of its
 releases at once, and snapshots stay hidden until "Show snapshots" is on.
 
+## The creator dashboard
+
+`/dashboard` is a guard plus an outlet; everything real lives in its
+children:
+
+| Route                                 | What it does                    |
+| ------------------------------------- | ------------------------------- |
+| `/dashboard/projects`                 | The creator's projects          |
+| `/dashboard/projects/new`             | Create a project                |
+| `/dashboard/projects/$projectId?tab=` | `details`, `versions`, `danger` |
+
+`/dashboard` redirects anyone whose `usernameConfirmed` is `false` to
+`/welcome` first, so a Google or GitHub account picks its username before
+it can create anything.
+
 ## Who can do what
 
-| Action                        | Who                                     |
-| ----------------------------- | --------------------------------------- |
-| View and download published   | Everyone                                |
-| View a draft or a pending one | Owner and admins                        |
-| Create a project              | Signed-in users with a verified email   |
-| Edit, add versions, submit    | Owner (verified) and admins             |
-| Approve or send back          | Admins                                  |
-| Withdraw or unpublish         | Owner (verified) and admins             |
-| Delete a version or project   | Owner (verified) and admins             |
-| Remove a project (moderation) | Admins                                  |
+| Action                        | Who                                   |
+| ----------------------------- | ------------------------------------- |
+| View and download published   | Everyone                              |
+| View a draft or a pending one | Owner and admins                      |
+| Create a project              | Signed-in users with a verified email |
+| Edit, add versions, submit    | Owner (verified) and admins           |
+| Approve or send back          | Admins                                |
+| Withdraw or unpublish         | Owner (verified) and admins           |
+| Delete a version or project   | Owner (verified) and admins           |
+| Mark a project as large       | Admins                                |
+| Remove a project (moderation) | Admins                                |
 
 Checks live in `src/lib/project-access.ts` and run on the server for
 every mutation. Server functions are protected from cross-site requests
-by the CSRF middleware in `src/start.ts`.
+by the CSRF middleware in `src/start.ts`, and the upload route additionally
+rejects a cross-origin `Origin` header rather than relying on the session
+cookie alone.
+
+An account can hold exactly one role, `user` or `admin`
+(`src/lib/permissions.ts`); admin additionally has implicit access
+everywhere.
 
 Password sign-ups cannot verify their email yet, because the app does not
 send email. Until it does, only Google and GitHub accounts (verified by
-the provider) and admins can upload.
+the provider) and admins can upload. The dashboard shows a
+`VerificationNotice` and hides the "New project" action for everyone else.
 
 ## Creating and publishing
 
@@ -91,7 +140,7 @@ public; only an admin can.
    * **Approve** (`approveProject`) moves it to `published` and notifies
      the creator.
    * **Send back** (`rejectProject`) moves it to `draft` with a required
-     reason, which the creator sees and can act on.
+     reason (max 2000 characters), which the creator sees and can act on.
 
 Two more transitions exist for the owner alone, neither of which is
 moderated because neither makes anything public:
@@ -102,6 +151,13 @@ moderated because neither makes anything public:
 
 Deleting the last file-bearing version of a published project moves it
 back to draft, so a published project always has something to download.
+The current status drives the available transitions, and the panel on the
+project's manage page shows only the ones that apply.
+
+A creator sees the outcome through the notification bell in the navbar,
+which lists `project-approved` and `project-rejected` notifications. These
+are the only two kinds
+(`USER_NOTIFICATION_TYPES` in `src/lib/notifications.ts`).
 
 ### Why `pending` is a status and not a flag
 
@@ -195,19 +251,46 @@ when nothing is linked. The Servers page filters on it. Because it is
 computed at query time, unpublishing a linked mod changes the server's
 requirement right away.
 
+A server's public page shows the join address with a copy button, the
+linked content split into required and recommended, and the client
+requirement derived from those links.
+
 ## Search
 
 Search reads these tables directly, so there is no index to sync after a
 publish, edit, upload, or delete. See [Search](../search/postgres.md).
 
+## Discovery
+
+The home page loads from Postgres too, and all of it is refetched in the
+background rather than on every render:
+
+* **Trending** — the most active published projects, recomputed at most
+  once a minute on the server and polled every 60 seconds
+  (`TRENDING_REFRESH_MS` in `src/lib/trending.functions.ts`).
+* **Explore** — the six category tiles from `src/lib/categories.ts`.
+* **News** — the latest published blog posts, polled every five minutes
+  (`POSTS_REFRESH_MS`).
+
 ## Demo data
 
-`pnpm db:seed` creates demo projects of every type owned by the first
-admin. Each gets one version with a small generated archive; demo servers
-get join details, and two of them link to demo content.
+`pnpm db:seed` runs both seeders against the first admin in the database:
+
+* `pnpm db:seed:projects` — demo projects of every type, each with one
+  version and a small generated archive uploaded to storage. Demo servers
+  get join details, and two of them link to demo content, one required and
+  one with three optional links.
+* `pnpm db:seed:posts` — published demo blog posts, so the blog and the
+  home page news section are not empty. Re-running leaves existing posts
+  alone.
+
+`pnpm db:seed:admin` promotes an existing account to `admin`, which is
+required first: both seeders attach their content to the first admin.
 
 ## Related
 
 * [Object Storage](../storage/object-storage.md)
 * [Search](../search/postgres.md)
+* [Accounts](../authentication/accounts.md)
+* [Architecture Overview](../architecture/overview.md)
 * [API Server](../architecture/api.md)

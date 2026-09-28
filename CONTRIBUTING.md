@@ -34,15 +34,24 @@ pull request process.
 3. Create a `.env.local` file. See [README.md](README.md) for the required
    variables.
 
-4. Start the development servers (web app + ElysiaJS API server):
+4. Apply the database migrations:
 
    ```bash
-   pnpm dev:all
+   pnpm db:migrate
+   ```
+
+5. Start the development servers (web app + ElysiaJS API server):
+
+   ```bash
+   pnpm dev
    ```
 
 The web app runs on `http://localhost:3000` and the API server on
 `http://localhost:3002`. See [docs/development/setup.md](docs/development/setup.md)
-for the full setup guide.
+for the full setup guide, including object storage and demo data.
+
+Optionally, `just infra` starts PostgreSQL and Garage together, and
+`pnpm db:seed` fills the database with demo projects and blog posts.
 
 ## Branch Strategy
 
@@ -76,13 +85,14 @@ feature branch → main → prod → production deployment
 
 ## Code Quality
 
-Before opening a pull request, run:
+Before opening a pull request, run the same checks CI runs:
 
 ```bash
 pnpm check
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm check:bundle --no-build
 pnpm lint:md
 ```
 
@@ -94,7 +104,12 @@ pnpm fix
 
 The project uses **Ultracite** (on Oxlint + Oxfmt) for code quality and
 **markdownlint** for documentation. A Husky pre-commit hook runs
-`ultracite fix` automatically.
+`ultracite fix` automatically and re-stages your files, so expect
+reformatting at commit time.
+
+`pnpm check:bundle` enforces a 700 kB raw / 250 kB gzipped budget on the
+main chunk, so a large new dependency fails CI rather than shipping
+silently.
 
 ## Accessibility
 
@@ -113,12 +128,17 @@ UI code:
 
 * Markdown files are validated with `markdownlint-cli2` using the GitHub
   ruleset (`pnpm lint:md`).
-* Only two rules are disabled: `MD033` (inline HTML) and `MD041`
-  (first-line heading). Do not disable additional rules to make
-  documentation pass — fix the documentation instead.
+* Only `MD041` (first-line heading) is disabled on top of the GitHub
+  ruleset, which already relaxes a few GitHub-specific rules. Do not
+  disable additional rules to make documentation pass — fix the
+  documentation instead.
+* Lines are capped at 80 characters and tables must stay aligned within
+  the file, so keep table cells short.
 * `.opencode/` and `.tmp/` are excluded from Markdown validation.
+* `pnpm lint:md:fix` fixes most issues automatically.
 * Update documentation when your change affects behavior, configuration,
-  or commands.
+  or commands. The guides live in [`docs/`](docs/README.md); the index
+  there is the entry point.
 
 ## Commit Conventions
 

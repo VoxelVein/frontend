@@ -10,14 +10,20 @@ first-class requirement — not an afterthought.
 
 ### Quick Reference
 
-| Command                     | Description                           |
-| --------------------------- | ------------------------------------- |
-| `pnpm check`                | Lint + format check (read-only)       |
-| `pnpm fix`                  | Lint + auto-fix issues                |
-| `pnpm dlx ultracite doctor` | Diagnose setup / configuration issues |
-| `pnpm typecheck`            | TypeScript type checking              |
-| `pnpm test`                 | Run Vitest suite                      |
-| `pnpm lint:md`              | Run markdownlint on Markdown files    |
+| Command                     | Description                             |
+| --------------------------- | --------------------------------------- |
+| `pnpm check`                | Lint + format check (read-only)         |
+| `pnpm fix`                  | Lint + auto-fix issues                  |
+| `pnpm dlx ultracite doctor` | Diagnose setup / configuration issues   |
+| `pnpm typecheck`            | TypeScript type checking                |
+| `pnpm test`                 | Run Vitest suite                        |
+| `pnpm check:bundle`         | Check the main chunk against its budget |
+| `pnpm lint:md`              | Run markdownlint on Markdown files      |
+
+CI runs `check`, `typecheck`, `test`, `build`, and
+`check:bundle --no-build` on every push and pull request, plus
+`lint:md` in the docs workflow. Run the same set before asking for a
+review.
 
 A **Husky pre-commit hook** runs `ultracite fix` automatically before every
 commit. It formats the working tree and re-stages your staged files, so
@@ -452,3 +458,4 @@ Oxlint (`**/.opencode/**` is in `ignorePatterns`).
 | `/context` | Context system manager (harvest, extract, organize) |
 | `/analyze-patterns` | Analyze codebase for patterns |
 | `/worktrees` | Git worktree management |
+| `/prompt-enhancer` | Improve the prompt for a coding task |

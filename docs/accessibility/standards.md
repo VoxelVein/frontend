@@ -73,11 +73,29 @@ it is a regression.
 
 ## Motion
 
-* All animations must respect `prefers-reduced-motion: reduce`.
+* All animations must respect `prefers-reduced-motion: reduce`. Use
+  `usePrefersReducedMotion()` from
+  `@/hooks/use-prefers-reduced-motion` rather than reading
+  `matchMedia` directly, so the check stays SSR-safe, and add
+  `motion-reduce:` utilities to CSS transitions.
 * Keep animations under 400ms for UI interactions.
 * Use `transform` and `opacity` for animations — never animate
   `width`, `height`, `top`, or `left`.
+* Use `EASE_OUT_CSS` from `src/lib/ease.ts` for scroll reveals and page
+  transitions, not ad-hoc keyframes.
 * Do not create flashing content (no more than 3 flashes per second).
+
+## Loading and empty states
+
+* Every data-driven route has a skeleton `pendingComponent` that matches
+  the shape of the content, so a slow query does not collapse the layout.
+  Use `Skeleton` from `src/components/ui/skeleton.tsx`.
+* Every list has an `EmptyState` with an icon, a title, a description
+  that says what would fill it, and an action where one exists.
+* Failures use `ErrorState` with a retry, or `role="alert"` when the
+  error must interrupt.
+* Anything that updates in place should be inside an `aria-busy`
+  container so assistive technology knows the region is in flux.
 
 ## Testing
 

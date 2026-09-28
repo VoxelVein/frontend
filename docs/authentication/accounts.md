@@ -6,12 +6,29 @@ live in `src/lib/usernames.ts` (shared with the forms) and
 are in `src/lib/account.functions.ts` and
 `src/lib/admin-accounts.functions.ts`.
 
+## Settings tabs
+
+`/settings?tab=` selects one of four tabs, all driven by the URL so they
+can be linked to:
+
+| Tab        | Contents                                                |
+| ---------- | ------------------------------------------------------- |
+| `profile`  | Display name, Markdown bio, username                    |
+| `security` | Sign-in methods (password, Google, GitHub) and passkeys |
+| `sessions` | Active sessions, revoke one or all others               |
+| `danger`   | Password change and the account-deletion wizard         |
+
+`?tab=passkeys` is a legacy alias that resolves to `security`, and
+`?confirm=delete` resumes the deletion wizard after a re-authentication
+round trip through the passkey or OAuth flow.
+
 ## Usernames
 
 Every account has a username. It is shown on projects and can be used
 to sign in instead of the email address.
 
-* **Email sign-up** — the user picks it on the sign-up form.
+* **Email sign-up** — the user picks it on the sign-up form. The
+  sign-up page is at `/signup`.
 * **Google or GitHub sign-up** — a free username is generated from the
   GitHub login, the email address, or the name, and
   `usernameConfirmed` is false. The user is sent to `/welcome` to keep
@@ -23,7 +40,7 @@ Rules:
 * 3–30 characters: letters, numbers, `_`, and `.`. Stored in lowercase;
   the typed capitalisation is kept as `displayUsername`.
 * Reserved names (route names, `admin`, `voxelvein`, and similar) cannot
-  be taken. The list is in `src/lib/usernames.ts`.
+  be taken. The list of 33 is in `src/lib/usernames.ts`.
 * After a change in **Settings → Profile** the username is locked for
   14 days.
 * The old username stays reserved for its previous owner for 14 days
@@ -31,17 +48,30 @@ Rules:
   take it. Changing only the capitalisation is free.
 * Better Auth's `updateUser` rejects `username` and `displayUsername`,
   so the cooldown cannot be bypassed.
+* `/welcome` accepts only a `redirect` that starts with a single `/`, so
+  a crafted link cannot bounce a new account off-site after it confirms
+  its username (`src/lib/safe-redirect.ts`).
+
+The sign-in field accepts an email address **or** a username. Because
+Better Auth exposes those as separate calls, the login page branches on
+the shape of the input client-side
+(`src/routes/login.tsx`).
 
 ## Sign-in methods
 
-**Settings → Security** lists the password, Google, and GitHub, and
-links to passkeys.
+**Settings → Security** lists the password, Google, and GitHub, and shows
+passkeys directly below. Which providers appear is decided at runtime:
+a provider is listed only when its credentials are set
+(`src/components/settings/sign-in-providers.ts`).
 
 * Link Google or GitHub to a signed-in account. The linked account's
   email may differ from the VoxelVein email.
 * Accounts without a password (created through Google or GitHub) can set
   one.
 * The last remaining sign-in method cannot be removed.
+
+A user with a generated username can also set one for the first time from
+**Settings → Profile**, which is the same card `/welcome` uses.
 
 ## Account deletion
 
@@ -57,10 +87,10 @@ links to passkeys.
 
 What happens next depends on the account's history:
 
-| Account                          | Result                                  |
-| -------------------------------- | --------------------------------------- |
-| Never owned a project            | Deleted immediately                     |
-| Owns or once owned a project     | Scheduled; purged after 14 days         |
+| Account                      | Result                          |
+| ---------------------------- | ------------------------------- |
+| Never owned a project        | Deleted immediately             |
+| Owns or once owned a project | Scheduled; purged after 14 days |
 
 A scheduled account is banned (`banReason = "pending-deletion"`) and
 signed out everywhere. Projects chosen for deletion are hidden at once.
@@ -72,10 +102,19 @@ account from **Admin → Deletions**, which unbans it and brings the
 hidden projects back. Unbanning from the Users tab does not cancel the
 deletion.
 
+The wizard keeps its state in `sessionStorage` under
+`voxelvein:pending-account-deletion` so a page reload mid-flow does not
+lose the user's place, and it moves focus to each new step heading.
+
 The `accounts:purge` Nitro task runs hourly (configured in
-`vite.config.ts`). It permanently deletes accounts past the grace
-period, including the chosen projects, their stored files, and search
-entries, and clears expired username reservations.
+`vite.config.ts`, task file `src/tasks/purge-accounts.ts`). It
+permanently deletes accounts past the grace period, including the chosen
+projects, their stored files, and search entries, and clears expired
+username reservations.
+
+Related docs: [Admin Panel](../content/admin-panel.md) for the Deletions
+tab, [Projects and Files](../content/projects.md) for what a project
+deletion does.
 
 ## Bios and public profiles
 
@@ -130,12 +169,22 @@ to a page that 404s.
 
 ## Large projects
 
-Admins mark a project as large on its page. Large projects are never
-deleted with their owner's account, and owners cannot choose to delete
-them that way.
+Admins mark a project as large on its page (`projects.is_protected`,
+labelled "Mark as large project"). Large projects are never deleted with
+their owner's account, and owners cannot choose to delete them that way.
+
+## Roles
+
+There are exactly two roles, `user` and `admin`, defined in
+`src/lib/permissions.ts` alongside Better Auth's access-control
+statements. `admin` additionally has implicit access to every project
+operation. Adding a third role means changing that file and the schema
+check that reads it; see [Admin Panel](../content/admin-panel.md).
 
 ## Related
 
 * [Sessions](sessions.md)
 * [Passkeys](passkeys.md)
+* [Cloudflare Turnstile](turnstile.md)
+* [Admin Panel](../content/admin-panel.md)
 * [Projects](../content/projects.md)

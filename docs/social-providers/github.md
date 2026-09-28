@@ -29,54 +29,59 @@ GITHUB_CLIENT_SECRET=your-client-secret
 
 ## 3. Configure the server
 
-Add the provider to `src/lib/auth.ts`. Like Google, the provider is
-only registered when both credentials are present:
+The provider is already wired in `src/lib/auth.ts` and is registered only
+when both credentials are present:
 
 ```ts
-const githubProvider =
-  env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
-    ? {
-        github: {
-          clientId: env.GITHUB_CLIENT_ID,
-          clientSecret: env.GITHUB_CLIENT_SECRET,
-        },
-      }
-    : {};
-
-export const auth = betterAuth({
-  // ...
-  socialProviders: {
-    ...googleProvider,
-    ...githubProvider,
-  },
-  // ...
-});
+if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
+  Object.assign(socialProviders, {
+    github: {
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+      // Seeds the generated username (see `databaseHooks` below).
+      mapProfileToUser: (profile: { login?: string }) => ({
+        username: profile.login,
+      }),
+    },
+  });
+}
 ```
 
-Add `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` to `env.config.ts`
-and `.env.example` as optional server variables, matching the Google
-pattern.
+`GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` are optional server
+variables in `env.config.ts` and `.env.example`, and
+`VITE_GITHUB_CLIENT_ID` is derived from `GITHUB_CLIENT_ID`.
+
+`mapProfileToUser` puts the GitHub login in as the username hint. The
+`databaseHooks.user.create.before` hook then picks the first free name
+from that hint, the email local part, and the display name, so a taken or
+invalid login falls back instead of failing the sign-up.
 
 ## 4. Sign in from the client
 
-Create a button component that mirrors
-`src/components/google-sign-in-button.tsx` and call:
+`src/components/github-sign-in-button.tsx` mirrors the Google button and
+calls:
 
 ```ts
 await authClient.signIn.social({
   provider: "github",
   callbackURL: "/",
+  newUserCallbackURL: "/welcome",
 });
 ```
 
-New users are registered automatically on first sign-in.
+New users are registered automatically on first sign-in and land on
+`/welcome` to confirm their generated username. Like the Google button, it
+renders nothing when `VITE_GITHUB_CLIENT_ID` is unset.
+
+Linking an existing account to GitHub happens in **Settings → Security**,
+not at sign-in. See [Accounts](../authentication/accounts.md).
 
 ## 5. Verify
 
 1. Start the dev server with `pnpm dev`.
 2. Open `http://localhost:3000/login`.
 3. Click the GitHub button and complete the flow.
-4. You should land on `/` signed in.
+4. You should land on `/` signed in, or on `/welcome` for a new account.
 
 ## Troubleshooting
 
@@ -85,8 +90,12 @@ New users are registered automatically on first sign-in.
 * **Provider not shown** — confirm both `GITHUB_CLIENT_ID` and
   `GITHUB_CLIENT_SECRET` are set in `.env.local` and restart the dev
   server.
+* **Name already taken** — the hook falls back to the email local part
+  and then the display name, adding a numeric suffix if needed. Land on
+  `/welcome` to pick something else.
 
 ## Related
 
 * [Google Social Provider](google.md)
+* [Accounts](../authentication/accounts.md)
 * [Sessions](../authentication/sessions.md)

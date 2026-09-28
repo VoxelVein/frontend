@@ -22,6 +22,7 @@ VITE_SITE_URL=https://voxelvein.vomlabs.com
 VITE_API_URL=https://api.voxelvein.vomlabs.com
 BETTER_AUTH_URL=https://voxelvein.vomlabs.com
 CORS_ORIGIN=https://voxelvein.vomlabs.com
+TRUST_PROXY=true
 
 # Secrets
 BETTER_AUTH_SECRET=   # openssl rand -hex 32
@@ -40,13 +41,18 @@ STORAGE_FORCE_PATH_STYLE=false
 STORAGE_BUCKET=
 STORAGE_ACCESS_KEY_ID=
 STORAGE_SECRET_ACCESS_KEY=
+STORAGE_QUOTA_BYTES=   # optional, e.g. 9500000000 stays under R2's free tier
 ```
+
+`TRUST_PROXY=true` is correct here because Traefik fronts the stack and
+appends to `X-Forwarded-For`. With `NODE_ENV=production` the API refuses
+to start unless it is explicitly `true` or `false`.
 
 Optional: `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` and
 `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` (callback URL
 `<VITE_SITE_URL>/api/auth/callback/<google|github>`),
-`STORAGE_PUBLIC_URL`, `STORAGE_QUOTA_BYTES`, and `DATABASE_URL` to use
-an external database instead of the bundled one. The full list is in
+`STORAGE_PUBLIC_URL`, and `DATABASE_URL` to use an external database
+instead of the bundled one. The full list is in
 [Docker](docker.md#environment-variables).
 
 `VITE_*` values are baked in at build time. Changing one needs a
@@ -66,7 +72,8 @@ The API needs its own public domain because browsers call it directly.
 ## 4. Deploy
 
 Click **Deploy**. `db` starts first, `migrate` applies the database
-migrations and exits, then `web` starts. `api` starts independently.
+migrations and exits, then `web` starts. `api` starts independently. No
+host ports are published, so nothing to open on the host.
 
 Search needs no separate step: `migrate` creates the extension and
 indexes, and search works as soon as there is something to find. See
@@ -82,5 +89,10 @@ indexes, and search works as soon as there is something to find. See
   psql -U voxelvein -c "UPDATE users SET role = 'admin' WHERE email = 'you@example.com'"
   ```
 
+  Locally, `pnpm db:seed:admin you@example.com` does the same thing.
+
+* To populate the site with demo content, run `pnpm db:seed` against the
+  deployed database. It attaches content to the first admin and uploads
+  small archives to your R2 bucket, so it needs the `STORAGE_*` variables.
 * The GitHub `prod` deploy workflow needs the `VITE_API_URL` and
   `VITE_SITE_URL` repository variables.

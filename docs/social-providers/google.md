@@ -70,11 +70,19 @@ Better Auth client:
 await authClient.signIn.social({
   provider: "google",
   callbackURL: "/",
+  newUserCallbackURL: "/welcome",
 });
 ```
 
 The user is redirected to Google, then back to the callback URL with a
 valid session. New users are registered automatically on first sign-in.
+A new account gets a generated username and `usernameConfirmed: false`,
+which is why it lands on `/welcome` to choose one before the dashboard
+lets it through.
+
+The button returns `null` when `VITE_GOOGLE_CLIENT_ID` is unset, so
+nothing dead is rendered. `env.config.ts` derives that value from
+`GOOGLE_CLIENT_ID`, so setting the server variable is enough.
 
 ## 5. Verify
 
@@ -90,10 +98,13 @@ valid session. New users are registered automatically on first sign-in.
 * **Provider not shown** — confirm both `GOOGLE_CLIENT_ID` and
   `GOOGLE_CLIENT_SECRET` are set in `.env.local` and restart the dev
   server.
+* **Landed on `/welcome` instead of `/`** — expected for a brand-new
+  account; that is the generated-username step.
 * **Production** — use the production origin in the redirect URI, for
   example `https://example.com/api/auth/callback/google`.
 
 ## Related
 
 * [GitHub Social Provider](github.md)
+* [Accounts](../authentication/accounts.md)
 * [Sessions](../authentication/sessions.md)

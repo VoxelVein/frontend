@@ -2,7 +2,8 @@
 
 VoxelVein uses Tailwind CSS v4 with OKLCH semantic tokens. Themes are
 sourced from [tweakcn.com](https://tweakcn.com) and applied with the
-shadcn CLI.
+shadcn CLI. Light and dark mode are driven by `@lonik/themer` and
+`<ThemeProvider>` in `src/routes/__root.tsx`.
 
 ## Apply a theme
 
@@ -55,6 +56,20 @@ pnpm add @fontsource/{font-name}
 @import "@fontsource/{font-name}";
 ```
 
+Inter is already installed as `@fontsource-variable/inter`.
+
+## The theme toggle
+
+`src/components/motion/theme-toggle.tsx` is a view-transition theme
+switch, not a class swap. It injects one `<style>` tag with four
+variants — `rectangle`, `circle`, `blinds`, and `pixel` — and the navbar
+uses `pixel`. The `pixel` variant drives `src/components/motion/pixel-reveal.ts`,
+which masks `::view-transition-new(root)` frame by frame from
+`requestAnimationFrame`.
+
+Every motion path checks `prefers-reduced-motion` and skips the animation
+entirely when it is set, so a theme change becomes an instant repaint.
+
 ## Verify
 
 After applying a theme:
@@ -63,6 +78,8 @@ After applying a theme:
 2. Test components in both light and dark themes.
 3. Check contrast at all breakpoints — a theme that passes in light
    mode may fail in dark mode.
+4. Check the theme toggle still animates, and that it does not animate
+   with `prefers-reduced-motion: reduce`.
 
 ## Related
 
