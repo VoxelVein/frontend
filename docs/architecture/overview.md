@@ -40,6 +40,7 @@ src/
   db/               Drizzle client and schema
   hooks/            Reduced motion, username availability, post search
   lib/              Auth, projects, search, storage, server functions
+    classes.ts      Class strings shared across unrelated components
   routes/           TanStack Start file-based routes
     api/            HTTP handlers: auth, upload, download
   tasks/            Nitro scheduled tasks
@@ -78,8 +79,13 @@ Signed-in pages, with the tab in the URL:
 | `/dashboard/projects` | Creator dashboard |
 | `/admin?tab=`         | Admin panel       |
 
-Every browse, detail, and blog route has a skeleton `pendingComponent`,
-and long lists (admin users and sessions) are virtualized.
+Every route whose loader hits the database has a skeleton
+`pendingComponent`: the home page, all six browse pages, all six detail
+pages, the blog, a single post, an author profile, and both dashboard
+project routes. The legal and auth routes load synchronously and need
+none. `/settings` and `/admin` render their panels immediately and
+skeleton inside each tab instead, so the tab list and its labels are never
+replaced. Long lists (admin users and sessions) are virtualized.
 
 ## Request flow
 

@@ -3,6 +3,7 @@ import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { fallback, object, optional, parse, string } from "valibot";
 
+import { FormError } from "@/components/form-error";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { UsernameField } from "@/components/username-field";
@@ -72,14 +73,7 @@ const WelcomePage = () => {
           days.
         </p>
 
-        {formError ? (
-          <div
-            role="alert"
-            className="border-destructive/30 bg-destructive/10 text-destructive mt-6 rounded-lg border px-3 py-2.5 text-sm"
-          >
-            {formError}
-          </div>
-        ) : null}
+        {formError ? <FormError>{formError}</FormError> : null}
 
         <form
           onSubmit={(event) => {

@@ -3,6 +3,7 @@ import { Markdown } from "@tanstack/markdown/react";
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { MICRO_LABEL_CLASS } from "@/lib/classes";
 import type { Post } from "@/lib/posts";
 import { getPost } from "@/lib/posts.functions";
 
@@ -52,9 +53,7 @@ const BlogPostPage = () => {
 
       <article className="mt-4">
         <header>
-          <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            {formatDate(post.createdAt)}
-          </p>
+          <p className={MICRO_LABEL_CLASS}>{formatDate(post.createdAt)}</p>
           <h1 className="text-foreground mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
             {post.title}
           </h1>

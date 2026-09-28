@@ -87,13 +87,21 @@ it is a regression.
 
 ## Loading and empty states
 
-* Every data-driven route has a skeleton `pendingComponent` that matches
-  the shape of the content, so a slow query does not collapse the layout.
-  Use `Skeleton` from `src/components/ui/skeleton.tsx`.
+* Every route whose loader hits the database has a skeleton
+  `pendingComponent` that matches the shape of the content, so a slow
+  query does not collapse the layout. Use `Skeleton` from
+  `src/components/ui/skeleton.tsx`, and mark the container
+  `aria-busy="true"`.
+* Skeleton what is actually loading, not the whole page. The home page
+  keeps its hero and category grid — neither needs data — and stubs only
+  the trending and news sections.
 * Every list has an `EmptyState` with an icon, a title, a description
-  that says what would fill it, and an action where one exists.
-* Failures use `ErrorState` with a retry, or `role="alert"` when the
-  error must interrupt.
+  that says what would fill it, and an action where one exists. Use
+  `variant="inline"` inside a card, panel, or list region, where the
+  default's margins and heading size would dominate.
+* Failures use `ErrorState` with a retry, or `FormError` for a
+  form-level failure above the fields. Both are live regions, so an
+  error inserted after a failed submit is announced.
 * Anything that updates in place should be inside an `aria-busy`
   container so assistive technology knows the region is in flux.
 

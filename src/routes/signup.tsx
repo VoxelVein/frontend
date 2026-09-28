@@ -8,6 +8,7 @@ import {
 import { useRef, useState } from "react";
 import { check, minLength, nonEmpty, pipe, regex, string } from "valibot";
 
+import { FormError } from "@/components/form-error";
 import { FormField } from "@/components/form-field";
 import { GitHubSignInButton } from "@/components/github-sign-in-button";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
@@ -99,14 +100,7 @@ const SignupPage = () => {
           Join VoxelVein to publish and discover Minecraft content.
         </p>
 
-        {formError ? (
-          <div
-            role="alert"
-            className="border-destructive/30 bg-destructive/10 text-destructive mt-6 rounded-lg border px-3 py-2.5 text-sm"
-          >
-            {formError}
-          </div>
-        ) : null}
+        {formError ? <FormError>{formError}</FormError> : null}
 
         <div className="mt-6">
           <GoogleSignInButton />

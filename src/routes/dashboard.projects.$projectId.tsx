@@ -1,4 +1,4 @@
-import { IconTrash } from "@tabler/icons-react";
+import { IconTrash, IconVersions } from "@tabler/icons-react";
 import {
   createFileRoute,
   Link,
@@ -16,9 +16,11 @@ import { ProjectForm } from "@/components/dashboard/project-form";
 import { PublishPanel } from "@/components/dashboard/publish-panel";
 import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
@@ -61,7 +63,12 @@ const VersionList = ({
 
   if (versions.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">No versions uploaded yet.</p>
+      <EmptyState
+        description="Upload one with the form above. A project needs at least one version before it can be submitted for review."
+        icon={<IconVersions size={24} aria-hidden="true" />}
+        title="No versions uploaded yet"
+        variant="inline"
+      />
     );
   }
 
@@ -332,6 +339,20 @@ const ManageProjectPage = () => {
   );
 };
 
+/** The manage page while `getEditableProject` is in flight. */
+const ManageProjectSkeleton = () => (
+  <div
+    aria-busy="true"
+    className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
+  >
+    <Skeleton className="h-11 w-32" />
+    <Skeleton className="mt-4 h-9 w-64" />
+    <Skeleton className="mt-3 h-5 w-80 max-w-full" />
+    <Skeleton className="mt-8 h-32 w-full rounded-xl" />
+    <Skeleton className="mt-8 h-64 w-full rounded-xl" />
+  </div>
+);
+
 const ProjectUnavailable = ({ error }: ErrorComponentProps) => (
   <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
     <PageHeader
@@ -350,6 +371,7 @@ const ProjectUnavailable = ({ error }: ErrorComponentProps) => (
 );
 
 export const Route = createFileRoute("/dashboard/projects/$projectId")({
+  pendingComponent: ManageProjectSkeleton,
   validateSearch: (search: Record<string, string | undefined>) =>
     parse(searchSchema, search),
   loader: ({ params }) =>

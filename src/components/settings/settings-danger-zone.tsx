@@ -47,6 +47,7 @@ import {
 } from "@/lib/account.functions";
 import type { AccountDeletionContext } from "@/lib/account.functions";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 interface SettingsDangerZoneProps {
   onSignOut: () => void;
@@ -1175,10 +1176,10 @@ const PasswordSection = ({ hasPassword }: PasswordSectionProps) => {
         <CardContent>
           <a
             href="/settings?tab=security"
-            className={buttonVariants({
-              className: "mt-2 min-h-11 sm:px-6",
-              variant: "outline",
-            })}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "mt-2 min-h-11 sm:px-6"
+            )}
           >
             Go to Security
           </a>

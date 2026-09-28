@@ -3,7 +3,7 @@
 Current work items for the VoxelVein frontend. See [ROADMAP.md](ROADMAP.md)
 for the longer-term plan.
 
-## In Progress
+## Before Production
 
 * [ ] Legal pages — real operator name and address. `/legal` still
       renders `Unknown` for both, which is a § 5 DDG compliance gap. The
@@ -38,8 +38,6 @@ for the longer-term plan.
 ## Quality
 
 * [ ] Route-level tests for `/admin`, `/settings`, and `/dashboard`
-* [ ] Loading skeletons and empty states across any remaining page
-* [ ] Use `cn` more across the application
 * [ ] `admin.tsx` fetches badge counts client-side in a `useEffect` while
       every other route uses a loader
 * [ ] `settings.tsx` `resolveTab` has a subtle three-way interaction
@@ -74,3 +72,7 @@ for the longer-term plan.
 * [x] README, ROADMAP, TODO, and `docs/` brought up to date
 * [x] Personal Gmail replaced with `admin@vomlabs.com` on the legal pages
 * [x] Dashboard and verification copy no longer narrows to two types
+* [x] Loading skeletons for the home page and both dashboard project routes
+* [x] `EmptyState` for the two bare version-list placeholders
+* [x] `cn` pass: `FormError`, `RowIcon`, `MICRO_LABEL_CLASS`, and the
+      `buttonVariants({ className })` call
