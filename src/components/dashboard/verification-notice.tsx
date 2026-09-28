@@ -19,7 +19,7 @@ export const VerificationNotice = () => (
         Verify your email to publish
       </h2>
       <p className="text-muted-foreground mt-1 text-sm">
-        Only accounts with a verified email address can upload mods and plugins.
+        Only accounts with a verified email address can upload projects.
         Accounts created with Google or GitHub are verified automatically.
       </p>
     </div>

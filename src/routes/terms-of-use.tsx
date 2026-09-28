@@ -64,8 +64,7 @@ const TermsOfUsePage = () => (
         heading: "Contact",
         body: (
           <p>
-            Questions about these Terms of Use can be sent to
-            mateo.sauer161013@gmail.com.
+            Questions about these Terms of Use can be sent to admin@vomlabs.com.
           </p>
         ),
       },

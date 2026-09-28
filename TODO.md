@@ -5,12 +5,10 @@ for the longer-term plan.
 
 ## In Progress
 
-* [ ] Legal pages — real operator name, address, and a single consistent
-      contact address. `/legal` still renders `Unknown`; `privacy.tsx` and
-      `terms-of-use.tsx` name a personal Gmail while `legal.tsx` names
-      VOMLabs.
+* [ ] Legal pages — real operator name and address. `/legal` still
+      renders `Unknown` for both, which is a § 5 DDG compliance gap. The
+      contact address is now `admin@vomlabs.com` everywhere.
 * [ ] Legal review by a qualified professional before production
-* [ ] Update README, docs, ROADMAP, and TODO (this pass)
 
 ## Content
 
@@ -25,9 +23,6 @@ for the longer-term plan.
 
 * [ ] `Hero` advertises "Datapacks" in its rotating text, but there is no
       `datapack` project type, route, or category
-* [ ] `dashboard.projects.index.tsx` says "the mods and plugins you
-      publish" — the platform supports six types
-* [ ] `VerificationNotice` has the same two-type narrowing
 * [ ] `project-browser-loader.ts` error copy still says "the search
       service" and suggests `pnpm dev:all`; search is in Postgres
 * [ ] `/blog/$slug` returns a soft 404 (HTTP 200) while `/u/$username`
@@ -77,3 +72,5 @@ for the longer-term plan.
 * [x] Dev commands: `pnpm dev` / `dev:all` / `dev:web`
 * [x] Repo-wide Node 22 → 24 consistency
 * [x] README, ROADMAP, TODO, and `docs/` brought up to date
+* [x] Personal Gmail replaced with `admin@vomlabs.com` on the legal pages
+* [x] Dashboard and verification copy no longer narrows to two types

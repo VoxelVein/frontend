@@ -193,7 +193,11 @@ export const UserNotifications = () => {
           <Button
             type="button"
             variant="ghost"
-            className="relative min-h-11 px-2"
+            size="icon-lg"
+            // Square, and the same 44px as the theme toggle beside it. Without
+            // an explicit size the button is content-width, so a taller touch
+            // target would leave the bell visibly taller than it is wide.
+            className="relative size-11"
             {...props}
           />
         )}

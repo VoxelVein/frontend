@@ -47,7 +47,7 @@ const MyProjectsPage = () => {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <PageHeader
           title="My projects"
-          description="Create and manage the mods and plugins you publish."
+          description="Create and manage the projects you publish."
         />
         {canUpload ? <NewProjectLink /> : null}
       </div>
@@ -58,7 +58,7 @@ const MyProjectsPage = () => {
         <EmptyState
           icon={<IconPackage size={24} aria-hidden="true" />}
           title="No projects yet"
-          description="Create your first mod or plugin to share it with the community."
+          description="Create your first project to share it with the community."
         />
       ) : (
         <ul className="mt-8 grid gap-3">
