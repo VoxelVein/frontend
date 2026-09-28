@@ -1,14 +1,22 @@
 # Object Storage
 
 Uploaded files — mods, modpacks, plugins, resource packs, and shaders —
-live in S3-compatible object storage. Local development uses
-[Garage](https://garagehq.deuxfleurs.fr/), which runs in
-`docker-compose.yml`. Production uses
-[Cloudflare R2](https://developers.cloudflare.com/r2/). R2 has no egress
-fees, which matters because downloads make up most of the traffic.
+live in S3-compatible object storage. The app only uses the S3 API
+(`@aws-sdk/client-s3`), so switching providers only means changing
+environment variables.
 
-The app only uses the S3 API (`@aws-sdk/client-s3`), so switching
-providers only means changing environment variables.
+| Where       | Provider                               |
+| ----------- | -------------------------------------- |
+| Production  | [Cloudflare R2](cloudflare-r2.md)      |
+| Development | [RustFS](rustfs.md), or Garage (below) |
+
+R2 is the production store because it has no egress fees, and downloads
+are most of this platform's traffic.
+
+Garage is still wired into `docker-compose.yml` and `just infra`, so it
+remains the zero-setup local default. See
+[Local setup with Garage](#local-setup-with-garage) at the bottom of this
+page.
 
 ## How it works
 
@@ -36,7 +44,7 @@ cache header, so a CDN can cache them indefinitely.
 | `STORAGE_BUCKET`            | Bucket name                            |
 | `STORAGE_ACCESS_KEY_ID`     | Access key ID                          |
 | `STORAGE_SECRET_ACCESS_KEY` | Secret access key                      |
-| `STORAGE_FORCE_PATH_STYLE`  | `true` for Garage, `false` for R2      |
+| `STORAGE_FORCE_PATH_STYLE`  | `true` for Garage and RustFS           |
 | `STORAGE_PUBLIC_URL`        | Optional public download domain        |
 | `STORAGE_MAX_FILE_BYTES`    | Optional upload limit (default 100 MB) |
 | `STORAGE_QUOTA_BYTES`       | Optional limit on total stored bytes   |
@@ -49,7 +57,8 @@ route answers `503`; browse, search, and download links for projects that
 have no files all keep working.
 
 `STORAGE_FORCE_PATH_STYLE` defaults to `false`, which is right for R2.
-Garage needs `true`, and `.env.example` sets it that way.
+Garage and RustFS need `true`, because both serve path-style addressing
+(`/<bucket>/<key>`) while the AWS SDK defaults to virtual-host style.
 
 ## Storage quota
 
@@ -104,30 +113,13 @@ It is safe to run more than once.
 Garage's S3 API listens on `127.0.0.1:3900`. Without
 `STORAGE_PUBLIC_URL`, downloads redirect to presigned Garage URLs.
 
-## Production setup with Cloudflare R2
-
-1. Create an R2 bucket in the Cloudflare dashboard.
-2. Connect a custom domain to the bucket (for example
-   `cdn.voxelvein.example`). Use a separate domain from the app, so
-   uploaded files never share the app's origin or cookies.
-3. Create an R2 API token with **Object Read & Write** on that bucket
-   only.
-4. Set the variables:
-
-   ```bash
-   STORAGE_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
-   STORAGE_REGION=auto
-   STORAGE_BUCKET=<bucket>
-   STORAGE_ACCESS_KEY_ID=<token access key id>
-   STORAGE_SECRET_ACCESS_KEY=<token secret>
-   STORAGE_FORCE_PATH_STYLE=false
-   STORAGE_PUBLIC_URL=https://cdn.voxelvein.example
-   ```
-
-The Garage variables are not used in production.
+To use RustFS instead — it has a web console, so the bucket and key are
+created in a browser rather than by a shell script — see
+[RustFS](rustfs.md).
 
 ## Related
 
+* [RustFS](rustfs.md) — local development provider with a web console
+* [Cloudflare R2](cloudflare-r2.md) — the production provider
 * [Projects and Files](../content/projects.md)
 * [Admin Panel](../content/admin-panel.md)
-* [Search](../search/postgres.md)

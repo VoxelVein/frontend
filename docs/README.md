@@ -49,8 +49,11 @@ frontend. Each guide lives in its own directory under `docs/`.
 * [Blog](content/blog.md) — posts, admin post management, and post search
 * [Admin Panel](content/admin-panel.md) — users, sessions, storage,
   notifications, account deletions, and the review queue
-* [Object Storage](storage/object-storage.md) — Garage for development,
-  Cloudflare R2 for production
+* [Object Storage](storage/object-storage.md) — how the app uses S3
+  storage, and the quota rules
+* [RustFS](storage/rustfs.md) — local development storage, set up through
+  its web console
+* [Cloudflare R2](storage/cloudflare-r2.md) — the production provider
 
 ## Search
 
