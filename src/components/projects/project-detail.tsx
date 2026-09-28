@@ -7,17 +7,20 @@ import {
   IconPencil,
   IconShieldCheck,
   IconTag,
+  IconVersions,
   IconWorld,
 } from "@tabler/icons-react";
 import { Markdown } from "@tanstack/markdown/react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { EmptyState } from "@/components/empty-state";
 import { ProjectLink } from "@/components/projects/project-link";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
+import { MICRO_LABEL_CLASS } from "@/lib/classes";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import {
@@ -82,9 +85,12 @@ export const ProjectDetailSkeleton = () => (
 const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
   if (versions.length === 0) {
     return (
-      <p className="text-muted-foreground mt-3 text-sm">
-        No versions have been uploaded yet.
-      </p>
+      <EmptyState
+        description="Nothing is downloadable on this page yet. Published projects always have at least one version, so this is a transient state."
+        icon={<IconVersions size={24} aria-hidden="true" />}
+        title="No versions have been uploaded yet"
+        variant="inline"
+      />
     );
   }
 
@@ -247,9 +253,7 @@ const ServerJoin = ({ server }: { server: ProjectServerView | null }) => {
     <div className="mt-3 grid gap-4">
       <div className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
         <div className="min-w-0">
-          <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            Server address
-          </p>
+          <p className={MICRO_LABEL_CLASS}>Server address</p>
           <p className="text-foreground mt-1 font-mono text-lg break-all select-all">
             {address}
           </p>

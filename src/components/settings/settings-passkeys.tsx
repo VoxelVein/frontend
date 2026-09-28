@@ -9,6 +9,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { EmptyState } from "@/components/empty-state";
+import { RowIcon } from "@/components/row-icon";
 import { AlertDescription, Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -191,12 +192,9 @@ const SettingsPasskeys = () => {
                     key={passkey.id}
                     className="border-border bg-muted/40 flex items-center gap-3 rounded-lg border p-3"
                   >
-                    <span
-                      aria-hidden="true"
-                      className="border-border bg-background text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border"
-                    >
+                    <RowIcon>
                       <DeviceIcon size={18} stroke={1.8} />
-                    </span>
+                    </RowIcon>
 
                     <div className="min-w-0 flex-1">
                       <p className="text-foreground truncate text-sm font-medium">

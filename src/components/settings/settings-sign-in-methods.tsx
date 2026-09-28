@@ -6,6 +6,7 @@ import type { ComponentType, ReactNode } from "react";
 import { check, minLength, nonEmpty, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
+import { RowIcon } from "@/components/row-icon";
 import {
   ACCOUNT_DELETION_CONTEXT_QUERY_KEY,
   getConfiguredSocialProviders,
@@ -179,12 +180,9 @@ interface MethodRowProps {
 const MethodRow = ({ icon: Icon, label, status, children }: MethodRowProps) => (
   <li className="border-border bg-muted/40 grid gap-3 rounded-lg border p-3">
     <div className="flex flex-wrap items-center gap-3">
-      <span
-        aria-hidden="true"
-        className="border-border bg-background text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border"
-      >
+      <RowIcon>
         <Icon aria-hidden size={18} />
-      </span>
+      </RowIcon>
       <div className="min-w-0 flex-1">
         <p className="text-foreground text-sm font-medium">{label}</p>
         <p className="text-muted-foreground text-xs">{status}</p>

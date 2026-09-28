@@ -349,6 +349,12 @@ complement the a11y section above.
 
 * Prefer shadcn/Base UI primitives (`Button`, `Dialog`, `Drawer`,
   `FormField`) over hand-rolled equivalents
+* Reuse the shared pieces before writing a new one: `EmptyState`,
+  `ErrorState`, `FormError`, `PageHeader`, `Skeleton`, and `RowIcon` for
+  the icon tile at the leading edge of a settings or admin list row
+* Compose class strings with `cn`. When the same string is repeated
+  across unrelated files, move it to `src/lib/classes.ts` and compose it
+  with `cn` at each call site rather than editing it inline
 * Cards: `rounded-xl border bg-card` with `p-6` padding; hover states use
   `hover:bg-muted/50` or border emphasis
 * Buttons: `default` for primary actions, `outline` for secondary, `ghost`

@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
+import { MICRO_LABEL_CLASS } from "@/lib/classes";
+
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
 });
@@ -60,7 +62,7 @@ const PostCard = ({ headingLevel = 2, post }: PostCardProps) => {
       </Link>
 
       {isoDate === null ? null : (
-        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+        <p className={MICRO_LABEL_CLASS}>
           <time dateTime={isoDate}>
             {dateFormatter.format(new Date(isoDate))}
           </time>

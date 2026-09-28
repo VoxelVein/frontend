@@ -10,12 +10,29 @@ import { VerificationNotice } from "@/components/dashboard/verification-notice";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCount, formatDate } from "@/lib/format";
 import { hasVersions, PROJECT_TYPE_LABELS } from "@/lib/projects";
 import { listMyProjects } from "@/lib/projects.functions";
 import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/";
+
+/** The project list while `listMyProjects` is in flight. */
+const MyProjectsSkeleton = () => (
+  <div
+    aria-busy="true"
+    className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
+  >
+    <Skeleton className="h-9 w-40" />
+    <Skeleton className="mt-3 h-5 w-72 max-w-full" />
+    <div className="mt-8 grid gap-3">
+      {Array.from({ length: 4 }, (_, index) => (
+        <Skeleton key={index} className="h-20 w-full rounded-xl" />
+      ))}
+    </div>
+  </div>
+);
 
 const formatVersionCount = (count: number): string =>
   `${formatCount(count)} ${count === 1 ? "version" : "versions"}`;
@@ -95,6 +112,7 @@ const MyProjectsPage = () => {
 };
 
 export const Route = createFileRoute("/dashboard/projects/")({
+  pendingComponent: MyProjectsSkeleton,
   loader: () => listMyProjects(),
   head: () => ({ meta: [{ title: "My projects — VoxelVein" }] }),
   component: MyProjectsPage,
