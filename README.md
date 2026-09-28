@@ -424,8 +424,9 @@ operator's name and address, and no route is named `/impressum`:
 * `/disclaimer` — Disclaimer
 
 All six share the renderer in
-[`src/components/legal/legal-page.tsx`](src/components/legal/legal-page.tsx).
-The cookie consent banner is implemented in
+[`src/components/legal/legal-page.tsx`](src/components/legal/legal-page.tsx)
+and name `admin@vomlabs.com` as the contact address. The cookie consent
+banner is implemented in
 [`src/components/cookie-banner.tsx`](src/components/cookie-banner.tsx).
 
 ---

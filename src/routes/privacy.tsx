@@ -83,7 +83,7 @@ const PrivacyPage = () => (
             Depending on your jurisdiction (including the GDPR in the EU/EEA),
             you may have the right to access, rectify, erase, restrict, or port
             your personal data, and to object to processing. To exercise these
-            rights, contact mateo.sauer161013@gmail.com.
+            rights, contact admin@vomlabs.com.
           </p>
         ),
       },
