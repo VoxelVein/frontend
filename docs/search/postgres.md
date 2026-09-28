@@ -3,29 +3,34 @@
 Search runs inside Postgres. There is no search service to run, no key to
 configure, and no index to keep in step with the tables it was built from.
 
-`/mods`, `/plugins`, and the blog all query Postgres directly through server
-functions.
+All six browse pages (`/mods`, `/modpacks`, `/plugins`, `/resource-packs`,
+`/shaders`, `/servers`), the blog, and the admin Posts tab query Postgres
+directly through server functions.
 
 ## How it works
 
 * `src/lib/search/text.ts` — the shared matching and ranking expressions:
-  the weighted `tsvector` for each table, the fuzzy/substring predicate, and
-  the relevance score
+  the weighted `tsvector` for each table, the fuzzy/substring predicates,
+  and the relevance scores
 * `src/lib/search/projects.ts` — `searchProjectsInDatabase`, which filters,
   ranks, sorts, pages, and returns facet counts in one round trip
 * `src/lib/search/posts.ts` — `searchPostsInDatabase` and
   `hasSearchablePosts`
 * `src/lib/project-search.functions.ts` — the `searchProjects` server
   function; validates filters against the same allowlists the UI offers
+* `src/lib/project-search-cache.ts` — the in-process LRU + TTL cache that
+  backs browse pages
+* `src/lib/project-browser-loader.ts` — runs the first, uncached search on
+  the server so the first paint has results
 * `src/lib/posts.functions.ts` — `searchPosts`, `searchPostsAdmin`, and
   `postSearchAvailable`
 * `drizzle/0010_postgres_search.sql` — the extension, the trigram
   threshold, and the five indexes that back the queries
 
-## Two matching strategies
+## Three matching strategies
 
-Each query ORs together three branches, because each finds something the
-others miss.
+Each query ORs together three kinds of match, because each finds something
+the others miss.
 
 **Full text** (`tsvector @@ websearch_to_tsquery`) catches real words,
 including ones buried in a description, tag, or post body that trigrams are
@@ -94,6 +99,11 @@ allowlists for the given type in `src/lib/projects.ts` before they reach
 the query; an unknown value is dropped rather than forwarded. The response
 includes `hits`, `estimatedTotalHits`, and `facetDistribution`.
 
+Page size is 12 and the maximum reachable page is 1000
+(`PAGE_SIZE`, `MAX_PAGE` in `src/lib/search/projects.ts`). The server-side
+cache holds at most 50 distinct query tuples for 60 seconds
+(`DEFAULT_MAX_ENTRIES`, `DEFAULT_TTL_MS`).
+
 `gameVersions` and `loaders` live on `project_versions`, not `projects`, so
 filtering unions them across versions in a CTE. A project with no
 published versions left-joins to no facets at all, which is why those two
@@ -117,7 +127,8 @@ there is no index that starts out empty after a fresh deploy.
 
 An unreadable result set degrades to "no matches" rather than throwing, so a
 schema mismatch shows an empty listing instead of a 500 and an error
-boundary.
+boundary. The browse pages handle a failed first search with an `ErrorState`
+and a retry instead, since a browse page is unusable without results.
 
 ## Local setup
 
@@ -127,6 +138,8 @@ against the same database as everything else.
 ## Related
 
 * [Projects and Files](../content/projects.md)
+* [Blog](../content/blog.md)
+* [Migrations](../database/migrations.md)
 * [Commands](../development/commands.md)
 * [Docker](../deployment/docker.md)
 * [Architecture](../architecture/overview.md)

@@ -9,7 +9,9 @@ automated abuse.
 
 1. `TurnstileWidget` (`src/components/turnstile-widget.tsx`) renders the
    widget on the login and signup forms with the action `login` or
-   `signup`, matching the site's light or dark theme.
+   `signup`, matching the site's light or dark theme. It renders nothing
+   when `VITE_TURNSTILE_SITE_KEY` is unset, and exposes a `reset()` ref
+   handle so the forms can clear the single-use token after a failure.
 2. The form sends the widget's token to Better Auth in the
    `cf-turnstile-response` request header.
 3. A Better Auth `before` hook in `src/lib/auth.ts` calls
@@ -19,6 +21,10 @@ automated abuse.
    expected action, and a hostname listed in `TURNSTILE_HOSTNAMES`.
    Anything else is rejected with `403`; a missing configuration or an
    unreachable siteverify fails closed with `503`.
+
+`verifyTurnstileToken` also enforces a 10-second siteverify timeout and a
+2048-character token cap, and treats Cloudflare's `1x`/`2x`/`3x` test
+secrets as valid only outside production.
 
 Tokens are single-use, so the forms reset the widget after every failed
 attempt.
@@ -47,6 +53,9 @@ sign-in and sign-up, and logs an error at startup, when:
 * `TURNSTILE_SECRET` is a Cloudflare test secret
 * `TURNSTILE_HOSTNAMES` contains `localhost` or `127.0.0.1`
 
+The problems are also logged once at startup from `src/lib/auth.ts`, so
+the reason is visible in the server log rather than only as a `503`.
+
 ## Adding Turnstile to another endpoint
 
 1. Add an action name to `TurnstileAction` in `src/lib/turnstile.ts`.
@@ -58,4 +67,5 @@ sign-in and sign-up, and logs an error at startup, when:
 ## Related
 
 * [Email and Password](email-password.md)
+* [Accounts](accounts.md)
 * [Sessions](sessions.md)

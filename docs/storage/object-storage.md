@@ -1,7 +1,8 @@
 # Object Storage
 
-Uploaded mod and plugin files live in S3-compatible object storage. Local
-development uses [Garage](https://garagehq.deuxfleurs.fr/), which runs in
+Uploaded files — mods, modpacks, plugins, resource packs, and shaders —
+live in S3-compatible object storage. Local development uses
+[Garage](https://garagehq.deuxfleurs.fr/), which runs in
 `docker-compose.yml`. Production uses
 [Cloudflare R2](https://developers.cloudflare.com/r2/). R2 has no egress
 fees, which matters because downloads make up most of the traffic.
@@ -28,19 +29,27 @@ cache header, so a CDN can cache them indefinitely.
 
 ## Configuration
 
-| Variable                    | Description                              |
-| --------------------------- | ---------------------------------------- |
-| `STORAGE_ENDPOINT`          | S3 API endpoint                          |
-| `STORAGE_REGION`            | `garage` locally, `auto` for R2          |
-| `STORAGE_BUCKET`            | Bucket name                              |
-| `STORAGE_ACCESS_KEY_ID`     | Access key ID                            |
-| `STORAGE_SECRET_ACCESS_KEY` | Secret access key                        |
-| `STORAGE_FORCE_PATH_STYLE`  | `true` for Garage, `false` for R2        |
-| `STORAGE_PUBLIC_URL`        | Optional public download domain          |
-| `STORAGE_MAX_FILE_BYTES`    | Optional upload limit (default 100 MB)   |
-| `STORAGE_QUOTA_BYTES`       | Optional limit on total stored bytes     |
-| `GARAGE_RPC_SECRET`         | Garage node secret (local only)          |
-| `GARAGE_ADMIN_TOKEN`        | Garage admin API token (local only)      |
+| Variable                    | Description                            |
+| --------------------------- | -------------------------------------- |
+| `STORAGE_ENDPOINT`          | S3 API endpoint                        |
+| `STORAGE_REGION`            | `garage` locally, `auto` for R2        |
+| `STORAGE_BUCKET`            | Bucket name                            |
+| `STORAGE_ACCESS_KEY_ID`     | Access key ID                          |
+| `STORAGE_SECRET_ACCESS_KEY` | Secret access key                      |
+| `STORAGE_FORCE_PATH_STYLE`  | `true` for Garage, `false` for R2      |
+| `STORAGE_PUBLIC_URL`        | Optional public download domain        |
+| `STORAGE_MAX_FILE_BYTES`    | Optional upload limit (default 100 MB) |
+| `STORAGE_QUOTA_BYTES`       | Optional limit on total stored bytes   |
+| `GARAGE_RPC_SECRET`         | Garage node secret (local only)        |
+| `GARAGE_ADMIN_TOKEN`        | Garage admin API token (local only)    |
+
+Storage is optional. Without the endpoint, bucket, and keys,
+`loadStorageConfig()` throws `StorageError(notConfigured)` and the upload
+route answers `503`; browse, search, and download links for projects that
+have no files all keep working.
+
+`STORAGE_FORCE_PATH_STYLE` defaults to `false`, which is right for R2.
+Garage needs `true`, and `.env.example` sets it that way.
 
 ## Storage quota
 
@@ -67,7 +76,7 @@ before the check removes them. Objects created outside the app (or left
 behind if a storage delete fails) are not counted.
 
 Admins see usage and the limit in the **Storage** tab of `/admin`. Above
-90% it shows a warning.
+90% it shows a warning. See [Admin Panel](../content/admin-panel.md).
 
 ## Local setup with Garage
 
@@ -120,4 +129,5 @@ The Garage variables are not used in production.
 ## Related
 
 * [Projects and Files](../content/projects.md)
+* [Admin Panel](../content/admin-panel.md)
 * [Search](../search/postgres.md)

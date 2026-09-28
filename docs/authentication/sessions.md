@@ -25,7 +25,8 @@ session: {
   sensitive actions. Listing sessions, registering a passkey, and
   unlinking a social account require a session younger than one day;
   otherwise the user has to sign in again. Deleting the account is
-  stricter: see [Accounts](accounts.md).
+  stricter — a session created in the last 10 minutes, or a correct
+  password. See [Accounts](accounts.md).
 
 ## How sessions work
 
@@ -35,6 +36,10 @@ session: {
    its expiry is pushed forward.
 3. When the session expires, the user must sign in again.
 
+The cookie handling for TanStack Start comes from the
+`tanstackStartCookies()` plugin, which must remain the last plugin in the
+array. See [Passkeys](passkeys.md).
+
 ## Sign out
 
 Sign out is handled by the Better Auth client:
@@ -43,16 +48,24 @@ Sign out is handled by the Better Auth client:
 await authClient.signOut();
 ```
 
-The session row is deleted and the cookie is cleared.
+The session row is deleted and the cookie is cleared. **Settings** falls
+back to a hard `window.location.assign("/")` when the client-side call
+fails, so a stale client store cannot leave a signed-out-looking page
+behind a live cookie.
 
 ## Session management UI
 
-The **Sessions** tab of the settings page
-(`src/components/settings/settings-sessions.tsx`) lists active
-sessions and lets users revoke them.
+The **Sessions** tab of the settings page (`/settings?tab=sessions`,
+`src/components/settings/settings-sessions.tsx`) lists active sessions
+and lets the user revoke one, or revoke every other session. The current
+session is highlighted so "revoke others" is unambiguous.
+
+Admins can list and revoke any user's sessions from
+**Admin → Sessions**. See [Admin Panel](../content/admin-panel.md).
 
 ## Related
 
 * [Email and Password](email-password.md)
 * [Passkeys](passkeys.md)
+* [Accounts](accounts.md)
 * [Google Social Provider](../social-providers/google.md)

@@ -3,6 +3,11 @@
 Guides for developing, configuring, and deploying the VoxelVein
 frontend. Each guide lives in its own directory under `docs/`.
 
+## Architecture
+
+* [Overview](architecture/overview.md) — how the pieces fit together,
+  including the page and route map
+
 ## Authentication
 
 * [Accounts](authentication/accounts.md) — usernames, sign-in methods,
@@ -39,8 +44,11 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 ## Content
 
-* [Projects and Files](content/projects.md) — every project type, versions,
-  uploads, downloads, and permissions
+* [Projects and Files](content/projects.md) — all six project types,
+  versions, uploads, downloads, permissions, and the review workflow
+* [Blog](content/blog.md) — posts, admin post management, and post search
+* [Admin Panel](content/admin-panel.md) — users, sessions, storage,
+  notifications, account deletions, and the review queue
 * [Object Storage](storage/object-storage.md) — Garage for development,
   Cloudflare R2 for production
 
@@ -63,7 +71,3 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 * [Standards](accessibility/standards.md) — WCAG 2.2 AA requirements for
   components and pages
-
-## Architecture
-
-* [Overview](architecture/overview.md) — how the pieces fit together

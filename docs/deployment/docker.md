@@ -2,30 +2,39 @@
 
 The repository ships one multi-stage `Dockerfile` that produces three
 images: the web app, the Elysia API server, and a one-shot migration
-runner.
+runner. All of them are built on `node:24-alpine`.
 
 ## Build targets
 
-| Target    | Image       | Runs                          |
-| --------- | ----------- | ----------------------------- |
-| `runtime` | web         | Nitro server (default target) |
-| `api`     | API server  | `server/index.ts` via `tsx`   |
-| `migrate` | migrations  | `drizzle-kit migrate`, exits  |
+| Target    | Image      | Runs                          |
+| --------- | ---------- | ----------------------------- |
+| `runtime` | web        | Nitro server (default target) |
+| `api`     | API server | `server/index.ts` via `tsx`   |
+| `migrate` | migrations | `drizzle-kit migrate`, exits  |
+| `deps`    | dev only   | Dependencies, no build        |
 
 The stages are:
 
-1. **deps** — installs dependencies with `pnpm install
+1. **deps** — enables Corepack and installs dependencies with `pnpm install
    --frozen-lockfile`.
 2. **migrate** — `node_modules`, `drizzle.config.ts`, `env.config.ts`,
-   and the `drizzle/` migrations. Applies pending migrations and exits.
-3. **api** — `node_modules`, `server/`, and `src/lib/`. Runs the API
-   on port 3002.
+   `drizzle/`, and `src/db/`. Applies pending migrations and exits. It
+   needs `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` too, because
+   `drizzle.config.ts` imports the validated `env.config.ts`.
+3. **api** — `node_modules`, `server/`, `tsconfig.json`, and the whole of
+   `src/lib/`. Runs the API on port 3002 with a `/api/health` healthcheck.
 4. **build** — runs `pnpm build`, producing the Nitro output in
-   `.output/`. Requires the `VITE_API_URL` build argument.
+   `.output/`. Requires the `VITE_API_URL` and `VITE_SITE_URL` build
+   arguments.
 5. **runtime** — copies only `.output/` and runs the web server on
-   port 3000 (override with `PORT`).
+   port 3000 (override with `PORT`) with a `/` healthcheck.
 
 Every image runs as a non-root user (`nodejs`).
+
+The order is deliberate: `migrate` and `api` come **before** the
+`build` stage that needs `VITE_*` arguments, so a legacy builder that runs
+every stage is never asked for a build argument it does not have, while a
+plain `docker build .` still produces the web image.
 
 ## Build the images
 
@@ -72,27 +81,31 @@ For a self-contained local stack with Postgres and Garage, use
 
 ## Environment variables
 
-| Variable                    | Used by             | Required    |
-| --------------------------- | ------------------- | ----------- |
-| `VITE_API_URL`              | web (build arg)     | Yes         |
-| `VITE_SITE_URL`             | web (build arg)     | Yes         |
-| `BETTER_AUTH_URL`           | web, migrate        | Yes         |
-| `BETTER_AUTH_SECRET`        | web, migrate        | Yes         |
-| `POSTGRES_PASSWORD`         | db                  | Yes         |
-| `WEBHOOK_SECRET`            | api                 | Yes         |
-| `CORS_ORIGIN`               | api                 | Yes         |
-| `VITE_TURNSTILE_SITE_KEY`   | web (build arg)     | For sign-in |
-| `TURNSTILE_SECRET`          | web                 | For sign-in |
-| `TURNSTILE_HOSTNAMES`       | web                 | For sign-in |
-| `STORAGE_*`                 | web                 | For uploads |
-| `GOOGLE_CLIENT_ID`/`SECRET` | web (+ build arg)   | No          |
-| `GITHUB_CLIENT_ID`/`SECRET` | web (+ build arg)   | No          |
-| `TRUST_PROXY`               | web, api            | No          |
-| `DATABASE_URL`              | web, migrate        | No          |
+| Variable                    | Used by       | Required      |
+| --------------------------- | ------------- | ------------- |
+| `VITE_API_URL`              | web (build)   | Yes           |
+| `VITE_SITE_URL`             | web (build)   | Yes           |
+| `BETTER_AUTH_URL`           | web, migrate  | Yes           |
+| `BETTER_AUTH_SECRET`        | web, migrate  | Yes           |
+| `POSTGRES_PASSWORD`         | db            | Yes           |
+| `WEBHOOK_SECRET`            | api           | Yes           |
+| `CORS_ORIGIN`               | api           | Has default   |
+| `VITE_TURNSTILE_SITE_KEY`   | web (build)   | For sign-in   |
+| `TURNSTILE_SECRET`          | web           | For sign-in   |
+| `TURNSTILE_HOSTNAMES`       | web           | For sign-in   |
+| `STORAGE_*`                 | web           | For uploads   |
+| `GOOGLE_CLIENT_ID`/`SECRET` | web (+ build) | No            |
+| `GITHUB_CLIENT_ID`/`SECRET` | web (+ build) | No            |
+| `TRUST_PROXY`               | web, api      | In production |
+| `DATABASE_URL`              | web, migrate  | No            |
+| `TAG`                       | all           | No            |
+| `WEB_PORT`, `API_HOST_PORT` | host ports    | No            |
 
 `VITE_API_URL` is the public API URL, `CORS_ORIGIN` the web app origin(s)
 allowed to call the API, and `TRUST_PROXY` (default `true` in
-`compose.yaml`) is covered below.
+`compose.yaml`) is covered below. `CORS_ORIGIN` defaults to
+`https://voxelvein.vomlabs.com` in `compose.yaml`; set it explicitly for
+any other domain.
 
 Password sign-in and sign-up are rejected unless all three Turnstile
 values are set. In production the secret must not be a Cloudflare
@@ -119,14 +132,20 @@ through unchanged.
   URIs and the WebAuthn relying party ID are derived from it.
 * Use a secrets manager or Docker secrets instead of plain environment
   variables for `BETTER_AUTH_SECRET` and the OAuth secrets.
-* The deploy workflow pushes `ghcr.io/<repo>`, `ghcr.io/<repo>-api`, and
-  `ghcr.io/<repo>-migrate`, each tagged with the `package.json` version
-  and the commit SHA. Set the `VITE_API_URL` repository variable in
-  GitHub; the workflow fails without it.
+* The deploy workflow pushes the web, API, and migration images to
+  `ghcr.io/<repo>`, each tagged with the `package.json` version and the
+  commit SHA — deliberately with no floating `latest`, so a roll-forward
+  is explicit. It fails unless both the `VITE_API_URL` and `VITE_SITE_URL`
+  repository variables are set.
+* Set the image tag with `TAG` when building locally, otherwise Compose
+  uses `latest`.
+* `migrate`, `web`, and `api` all read `.env` next to the compose file,
+  never `.env.local`.
 
 ## Related
 
 * [Deploying with Dokploy](dokploy.md)
 * [Setup](../development/setup.md)
 * [Commands](../development/commands.md)
+* [Object Storage](../storage/object-storage.md)
 * [Migrations](../database/migrations.md)

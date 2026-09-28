@@ -5,7 +5,10 @@ port. It is the single entry point for webhooks and real-time mod events,
 which it streams to the browser over Server-Sent Events (SSE).
 
 Search is not part of this server: the web app queries Postgres for that
-directly. See [Search](../search/postgres.md).
+directly. See [Search](../search/postgres.md). Uploads, downloads, and the
+Better Auth HTTP surface are also not here — they are web-app routes under
+`src/routes/api/`. See
+[Projects and Files](../content/projects.md).
 
 ## Running the server
 
@@ -23,16 +26,19 @@ pnpm dev:all
 
 ## Environment variables
 
-| Variable                     | Description                                 |
-| ---------------------------- | ------------------------------------------- |
-| `API_URL`                    | API server base URL (server-to-server)      |
-| `API_PORT`                   | API server port (default `3002`)            |
-| `WEBHOOK_SECRET`             | HMAC secret for webhooks (required, 32+)    |
-| `VITE_API_URL`               | API base URL used by the browser (SSE)      |
-| `CORS_ORIGIN`                | Comma-separated allowed origins (optional)  |
-| `SSE_MAX_CONNECTIONS`        | Max concurrent SSE streams (default `500`)  |
-| `SSE_MAX_CONNECTIONS_PER_IP` | Max SSE streams per client (default `5`)    |
-| `TRUST_PROXY`                | `true`/`false`; required in production      |
+| Variable                     | Description                                |
+| ---------------------------- | ------------------------------------------ |
+| `API_URL`                    | API server base URL (server-to-server)     |
+| `API_PORT`                   | API server port (default `3002`)           |
+| `WEBHOOK_SECRET`             | HMAC secret for webhooks (required, 32+)   |
+| `VITE_API_URL`               | API base URL used by the browser (SSE)     |
+| `CORS_ORIGIN`                | Comma-separated allowed origins (optional) |
+| `SSE_MAX_CONNECTIONS`        | Max concurrent SSE streams (default `500`) |
+| `SSE_MAX_CONNECTIONS_PER_IP` | Max SSE streams per client (default `5`)   |
+| `TRUST_PROXY`                | `true`/`false`; required in production     |
+
+None of these are validated by `env.config.ts`; the server reads
+`process.env` directly.
 
 The server loads `.env.local` via `server/env.ts` (imported first in every
 env-consuming module) and otherwise reads `process.env`, so it works in CI
@@ -76,6 +82,11 @@ The browser subscribes with `EventSource`:
 const source = new EventSource(`${API_URL}/api/events`);
 source.addEventListener("mod.created", handleEvent);
 ```
+
+In the app this lives in `src/components/projects/project-browser.tsx`,
+which every browse page renders. The URL comes from `VITE_API_URL`, with a
+`http://localhost:3002` fallback **in development only** — a production
+build without `VITE_API_URL` silently loses the live banner.
 
 ### `POST /api/webhooks/mods`
 
@@ -129,7 +140,7 @@ publisher ──POST /api/webhooks/mods──▶ API server ──SSE──▶ b
 1. A publisher (or `pnpm send:webhook`) posts a signed mod event.
 2. The API server verifies the HMAC signature, validates the payload, and
    broadcasts it to every SSE subscriber.
-3. The mods page receives the event and shows a live banner ("New mod
+3. The browse page receives the event and shows a live banner ("New mod
    added", "Mod updated", "Mod removed") with a "Refresh results" button
    that bypasses the search cache.
 
@@ -137,7 +148,7 @@ publisher ──POST /api/webhooks/mods──▶ API server ──SSE──▶ b
 
 ```text
 server/
-├── index.ts              # Elysia entry point (Node adapter, CORS)
+├── index.ts              # Elysia entry point (Node adapter, CORS, headers)
 ├── env.ts                # Loads .env.local before env reads
 ├── lib/
 │   └── events.ts         # Subscriber registry + AsyncQueue for SSE
@@ -147,8 +158,29 @@ server/
     └── webhooks.ts       # POST /api/webhooks/mods
 ```
 
+The API imports `src/lib/client-key.ts` from the web app to resolve the
+client IP, which is why the `api` Docker stage copies the whole of
+`src/lib`.
+
+`server/index.ts` sets a strict `default-src 'none'` CSP, `no-referrer`,
+and `nosniff` on every response. The web app's own CSP is deliberately
+looser, because SSR hydration needs inline scripts — see `src/start.ts`.
+
+## The web app's own HTTP routes
+
+These are TanStack Start routes, not part of this server:
+
+| Method        | Path                                   | Purpose            |
+| ------------- | -------------------------------------- | ------------------ |
+| `GET`, `POST` | `/api/auth/*`                          | Better Auth        |
+| `PUT`         | `/api/projects/:id/versions/:id/files` | Upload a file      |
+| `GET`         | `/api/download/:fileId`                | Count and redirect |
+
+See [Projects and Files](../content/projects.md).
+
 ## Related
 
+* [Projects and Files](../content/projects.md)
 * [Search](../search/postgres.md)
 * [Architecture Overview](overview.md)
 * [Commands](../development/commands.md)
