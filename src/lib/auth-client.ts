@@ -7,13 +7,13 @@ import {
 import { createAuthClient } from "better-auth/react";
 
 import type { auth } from "./auth";
-import { ac, admin, user } from "./permissions";
+import { ac, staffRoles } from "./permissions";
 
 export const authClient = createAuthClient({
   plugins: [
     usernameClient(),
     passkeyClient(),
-    adminClient({ ac, roles: { admin, user } }),
+    adminClient({ ac, roles: staffRoles }),
     inferAdditionalFields<typeof auth>(),
   ],
 });

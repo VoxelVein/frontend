@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCount, formatDate } from "@/lib/format";
 import { hasVersions, PROJECT_TYPE_LABELS } from "@/lib/projects";
 import { listMyProjects } from "@/lib/projects.functions";
+import { hasRole } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/";
@@ -57,7 +58,8 @@ const NewProjectLink = () => (
 const MyProjectsPage = () => {
   const projects = useLoaderData({ from: ROUTE_ID });
   const { session } = useRouteContext({ from: ROUTE_ID });
-  const canUpload = session.user.emailVerified || session.user.role === "admin";
+  const canUpload =
+    session.user.emailVerified || hasRole(session.user.role, "moderator");
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">

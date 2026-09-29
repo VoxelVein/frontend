@@ -8,29 +8,56 @@ import { posts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { postInputSchema, postUpdateSchema, resolvePreview } from "@/lib/posts";
 import type { Post, PostInput, PostSummary } from "@/lib/posts";
+import { hasRole, isAdmin } from "@/lib/roles";
 import { hasSearchablePosts, searchPostsInDatabase } from "@/lib/search/posts";
 import type { PostSearchResult } from "@/lib/search/posts";
 
-const getAdminSessionOrNull = async () => {
+const getStaffSessionOrNull = async () => {
   const headers = getRequestHeaders();
   const session = await auth.api.getSession({ headers });
 
-  if (!session || session.user.role !== "admin") {
+  if (!session || !hasRole(session.user.role, "moderator")) {
     return null;
   }
 
   return session;
 };
 
-const getAdminSession = async () => {
-  const session = await getAdminSessionOrNull();
+/** Any staff member, which is enough to write and read drafts. */
+const getStaffSession = async () => {
+  const session = await getStaffSessionOrNull();
 
   if (!session) {
-    throw new Error("Unauthorized");
+    throw new Error("Only staff can manage blog posts.");
   }
 
   return session;
 };
+
+/** Admins only: publishing a post makes it public. */
+const getAdminSession = async () => {
+  const session = await getStaffSessionOrNull();
+
+  if (!session || !isAdmin(session.user.role)) {
+    throw new Error("Only admins can publish or delete blog posts.");
+  }
+
+  return session;
+};
+
+/**
+ * Whether a staff member may set the published flag.
+ *
+ * A moderator drafts; an admin publishes. The check lives here so both the
+ * create and update paths agree, rather than each trusting a value that came
+ * from the client.
+ */
+const resolvePublished = (
+  requested: boolean,
+  role: string | null | undefined
+): boolean => (isAdmin(role) ? requested : false);
+
+const POST_NOT_FOUND = "Post not found.";
 
 const postSummaryColumns = {
   content: posts.content,
@@ -70,7 +97,7 @@ export const listPosts = createServerFn({ method: "GET" })
     const { includeUnpublished = false } = data;
 
     if (includeUnpublished) {
-      await getAdminSession();
+      await getStaffSession();
     }
 
     const rows = await db
@@ -128,7 +155,7 @@ export const searchPosts = createServerFn({ method: "GET" })
 export const searchPostsAdmin = createServerFn({ method: "GET" })
   .validator((data: { query: string }) => data)
   .handler(async ({ data }): Promise<PostSearchResult> => {
-    await getAdminSession();
+    await getStaffSession();
 
     return searchPostsInDatabase({
       includeUnpublished: true,
@@ -164,7 +191,7 @@ export const getPost = createServerFn({ method: "GET" })
     const [post] = rows;
 
     if (!post.published) {
-      const session = await getAdminSessionOrNull();
+      const session = await getStaffSessionOrNull();
 
       if (!session) {
         return null;
@@ -193,7 +220,7 @@ export const getPostById = createServerFn({ method: "GET" })
 export const createPost = createServerFn({ method: "POST" })
   .validator((data: PostInput) => parse(postInputSchema, data))
   .handler(async ({ data }): Promise<Post> => {
-    const session = await getAdminSession();
+    const session = await getStaffSession();
 
     const [row] = await db
       .insert(posts)
@@ -201,7 +228,8 @@ export const createPost = createServerFn({ method: "POST" })
         authorId: session.user.id,
         content: data.content,
         excerpt: data.excerpt ?? null,
-        published: data.published,
+        // A moderator's post is always a draft, whatever the form sent.
+        published: resolvePublished(data.published, session.user.role),
         slug: data.slug,
         title: data.title,
       })
@@ -210,19 +238,47 @@ export const createPost = createServerFn({ method: "POST" })
     return { ...row, preview: resolvePreview(row) };
   });
 
+/**
+ * The published value a non-admin may write.
+ *
+ * A moderator cannot change the published state at all in either direction:
+ * they may not publish a draft, and they may not unpublish a live post, since
+ * both are publishing decisions. The stored value wins.
+ */
+const staysUnpublished = async (
+  id: string,
+  requested: boolean
+): Promise<boolean> => {
+  const [existing] = await db
+    .select({ published: posts.published })
+    .from(posts)
+    .where(eq(posts.id, id))
+    .limit(1);
+  if (!existing) {
+    throw new Error(POST_NOT_FOUND);
+  }
+  return requested || existing.published;
+};
+
 export const updatePost = createServerFn({ method: "POST" })
   .validator((data: PostInput & { id: string }) =>
     parse(postUpdateSchema, data)
   )
   .handler(async ({ data }): Promise<Post> => {
-    await getAdminSession();
+    const session = await getStaffSession();
+
+    // A moderator editing a draft stays a draft, and cannot unpublish an
+    // already-published post either — that would be a publish decision.
+    const published = isAdmin(session.user.role)
+      ? data.published
+      : await staysUnpublished(data.id, data.published);
 
     const [row] = await db
       .update(posts)
       .set({
         content: data.content,
         excerpt: data.excerpt ?? null,
-        published: data.published,
+        published,
         slug: data.slug,
         title: data.title,
       })
@@ -230,7 +286,7 @@ export const updatePost = createServerFn({ method: "POST" })
       .returning();
 
     if (!row) {
-      throw new Error("Post not found.");
+      throw new Error(POST_NOT_FOUND);
     }
 
     return { ...row, preview: resolvePreview(row) };
@@ -244,7 +300,7 @@ export const deletePost = createServerFn({ method: "POST" })
     const result = await db.delete(posts).where(eq(posts.id, data.id));
 
     if (result.rowCount === 0) {
-      throw new Error("Post not found.");
+      throw new Error(POST_NOT_FOUND);
     }
 
     return { ok: true };

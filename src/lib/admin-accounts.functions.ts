@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
 import { count, desc, eq, isNull } from "drizzle-orm";
 import { object, parse, pipe, string, uuid } from "valibot";
 
@@ -11,16 +10,21 @@ import {
   restoreAccount as restoreAccountInDb,
 } from "@/lib/account-lifecycle";
 import type { PendingDeletion } from "@/lib/account-lifecycle";
-import { auth } from "@/lib/auth";
+import { requireStaff } from "@/lib/role-guards";
 
 const NOTIFICATION_LIMIT = 100;
 
+/**
+ * Restoring a scheduled deletion and reading the shared inbox stay
+ * admin-only: neither is part of moderating content, and a restore reverses a
+ * destructive decision.
+ */
 const requireAdminSession = async () => {
-  const session = await auth.api.getSession({ headers: getRequestHeaders() });
-  if (!session || session.user.role !== "admin") {
+  try {
+    return await requireStaff("admin");
+  } catch {
     throw new AccountError("Only admins can do this.");
   }
-  return session;
 };
 
 const userIdSchema = object({ userId: string() });

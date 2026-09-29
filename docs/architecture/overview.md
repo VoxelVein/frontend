@@ -98,7 +98,12 @@ replaced. Long lists (admin users and sessions) are virtualized.
 3. Better Auth handles sessions, social login, passkeys, and the admin
    API. The server config is in `src/lib/auth.ts`; the client is in
    `src/lib/auth-client.ts`; the HTTP surface is mounted at
-   `/api/auth/*` by `src/routes/api/auth/$.tsx`.
+   `/api/auth/*` by `src/routes/api/auth/$.tsx`. Authorization is the
+   `user` / `moderator` / `admin` ladder in `src/lib/roles.ts` (pure, with
+   no server imports, so client components can use it), with session
+   guards in `src/lib/role-guards.ts` and the plugin's own statements in
+   `src/lib/permissions.ts`. See
+   [Admin Panel](../content/admin-panel.md#roles).
 4. Drizzle reads and writes PostgreSQL through the pool in
    `src/db/index.ts`.
 5. Search queries PostgreSQL directly from a server function. Every

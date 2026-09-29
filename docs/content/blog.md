@@ -61,13 +61,13 @@ Validation and the card-preview machinery live in `src/lib/posts.ts`:
 | `listPosts`           | GET    | Published posts for the index       |
 | `getLatestPosts`      | GET    | Recent posts for the home page news |
 | `searchPosts`         | GET    | Public search over published posts  |
-| `searchPostsAdmin`    | GET    | Same, including drafts (admin only) |
+| `searchPostsAdmin`    | GET    | Same, including drafts (staff only) |
 | `postSearchAvailable` | GET    | Whether there is anything to search |
 | `getPost`             | GET    | One post by slug                    |
 | `getPostById`         | GET    | One post by id, for editing         |
-| `createPost`          | POST   | Create                              |
-| `updatePost`          | POST   | Update                              |
-| `deletePost`          | POST   | Delete                              |
+| `createPost`          | POST   | Create (staff; always a draft)      |
+| `updatePost`          | POST   | Update (staff; cannot publish)      |
+| `deletePost`          | POST   | Delete (admin only)                 |
 
 ## Writing posts
 
@@ -75,6 +75,23 @@ Validation and the card-preview machinery live in `src/lib/posts.ts`:
 Published/Draft badge, a search field, and create, edit, and delete
 actions. `post-form-dialog.tsx` is a TanStack Form dialog with a live
 Markdown preview of the body next to the editor.
+
+### Drafting and publishing
+
+Staff write, but only admins publish. The split is enforced on the server in
+`posts.functions.ts` rather than in the form, so a moderator cannot reach
+the published state by bypassing the UI:
+
+* `createPost` forces `published: false` for a non-admin, whatever the
+  request asked for.
+* `updatePost` gives a non-admin no control over the flag in **either**
+  direction — a moderator may neither publish a draft nor unpublish a live
+  post, since both are publishing decisions. The stored value wins.
+* `deletePost` is admin-only.
+
+The read paths (`listPosts` with `includeUnpublished`, `searchPostsAdmin`,
+`getPostById`) accept moderators, because a moderator has to be able to read
+the drafts they are writing. See [Admin Panel](admin-panel.md#roles).
 
 `use-admin-posts.ts` owns that tab's state. It polls every 15 seconds
 while `document.visibilityState !== "hidden"`, catches up immediately when

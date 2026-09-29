@@ -9,11 +9,13 @@ import { VerificationNotice } from "@/components/dashboard/verification-notice";
 import { PageHeader } from "@/components/page-header";
 import type { ProjectInput } from "@/lib/projects";
 import { createProject } from "@/lib/projects.functions";
+import { hasRole } from "@/lib/roles";
 
 const NewProjectPage = () => {
   const { session } = useRouteContext({ from: "/dashboard/projects/new" });
   const navigate = useNavigate();
-  const canUpload = session.user.emailVerified || session.user.role === "admin";
+  const canUpload =
+    session.user.emailVerified || hasRole(session.user.role, "moderator");
 
   const handleSubmit = async (input: ProjectInput) => {
     const { id } = await createProject({ data: input });

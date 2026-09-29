@@ -78,6 +78,8 @@ for the longer-term plan.
       `buttonVariants({ className })` call
 * [x] Project icons and gallery images in object storage, served through
       `/api/image/$imageId`
+* [x] Role ladder (`user` / `moderator` / `admin`) replacing 21 ad-hoc
+      `role === "admin"` checks and four duplicated guard helpers
 
 ## Known limitations
 

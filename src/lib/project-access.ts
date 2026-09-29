@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { hasRole } from "@/lib/roles";
+import type { MinimumRole } from "@/lib/roles";
 
 export type Session = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -42,22 +44,33 @@ export class ProjectAccessError extends Error {
   }
 }
 
-export const isAdmin = (session: Session): boolean =>
-  session.user.role === "admin";
+/** Whether the session holds at least the given role. */
+export const hasSessionRole = (
+  session: Session,
+  minimum: MinimumRole
+): boolean => hasRole(session.user.role, minimum);
 
-/** Signed-in user allowed to publish content: verified email or admin. */
+export const isAdmin = (session: Session): boolean =>
+  hasSessionRole(session, "admin");
+
+/** Signed-in user allowed to publish content: verified email or staff. */
 export const requireUploader = async (headers: Headers): Promise<Session> => {
   const session = await auth.api.getSession({ headers });
   if (!session) {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.unauthenticated);
   }
-  if (!session.user.emailVerified && !isAdmin(session)) {
+  if (!session.user.emailVerified && !hasSessionRole(session, "moderator")) {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.unverified);
   }
   return session;
 };
 
-/** Loads a project the session may change (owner or admin). */
+/**
+ * Loads a project the session may change.
+ *
+ * The owner may edit their own; staff may edit anyone's, because reviewing a
+ * submission means reaching a project the moderator does not own.
+ */
 export const requireEditableProject = async (
   session: Session,
   projectId: string
@@ -71,7 +84,10 @@ export const requireEditableProject = async (
   if (!project || project.status === "removed") {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.notFound);
   }
-  if (project.ownerId !== session.user.id && !isAdmin(session)) {
+  if (
+    project.ownerId !== session.user.id &&
+    !hasSessionRole(session, "moderator")
+  ) {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
   }
   return project;

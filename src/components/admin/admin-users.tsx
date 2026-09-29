@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
+import { ALL_ROLES, hasRole, isRole, ROLE_LABELS } from "@/lib/roles";
+import type { Role } from "@/lib/roles";
 
 interface AdminUser {
   banned: boolean | null;
@@ -248,14 +250,17 @@ const BanAction = ({
 
 interface AdminUserRowProps {
   isMutating: boolean;
+  /** False for moderators, who may ban but not delete or re-rank accounts. */
+  canManageRoles: boolean;
   user: AdminUser;
   onBan: (user: AdminUser) => void;
   onRemove: (user: AdminUser) => void;
-  onRoleChange: (userId: string, role: "admin" | "user") => void;
+  onRoleChange: (userId: string, role: Role) => void;
   onUnban: (userId: string) => void;
 }
 
 const AdminUserRow = ({
+  canManageRoles,
   isMutating,
   user,
   onBan,
@@ -284,10 +289,10 @@ const AdminUserRow = ({
       <div className="min-w-0 flex-1">
         <p className="text-foreground flex flex-wrap items-center gap-2 text-sm font-medium">
           <span className="truncate">{user.name}</span>
-          {user.role === "admin" ? (
+          {user.role && isRole(user.role) && user.role !== "user" ? (
             <span className="border-border bg-background text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium tracking-wide uppercase">
               <IconShield size={10} stroke={2} />
-              Admin
+              {ROLE_LABELS[user.role]}
             </span>
           ) : null}
           <UserStatusBadge
@@ -301,25 +306,33 @@ const AdminUserRow = ({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <label className="sr-only" htmlFor={`role-${user.id}`}>
-          Role for {user.name}
-        </label>
-        <Select
-          value={user.role ?? "user"}
-          onValueChange={(value) =>
-            // SAFETY: The select only renders "user" and "admin" options, so the value is always one of these two literals.
-            onRoleChange(user.id, value as "admin" | "user")
-          }
-          disabled={isMutating}
-        >
-          <SelectTrigger id={`role-${user.id}`} className="min-h-11 w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="user">User</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-          </SelectContent>
-        </Select>
+        {canManageRoles ? (
+          <>
+            <label className="sr-only" htmlFor={`role-${user.id}`}>
+              Role for {user.name}
+            </label>
+            <Select
+              value={user.role ?? "user"}
+              onValueChange={(value) => {
+                if (value && isRole(value)) {
+                  onRoleChange(user.id, value);
+                }
+              }}
+              disabled={isMutating}
+            >
+              <SelectTrigger id={`role-${user.id}`} className="min-h-11 w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ALL_ROLES.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {ROLE_LABELS[role]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        ) : null}
 
         <BanAction
           isBanned={isBanned}
@@ -330,17 +343,19 @@ const AdminUserRow = ({
           onUnban={onUnban}
         />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="min-h-11 min-w-11"
-          aria-label={`Remove ${user.name}`}
-          disabled={isMutating}
-          onClick={() => onRemove(user)}
-        >
-          <IconTrash size={16} stroke={1.8} />
-        </Button>
+        {canManageRoles ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="min-h-11 min-w-11"
+            aria-label={`Remove ${user.name}`}
+            disabled={isMutating}
+            onClick={() => onRemove(user)}
+          >
+            <IconTrash size={16} stroke={1.8} />
+          </Button>
+        ) : null}
       </div>
     </div>
   );
@@ -350,13 +365,13 @@ interface AdminUsersDialogsProps {
   isMutating: boolean;
   pendingBan: AdminUser | null;
   pendingRemove: AdminUser | null;
-  pendingRole: { role: "admin" | "user"; userId: string } | null;
+  pendingRole: { role: Role; userId: string } | null;
   onBan: (user: AdminUser) => void;
   onCloseBan: () => void;
   onCloseRemove: () => void;
   onCloseRole: () => void;
   onRemove: (user: AdminUser) => void;
-  onRoleChange: (userId: string, role: "admin" | "user") => void;
+  onRoleChange: (userId: string, role: Role) => void;
 }
 
 const AdminUsersDialogs = ({
@@ -440,6 +455,11 @@ const AdminUsersDialogs = ({
 
 // oxlint-disable-next-line react-doctor/no-giant-component -- Splitting AdminUsers further would require major refactoring
 const AdminUsers = () => {
+  // A moderator may ban an account but not delete one or change its role, so
+  // those controls are hidden rather than shown and refused.
+  const { data: session } = authClient.useSession();
+  const canManageRoles = hasRole(session?.user.role, "admin");
+
   const [state, dispatch] = useReducer(usersReducer, {
     error: null,
     errorCount: 0,
@@ -448,7 +468,7 @@ const AdminUsers = () => {
   });
   const [pendingRole, setPendingRole] = useState<{
     userId: string;
-    role: "admin" | "user";
+    role: Role;
   } | null>(null);
   const [pendingBan, setPendingBan] = useState<AdminUser | null>(null);
   const [pendingRemove, setPendingRemove] = useState<AdminUser | null>(null);
@@ -504,7 +524,7 @@ const AdminUsers = () => {
     loadUsers();
   }, [loadUsers]);
 
-  const handleRoleChange = async (userId: string, role: "admin" | "user") => {
+  const handleRoleChange = async (userId: string, role: Role) => {
     setPendingRole(null);
     setIsMutating(true);
 
@@ -634,6 +654,7 @@ const AdminUsers = () => {
               }}
             >
               <AdminUserRow
+                canManageRoles={canManageRoles}
                 isMutating={isMutating}
                 user={users[virtualRow.index]}
                 onBan={setPendingBan}

@@ -28,7 +28,6 @@
 
 * Legal pages (Impressum, Privacy, Cookies, ToS, ToU, Disclaimer,
   Legal Notes) — placeholder content pending review before production
-* Broader RBAC beyond the current `user` / `admin` pair
 
 ## Planned
 
@@ -43,7 +42,11 @@
   absent today rather than pointing at a missing file.
 * A status page and a public changelog page, both of which the footer
   already reserves a "Soon" slot for
-* RBAC: roles beyond `user` and `admin`
+* RBAC beyond the current `user` / `moderator` / `admin` ladder. The roles are
+  strictly ordered, so a role that needs some admin powers but not others —
+  a moderator who may manage sessions but not delete users — cannot be
+  expressed. That is the point to switch to permission checks rather than
+  extend the ladder.
 * Loading skeletons and empty states across any remaining page
 
 ## Future Ideas

@@ -15,6 +15,7 @@ import {
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import {
+  hasSessionRole,
   isAdmin,
   ProjectAccessError,
   PROJECT_ACCESS_ERROR,
@@ -160,9 +161,10 @@ const canSeeUnpublished = (
 ): boolean =>
   session !== null &&
   project.status !== "removed" &&
-  (session.user.id === project.ownerId || isAdmin(session));
+  // Staff see drafts because reviewing a submission requires reading it.
+  (session.user.id === project.ownerId || hasSessionRole(session, "moderator"));
 
-/** Public project page data. Drafts are only visible to owners and admins. */
+/** Public project page data. Drafts are only visible to owners and staff. */
 export const getProject = createServerFn({ method: "GET" })
   .validator((data: { slug: string }) => parse(slugSchema, data))
   .handler(async ({ data }): Promise<ProjectView | null> => {
@@ -173,7 +175,7 @@ export const getProject = createServerFn({ method: "GET" })
     if (project.pendingDeletion) {
       // Its owner is deleting their account; only admins may still look.
       const session = await getSessionOrNull();
-      return session && isAdmin(session) ? project : null;
+      return session && hasSessionRole(session, "admin") ? project : null;
     }
     if (project.status === "published") {
       return project;

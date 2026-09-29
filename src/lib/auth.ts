@@ -17,7 +17,7 @@ import { bioInputSchema } from "@/lib/bio";
 import { isReservedUsername } from "@/lib/usernames";
 
 import env from "../../env.config";
-import { ac, admin as adminRole, user as userRole } from "./permissions";
+import { ac, staffRoles } from "./permissions";
 import {
   getTurnstileConfigProblems,
   parseHostnames,
@@ -270,10 +270,10 @@ export const auth = betterAuth({
       bannedUserMessage:
         "This account is suspended or scheduled for deletion. Contact support if you think this is a mistake.",
       ac,
-      roles: {
-        admin: adminRole,
-        user: userRole,
-      },
+      // A moderator is not an admin: `adminRoles` is deliberately left at its
+      // default so only "admin" passes the plugin's own admin checks. A
+      // moderator's reach comes from their access-control statements.
+      roles: staffRoles,
     }),
 
     passkey({
