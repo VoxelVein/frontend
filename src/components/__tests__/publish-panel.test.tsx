@@ -65,6 +65,8 @@ const project = (overrides: Partial<ProjectView> = {}): ProjectView => ({
   category: "optimization",
   description: "",
   downloads: 0,
+  gallery: [],
+  icon: null,
   id: "11111111-1111-4111-8111-111111111111",
   isProtected: false,
   name: "Sodium",

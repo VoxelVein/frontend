@@ -15,6 +15,8 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
+import { ProjectGallery } from "@/components/projects/project-gallery";
+import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
@@ -479,12 +481,20 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
       )}
 
       <header className="mt-4 flex items-start gap-4 sm:gap-5">
-        <div
-          aria-hidden="true"
-          className="border-border bg-primary/10 text-primary flex size-16 shrink-0 items-center justify-center rounded-2xl border text-2xl font-bold sm:size-20 sm:text-3xl"
-        >
-          {project.name.charAt(0)}
-        </div>
+        <ProjectImage
+          image={project.icon}
+          alt=""
+          priority
+          className="border-border size-16 shrink-0 rounded-2xl border sm:size-20"
+          fallback={
+            <div
+              aria-hidden="true"
+              className="border-border bg-primary/10 text-primary flex size-16 shrink-0 items-center justify-center rounded-2xl border text-2xl font-bold sm:size-20 sm:text-3xl"
+            >
+              {project.name.charAt(0)}
+            </div>
+          }
+        />
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -541,6 +551,8 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
           </div>
         </section>
       ) : null}
+
+      <ProjectGallery images={project.gallery} projectName={project.name} />
 
       <ProjectDownloads project={project} />
 

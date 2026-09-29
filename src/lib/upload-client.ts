@@ -1,3 +1,4 @@
+import type { ProjectImageKind } from "@/db/schema";
 import type { ProjectFileView } from "@/lib/projects";
 import { contentTypeFor } from "@/lib/upload-validation";
 
@@ -18,6 +19,16 @@ interface UploadOptions {
   versionId: string;
 }
 
+export interface UploadedProjectImage {
+  contentType: string;
+  height: number;
+  id: string;
+  kind: ProjectImageKind;
+  size: number;
+  url: string;
+  width: number;
+}
+
 const readError = (request: XMLHttpRequest): string => {
   try {
     // SAFETY: the upload route always answers errors with { error: string }.
@@ -29,6 +40,17 @@ const readError = (request: XMLHttpRequest): string => {
     // Fall through to the generic message below.
   }
   return `The upload failed (${request.status}).`;
+};
+
+/** Same contract as `readError`, for routes that answer with fetch. */
+const readErrorLike = async (response: Response): Promise<string> => {
+  try {
+    // SAFETY: the delete route always answers errors with { error: string }.
+    const body = (await response.json()) as { error?: string };
+    return body.error || `The request failed (${response.status}).`;
+  } catch {
+    return `The request failed (${response.status}).`;
+  }
 };
 
 /**
@@ -68,4 +90,59 @@ export const uploadVersionFile = ({
     );
     request.send(file);
   });
+};
+
+/**
+ * Uploads a project icon or gallery image. Uses XMLHttpRequest for the same
+ * reason as version files: fetch does not report upload progress.
+ */
+export const uploadProjectImage = ({
+  file,
+  kind,
+  onProgress,
+  projectId,
+}: {
+  file: File;
+  kind: ProjectImageKind;
+  onProgress?: (fraction: number) => void;
+  projectId: string;
+}): Promise<UploadedProjectImage> => {
+  const url = `/api/projects/${projectId}/images?kind=${kind}`;
+
+  // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest has no promise API.
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("PUT", url);
+    request.setRequestHeader("content-type", file.type);
+    request.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) {
+        onProgress?.(event.loaded / event.total);
+      }
+    });
+    request.addEventListener("load", () => {
+      if (request.status === 201) {
+        // SAFETY: a 201 from the image route always carries an image record.
+        resolve(JSON.parse(request.responseText) as UploadedProjectImage);
+        return;
+      }
+      reject(new Error(readError(request)));
+    });
+    request.addEventListener("error", () =>
+      reject(new Error("The upload failed. Check your connection."))
+    );
+    request.send(file);
+  });
+};
+
+/** Deletes one of a project's images. */
+export const deleteProjectImage = async (
+  projectId: string,
+  imageId: string
+): Promise<void> => {
+  const response = await fetch(`/api/projects/${projectId}/images/${imageId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorLike(response));
+  }
 };

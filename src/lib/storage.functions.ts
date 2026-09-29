@@ -15,7 +15,12 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
     if (session?.user.role !== "admin") {
       throw new Error("Unauthorized");
     }
-    const { fileCount, usedBytes } = await getUsedBytes();
-    return { fileCount, quotaBytes: loadStorageConfig().quotaBytes, usedBytes };
+    const { fileCount, imageCount, usedBytes } = await getUsedBytes();
+    return {
+      fileCount,
+      imageCount,
+      quotaBytes: loadStorageConfig().quotaBytes,
+      usedBytes,
+    };
   }
 );

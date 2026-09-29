@@ -127,8 +127,11 @@ VoxelVein platform but does not include the full infrastructure stack.
 | **markdownlint**    | Documentation linting                      |
 | **PNPM**            | Package management                         |
 
-> Image optimization is not in place. There are no content images yet
-> (projects use a letter avatar), so Unpic is not installed. See
+> Project icons and gallery images are stored in object storage, but they
+> are **not resized**: originals are kept exactly as uploaded, so a large
+> photo becomes a large icon. Images are served through a caching proxy
+> route rather than a CDN, and Unpic is not installed — it only rewrites
+> third-party CDN URLs, which R2 and Garage are not. See
 > [ROADMAP.md](ROADMAP.md).
 
 ---

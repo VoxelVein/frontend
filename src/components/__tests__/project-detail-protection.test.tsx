@@ -40,6 +40,8 @@ const PROJECT: ProjectView = {
   category: "utility",
   description: "",
   downloads: 10,
+  gallery: [],
+  icon: null,
   id: "0b8f7c1e-4b1a-4c7e-9a55-1c2d3e4f5a6b",
   isProtected: false,
   name: "Big Mod",

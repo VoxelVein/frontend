@@ -24,6 +24,7 @@ import {
 import type { InferOutput } from "valibot";
 
 import { MINECRAFT_VERSION_MANIFEST } from "@/lib/minecraft-version-manifest";
+import type { ProjectImageView } from "@/lib/project-images";
 
 export const PROJECT_TYPES = [
   "mod",
@@ -210,7 +211,11 @@ export interface ProjectDocument {
   category: string;
   description: string;
   downloads: number;
+  /** Project's gallery images, oldest first. */
+  gallery: ProjectImageView[];
   gameVersions: string[];
+  /** The project's icon, or null when it has none. */
+  icon: ProjectImageView | null;
   id: string;
   loaders: string[];
   name: string;
@@ -518,6 +523,10 @@ export interface ProjectView {
   category: string;
   description: string;
   downloads: number;
+  /** Project's gallery images, oldest first. */
+  gallery: ProjectImageView[];
+  /** The project's icon, or null when it has none. */
+  icon: ProjectImageView | null;
   id: string;
   /** Admin-marked large project, kept when its owner deletes their account. */
   isProtected: boolean;

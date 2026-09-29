@@ -12,6 +12,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { optional, parse, picklist, object } from "valibot";
 
+import { ImageManager } from "@/components/dashboard/image-manager";
 import { ProjectForm } from "@/components/dashboard/project-form";
 import { PublishPanel } from "@/components/dashboard/publish-panel";
 import { ServerForm } from "@/components/dashboard/server-form";
@@ -22,8 +23,10 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PROJECT_IMAGE_KIND } from "@/db/schema";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
+import type { ProjectImagesView } from "@/lib/project-images";
 import {
   hasVersions,
   PROJECT_TYPE_LABELS,
@@ -42,7 +45,7 @@ import {
 } from "@/lib/projects.functions";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
-const TABS = ["details", "versions", "danger"] as const;
+const TABS = ["details", "images", "versions", "danger"] as const;
 type Tab = (typeof TABS)[number];
 
 const searchSchema = object({ tab: optional(picklist(TABS)) });
@@ -216,6 +219,13 @@ const ManageProjectPage = () => {
   const navigate = useNavigate({ from: ROUTE_ID });
   const router = useRouter();
 
+  // Image uploads answer with the new record, so the tab updates itself
+  // rather than round-tripping the loader after every file.
+  const [images, setImages] = useState<ProjectImagesView>({
+    gallery: project.gallery,
+    icon: project.icon,
+  });
+
   const reload = () => router.invalidate();
 
   const handleDetails = async (input: ProjectInput) => {
@@ -263,6 +273,7 @@ const ManageProjectPage = () => {
       >
         <TabsList aria-label="Project sections">
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="versions">
             {hasVersions(project.type) ? "Versions" : "Server"}
           </TabsTrigger>
@@ -284,6 +295,27 @@ const ManageProjectPage = () => {
               type: project.type,
             }}
             onSubmit={handleDetails}
+          />
+        </TabsContent>
+
+        <TabsContent value="images" className="grid gap-8 pt-4">
+          <ImageManager
+            kind={PROJECT_IMAGE_KIND.icon}
+            icon={images.icon}
+            projectId={project.id}
+            projectName={project.name}
+            onChange={(next) =>
+              setImages((current) => ({ ...current, ...next }))
+            }
+          />
+          <ImageManager
+            kind={PROJECT_IMAGE_KIND.gallery}
+            gallery={images.gallery}
+            projectId={project.id}
+            projectName={project.name}
+            onChange={(next) =>
+              setImages((current) => ({ ...current, ...next }))
+            }
           />
         </TabsContent>
 

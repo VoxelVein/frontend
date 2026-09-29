@@ -40,9 +40,12 @@ import { Route as ShadersSlugRouteImport } from './routes/shaders.$slug'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiDownloadFileIdRouteImport } from './routes/api/download.$fileId'
+import { Route as ApiImageImageIdRouteImport } from './routes/api/image.$imageId'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard.projects.$projectId'
 import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard.projects.new'
+import { Route as ApiProjectsProjectIdImagesRouteImport } from './routes/api/projects.$projectId.images'
+import { Route as ApiProjectsProjectIdImagesImageIdRouteImport } from './routes/api/projects.$projectId.images.$imageId'
 import { Route as ApiProjectsProjectIdVersionsVersionIdFilesRouteImport } from './routes/api/projects.$projectId.versions.$versionId.files'
 
 const IndexRoute = IndexRouteImport.update({
@@ -200,6 +203,11 @@ const ApiDownloadFileIdRoute = ApiDownloadFileIdRouteImport.update({
   path: '/api/download/$fileId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImageImageIdRoute = ApiImageImageIdRouteImport.update({
+  id: '/api/image/$imageId',
+  path: '/api/image/$imageId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -216,6 +224,18 @@ const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
   path: '/projects/new',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiProjectsProjectIdImagesRoute =
+  ApiProjectsProjectIdImagesRouteImport.update({
+    id: '/api/projects/$projectId/images',
+    path: '/api/projects/$projectId/images',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiProjectsProjectIdImagesImageIdRoute =
+  ApiProjectsProjectIdImagesImageIdRouteImport.update({
+    id: '/$imageId',
+    path: '/$imageId',
+    getParentRoute: () => ApiProjectsProjectIdImagesRoute,
+  } as any)
 const ApiProjectsProjectIdVersionsVersionIdFilesRoute =
   ApiProjectsProjectIdVersionsVersionIdFilesRouteImport.update({
     id: '/api/projects/$projectId/versions/$versionId/files',
@@ -255,9 +275,12 @@ export interface FileRoutesByFullPath {
   '/shaders/': typeof ShadersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
+  '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
+  '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
   '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRoutesByTo {
@@ -291,9 +314,12 @@ export interface FileRoutesByTo {
   '/shaders': typeof ShadersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
+  '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
+  '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
   '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRoutesById {
@@ -329,9 +355,12 @@ export interface FileRoutesById {
   '/shaders/': typeof ShadersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
+  '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
+  '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
   '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRouteTypes {
@@ -368,9 +397,12 @@ export interface FileRouteTypes {
     | '/shaders/'
     | '/api/auth/$'
     | '/api/download/$fileId'
+    | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
     | '/dashboard/projects/'
+    | '/api/projects/$projectId/images'
+    | '/api/projects/$projectId/images/$imageId'
     | '/api/projects/$projectId/versions/$versionId/files'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -404,9 +436,12 @@ export interface FileRouteTypes {
     | '/shaders'
     | '/api/auth/$'
     | '/api/download/$fileId'
+    | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
     | '/dashboard/projects'
+    | '/api/projects/$projectId/images'
+    | '/api/projects/$projectId/images/$imageId'
     | '/api/projects/$projectId/versions/$versionId/files'
   id:
     | '__root__'
@@ -441,9 +476,12 @@ export interface FileRouteTypes {
     | '/shaders/'
     | '/api/auth/$'
     | '/api/download/$fileId'
+    | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
     | '/dashboard/projects/'
+    | '/api/projects/$projectId/images'
+    | '/api/projects/$projectId/images/$imageId'
     | '/api/projects/$projectId/versions/$versionId/files'
   fileRoutesById: FileRoutesById
 }
@@ -477,6 +515,8 @@ export interface RootRouteChildren {
   ShadersIndexRoute: typeof ShadersIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiDownloadFileIdRoute: typeof ApiDownloadFileIdRoute
+  ApiImageImageIdRoute: typeof ApiImageImageIdRoute
+  ApiProjectsProjectIdImagesRoute: typeof ApiProjectsProjectIdImagesRouteWithChildren
   ApiProjectsProjectIdVersionsVersionIdFilesRoute: typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 
@@ -699,6 +739,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDownloadFileIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/image/$imageId': {
+      id: '/api/image/$imageId'
+      path: '/api/image/$imageId'
+      fullPath: '/api/image/$imageId'
+      preLoaderRoute: typeof ApiImageImageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/projects/': {
       id: '/dashboard/projects/'
       path: '/projects'
@@ -719,6 +766,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/projects/new'
       preLoaderRoute: typeof DashboardProjectsNewRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/api/projects/$projectId/images': {
+      id: '/api/projects/$projectId/images'
+      path: '/api/projects/$projectId/images'
+      fullPath: '/api/projects/$projectId/images'
+      preLoaderRoute: typeof ApiProjectsProjectIdImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/projects/$projectId/images/$imageId': {
+      id: '/api/projects/$projectId/images/$imageId'
+      path: '/$imageId'
+      fullPath: '/api/projects/$projectId/images/$imageId'
+      preLoaderRoute: typeof ApiProjectsProjectIdImagesImageIdRouteImport
+      parentRoute: typeof ApiProjectsProjectIdImagesRoute
     }
     '/api/projects/$projectId/versions/$versionId/files': {
       id: '/api/projects/$projectId/versions/$versionId/files'
@@ -758,6 +819,21 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface ApiProjectsProjectIdImagesRouteChildren {
+  ApiProjectsProjectIdImagesImageIdRoute: typeof ApiProjectsProjectIdImagesImageIdRoute
+}
+
+const ApiProjectsProjectIdImagesRouteChildren: ApiProjectsProjectIdImagesRouteChildren =
+  {
+    ApiProjectsProjectIdImagesImageIdRoute:
+      ApiProjectsProjectIdImagesImageIdRoute,
+  }
+
+const ApiProjectsProjectIdImagesRouteWithChildren =
+  ApiProjectsProjectIdImagesRoute._addFileChildren(
+    ApiProjectsProjectIdImagesRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -788,6 +864,8 @@ const rootRouteChildren: RootRouteChildren = {
   ShadersIndexRoute: ShadersIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiDownloadFileIdRoute: ApiDownloadFileIdRoute,
+  ApiImageImageIdRoute: ApiImageImageIdRoute,
+  ApiProjectsProjectIdImagesRoute: ApiProjectsProjectIdImagesRouteWithChildren,
   ApiProjectsProjectIdVersionsVersionIdFilesRoute:
     ApiProjectsProjectIdVersionsVersionIdFilesRoute,
 }

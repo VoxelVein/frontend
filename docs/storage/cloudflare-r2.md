@@ -117,14 +117,28 @@ uploads stop when R2 does, which for a paid account is a surprise bill.
 
 ## CORS
 
-R2 only needs CORS configured for **browser** access. VoxelVein does not
-put object URLs in `<img>` or `fetch`: every upload goes through
-`PUT /api/projects/.../files` and every download through
-`/api/download/<fileId>`, both same-origin, both server-side.
+R2 only needs CORS configured for **browser** access. VoxelVein never
+points the browser at an R2 URL: every upload goes through
+`PUT /api/projects/.../files` or `PUT /api/projects/.../images`, every
+version download through `/api/download/<fileId>`, and every image through
+`/api/image/<imageId>`. All are same-origin and all are server-side.
 
-So **no CORS configuration is needed**. If you add R2 custom domains for
-browser-facing images later — project icons, gallery shots — configure
-CORS then, and only for the bucket in question.
+So **no CORS configuration is needed**, including for project icons and
+gallery images. If you later expose objects directly to the browser,
+configure CORS then, and only for the bucket in question.
+
+## Images
+
+Project icons and gallery images live in the same bucket and follow
+`STORAGE_PUBLIC_URL` for nothing: they are always served through
+`/api/image/$imageId`, which applies the project's published state. That is
+deliberate, because a public bucket URL would expose a draft project's icon.
+
+The trade-off is that image bytes pass through the app rather than straight
+from the CDN, so they count against your Workers or container egress. It is
+acceptable while images are unscaled originals; it gets expensive if you add
+a lot of them. `ROADMAP.md` covers the resizing options, including Cloudflare
+Image Resizing, which would move that cost back to the edge.
 
 ## Verify
 

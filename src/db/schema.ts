@@ -367,6 +367,54 @@ export const projectFiles = pgTable(
   ]
 );
 
+export const PROJECT_IMAGE_KIND = {
+  gallery: "gallery",
+  icon: "icon",
+} as const;
+
+export type ProjectImageKind =
+  (typeof PROJECT_IMAGE_KIND)[keyof typeof PROJECT_IMAGE_KIND];
+
+/**
+ * A project's icon and gallery images, stored in object storage.
+ *
+ * One table for both kinds rather than an icon column plus a gallery table,
+ * so quota accounting and deletion are uniform. A project has at most one
+ * icon, enforced by the partial unique index below.
+ *
+ * Distinct from `project_files`, which holds the downloadable archives a
+ * version ships. Images are never served as downloads and never counted as
+ * project downloads.
+ */
+export const projectImages = pgTable(
+  "project_images",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    // Sniffed from the uploaded bytes, never taken from the request.
+    contentType: text("content_type").notNull(),
+    height: integer("height").notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: text("kind").$type<ProjectImageKind>().notNull(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    size: bigint("size", { mode: "number" }).notNull(),
+    storageKey: text("storage_key").notNull().unique(),
+    width: integer("width").notNull(),
+  },
+  (table) => [
+    // At most one icon per project. Gallery images are unconstrained.
+    uniqueIndex("project_images_projectId_icon_uidx")
+      .on(table.projectId)
+      .where(sql`${table.kind} = 'icon'`),
+    // Listing a project's images, which a leading project_id serves directly.
+    index("project_images_projectId_createdAt_idx").on(
+      table.projectId,
+      table.createdAt
+    ),
+  ]
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   passkeys: many(passkeys),
@@ -415,11 +463,19 @@ export const postsRelations = relations(posts, ({ one }) => ({
 }));
 
 export const projectsRelations = relations(projects, ({ many, one }) => ({
+  images: many(projectImages),
   owner: one(users, {
     fields: [projects.ownerId],
     references: [users.id],
   }),
   versions: many(projectVersions),
+}));
+
+export const projectImagesRelations = relations(projectImages, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectImages.projectId],
+    references: [projects.id],
+  }),
 }));
 
 export const projectVersionsRelations = relations(

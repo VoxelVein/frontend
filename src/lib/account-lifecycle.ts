@@ -13,6 +13,7 @@ import {
   users,
 } from "@/db/schema";
 import { deleteObjects } from "@/lib/storage";
+import { getProjectImageKeys } from "@/lib/storage-quota";
 import {
   getNextUsernameChange,
   getUsernameProblem,
@@ -363,7 +364,7 @@ export const listOwnedProjects = (userId: string): Promise<OwnedProject[]> =>
     .where(eq(projects.ownerId, userId))
     .orderBy(projects.name);
 
-/** Deletes projects with their versions, stored files, and search entries. */
+/** Deletes projects with their versions, files, images, and search entries. */
 const deleteProjectsCompletely = async (projectIds: string[]) => {
   if (projectIds.length === 0) {
     return;
@@ -372,19 +373,29 @@ const deleteProjectsCompletely = async (projectIds: string[]) => {
     .select({ id: projectVersions.id })
     .from(projectVersions)
     .where(inArray(projectVersions.projectId, projectIds));
-  const files = await db
-    .select({ storageKey: projectFiles.storageKey })
-    .from(projectFiles)
-    .where(inArray(projectFiles.versionId, versionIds));
+  const [files, images] = await Promise.all([
+    db
+      .select({ storageKey: projectFiles.storageKey })
+      .from(projectFiles)
+      .where(inArray(projectFiles.versionId, versionIds)),
+    getProjectImageKeys(projectIds),
+  ]);
 
   await db.delete(projects).where(inArray(projects.id, projectIds));
-  if (files.length > 0) {
+  const keys = [
+    ...files.map((file) => file.storageKey),
+    ...images.map((image) => image.storageKey),
+  ];
+  if (keys.length > 0) {
     try {
-      await deleteObjects(files.map((file) => file.storageKey));
+      await deleteObjects(keys);
     } catch (error) {
       // The rows are gone either way; leftover objects only cost storage
       // and must not keep the account from being deleted.
-      console.error("Could not delete stored files of deleted projects", error);
+      console.error(
+        "Could not delete stored objects of deleted projects",
+        error
+      );
     }
   }
 };
