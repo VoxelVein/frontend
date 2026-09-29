@@ -1,17 +1,30 @@
 import { config } from "dotenv";
 import { Pool } from "pg";
 
+import { ALL_ROLES, isRole } from "../src/lib/roles";
+
 config({ path: ".env.local" });
 
-const ADMIN_ROLE = "admin";
+/**
+ * Grants a staff role to an account.
+ *
+ * Usage: `pnpm db:seed:admin <email> [role]`, or set ADMIN_EMAIL and
+ * ADMIN_ROLE in .env.local. The role defaults to "admin" and may be any name
+ * in the role ladder, so this is also how a moderator is created.
+ */
+const email = process.argv[2] ?? process.env.ADMIN_EMAIL;
+const requestedRole = process.argv[3] ?? process.env.ADMIN_ROLE ?? "admin";
 
-// Pass the email as an argument (`pnpm db:seed:admin you@example.com`) or set
-// ADMIN_EMAIL in .env.local.
-const adminEmail = process.argv[2] ?? process.env.ADMIN_EMAIL;
-
-if (!adminEmail) {
+if (!email) {
   console.error(
-    "Usage: pnpm db:seed:admin <email> (or set ADMIN_EMAIL in .env.local)"
+    "Usage: pnpm db:seed:admin <email> [role] (or set ADMIN_EMAIL in .env.local)"
+  );
+  process.exit(1);
+}
+
+if (!isRole(requestedRole)) {
+  console.error(
+    `"${requestedRole}" is not a role. Expected one of: ${ALL_ROLES.join(", ")}.`
   );
   process.exit(1);
 }
@@ -20,11 +33,11 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const result = await pool.query(
   "UPDATE users SET role = $1 WHERE email = $2 RETURNING id, name, email, role",
-  [ADMIN_ROLE, adminEmail]
+  [requestedRole, email]
 );
 
 if (result.rowCount === 0) {
-  console.error(`No user found with email "${adminEmail}".`);
+  console.error(`No user found with email "${email}".`);
   await pool.end();
   process.exit(1);
 }

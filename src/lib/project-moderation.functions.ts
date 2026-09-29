@@ -5,7 +5,6 @@ import { parse } from "valibot";
 
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { auth } from "@/lib/auth";
 import { requireEditableProject, requireUploader } from "@/lib/project-access";
 import type { Session } from "@/lib/project-access";
 import {
@@ -18,27 +17,23 @@ import {
   withdrawReview,
 } from "@/lib/project-moderation";
 import type { PendingReview } from "@/lib/project-moderation";
+import { requireStaff } from "@/lib/role-guards";
 
 /**
- * Resolves the caller's admin session.
+ * Resolves the caller's staff session.
  *
  * Throws rather than returning null so no handler can forget to check, which
- * is the failure mode that would let a non-admin reach a decision endpoint.
+ * is the failure mode that would let a non-staff account reach a decision
+ * endpoint. Reviewing is the moderator's core duty, so the bar is moderator.
  */
-const requireAdminSession = async (): Promise<Session> => {
-  const session = await auth.api.getSession({ headers: getRequestHeaders() });
-  if (!session || session.user.role !== "admin") {
-    throw new Error("Only admins can review projects.");
-  }
-  return session;
-};
+const requireReviewer = (): Promise<Session> => requireStaff("moderator");
 
 const getOwner = (): Promise<Session> => requireUploader(getRequestHeaders());
 
 /** Every project currently waiting for a decision, oldest first. */
 export const listPendingReviews = createServerFn({ method: "GET" }).handler(
   async (): Promise<PendingReview[]> => {
-    await requireAdminSession();
+    await requireReviewer();
     return listPendingReviewsInDb();
   }
 );
@@ -46,7 +41,7 @@ export const listPendingReviews = createServerFn({ method: "GET" }).handler(
 /** How many projects are waiting, for the tab badge. */
 export const countPendingReviews = createServerFn({ method: "GET" }).handler(
   async (): Promise<number> => {
-    await requireAdminSession();
+    await requireReviewer();
     const [row] = await db
       .select({ pending: count() })
       .from(projects)
@@ -59,7 +54,7 @@ export const countPendingReviews = createServerFn({ method: "GET" }).handler(
 export const approveProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
-    const session = await requireAdminSession();
+    const session = await requireReviewer();
     await approveReview(data.projectId, session.user.id);
   });
 
@@ -69,7 +64,7 @@ export const rejectProject = createServerFn({ method: "POST" })
     parse(rejectionSchema, data)
   )
   .handler(async ({ data }): Promise<void> => {
-    const session = await requireAdminSession();
+    const session = await requireReviewer();
     await rejectReview(data.projectId, session.user.id, data.reason);
   });
 

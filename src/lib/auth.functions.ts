@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { auth } from "@/lib/auth";
+import { ADMIN_PANEL_ROLE, hasRole } from "@/lib/roles";
 
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -25,6 +26,12 @@ export const ensureSession = createServerFn({ method: "GET" }).handler(
   }
 );
 
+/**
+ * The caller's session when they may open the admin panel, else null.
+ *
+ * The bar is moderator, so a moderator gets the panel and its Reviews and
+ * Posts tabs; the tabs they cannot use are not rendered.
+ */
 export const requireAdmin = createServerFn({ method: "GET" }).handler(
   async () => {
     const headers = getRequestHeaders();
@@ -34,7 +41,7 @@ export const requireAdmin = createServerFn({ method: "GET" }).handler(
       return null;
     }
 
-    if (session.user.role !== "admin") {
+    if (!hasRole(session.user.role, ADMIN_PANEL_ROLE)) {
       return null;
     }
 

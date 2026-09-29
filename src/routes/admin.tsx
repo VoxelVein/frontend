@@ -5,6 +5,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { object, optional, parse, picklist } from "valibot";
 
 import { AdminAccountDeletions } from "@/components/admin/admin-account-deletions";
@@ -17,8 +18,11 @@ import { AdminUsers } from "@/components/admin/admin-users";
 import { PageHeader } from "@/components/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { countUnreadAdminNotifications } from "@/lib/admin-accounts.functions";
+import { authClient } from "@/lib/auth-client";
 import { requireAdmin } from "@/lib/auth.functions";
 import { countPendingReviews } from "@/lib/project-moderation.functions";
+import { hasRole } from "@/lib/roles";
+import type { MinimumRole } from "@/lib/roles";
 
 const adminSearchSchema = object({
   tab: optional(
@@ -33,6 +37,54 @@ const adminSearchSchema = object({
     ])
   ),
 });
+
+type AdminTab = NonNullable<
+  ReturnType<typeof parse<typeof adminSearchSchema>>["tab"]
+>;
+
+/**
+ * The minimum role for each tab.
+ *
+ * A tab is hidden rather than disabled, so staff never see a control that
+ * would fail. The server functions behind each tab enforce the same bar, so
+ * this is presentation and not the security boundary.
+ */
+const TAB_MINIMUM_ROLE = {
+  deletions: "admin",
+  notifications: "admin",
+  posts: "moderator",
+  reviews: "moderator",
+  sessions: "admin",
+  storage: "admin",
+  users: "moderator",
+} as const satisfies Record<AdminTab, MinimumRole>;
+
+const TABS = [
+  { label: "Users", value: "users" },
+  { label: "Sessions", value: "sessions" },
+  { label: "Posts", value: "posts" },
+  { label: "Storage", value: "storage" },
+  { label: "Notifications", value: "notifications" },
+  { label: "Deletions", value: "deletions" },
+  { label: "Reviews", value: "reviews" },
+] as const satisfies { label: string; value: AdminTab }[];
+
+const canSee = (tab: { value: AdminTab }, role: string) =>
+  hasRole(role, TAB_MINIMUM_ROLE[tab.value]);
+
+/** Two tabs carry a count badge; the rest are plain text. */
+const tabLabel = (
+  tab: AdminTab,
+  counts: { pending: number; unread: number }
+): ReactNode => {
+  if (tab === "notifications") {
+    return <NotificationsTabLabel unread={counts.unread} />;
+  }
+  if (tab === "reviews") {
+    return <ReviewsTabLabel pending={counts.pending} />;
+  }
+  return TABS.find((entry) => entry.value === tab)?.label ?? tab;
+};
 
 /** Unread inbox size, or null when it could not be loaded. */
 const fetchUnreadCount = async (): Promise<number | null> => {
@@ -98,16 +150,32 @@ const ReviewsTabLabel = ({ pending }: { pending: number }) => (
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  // beforeLoad already refused anyone who is not staff; this reads the role
+  // to decide which tabs to show.
+  const { data: session } = authClient.useSession();
   const { tab = "users" } = useSearch({ from: "/admin" });
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingReviews, setPendingReviews] = useState(0);
+  const role = session?.user.role ?? "user";
+
+  // A tab is hidden rather than disabled, so a moderator never sees a control
+  // that would fail. Redirect rather than render nothing, so a bookmarked or
+  // shared admin URL lands somewhere usable.
+  const visibleTabs = TABS.filter((entry) => canSee(entry, role));
+  const activeTab = canSee({ value: tab }, role) ? tab : visibleTabs[0].value;
 
   useEffect(() => {
     let isCurrent = true;
     const loadOnMount = async () => {
+      // Only the badges this role can actually see are fetched; the others
+      // would 403 and the count is a convenience either way.
       const [unread, pending] = await Promise.all([
-        fetchUnreadCount(),
-        fetchPendingReviewCount(),
+        canSee({ value: "notifications" }, role)
+          ? fetchUnreadCount()
+          : Promise.resolve(null),
+        canSee({ value: "reviews" }, role)
+          ? fetchPendingReviewCount()
+          : Promise.resolve(null),
       ]);
       if (!isCurrent) {
         return;
@@ -123,7 +191,7 @@ const AdminPage = () => {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [role]);
 
   const refreshUnreadCount = async () => {
     const unread = await fetchUnreadCount();
@@ -147,7 +215,7 @@ const AdminPage = () => {
       />
 
       <Tabs
-        value={tab}
+        value={activeTab}
         onValueChange={(value) =>
           navigate({
             to: "/admin",
@@ -158,46 +226,31 @@ const AdminPage = () => {
         className="mt-8"
       >
         <TabsList aria-label="Admin sections" className="flex-wrap">
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="storage">Storage</TabsTrigger>
-          <TabsTrigger value="notifications">
-            <NotificationsTabLabel unread={unreadCount} />
-          </TabsTrigger>
-          <TabsTrigger value="deletions">Deletions</TabsTrigger>
-          <TabsTrigger value="reviews">
-            <ReviewsTabLabel pending={pendingReviews} />
-          </TabsTrigger>
+          {visibleTabs.map((entry) => (
+            <TabsTrigger key={entry.value} value={entry.value}>
+              {tabLabel(entry.value, {
+                pending: pendingReviews,
+                unread: unreadCount,
+              })}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        <TabsContent value="users">
-          <AdminUsers />
-        </TabsContent>
-
-        <TabsContent value="sessions">
-          <AdminSessions />
-        </TabsContent>
-
-        <TabsContent value="posts">
-          <AdminPosts />
-        </TabsContent>
-
-        <TabsContent value="storage">
-          <AdminStorage />
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <AdminNotifications onReadStateChange={refreshUnreadCount} />
-        </TabsContent>
-
-        <TabsContent value="deletions">
-          <AdminAccountDeletions />
-        </TabsContent>
-
-        <TabsContent value="reviews">
-          <AdminReviews onDecided={refreshPendingReviews} />
-        </TabsContent>
+        {visibleTabs.map((entry) => (
+          <TabsContent key={entry.value} value={entry.value}>
+            {entry.value === "users" ? <AdminUsers /> : null}
+            {entry.value === "sessions" ? <AdminSessions /> : null}
+            {entry.value === "posts" ? <AdminPosts /> : null}
+            {entry.value === "storage" ? <AdminStorage /> : null}
+            {entry.value === "notifications" ? (
+              <AdminNotifications onReadStateChange={refreshUnreadCount} />
+            ) : null}
+            {entry.value === "deletions" ? <AdminAccountDeletions /> : null}
+            {entry.value === "reviews" ? (
+              <AdminReviews onDecided={refreshPendingReviews} />
+            ) : null}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );

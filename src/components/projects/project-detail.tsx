@@ -37,6 +37,7 @@ import type {
   ProjectView,
 } from "@/lib/projects";
 import { setProjectProtected } from "@/lib/projects.functions";
+import { hasRole } from "@/lib/roles";
 
 const badgeClassName =
   "border-border bg-muted text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium";
@@ -414,8 +415,11 @@ interface ProtectedOverride {
 
 export const ProjectDetail = ({ project }: { project: ProjectView }) => {
   const { data: session } = authClient.useSession();
-  const isAdmin = session?.user.role === "admin";
-  const canManage = session?.user.id === project.ownerId || isAdmin;
+  const isAdmin = hasRole(session?.user.role, "admin");
+  const isStaff = hasRole(session?.user.role, "moderator");
+  // Staff can reach a project's dashboard to review it, so the link follows
+  // the same bar as editing on the server.
+  const canManage = session?.user.id === project.ownerId || isStaff;
 
   const [protectedOverride, setProtectedOverride] =
     useState<ProtectedOverride | null>(null);

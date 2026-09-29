@@ -19,11 +19,62 @@ Better Auth's admin plugin provides the underlying primitives
 `revokeUserSession`, impersonation, and the access-control statements in
 `src/lib/permissions.ts`). The panels above it are ours.
 
+## Roles
+
+There are three roles, ordered in `ROLE_RANK` (`src/lib/roles.ts`):
+
+**`user`** (rank 0)
+: Only their own projects. Nothing in the panel.
+
+**`moderator`** (rank 1)
+: Review submissions, draft blog posts, ban an account.
+
+**`admin`** (rank 2)
+: Everything, plus role changes, account deletion, sessions, and storage.
+
+A role grants everything at or below its rank, so `admin` is a superset of
+`moderator`. Every check calls `hasRole(role, minimum)` rather than
+comparing role names, so a check cannot silently miss the new role.
+
+`src/lib/roles.ts` holds only the pure ladder, with no server imports —
+client components import `hasRole` to decide what to render, and pulling the
+session helpers in would drag the database into the browser bundle. The
+session-based guards (`getRoleSession`, `requireRole`, `requireStaff`) live
+in `src/lib/role-guards.ts`.
+
+The panel's minimum is `moderator`, and each tab declares its own minimum in
+`TAB_MINIMUM_ROLE`. A tab a staff member cannot use is **not rendered**,
+rather than rendered and refused, and a bookmarked URL for a tab they cannot
+see falls back to the first one they can. The server functions behind each
+tab enforce the same bar independently, so the tab table is presentation
+and not the security boundary.
+
+`src/lib/permissions.ts` expresses the same split in Better Auth's
+statements, which is what actually gates the `/admin/*` endpoints. A
+moderator holds `user: ["get", "list", "ban"]` and no `delete`, `set-role`,
+`set-password`, or `set-email`, and no `session` statements at all — so even
+if a guard in this app were missed, the plugin refuses the endpoint.
+
+`adminRoles` is left at its default, so only `admin` satisfies the plugin's
+own admin checks. A moderator's reach comes from their statements.
+
+`assertRolesInSync()` runs at import and throws if the ladder names a role
+the plugin does not know about. Without it, a role wired into only one of
+the two places fails closed and reads as a permission bug rather than a
+configuration mistake.
+
+To grant a role outside the UI:
+
+```bash
+pnpm db:seed:admin you@example.com moderator
+```
+
 The Notifications and Reviews tabs carry unread and pending counts. Both
 are fetched client-side after mount and fail soft to `null`, because a
 badge must never be the reason the page fails to render — the tab itself
 is where the real error is reported. A failed count therefore renders as
-`0` until the panel loads.
+`0` until the panel loads. Only the badges a staff member's role can see are
+fetched, since the others would 403.
 
 ## Tabs
 
@@ -32,9 +83,12 @@ is where the real error is reported. A failed count therefore renders as
 A virtualized table (`@tanstack/react-virtual`) of every account, with
 role, ban state, and creation date. Actions:
 
-* Change a role between `user` and `admin`
+* Change a role between `user`, `moderator`, and `admin` (admin only)
 * Ban or unban, optionally with an expiry
-* Delete an account
+* Delete an account (admin only)
+
+A moderator sees only the ban control. The role selector and the delete
+button are not rendered for them, rather than shown and then refused.
 
 Each destructive action goes through a `ConfirmDialog`, and failures are
 surfaced as keyed toasts rather than inline text.

@@ -105,12 +105,12 @@ it can create anything.
 | Action                        | Who                                   |
 | ----------------------------- | ------------------------------------- |
 | View and download published   | Everyone                              |
-| View a draft or a pending one | Owner and admins                      |
+| View a draft or a pending one | Owner and staff                       |
 | Create a project              | Signed-in users with a verified email |
-| Edit, add versions, submit    | Owner (verified) and admins           |
-| Approve or send back          | Admins                                |
-| Withdraw or unpublish         | Owner (verified) and admins           |
-| Delete a version or project   | Owner (verified) and admins           |
+| Edit, add versions, submit    | Owner (verified) and staff            |
+| Approve or send back          | Staff (moderator and up)              |
+| Withdraw or unpublish         | Owner (verified) and staff            |
+| Delete a version or project   | Owner (verified) and staff            |
 | Mark a project as large       | Admins                                |
 | Remove a project (moderation) | Admins                                |
 
@@ -120,13 +120,15 @@ by the CSRF middleware in `src/start.ts`, and the upload route additionally
 rejects a cross-origin `Origin` header rather than relying on the session
 cookie alone.
 
-An account can hold exactly one role, `user` or `admin`
-(`src/lib/permissions.ts`); admin additionally has implicit access
-everywhere.
+"Staff" means `moderator` or `admin`; the roles are a ladder in
+`ROLE_RANK` (`src/lib/roles.ts`) and every check calls `hasRole(role,
+minimum)`. A moderator can reach a project they do not own because
+reviewing a submission means reading it. See
+[Admin Panel](admin-panel.md#roles) for the full matrix.
 
 Password sign-ups cannot verify their email yet, because the app does not
 send email. Until it does, only Google and GitHub accounts (verified by
-the provider) and admins can upload. The dashboard shows a
+the provider) and staff can upload. The dashboard shows a
 `VerificationNotice` and hides the "New project" action for everyone else.
 
 ## Creating and publishing
@@ -143,7 +145,7 @@ public; only an admin can.
 3. **Submit for review** (`submitProjectForReview`) moves the draft to
    `pending`, once at least one version exists, or for servers once join
    details are saved. The project stays hidden from the site.
-4. An admin decides in `/admin?tab=reviews`:
+4. A moderator or admin decides in `/admin?tab=reviews`:
    * **Approve** (`approveProject`) moves it to `published` and notifies
      the creator.
    * **Send back** (`rejectProject`) moves it to `draft` with a required
