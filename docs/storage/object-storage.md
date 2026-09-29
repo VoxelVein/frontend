@@ -35,6 +35,31 @@ Object keys are immutable:
 stored with `Content-Disposition: attachment` and a one-year `immutable`
 cache header, so a CDN can cache them indefinitely.
 
+## Images
+
+Project icons and gallery images are stored in the same bucket, under
+`projects/<projectId>/images/`. They differ from version files in three
+ways:
+
+* They are uploaded with `inline` disposition and a revalidating cache
+  header, so a browser renders an icon instead of downloading it.
+* They are never served through `/api/download/$fileId` and never count
+  towards a version's download total. They are served by
+  `/api/image/$imageId` instead, which applies the same published-state
+  rule as a file download, so a draft project's icon stays private.
+* They are **not resized**. The file is stored exactly as uploaded,
+  capped at 8 MB, and the `project_images` table records the real pixel
+  dimensions so the UI can reserve the right space before it loads.
+
+Accepted types are PNG, JPEG, WebP, and GIF, chosen by sniffing the file's
+leading bytes rather than trusting the request's `content-type`. SVG is
+rejected on purpose: it is a scriptable document format, and these images
+are served inline from the app's own origin.
+
+A project has at most one icon, enforced by a partial unique index. Images
+count toward `STORAGE_QUOTA_BYTES` along with version files, so the admin
+storage panel and the site limit stay truthful.
+
 ## Configuration
 
 | Variable                    | Description                            |

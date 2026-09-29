@@ -1,7 +1,7 @@
-import { count, eq, sql, sum } from "drizzle-orm";
+import { and, count, eq, inArray, sql, sum } from "drizzle-orm";
 
 import { db } from "@/db";
-import { projectFiles } from "@/db/schema";
+import { projectFiles, projectImages } from "@/db/schema";
 import { STORAGE_ERROR, StorageError } from "@/lib/storage";
 
 // Arbitrary constant key for pg_advisory_xact_lock. Holding it serializes
@@ -16,20 +16,43 @@ const VERSION_LOCK_NAMESPACE = 7_140_002;
 
 const PG_UNIQUE_VIOLATION = "23505";
 
+// Namespace for the two-key pg_advisory_xact_lock taken per project image
+// upload, so a project's icon cannot be replaced twice concurrently. The
+// second key is a hash of the project id.
+const IMAGE_LOCK_NAMESPACE = 7_140_003;
+
 type Executor = Pick<typeof db, "select">;
 
 export interface StorageUsage {
   fileCount: number;
+  imageCount: number;
   quotaBytes: number | null;
   usedBytes: number;
 }
 
-/** Bytes used by every stored file, from the database (source of truth). */
+type ImageValues = typeof projectImages.$inferInsert;
+
+/**
+ * Bytes used by every stored object, from the database (source of truth).
+ *
+ * Images count toward the same quota as downloadable files, so the limit
+ * reflects what the bucket actually holds and the admin storage panel stays
+ * truthful.
+ */
 export const getUsedBytes = async (executor: Executor = db) => {
-  const [row] = await executor
-    .select({ files: count(), used: sum(projectFiles.size) })
-    .from(projectFiles);
-  return { fileCount: row?.files ?? 0, usedBytes: Number(row?.used ?? 0) };
+  const [[file], [image]] = await Promise.all([
+    executor
+      .select({ files: count(), used: sum(projectFiles.size) })
+      .from(projectFiles),
+    executor
+      .select({ images: count(), used: sum(projectImages.size) })
+      .from(projectImages),
+  ]);
+  return {
+    fileCount: file?.files ?? 0,
+    imageCount: image?.images ?? 0,
+    usedBytes: Number(file?.used ?? 0) + Number(image?.used ?? 0),
+  };
 };
 
 export const quotaExceededError = () =>
@@ -47,6 +70,55 @@ export const getRemainingBytes = async (
   }
   const { usedBytes } = await getUsedBytes();
   return Math.max(0, quotaBytes - usedBytes);
+};
+
+/**
+ * Records an uploaded image, re-checking the quota under a lock first.
+ *
+ * A project has at most one icon: the previous row is deleted in the same
+ * transaction so a replaced icon does not leave an orphan row behind. The
+ * caller deletes the superseded object once this resolves.
+ *
+ * Gallery images are appended; the per-project count is capped by the route.
+ */
+export const insertImageWithinQuota = async (
+  values: ImageValues,
+  quotaBytes: number | null
+): Promise<void> => {
+  await db.transaction(async (tx) => {
+    await tx.execute(
+      sql`select pg_advisory_xact_lock(${IMAGE_LOCK_NAMESPACE}, hashtext(${values.projectId}))`
+    );
+    if (values.kind === "icon") {
+      await tx
+        .delete(projectImages)
+        .where(
+          and(
+            eq(projectImages.projectId, values.projectId),
+            eq(projectImages.kind, "icon")
+          )
+        );
+    }
+    if (quotaBytes !== null) {
+      await tx.execute(sql`select pg_advisory_xact_lock(${QUOTA_LOCK_KEY})`);
+      const { usedBytes } = await getUsedBytes(tx);
+      if (usedBytes + values.size > quotaBytes) {
+        throw quotaExceededError();
+      }
+    }
+    await tx.insert(projectImages).values(values);
+  });
+};
+
+/** Storage keys of a project's images, for cleanup before deleting it. */
+export const getProjectImageKeys = async (projectIds: string[]) => {
+  if (projectIds.length === 0) {
+    return [];
+  }
+  return await db
+    .select({ storageKey: projectImages.storageKey })
+    .from(projectImages)
+    .where(inArray(projectImages.projectId, projectIds));
 };
 
 export class DuplicateFilenameError extends Error {

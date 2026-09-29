@@ -76,3 +76,23 @@ for the longer-term plan.
 * [x] `EmptyState` for the two bare version-list placeholders
 * [x] `cn` pass: `FormError`, `RowIcon`, `MICRO_LABEL_CLASS`, and the
       `buttonVariants({ className })` call
+* [x] Project icons and gallery images in object storage, served through
+      `/api/image/$imageId`
+
+## Known limitations
+
+* [ ] **Images are not resized.** A 4000px phone photo is stored and served
+      as-is, so a project icon can be several MB and every listing page that
+      shows it pays for that. The 8 MB cap bounds the damage but does not
+      remove it. Client-side downscaling is the cheap fix;
+      `ROADMAP.md` has the full comparison including Cloudflare Image
+      Resizing.
+* [ ] **Image bytes pass through the app.** `/api/image/$imageId` proxies
+      from the bucket rather than redirecting to it, because the
+      published-state check has to run on every request. That makes image
+      traffic count against Workers or container egress instead of being
+      free at the CDN, as downloads are.
+* [ ] **Search results show no icon.** `project_search` rows are built in
+      SQL and do not carry image columns, so `toDocument` in
+      `src/lib/search/projects.ts` fills in an empty gallery and a null
+      icon. Search hit cards therefore fall back to the letter tile.

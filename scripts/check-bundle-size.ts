@@ -5,7 +5,10 @@ import { gzipSync } from "node:zlib";
 
 const ASSETS_DIR = path.resolve(".output/public/assets");
 const MAIN_CHUNK_PATTERN = /^index-.*\.js$/u;
-const RAW_LIMIT_BYTES = 700_000;
+// Raised from 700_000 to 720_000 for project icons and gallery images, which
+// added ~18 kB. The gzip limit is unchanged and has plenty of headroom, so
+// this is a raw-bytes threshold rather than a real payload regression.
+const RAW_LIMIT_BYTES = 720_000;
 const GZIP_LIMIT_BYTES = 250_000;
 
 const formatBytes = (bytes: number) => `${(bytes / 1000).toFixed(1)} kB`;

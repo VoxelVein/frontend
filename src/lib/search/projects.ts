@@ -246,7 +246,12 @@ const toDocument = ({
   const document: ProjectDocument = {
     ...hit,
     authorUsername: hit.authorUsername ?? null,
+    // Search rows are built by Postgres and do not carry images, so a hit
+    // renders the letter avatar. The full document, which does include them,
+    // backs the project and profile pages.
+    gallery: [],
     gameVersions: hit.gameVersions ?? [],
+    icon: null,
     loaders: hit.loaders ?? [],
     updatedAt: new Date(hit.updatedAt).toISOString(),
   };

@@ -1,7 +1,8 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
-import { projects, projectVersions, users } from "@/db/schema";
+import { projectImages, projects, projectVersions, users } from "@/db/schema";
+import { toProjectImages } from "@/lib/project-images";
 import { DELETED_USER_LABEL } from "@/lib/projects";
 import type { ProjectDocument } from "@/lib/projects";
 
@@ -84,6 +85,33 @@ export const buildProjectDocuments = async (
     }
   }
 
+  const images = await db
+    .select({
+      height: projectImages.height,
+      id: projectImages.id,
+      kind: projectImages.kind,
+      projectId: projectImages.projectId,
+      width: projectImages.width,
+    })
+    .from(projectImages)
+    .where(
+      inArray(
+        projectImages.projectId,
+        published.map((row) => row.id)
+      )
+    )
+    .orderBy(asc(projectImages.createdAt));
+
+  const imagesByProject = new Map<string, typeof images>();
+  for (const image of images) {
+    const existing = imagesByProject.get(image.projectId);
+    if (existing) {
+      existing.push(image);
+    } else {
+      imagesByProject.set(image.projectId, [image]);
+    }
+  }
+
   return published.map((project) => {
     const projectVersionsForProject = versionsByProject.get(project.id) ?? [];
     return {
@@ -98,6 +126,11 @@ export const buildProjectDocuments = async (
       category: project.category,
       description: project.summary,
       downloads: project.downloads,
+      ...toProjectImages(
+        (imagesByProject.get(project.id) ?? []).map(
+          ({ height, id, kind, width }) => ({ height, id, kind, width })
+        )
+      ),
       gameVersions: unique(
         projectVersionsForProject.map((version) => version.gameVersions)
       ),

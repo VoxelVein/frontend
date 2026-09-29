@@ -6,6 +6,7 @@ import { boolean, object, parse, pipe, string, uuid } from "valibot";
 import { db } from "@/db";
 import {
   projectFiles,
+  projectImages,
   projects,
   projectServerLinks,
   projectServers,
@@ -21,6 +22,7 @@ import {
   requireUploader,
 } from "@/lib/project-access";
 import type { Session } from "@/lib/project-access";
+import { toProjectImages } from "@/lib/project-images";
 import {
   DELETED_USER_LABEL,
   hasLoaders,
@@ -46,6 +48,7 @@ import type {
 } from "@/lib/projects";
 import { loadServerDetails } from "@/lib/server-details";
 import { deleteObjects } from "@/lib/storage";
+import { getProjectImageKeys } from "@/lib/storage-quota";
 
 const PG_UNIQUE_VIOLATION = "23505";
 
@@ -77,6 +80,10 @@ const loadProjectView = async (
   const project = await db.query.projects.findFirst({
     where,
     with: {
+      images: {
+        columns: { height: true, id: true, kind: true, width: true },
+        orderBy: [projectImages.createdAt],
+      },
       owner: {
         columns: { displayUsername: true, name: true, username: true },
       },
@@ -124,6 +131,7 @@ const loadProjectView = async (
     tags: project.tags,
     type: project.type,
     updatedAt: project.updatedAt.toISOString(),
+    ...toProjectImages(project.images),
     versions: project.versions.map((version) => ({
       changelog: version.changelog,
       channel: version.channel,
@@ -449,7 +457,7 @@ export const deleteVersion = createServerFn({ method: "POST" })
     }
   });
 
-/** Permanently deletes a project with all versions and stored files. */
+/** Permanently deletes a project with all versions, files, and images. */
 export const deleteProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
@@ -460,12 +468,18 @@ export const deleteProject = createServerFn({ method: "POST" })
       .select({ id: projectVersions.id })
       .from(projectVersions)
       .where(eq(projectVersions.projectId, project.id));
-    const files = await db
-      .select({ storageKey: projectFiles.storageKey })
-      .from(projectFiles)
-      .where(inArray(projectFiles.versionId, versionIds));
+    const [files, images] = await Promise.all([
+      db
+        .select({ storageKey: projectFiles.storageKey })
+        .from(projectFiles)
+        .where(inArray(projectFiles.versionId, versionIds)),
+      getProjectImageKeys([project.id]),
+    ]);
     await db.delete(projects).where(eq(projects.id, project.id));
-    await deleteObjects(files.map((file) => file.storageKey));
+    await deleteObjects([
+      ...files.map((file) => file.storageKey),
+      ...images.map((image) => image.storageKey),
+    ]);
   });
 
 /**

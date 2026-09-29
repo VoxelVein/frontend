@@ -49,6 +49,14 @@ Tables are defined in `src/db/schema.ts`:
 * `project_server_links`: mods, modpacks, shaders, and resource packs a
   server links to, in any mix, each marked required or recommended. A
   server links to at most `MAX_SERVER_LINKS` (20) projects.
+* `project_images` (migration
+  `drizzle/0016_add_project_images.sql`): a project's icon and gallery
+  images in one table, with a `kind` of `icon` or `gallery`. A project has
+  at most one icon, enforced by a partial unique index on `project_id` where
+  `kind = 'icon'`. Rows carry the real pixel `width` and `height` so the UI
+  can reserve the right box before the image loads, and deleting the
+  project cascades them away. See
+  [Object Storage](../storage/object-storage.md#images).
 * `projects.is_protected`: set by an admin, keeps a project out of its
   owner's account deletion.
 * `projects.pending_deletion`: hides a project immediately while its
@@ -83,11 +91,10 @@ releases at once, and snapshots stay hidden until "Show snapshots" is on.
 `/dashboard` is a guard plus an outlet; everything real lives in its
 children:
 
-| Route                                 | What it does                    |
-| ------------------------------------- | ------------------------------- |
-| `/dashboard/projects`                 | The creator's projects          |
-| `/dashboard/projects/new`             | Create a project                |
-| `/dashboard/projects/$projectId?tab=` | `details`, `versions`, `danger` |
+* `/dashboard/projects` — the creator's projects
+* `/dashboard/projects/new` — create a project
+* `/dashboard/projects/$projectId?tab=` — `details`, `images`, `versions`,
+  or `danger`
 
 `/dashboard` redirects anyone whose `usernameConfirmed` is `false` to
 `/welcome` first, so a Google or GitHub account picks its username before
@@ -240,6 +247,30 @@ Every request gets the redirect, but only plausible downloads are counted
   counters. Set `TRUST_PROXY=true` behind a reverse proxy to avoid this.
 
 The dedup cache is in memory, so it resets on restart and is per process.
+
+## Images
+
+A project has an optional icon and up to `GALLERY_MAX_COUNT` (12) gallery
+images, managed on the dashboard project's `images` tab. Both go through
+`PUT /api/projects/$projectId/images?kind=icon|gallery`, and are removed with
+`DELETE /api/projects/$projectId/images/$imageId`.
+
+They are stored in object storage like version files, but are kept separate
+from them in every way that matters:
+
+* The upload is not an archive, so the zip-magic check does not apply.
+  Instead the type is sniffed from the file's leading bytes, and SVG is
+  rejected outright.
+* Uploading a new icon **replaces** the old one in the same transaction,
+  then deletes the superseded object, so a project never accumulates icons.
+* `GET /api/image/$imageId` serves the bytes, and applies the same
+  published-and-not-pending-deletion rule as a file download. A draft
+  project's icon is therefore not readable by anyone who guesses its id.
+* Images never affect a version's or a project's download counter.
+
+Nothing is resized. The stored `width` and `height` let the UI reserve the
+correct box, which avoids layout shift, but the file itself is what was
+uploaded. `ROADMAP.md` records the resizing options and their trade-offs.
 
 ## Server client requirements
 

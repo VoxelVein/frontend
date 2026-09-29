@@ -1,5 +1,6 @@
 import { IconDownload, IconTag } from "@tabler/icons-react";
 
+import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
 import { formatCount } from "@/lib/format";
 import type { ProjectDocument } from "@/lib/projects";
@@ -17,9 +18,16 @@ const ProjectCard = ({ project }: { project: ProjectDocument }) => (
 
     {/* Header */}
     <div className="flex items-start gap-3.5">
-      <div className="border-primary/20 bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border text-base font-bold shadow-inner">
-        {project.name.charAt(0)}
-      </div>
+      <ProjectImage
+        image={project.icon}
+        alt=""
+        className="size-11 shrink-0 rounded-xl border"
+        fallback={
+          <div className="border-primary/20 bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border text-base font-bold shadow-inner">
+            {project.name.charAt(0)}
+          </div>
+        }
+      />
 
       <div className="min-w-0 flex-1">
         <span className="border-primary/20 bg-primary/10 text-primary inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase">

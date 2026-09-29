@@ -6,9 +6,17 @@
 
 ## Current Focus
 
-* **Content images** — project icons and gallery images stored in object
-  storage, with Unpic for delivery. Nothing in the UI is blocked on this;
-  the current design uses letter avatars and has no image slots yet.
+* **Image resizing** — project icons and gallery images now live in object
+  storage and are served through a caching proxy route, but originals are
+  stored **unresized**. A 4000px phone photo therefore becomes a multi-MB
+  icon that every listing page pays for. Two options, in order of cost:
+  1. **Client-side downscale before upload** — no new dependency, no server
+     CPU, works in every environment. The smaller, more certain fix.
+  2. **Cloudflare Image Resizing** — the only on-the-fly option that works
+     with R2, since Unpic can only rewrite URLs from third-party image CDNs
+     and R2 is not one. Requires a Cloudflare-proxied zone with the paid
+     Image Resizing add-on, and a public source URL, so it does not help
+     local development.
 * **Legal review** — the six legal pages need a real operator name and
   address, a single consistent contact address, and review by a qualified
   professional.
@@ -20,7 +28,6 @@
 
 * Legal pages (Impressum, Privacy, Cookies, ToS, ToU, Disclaimer,
   Legal Notes) — placeholder content pending review before production
-* Content images and image optimization
 * Broader RBAC beyond the current `user` / `admin` pair
 
 ## Planned

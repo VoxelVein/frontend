@@ -12,14 +12,21 @@ const PERCENT = 100;
 // Above this share of the quota, warn that uploads will soon be refused.
 const WARNING_RATIO = 0.9;
 
+const plural = (count: number, noun: string) =>
+  `${formatCount(count)} ${noun}${count === 1 ? "" : "s"}`;
+
 const UsageSummary = ({ usage }: { usage: StorageUsage }) => {
-  const { fileCount, quotaBytes, usedBytes } = usage;
-  const files = `${formatCount(fileCount)} ${fileCount === 1 ? "file" : "files"}`;
+  const { fileCount, imageCount, quotaBytes, usedBytes } = usage;
+  // Images share the quota with files, so both are named here.
+  const objects = `files and images (${plural(fileCount, "file")}, ${plural(
+    imageCount,
+    "image"
+  )})`;
 
   if (quotaBytes === null) {
     return (
       <p className="text-foreground text-sm">
-        {formatBytes(usedBytes)} used by {files}. No storage limit is set (
+        {formatBytes(usedBytes)} used by {objects}. No storage limit is set (
         <code>STORAGE_QUOTA_BYTES</code>).
       </p>
     );
@@ -36,7 +43,7 @@ const UsageSummary = ({ usage }: { usage: StorageUsage }) => {
         className="text-foreground text-sm font-medium"
       >
         {formatBytes(usedBytes)} of {formatBytes(quotaBytes)} used ({percent}
-        %) by {files}
+        %) by {objects}
       </label>
       <progress
         id="storage-usage"
@@ -80,7 +87,7 @@ export const AdminStorage = () => {
             id="storage-heading"
             className="text-foreground text-lg font-semibold"
           >
-            File storage
+            Object storage
           </h2>
         </CardHeader>
 

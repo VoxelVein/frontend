@@ -16,6 +16,9 @@ const DEFAULT_MAX_FILE_BYTES = 100 * 1024 * 1024;
 const PRESIGNED_DOWNLOAD_TTL_SECONDS = 300;
 // Keys are content-addressed, so a stored object never changes.
 const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+// Images are served through a proxy route that sets its own caching, and
+// their keys are not content-addressed: replacing an icon reuses its row.
+const REVALIDATE_CACHE_CONTROL = "public, max-age=0, must-revalidate";
 const DELETE_BATCH_SIZE = 1000;
 
 export interface StorageConfig {
@@ -34,6 +37,12 @@ export interface StorageConfig {
 export interface UploadInput {
   body: AsyncIterable<Uint8Array>;
   contentType: string;
+  /**
+   * When true the object is served for display in a browser — inline
+   * disposition, revalidating cache — rather than as a download. Required
+   * for images, which a browser would otherwise save instead of rendering.
+   */
+  inline?: boolean;
   filename: string;
   key: string;
   /** Lower byte limit for this upload, e.g. the space left in the quota. */
@@ -194,8 +203,12 @@ export const uploadStream = async (
         )
       ),
       Bucket: config.bucket,
-      CacheControl: IMMUTABLE_CACHE_CONTROL,
-      ContentDisposition: contentDisposition(input.filename),
+      CacheControl: input.inline
+        ? REVALIDATE_CACHE_CONTROL
+        : IMMUTABLE_CACHE_CONTROL,
+      ContentDisposition: input.inline
+        ? `inline; filename*=UTF-8''${encodeURIComponent(input.filename)}`
+        : contentDisposition(input.filename),
       ContentType: input.contentType,
       Key: input.key,
     },
@@ -213,6 +226,41 @@ export const uploadStream = async (
     sha1: digest.sha1.digest("hex"),
     sha512: digest.sha512.digest("hex"),
     size: digest.size,
+  };
+};
+
+/**
+ * Fetches an object's bytes and metadata, for serving an image through the
+ * app rather than redirecting to a URL. Unlike a download this cannot use a
+ * presigned URL, because the response has to pass through the app to enforce
+ * the project-visibility rules.
+ */
+export const getObjectBytes = async (
+  key: string,
+  config: StorageConfig = loadStorageConfig(),
+  client: S3Client = getClient(config)
+): Promise<{
+  body: ReadableStream;
+  contentLength: number | null;
+  etag: string | null;
+}> => {
+  const response = await client.send(
+    new GetObjectCommand({ Bucket: config.bucket, Key: key })
+  );
+  if (!response.Body) {
+    throw new StorageError(
+      STORAGE_ERROR.notConfigured,
+      "The stored object has no body."
+    );
+  }
+  return {
+    // SAFETY: the check above guarantees Body is present, and the AWS SDK
+    // types it as a Node Readable, which is a ReadableStream at runtime in
+    // the web-fetch handler this runs under.
+    body: response.Body as ReadableStream,
+    contentLength: response.ContentLength ?? null,
+    // Weak ETags from multipart uploads are still valid cache validators.
+    etag: response.ETag ?? null,
   };
 };
 
