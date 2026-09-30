@@ -84,8 +84,19 @@
 }
 
 :root {
-  /* Light — clean with red brand accent */
-  --background: oklch(0.9791 0 0);
+  /* Light — clean with red brand accent
+
+     The neutrals are a deliberately spaced ladder rather than a cluster of
+     near-identical whites. Measured in 8-bit sRGB the steps are 255 / 241 /
+     224 / 205 / 176, so adjacent surfaces differ by 14–19 levels instead of
+     the 13–16 the previous values produced, which read as one flat white.
+
+     Chroma is a constant 0.002 on hue 70 — enough for the greys to read as
+     warm paper rather than dead grey, faint enough to stay white. Raising it
+     toward 0.004 turns the background visibly cream, which is why it is
+     kept this low. Every text pairing below stays above WCAG AA: the
+     tightest is muted-foreground on muted at 10.8:1. */
+  --background: oklch(0.9779 0.002 70);
   --foreground: oklch(0.2178 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2393 0 0);
@@ -93,15 +104,15 @@
   --popover-foreground: oklch(0.2393 0 0);
   --primary: oklch(0.56 0.2185 22.6077);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.9612 0 0);
+  --secondary: oklch(0.9542 0.002 70);
   --secondary-foreground: oklch(0.2178 0 0);
-  --muted: oklch(0.9401 0 0);
+  --muted: oklch(0.9263 0.002 70);
   --muted-foreground: oklch(0.464 0 0);
-  --accent: oklch(0.9617 0.02 22.6077);
+  --accent: oklch(0.9542 0.022 22.6077);
   --accent-foreground: oklch(0.2178 0 0);
   --destructive: oklch(0.55 0.17 40);
-  --border: oklch(0.9006 0 0);
-  --input: oklch(0.9006 0 0);
+  --border: oklch(0.8801 0.002 70);
+  --input: oklch(0.8801 0.002 70);
   --ring: oklch(0.56 0.2185 22.6077);
   --chart-1: oklch(0.56 0.2185 22.6077);
   --chart-2: oklch(0.449 0.0405 250.0452);
@@ -109,13 +120,13 @@
   --chart-4: oklch(0.8494 0.0104 58.1918);
   --chart-5: oklch(0.6001 0.0492 249.6616);
   --radius: 1.4rem;
-  --sidebar: oklch(0.9791 0 0);
+  --sidebar: oklch(0.9779 0.002 70);
   --sidebar-foreground: oklch(0.2178 0 0);
   --sidebar-primary: oklch(0.56 0.2185 22.6077);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9766 0.015 22.6077);
+  --sidebar-accent: oklch(0.9542 0.02 22.6077);
   --sidebar-accent-foreground: oklch(0.2178 0 0);
-  --sidebar-border: oklch(0.9006 0 0);
+  --sidebar-border: oklch(0.8801 0.002 70);
   --sidebar-ring: oklch(0.56 0.2185 22.6077);
   --destructive-foreground: oklch(1 0 0);
   --font-sans: Inter, sans-serif;

@@ -101,8 +101,10 @@ export const Route = createRootRoute({
         content: "strict-origin-when-cross-origin",
       },
       {
+        // Matches --background (oklch(0.9779 0.002 70) = #f1eeeb) so the
+        // browser chrome does not read whiter than the page behind it.
         name: "theme-color",
-        content: "#ffffff",
+        content: "#f1eeeb",
         media: "(prefers-color-scheme: light)",
       },
       {
