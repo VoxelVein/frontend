@@ -84,12 +84,17 @@ const splitTags = (value: string): string[] => [
 const formatCategory = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
 
-// The form itself is capped rather than each field: every control is a grid
-// child, so this covers all of them and a field added later cannot forget it.
-// Narrower than the dashboard page's max-w-3xl wrapper, which leaves the right
-// side clear on a wide screen instead of stretching a short input across the
-// full column.
-const FORM_CLASS_NAME = "grid max-w-2xl gap-6";
+/**
+ * Width cap applied to every field in this form.
+ *
+ * A single-line `<input>` cannot wrap: a long value scrolls sideways and runs
+ * out of view. Capping the field keeps that scroll inside a box the eye can
+ * follow, and stops a short value such as a name stretching the full column
+ * on a wide monitor. Applied per field rather than on the form so the cap is
+ * visible in the markup and so it reaches the selects, which are not grid
+ * children of their own.
+ */
+const FIELD_WIDTH = "max-w-xl";
 
 export const ProjectForm = ({
   initialValues = EMPTY_VALUES,
@@ -153,7 +158,7 @@ export const ProjectForm = ({
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className={FORM_CLASS_NAME}>
+    <form noValidate onSubmit={handleSubmit} className="grid gap-6">
       {mode === "create" ? (
         <div className="grid gap-2">
           <RequiredLabel htmlFor="project-type" isRequired>
@@ -171,7 +176,10 @@ export const ProjectForm = ({
               }
             }}
           >
-            <SelectTrigger id="project-type" className="min-h-11 w-full">
+            <SelectTrigger
+              id="project-type"
+              className="min-h-11 w-full max-w-xl"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -188,6 +196,7 @@ export const ProjectForm = ({
       <FormField
         id="project-name"
         label="Name"
+        className={FIELD_WIDTH}
         value={values.name}
         onChange={(event) => changeName(event.target.value)}
         error={errors.get("name")}
@@ -199,6 +208,7 @@ export const ProjectForm = ({
         <FormField
           id="project-slug"
           label="URL slug"
+          className={FIELD_WIDTH}
           value={values.slug}
           onChange={(event) => {
             slugEditedRef.current = true;
@@ -226,7 +236,7 @@ export const ProjectForm = ({
         >
           <SelectTrigger
             id="project-category"
-            className="min-h-11 w-full"
+            className="min-h-11 w-full max-w-xl"
             aria-invalid={errors.get("category") ? true : undefined}
             aria-describedby={
               errors.get("category") ? "project-category-error" : undefined
@@ -256,6 +266,7 @@ export const ProjectForm = ({
       <FormField
         id="project-summary"
         label="Summary"
+        className={FIELD_WIDTH}
         value={values.summary}
         onChange={(event) => update("summary", event.target.value)}
         error={errors.get("summary")}
@@ -264,15 +275,7 @@ export const ProjectForm = ({
       />
 
       <div className="grid gap-2">
-        <FormTextarea
-          id="project-description"
-          label="Description (Markdown)"
-          rows={10}
-          value={values.description}
-          onChange={(event) => update("description", event.target.value)}
-          error={errors.get("description")}
-          className="font-mono text-xs"
-        />
+        <FormTextarea id="project-description" label="Description (Markdown)" />
 
         {/* The description is the longest field in the form, so the preview is
             behind a toggle rather than always beside the editor. The blog post
@@ -291,7 +294,7 @@ export const ProjectForm = ({
           </Button>
 
           {showDescriptionPreview ? (
-            <div className="mt-2" id={DESCRIPTION_PREVIEW_ID}>
+            <div className={`mt-2 ${FIELD_WIDTH}`} id={DESCRIPTION_PREVIEW_ID}>
               <p
                 className="text-foreground text-sm font-medium"
                 id={DESCRIPTION_PREVIEW_LABEL_ID}
@@ -311,6 +314,7 @@ export const ProjectForm = ({
       <FormField
         id="project-tags"
         label="Tags"
+        className={FIELD_WIDTH}
         value={values.tags}
         onChange={(event) => update("tags", event.target.value)}
         error={errors.get("tags")}

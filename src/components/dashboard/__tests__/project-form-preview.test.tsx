@@ -15,10 +15,10 @@ const onSubmit = vi.fn<(input: ProjectInput) => Promise<void>>(() =>
   Promise.resolve()
 );
 
-const renderForm = () =>
+const renderForm = (mode: "create" | "edit" = "edit") =>
   render(
     <ProjectForm
-      mode="edit"
+      mode={mode}
       submitLabel="Save changes"
       initialValues={{
         category: "optimization",
@@ -104,11 +104,48 @@ describe("project description preview", () => {
     ).toBeTruthy();
   });
 
-  it("caps the width of the form, so every field inherits it", () => {
-    const { container } = renderForm();
+  it("caps the width of every field on the edit form", () => {
+    renderForm("edit");
 
-    // Capped on the form rather than per field, so a field added later cannot
-    // forget the constraint and stretch across the whole column.
-    expect(container.querySelector("form")?.className).toContain("max-w-2xl");
+    for (const id of [
+      "project-name",
+      "project-summary",
+      "project-description",
+      "project-tags",
+      "project-category",
+    ]) {
+      const field = document.querySelector(`#${id}`);
+      expect(field, `field ${id} should exist`).toBeTruthy();
+      expect(field?.className, `field ${id} should be capped`).toContain(
+        "max-w-xl"
+      );
+    }
+  });
+
+  it("caps the width of the create-only fields too", () => {
+    renderForm("create");
+
+    // Type and slug only render when creating, so they need their own check
+    // rather than riding along with the edit form.
+    for (const id of ["project-type", "project-slug"]) {
+      const field = document.querySelector(`#${id}`);
+      expect(field, `field ${id} should exist`).toBeTruthy();
+      expect(field?.className, `field ${id} should be capped`).toContain(
+        "max-w-xl"
+      );
+    }
+  });
+
+  it("caps the preview so it lines up with the editor", () => {
+    renderForm();
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    const controls = screen
+      .getByRole("button", { name: "Hide preview" })
+      .getAttribute("aria-controls");
+    expect(
+      document.querySelector(`#${CSS.escape(String(controls))}`)?.className
+    ).toContain("max-w-xl");
   });
 });
