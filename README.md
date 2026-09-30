@@ -36,16 +36,18 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 #### Content
 
-* Six project types — **mods**, **modpacks**, **plugins**, **resource
-  packs**, **shaders**, and **servers** — each with a browse page and a
+* Six project types: **mods**, **modpacks**, **plugins**, **resource
+  packs**, **shaders**, and **servers**, each with a browse page and a
   detail page
-* Typo-tolerant, full-text search straight from PostgreSQL (no search
-  service)
-* Filter by category, Minecraft version, loader/platform, and client
+* Typo-tolerant full-text search straight from PostgreSQL, with no
+  separate search service
+* Filter by category, Minecraft version, loader or platform, and client
   requirement; sort by downloads, activity, or name
 * Trending projects and a news section on the home page
 * S3-compatible object storage for uploads, with per-file and site-wide
   quota enforcement
+* Project icons and gallery images in the same bucket, with a web console
+  for local development
 * Versioned releases with release channels, changelogs, and game-version
   and loader metadata
 * Server listings with join address, port, client requirement, and links
@@ -54,10 +56,10 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 #### Creators and community
 
-* Creator dashboard: create projects, upload versions, manage server
-  details
-* Moderated publishing: a project goes `draft` → `pending` → `published`
-  through an admin review queue
+* Creator dashboard: create projects, upload versions, manage images and
+  server details
+* Moderated publishing: a project goes `draft` to `pending` to `published`
+  through a review queue
 * Blog with Markdown posts, admin post management, and post search
 * Public author profiles at `/u/<username>` with a Markdown bio
 * Public profiles for every project type, with a version picker and
@@ -66,11 +68,17 @@ VoxelVein platform but does not include the full infrastructure stack.
 #### Accounts and administration
 
 * Better Auth with email/password, Google, GitHub, and passkeys
+* Three roles on one ladder: `user`, `moderator`, and `admin`
+* A moderator reviews projects and drafts blog posts, and can disable an
+  account. Publishing a post, deleting a user, changing roles, and storage
+  settings stay admin-only
 * Cloudflare Turnstile on password sign-in and sign-up
 * Settings for profile, username, bio, sign-in methods, passkeys,
   sessions, and a guided account-deletion flow
 * Admin panel: users, sessions, posts, storage, notifications, pending
-  account deletions, and the publishing review queue
+  account deletions, and the publishing review queue, with each tab
+  hidden from roles that cannot use it
+* Notification bell with per-item and bulk mark-as-read
 * Public legal pages and a cookie consent banner
 
 #### Interface
@@ -79,7 +87,9 @@ VoxelVein platform but does not include the full infrastructure stack.
 * Light and dark themes with a view-transition theme switch
 * Responsive, mobile-first layout
 * WCAG 2.2 AA accessibility as a baseline requirement
-* Cookie banner, skip link, and reduced-motion support throughout
+* Scroll reveals that respect `prefers-reduced-motion`
+* Visible required-field markers on forms, marked in the label but kept out
+  of the accessible name
 
 #### Engineering
 
@@ -88,14 +98,14 @@ VoxelVein platform but does not include the full infrastructure stack.
 * TanStack Router (file-based, type-safe routing)
 * TanStack Query and TanStack Form (server state and forms)
 * Tailwind CSS v4 with OKLCH design tokens
-* Base UI + shadcn-style components (UI foundation)
+* Base UI and shadcn-style components
 * Better Auth (authentication, passkeys, admin plugin)
-* Drizzle ORM and PostgreSQL (database access and schema management)
+* Drizzle ORM and PostgreSQL
 * ElysiaJS (standalone API server with signed webhooks and SSE)
-* Valibot (shared validation on client and server)
+* Valibot (validation shared by client and server)
 * Nitro (production server runtime and scheduled tasks)
-* Vitest and Testing Library (testing)
-* Ultracite on Oxlint + Oxfmt (linting and formatting)
+* Vitest and Testing Library
+* Ultracite on Oxlint and Oxfmt
 * markdownlint (documentation)
 * pnpm (package management)
 
@@ -125,14 +135,7 @@ VoxelVein platform but does not include the full infrastructure stack.
 | **Oxfmt**           | Formatting                                 |
 | **Ultracite**       | Unified code-quality checks and fixes      |
 | **markdownlint**    | Documentation linting                      |
-| **PNPM**            | Package management                         |
-
-> Project icons and gallery images are stored in object storage, but they
-> are **not resized**: originals are kept exactly as uploaded, so a large
-> photo becomes a large icon. Images are served through a caching proxy
-> route rather than a CDN, and Unpic is not installed — it only rewrites
-> third-party CDN URLs, which R2 and Garage are not. See
-> [ROADMAP.md](ROADMAP.md).
+| **pnpm**            | Package management                         |
 
 ---
 
@@ -140,33 +143,32 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 Before starting development, ensure you have:
 
-* **Node.js 24+**
-* **PNPM 11.3.0** (managed via `packageManager` in `package.json`)
+* **Node.js 24 or later**
+* **pnpm 11.3.0**, pinned through the `packageManager` field in
+  `package.json`
 * **PostgreSQL** for local server-side database integration
 * Git
 
-> **Note:** The repository pins PNPM through the `packageManager` field, so
-> using the pinned version is recommended. Node.js 24 is also pinned in
-> [`mise.toml`](mise.toml) and used by the Dockerfile and CI.
+Node 24 is also pinned in [`mise.toml`](mise.toml), the Dockerfile, and CI.
 
 ---
 
 ## Getting Started
 
-### Clone the Repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/VoxelVein/frontend.git
 cd frontend
 ```
 
-### Install Dependencies
+### Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### Configure the Environment
+### Configure the environment
 
 Copy the example file and fill in the values. `.env.example` documents
 every supported variable:
@@ -179,7 +181,7 @@ The minimum needed to boot the web app:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
-BETTER_AUTH_SECRET=your-secret-here  # At least 32 characters
+BETTER_AUTH_SECRET=your-secret-here  # at least 32 characters
 BETTER_AUTH_URL=http://localhost:3000
 VITE_SITE_URL=http://localhost:3000
 API_URL=http://localhost:3002
@@ -189,15 +191,12 @@ NODE_ENV=development
 
 The API server additionally requires `WEBHOOK_SECRET` (at least 32
 characters) and refuses to start without it. Object storage, Google,
-GitHub, and Cloudflare Turnstile are all optional and each one simply
+GitHub, and Cloudflare Turnstile are all optional, and each one simply
 disables its own feature when unset.
 
 > Never commit `.env.local` or real credentials to the repository.
 
-### Start the Development Server
-
-The app and the ElysiaJS API server run side by side. Start the complete
-development environment with:
+### Start the development server
 
 ```bash
 pnpm dev
@@ -210,11 +209,8 @@ pnpm dev:web    # web app on http://localhost:3000
 pnpm dev:api    # API server on http://localhost:3002
 ```
 
-The development server runs on `http://localhost:3000` and the API server
-on `http://localhost:3002`.
-
-> `pnpm dev` delegates to `pnpm dev:all`, so the two commands can never
-> drift apart. `pnpm dev:web` starts only the Vite app.
+`pnpm dev` delegates to `pnpm dev:all`, so the two cannot drift apart.
+`pnpm dev:web` starts only the Vite app.
 
 ---
 
@@ -222,18 +218,18 @@ on `http://localhost:3002`.
 
 ### Development
 
-| Command             | Description                                     |
-| ------------------- | ----------------------------------------------- |
-| `pnpm dev`          | Starts the complete dev environment (app + API) |
-| `pnpm dev:web`      | Starts only the Vite app (port 3000)            |
-| `pnpm dev:api`      | Starts the ElysiaJS API server (watch)          |
-| `pnpm dev:all`      | Runs the app and API server together            |
-| `pnpm start:api`    | Starts the API server (no watch)                |
-| `pnpm send:webhook` | Sends a test mod webhook to the API             |
-| `pnpm build`        | Builds the production bundle                    |
-| `pnpm preview`      | Previews the production build                   |
-| `pnpm start`        | Starts the built Nitro server                   |
-| `pnpm check:bundle` | Checks the main chunk against the size budget   |
+| Command             | Description                                   |
+| ------------------- | --------------------------------------------- |
+| `pnpm dev`          | Starts the whole dev environment (app + API)  |
+| `pnpm dev:web`      | Starts only the Vite app (port 3000)          |
+| `pnpm dev:api`      | Starts the ElysiaJS API server (watch)        |
+| `pnpm dev:all`      | Runs the app and API server together          |
+| `pnpm start:api`    | Starts the API server (no watch)              |
+| `pnpm send:webhook` | Sends a test mod webhook to the API           |
+| `pnpm build`        | Builds the production bundle                  |
+| `pnpm preview`      | Previews the production build                 |
+| `pnpm start`        | Starts the built Nitro server from `.output/` |
+| `pnpm check:bundle` | Checks the main chunk against the size budget |
 
 ### Quality
 
@@ -256,16 +252,19 @@ on `http://localhost:3002`.
 | ----------------------- | ---------------------------------------- |
 | `pnpm db:migrate`       | Applies pending Drizzle migrations       |
 | `pnpm db:studio`        | Opens Drizzle Studio                     |
+| `pnpm db:check`         | Check for an ungenerated migration       |
 | `pnpm db:seed`          | Seeds demo projects and blog posts       |
 | `pnpm db:seed:projects` | Seeds demo projects of every type        |
 | `pnpm db:seed:posts`    | Seeds demo blog posts                    |
-| `pnpm db:seed:admin`    | Promotes an existing user to admin       |
+| `pnpm db:seed:admin`    | Promotes a user to a staff role          |
 | `pnpm mc:versions`      | Refreshes the Minecraft version manifest |
-| `pnpm storage:init`     | Prepares the local Garage bucket and key |
+| `pnpm storage:init`     | Prepares the local Garage bucket         |
+| `pnpm docs:check`       | Checks Markdown links and anchors        |
 
-> To generate a migration, use the project-local Drizzle binary:
-> `./node_modules/.bin/drizzle-kit generate`. There is no `db:generate`
-> script, and `pnpm dlx drizzle-kit` fails in a fresh environment.
+To generate a migration, use the project-local Drizzle binary:
+`./node_modules/.bin/drizzle-kit generate`. There is deliberately no
+`db:generate` script, and `pnpm dlx drizzle-kit` fails in a fresh
+environment without `drizzle-orm`.
 
 ---
 
@@ -273,7 +272,7 @@ on `http://localhost:3002`.
 
 ### mise
 
-[`mise.toml`](mise.toml) pins the Node.js version (24). If you use mise:
+[`mise.toml`](mise.toml) pins the Node.js version. If you use mise:
 
 ```bash
 mise install
@@ -281,9 +280,9 @@ mise install
 
 ### just
 
-A [`justfile`](justfile) wraps the common package scripts so you can run
-`just dev`, `just check`, `just test`, and so on instead of `pnpm <script>`.
-Run `just` with no arguments to list all recipes.
+A [`justfile`](justfile) wraps the common package scripts, so you can run
+`just dev`, `just check`, or `just test` instead of the equivalent `pnpm`
+command. Run `just` with no arguments to list every recipe.
 
 ---
 
@@ -296,16 +295,16 @@ src/
 ├── components/     # UI components, grouped by feature
 │   ├── admin/      # Admin panel tabs
 │   ├── blog/       # Blog cards and search
-│   ├── dashboard/  # Creator project, version, and server forms
+│   ├── dashboard/  # Creator project, version, server, and image forms
 │   ├── legal/      # Shared legal-document renderer
 │   ├── motion/     # Theme toggle, rotating text, view transitions
-│   ├── navbar/     # Navbar, mobile drawer, user menu
-│   ├── projects/   # Project browser, card, detail page
+│   ├── navbar/     # Navbar, mobile drawer, user menu, notifications
+│   ├── projects/   # Project browser, card, detail, image, gallery
 │   ├── settings/   # Settings tabs
-│   └── ui/         # Base UI + shadcn primitives
+│   └── ui/         # Base UI and shadcn primitives
 ├── db/             # Drizzle client and schema
 ├── hooks/          # Reduced motion, username availability, post search
-├── lib/            # Auth, projects, search, storage, server functions
+├── lib/            # Auth, roles, projects, search, storage, server functions
 ├── routes/         # TanStack Start file-based routes
 ├── tasks/          # Nitro scheduled tasks
 ├── test/           # Vitest setup
@@ -321,7 +320,12 @@ server/             # Standalone ElysiaJS API server
 
 The Vite configuration integrates TanStack Start, TanStack Router,
 TanStack DevTools, Tailwind CSS, Nitro, and React. Nitro also runs the
-hourly `accounts:purge` scheduled task.
+hourly account-purge scheduled task.
+
+`src/lib/roles.ts` holds the role ladder and is deliberately free of
+server imports, so client components can check a role without pulling the
+database into the browser bundle. Session-based guards live in
+`src/lib/role-guards.ts`.
 
 See [docs/architecture/overview.md](docs/architecture/overview.md) for how
 a request flows through the stack.
@@ -330,38 +334,41 @@ a request flows through the stack.
 
 ## Database
 
-The application uses **PostgreSQL** via **Drizzle ORM**.
+The application uses **PostgreSQL** through **Drizzle ORM**.
 
 * A local PostgreSQL instance is required for server-side database
   functionality.
-* The connection is configured via `DATABASE_URL`:
+* The connection is configured through `DATABASE_URL`:
 
   ```env
   DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
   ```
 
-* Migrations are stored in `drizzle/`. Apply them with `pnpm db:migrate`.
-* Search is part of the database, not a separate service: `pg_trgm` and
-  full-text indexes created by the migrations back every query. See
+* Migrations live in `drizzle/`. Apply them with `pnpm db:migrate`.
+* Search is part of the database rather than a separate service: `pg_trgm`
+  and full-text indexes created by the migrations back every query. See
   [docs/search/postgres.md](docs/search/postgres.md).
 
 To bring up Postgres and local object storage together:
 
 ```bash
-just infra           # docker-compose.yml: Postgres + Garage
+just infra           # docker-compose.yml: Postgres and Garage
 just storage-init    # create the bucket and access key
 ```
 
+For an object storage server with a browser console, see
+[docs/storage/rustfs.md](docs/storage/rustfs.md).
+
 ---
 
-## Authentication
+## Authentication and Roles
 
-The application uses **Better Auth** for authentication.
+The application uses **Better Auth**.
 
 * Required configuration:
 
   ```env
-  BETTER_AUTH_SECRET=your-secret-here   # At least 32 characters
+  BETTER_AUTH_SECRET=your-secret-here   # at least 32 characters
   BETTER_AUTH_URL=http://localhost:3000
   ```
 
@@ -370,12 +377,27 @@ The application uses **Better Auth** for authentication.
   without them the provider and its button are simply absent.
 * Password sign-in and sign-up are gated by Cloudflare Turnstile. Without
   `VITE_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET` the widget does not
-  render and those two endpoints fail closed with `503`.
+  render, and those two endpoints fail closed with `503`.
 * Usernames are separate from the display name, with a 14-day change
   cooldown and a reservation window for a previous name.
 
-See [docs/authentication/](docs/authentication/accounts.md) for usernames,
-sessions, passkeys, and account deletion.
+Authorization is a single ladder in `ROLE_RANK` (`src/lib/roles.ts`):
+
+| Role        | Can                                                           |
+| ----------- | ------------------------------------------------------------- |
+| `user`      | Only their own projects. Nothing in the admin panel.          |
+| `moderator` | Review projects, draft blog posts, disable an account.        |
+| `admin`     | Everything, plus publishing posts, deleting users, and roles. |
+
+Every check calls `hasRole(role, minimum)` rather than comparing role
+names, so adding a role extends the ladder without touching call sites. The
+same split is expressed a second time in Better Auth's access-control
+statements (`src/lib/permissions.ts`), which is what actually gates the
+`/admin/*` endpoints, so a moderator cannot delete a user even if an app
+guard were missed.
+
+See [docs/content/admin-panel.md](docs/content/admin-panel.md#roles) for
+the full matrix.
 
 ---
 
@@ -383,10 +405,10 @@ sessions, passkeys, and account deletion.
 
 A standalone **ElysiaJS** API server (`server/`) handles real-time events:
 
-* `GET /api/health` — liveness check
-* `GET /api/events` — Server-Sent Events (SSE) stream of mod events
-* `POST /api/webhooks/mods` — webhook endpoint (HMAC-SHA256 verified) that
-  broadcasts `mod.created`, `mod.updated`, and `mod.deleted` events
+* `GET /api/health`, a liveness check
+* `GET /api/events`, a Server-Sent Events stream of mod events
+* `POST /api/webhooks/mods`, an HMAC-SHA256-verified webhook that
+  broadcasts `mod.created`, `mod.updated`, and `mod.deleted`
 
 Every project browse page subscribes to the SSE stream and shows a live
 banner when something changes, with a one-click refresh that bypasses the
@@ -406,10 +428,30 @@ VITE_API_URL=http://localhost:3002
 ```
 
 The server has no database connection: it publishes and streams events
-only. Search lives in Postgres, not here. See
+only. Search lives in Postgres. See
 [docs/architecture/api.md](docs/architecture/api.md) for the full
-reference, and [docs/content/projects.md](docs/content/projects.md) for
+reference and [docs/content/projects.md](docs/content/projects.md) for
 the web app's own upload and download endpoints.
+
+---
+
+## Object Storage
+
+Uploaded files and project images live in S3-compatible object storage.
+Local development uses [Garage](https://garagehq.deuxfleurs.fr/) or
+[RustFS](docs/storage/rustfs.md), and production uses Cloudflare R2.
+
+The app only uses the S3 API, so switching providers means changing
+environment variables only. Images are proxied through the app rather than
+redirected, because the published-state check has to run on every request.
+
+> Images are **not resized**: originals are stored exactly as uploaded, so a
+> large photo becomes a large icon. [ROADMAP.md](ROADMAP.md) records the
+> options and their trade-offs.
+
+See [docs/storage/object-storage.md](docs/storage/object-storage.md) for the
+object layout, [rustfs](docs/storage/rustfs.md) for the local console
+setup, and [cloudflare-r2](docs/storage/cloudflare-r2.md) for production.
 
 ---
 
@@ -417,14 +459,14 @@ the web app's own upload and download endpoints.
 
 These pages exist as **placeholders** and must be reviewed by a qualified
 professional before production. `/legal` still carries `Unknown` for the
-operator's name and address, and no route is named `/impressum`:
+operator's name and address:
 
-* `/legal` — Legal notes (§ 5 DDG service-provider notice)
-* `/privacy` — Privacy Policy
-* `/cookies` — Cookie Policy
-* `/terms` — Terms of Service
-* `/terms-of-use` — Terms of Use
-* `/disclaimer` — Disclaimer
+* `/legal` legal notes (§ 5 DDG service-provider notice)
+* `/privacy` privacy policy
+* `/cookies` cookie policy
+* `/terms` terms of service
+* `/terms-of-use` terms of use
+* `/disclaimer` disclaimer
 
 All six share the renderer in
 [`src/components/legal/legal-page.tsx`](src/components/legal/legal-page.tsx)
@@ -444,33 +486,34 @@ completed milestones. Day-to-day work items are tracked in
 
 ## Development Workflow
 
-The workflow follows a simple promotion pattern:
-
 ```text
-feature branch → main → prod → production deployment
+feature branch -> main -> prod -> production deployment
 ```
 
 ### `main`
 
 * The primary development branch.
-* New work is developed on a dedicated branch and merged into `main` via
-  pull requests.
+* New work is developed on a dedicated branch and merged into `main`
+  through pull requests.
 
 ### `prod`
 
 * Represents the production branch.
-* Merging `main` into `prod` triggers automatic production deployment.
-* The `prod` branch is protected: changes can only land through a pull
-  request whose head branch is `main`.
+* Merging `main` into `prod` triggers the production deployment.
+* The branch is protected: changes can only land through a pull request
+  whose head branch is `main`.
 
-> [!IMPORTANT] Do not develop directly on `prod`. Changes must flow through
-> `main` first.
+> [!IMPORTANT]
+> Do not develop directly on `prod`. Changes must flow through `main`
+> first.
 
 ---
 
-## Code Quality
+## Continuous Integration
 
-Before opening a pull request, run the same checks CI runs:
+The gate lives in one place, the reusable workflow
+`.github/workflows/_quality.yml`, called by `main.yml`, `pr.yml`, and
+`deploy.yml`. Run the same checks locally before opening a pull request:
 
 ```bash
 pnpm check
@@ -479,30 +522,35 @@ pnpm test
 pnpm build
 pnpm check:bundle --no-build
 pnpm lint:md
+pnpm db:check
+pnpm docs:check
 ```
 
-For automatic fixes:
+Two of these catch things nothing else does:
 
-```bash
-pnpm fix
-```
+* `pnpm db:check` fails when the schema has a change with no generated
+  migration. Migrations apply automatically at merge time, so that
+  combination would ship code reading columns the database does not have.
+* `pnpm docs:check` resolves every relative link and heading anchor.
+  markdownlint has no rule for link targets, so a renamed section
+  otherwise leaves links quietly pointing at nothing.
 
-For formatting:
+`pnpm fix` applies automatic lint and format fixes, and `pnpm format`
+formats source files only.
 
-```bash
-pnpm format
-```
+The project enforces code quality with **Ultracite**, **Oxlint**, and
+**Oxfmt**, and documentation with **markdownlint** (via `markdownlint-cli2`
+with the GitHub ruleset). A Husky pre-commit hook runs `ultracite fix` and
+re-stages your files, so formatting is applied at commit time.
 
-The project uses **Ultracite**, **Oxlint**, and **Oxfmt** for code-quality
-enforcement, and **markdownlint** (via `markdownlint-cli2` with the GitHub
-ruleset) for documentation. A Husky pre-commit hook runs `ultracite fix` and
-re-stages your files, so formatting is applied automatically at commit time.
+Markdown-only changes skip the heavy jobs, and the deployed images are
+published with provenance and SBOM attestations.
 
 ---
 
 ## Testing
 
-Tests use **Vitest** with Testing Library and jsdom. Run the suite with:
+Tests use **Vitest** with Testing Library and jsdom:
 
 ```bash
 pnpm test
@@ -515,35 +563,23 @@ lines, statements, and functions; 70% branches):
 pnpm test:coverage
 ```
 
-Tests live next to what they cover in `__tests__` folders — route tests in
-`src/__tests__`, component tests in `src/components/__tests__`, and library
-tests in `src/lib/__tests__`.
+Tests live next to what they cover in `__tests__` folders: route tests in
+`src/__tests__`, component tests in `src/components/__tests__`, and
+library tests in `src/lib/__tests__`.
 
 ---
 
 ## Production Build
 
-Build the production application with:
-
 ```bash
-pnpm build
-```
-
-Preview the generated build with:
-
-```bash
-pnpm preview
-```
-
-Start the production server:
-
-```bash
-pnpm start
+pnpm build     # build the production bundle
+pnpm preview   # preview the generated build
+pnpm start     # start the production server
 ```
 
 The application uses **Nitro** for its production server output. The
 production image also ships the standalone API server and a one-shot
-migration runner as separate build targets — see
+migration runner as separate build targets. See
 [docs/deployment/docker.md](docs/deployment/docker.md).
 
 ---
@@ -552,36 +588,31 @@ migration runner as separate build targets — see
 
 ### Development with Docker
 
-Run the development environment with Docker:
-
 ```bash
 docker compose -f compose.yaml -f compose.dev.yaml up
 ```
 
-The development Compose configuration mounts the source tree and runs the
-complete development environment (Vite app + ElysiaJS API server in the
-same container) with hot reload. Vite is pinned to container port `6001`
-and the API to `3002`, published on host ports `1112` and `3002` by
-default:
+The development configuration mounts the source tree and runs the whole
+development environment, the Vite app and the ElysiaJS API server in the
+same container, with hot reload. Vite is pinned to container port `6001`
+and the API to `3002`:
 
 ```text
-host :1112 → container :6001 (Vite dev server)
-host :3002 → container :3002 (API server)
+host :1112 -> container :6001 (Vite dev server)
+host :3002 -> container :3002 (API server)
 ```
 
-`migrate` and the standalone `api` service are put behind a Compose profile
-in this file, so migrations stay a manual `pnpm db:migrate`.
+`migrate` and the standalone `api` service sit behind a Compose profile in
+this file, so migrations stay a manual `pnpm db:migrate`.
 
 ### Production with Docker
-
-Run the production environment with Docker:
 
 ```bash
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 ```
 
 `db` starts first, the one-shot `migrate` service applies pending
-migrations and exits, and `web` only starts after it succeeds, so a deploy
+migrations and exits, and `web` starts only after it succeeds, so a deploy
 never serves new code against an old schema. `api` starts independently.
 
 This stack publishes **no host ports**: under Dokploy, Traefik routes
@@ -594,11 +625,11 @@ docker compose -f compose.yaml -f compose.prod.yaml \
 ```
 
 ```text
-host :1112 → container :3000 (Nitro server)
-host :1113 → container :3002 (API server)
+host :1112 -> container :3000 (Nitro server)
+host :1113 -> container :3002 (API server)
 ```
 
-> The host ports default to `1112`/`1113` to avoid conflicts with other
+> Host ports default to `1112` and `1113` to avoid clashing with other
 > services on a shared host. Override them with `WEB_PORT` and
 > `API_HOST_PORT`.
 
@@ -609,37 +640,34 @@ storage, use `docker-compose.yml` instead.
 
 ## Deployment
 
-Production deployment follows this workflow:
-
 ```text
-main → prod → automatic production deployment
+main -> prod -> automatic production deployment
 ```
 
-Changes merged from `main` into `prod` are automatically deployed. The
+Changes merged from `main` into `prod` are deployed automatically. The
 `deploy` workflow builds the web, API, and migration images, pushes them to
 `ghcr.io` tagged with the `package.json` version and the commit SHA, and
-fails unless the `VITE_API_URL` and `VITE_SITE_URL` repository variables are
-set. See [docs/deployment/dokploy.md](docs/deployment/dokploy.md) for the
-Dokploy setup.
+fails unless the `VITE_API_URL` and `VITE_SITE_URL` repository variables
+are set. See [docs/deployment/dokploy.md](docs/deployment/dokploy.md) for
+the Dokploy setup.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-full contribution guide, including branch strategy, code-quality
-requirements, and the pull request process.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+branch strategy, code-quality requirements, and the pull request process.
 
 ---
 
 ## Security
 
-Found a security issue? See [SECURITY.md](SECURITY.md) for our vulnerability
-reporting policy.
+Found a security issue? See [SECURITY.md](SECURITY.md) for the
+vulnerability reporting policy.
 
 ---
 
 ## Code of Conduct
 
-Please review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating
-in the community.
+Please review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before
+participating in the community.
