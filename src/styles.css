@@ -333,6 +333,10 @@
   color: var(--foreground);
   font-size: 1rem;
   line-height: 1.75;
+  /* Break a word that cannot fit a line of its own, rather than letting it
+     push the layout sideways. A pasted URL or a long hash used to widen the
+     page instead of wrapping. Reset on code below, which scrolls instead. */
+  overflow-wrap: break-word;
 }
 
 .markdown-body > * + * {
@@ -398,6 +402,9 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.875em;
+  /* A code block scrolls horizontally rather than reflowing, so the inherited
+     break must be switched off or the code stops reading as code. */
+  overflow-wrap: normal;
   padding: 0.15em 0.35em;
 }
 
