@@ -5,6 +5,11 @@ on:
     branches: [main, prod]
   push:
     branches: [main, prod]
+    paths-ignore:
+      # Not documentation: let the Main and Pull Request workflows own it.
+      - "**/*.md"
+      - "docs/**"
+      - ".opencode/**"
 
 concurrency:
   group: docs-${{ github.ref }}
@@ -29,8 +34,8 @@ jobs:
       - name: Lint Markdown
         run: pnpm lint:md
 
-  accessibility:
-    name: Markdown accessibility
+  links:
+    name: Check documentation links
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -41,5 +46,9 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
-      - name: Check Markdown accessibility
-        run: pnpm lint:md
+      # Every relative link and heading anchor in docs/ and the root Markdown
+      # files. These break silently: a renamed section leaves the link
+      # pointing at a heading that no longer exists, and markdownlint has no
+      # rule for it.
+      - name: Verify internal links resolve
+        run: pnpm docs:check

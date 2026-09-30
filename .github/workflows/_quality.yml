@@ -1,0 +1,76 @@
+name: Reusable — Quality
+
+# Single definition of the quality gate, called by the Main, Pull Request and
+# Deploy workflows. This used to be copy-pasted into all three, so a change to
+# the gate needed three edits and they would drift; a later workflow could end
+# up silently checking less than an earlier one.
+on:
+  workflow_call:
+    inputs:
+      # The deploy build bakes the public URLs into the bundle, so it needs the
+      # real repository variables. Pull requests and main have no such values,
+      # and this lets the caller fall back to placeholders that still typecheck.
+      api-url:
+        description: Public API URL baked into the bundle
+        required: false
+        type: string
+        default: ""
+      site-url:
+        description: Public web app URL baked into the bundle
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Lint & format check
+        run: pnpm check
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint Markdown
+        # Was only in docs.yml, which runs on push and pull request, so a
+        # deploy-triggered build never checked it. It is cheap, so it belongs
+        # in the gate itself.
+        run: pnpm lint:md
+
+      - name: Check for known vulnerabilities
+        run: pnpm audit --audit-level high
+        continue-on-error: true
+
+      - name: Verify migrations match the schema
+        run: pnpm db:check
+        env:
+          # drizzle.config.ts validates its environment on import, so these must
+          # be present and well-formed even though `generate` only reads the
+          # schema and never connects. No database service is needed.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          BETTER_AUTH_SECRET: ci-only-placeholder-secret-not-used-in-ci
+          BETTER_AUTH_URL: http://localhost:3000
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          VITE_API_URL: ${{ inputs.api-url || 'https://api.invalid' }}
+          VITE_SITE_URL: ${{ inputs.site-url || 'https://site.invalid' }}
+
+      - name: Check bundle size
+        run: pnpm check:bundle --no-build

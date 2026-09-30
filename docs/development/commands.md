@@ -43,6 +43,7 @@ build. The budget is 700 kB raw and 250 kB gzipped for the largest
 | ----------------- | ------------------------ |
 | `pnpm db:migrate` | Apply pending migrations |
 | `pnpm db:studio`  | Open Drizzle Studio      |
+| `pnpm db:check`   | Verify schema/migrations |
 
 To generate a migration, use the project-local Drizzle binary:
 
@@ -53,6 +54,10 @@ To generate a migration, use the project-local Drizzle binary:
 There is deliberately no `db:generate` script, and
 `pnpm dlx drizzle-kit` runs in a fresh environment and fails with
 "Please install latest version of drizzle-orm".
+
+`pnpm db:check` runs `generate` and fails if it produces a migration, which
+means `src/db/schema.ts` changed without one. It needs no database, so it is
+cheap to run locally before pushing, and CI runs it on every build.
 
 See [Migrations](../database/migrations.md) for how to name, review, and
 apply a migration.
@@ -111,9 +116,33 @@ the Vite server and `3002` for the API. See
 
 ## CI
 
-The same commands run in CI: `pnpm check`, `pnpm typecheck`, `pnpm test`,
-`pnpm build`, and `pnpm check:bundle --no-build`, plus `pnpm lint:md` in
-the docs workflow. Markdown lint also runs on every pull request.
+The gate is defined once, in the reusable workflow
+`.github/workflows/_quality.yml`, and is called by `main.yml`, `pr.yml`, and
+`deploy.yml`. It runs:
+
+* `pnpm check` for lint and format
+* `pnpm typecheck` for types
+* `pnpm lint:md` for Markdown
+* `pnpm audit --audit-level high` for known vulnerabilities (non-blocking, so
+  an advisory does not block unrelated work)
+* `pnpm db:check` to confirm the schema and migrations agree
+* `pnpm test`, `pnpm build`, and `pnpm check:bundle --no-build`
+
+`_docker.yml` is likewise reusable, and builds the runtime image with
+`push: false` on main and pull requests, so the Dockerfile is checked without
+needing registry credentials.
+
+`docs.yml` runs `pnpm lint:md` and `pnpm docs:check`, the latter verifying
+that every relative link and heading anchor resolves.
+
+`main.yml` and `pr.yml` skip everything except docs for Markdown-only
+changes. `deploy.yml` additionally pushes the web, API, and migrate images
+with provenance and SBOM attestations.
+
+The migration check needs no database, but `drizzle.config.ts` validates its
+environment on import, so the workflow supplies a placeholder
+`DATABASE_URL`, a `BETTER_AUTH_SECRET` of at least 32 characters, and
+`BETTER_AUTH_URL`.
 
 ## Git hooks
 

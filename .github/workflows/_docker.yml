@@ -1,0 +1,52 @@
+name: Reusable — Docker build
+
+# Single definition of the Docker build, called by the Main and Pull Request
+# workflows. Both only build (push: false), so this checks that the image still
+# compiles without needing registry credentials.
+on:
+  workflow_call:
+    inputs:
+      api-url:
+        description: Public API URL baked into the bundle
+        required: false
+        type: string
+        default: ""
+      site-url:
+        description: Public web app URL baked into the bundle
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime
+          push: false
+          # Build check only (nothing is pushed), so placeholder URLs are fine
+          # when the repository variables are not set.
+          build-args: |
+            VITE_API_URL=${{ inputs.api-url || 'https://api.invalid' }}
+            VITE_SITE_URL=${{ inputs.site-url || 'https://site.invalid' }}
+          # Scoped cache, so the web build does not evict the API and migrate
+          # layers. The previous shared scope meant three targets fought over
+          # one cache entry and each push missed more than it needed to.
+          cache-from: type=gha,scope=docker-runtime
+          cache-to: type=gha,scope=docker-runtime,mode=max

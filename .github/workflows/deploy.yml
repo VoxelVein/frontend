@@ -7,41 +7,25 @@ on:
 
 concurrency:
   group: deploy-${{ github.ref }}
+  # A deploy must finish once started; cancelling halfway would leave whatever
+  # was published pointing at images that were never fully pushed.
   cancel-in-progress: false
 
 permissions:
   contents: read
   packages: write
+  # Required for the image provenance attestation below, which signs the build
+  # with this workflow's OIDC identity.
+  id-token: write
+  attestations: write
 
 jobs:
   quality:
     name: Quality checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
-
-      - name: Lint & format check
-        run: pnpm check
-
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Run tests
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-
-      - name: Check bundle size
-        run: pnpm check:bundle --no-build
+    uses: ./.github/workflows/_quality.yml
+    with:
+      api-url: ${{ vars.VITE_API_URL }}
+      site-url: ${{ vars.VITE_SITE_URL }}
 
   deploy:
     name: Build & push images
@@ -85,6 +69,8 @@ jobs:
 
       # Images are tagged with the package.json version (what is deployed) and
       # the commit SHA (exactly which build). There is no floating `latest`.
+      # provenance: true adds a signed attestation so a pulled image can be
+      # traced to this workflow run.
       - name: Build and push web image
         uses: docker/build-push-action@v6
         with:
@@ -92,6 +78,8 @@ jobs:
           file: ./Dockerfile
           target: runtime
           push: true
+          provenance: true
+          sbom: true
           build-args: |
             VITE_API_URL=${{ vars.VITE_API_URL }}
             VITE_SITE_URL=${{ vars.VITE_SITE_URL }}
@@ -111,6 +99,8 @@ jobs:
           file: ./Dockerfile
           target: api
           push: true
+          provenance: true
+          sbom: true
           tags: |
             ${{ steps.meta.outputs.image }}-api:${{ steps.meta.outputs.version }}
             ${{ steps.meta.outputs.image }}-api:${{ github.sha }}
@@ -124,6 +114,8 @@ jobs:
           file: ./Dockerfile
           target: migrate
           push: true
+          provenance: true
+          sbom: true
           tags: |
             ${{ steps.meta.outputs.image }}-migrate:${{ steps.meta.outputs.version }}
             ${{ steps.meta.outputs.image }}-migrate:${{ github.sha }}
