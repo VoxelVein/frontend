@@ -3,6 +3,12 @@ name: Pull Request
 on:
   pull_request:
     branches: [main, prod]
+    paths-ignore:
+      # A Markdown-only change cannot fail the gate or break the image. The
+      # Docs workflow still lints it on the same events.
+      - "**/*.md"
+      - "docs/**"
+      - ".opencode/**"
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
@@ -38,55 +44,9 @@ jobs:
 
   quality:
     name: Quality checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
-
-      - name: Lint & format check
-        run: pnpm check
-
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Run tests
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
-
-      - name: Check bundle size
-        run: pnpm check:bundle --no-build
+    uses: ./.github/workflows/_quality.yml
 
   docker:
     name: Docker build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     needs: quality
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          target: runtime
-          push: false
-          # Build check only (nothing is pushed), so placeholder URLs are fine
-          # when the repository variables are not set.
-          build-args: |
-            VITE_API_URL=${{ vars.VITE_API_URL || 'https://api.invalid' }}
-            VITE_SITE_URL=${{ vars.VITE_SITE_URL || 'https://site.invalid' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+    uses: ./.github/workflows/_docker.yml
