@@ -140,8 +140,10 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
       className="px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
       id="news"
     >
-      <div className="mx-auto max-w-5xl">
-        <Reveal className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+      {/* One reveal for the whole section, so the heading and the posts
+          arrive together instead of the heading leading on its own. */}
+      <Reveal className="mx-auto max-w-5xl">
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
           <div>
             <h2
               className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
@@ -165,7 +167,7 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
             All posts
             <IconArrowRight aria-hidden size={16} />
           </Link>
-        </Reveal>
+        </div>
 
         {lead === undefined ? (
           <EmptyState
@@ -200,7 +202,7 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
             ))}
           </ol>
         )}
-      </div>
+      </Reveal>
     </section>
   );
 };

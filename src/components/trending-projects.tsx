@@ -33,8 +33,10 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
       className="px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
       id="trending"
     >
-      <div className="mx-auto max-w-7xl">
-        <Reveal className="mb-8 flex items-end justify-between gap-4">
+      {/* One reveal for the whole section, so the heading and the cards
+          arrive together instead of the heading leading on its own. */}
+      <Reveal className="mx-auto max-w-7xl">
+        <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="text-muted-foreground mb-2 inline-flex items-center gap-1.5 text-sm font-medium">
               <IconFlame aria-hidden size={16} />
@@ -64,7 +66,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
             <span>Browse all</span>
             <IconArrowRight aria-hidden size={18} />
           </Link>
-        </Reveal>
+        </div>
 
         {projects.length === 0 ? (
           <EmptyState
@@ -96,7 +98,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
             ))}
           </ol>
         )}
-      </div>
+      </Reveal>
     </section>
   );
 };
