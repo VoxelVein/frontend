@@ -1,6 +1,8 @@
 import { cn } from "cn";
 import type { TextareaHTMLAttributes } from "react";
 
+import { RequiredLabel } from "@/components/required-label";
+
 type FormTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   id: string;
   label: string;
@@ -25,9 +27,9 @@ const FormTextarea = ({
 
   return (
     <div className="grid gap-2">
-      <label htmlFor={id} className="text-foreground text-sm font-medium">
+      <RequiredLabel htmlFor={id} isRequired={textareaProps.required}>
         {label}
-      </label>
+      </RequiredLabel>
 
       <textarea
         id={id}

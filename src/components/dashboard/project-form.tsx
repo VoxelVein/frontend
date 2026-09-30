@@ -4,6 +4,7 @@ import { safeParse } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
+import { RequiredLabel } from "@/components/required-label";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -140,12 +141,9 @@ export const ProjectForm = ({
     <form noValidate onSubmit={handleSubmit} className="grid gap-6">
       {mode === "create" ? (
         <div className="grid gap-2">
-          <label
-            htmlFor="project-type"
-            className="text-foreground text-sm font-medium"
-          >
+          <RequiredLabel htmlFor="project-type" isRequired>
             Project type
-          </label>
+          </RequiredLabel>
           <Select
             items={PROJECT_TYPES.map((type) => ({
               label: PROJECT_TYPE_LABELS[type].singular,
@@ -200,12 +198,9 @@ export const ProjectForm = ({
       ) : null}
 
       <div className="grid gap-2">
-        <label
-          htmlFor="project-category"
-          className="text-foreground text-sm font-medium"
-        >
+        <RequiredLabel htmlFor="project-category" isRequired>
           Category
-        </label>
+        </RequiredLabel>
         <Select
           items={CATEGORIES_BY_TYPE[values.type].map((category) => ({
             label: formatCategory(category),

@@ -1,6 +1,8 @@
 import { cn } from "cn";
 import type { InputHTMLAttributes } from "react";
 
+import { RequiredLabel } from "@/components/required-label";
+
 type FormFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   id: string;
   label: string;
@@ -25,9 +27,9 @@ const FormField = ({
 
   return (
     <div className="grid gap-2">
-      <label htmlFor={id} className="text-foreground text-sm font-medium">
+      <RequiredLabel htmlFor={id} isRequired={inputProps.required}>
         {label}
-      </label>
+      </RequiredLabel>
 
       <input
         id={id}
