@@ -13,7 +13,7 @@ const PluginsPage = () => {
 
 export const Route = createFileRoute("/plugins/")({
   loader: () => loadProjectBrowser("plugin"),
-  head: () => ({ meta: [{ title: "Plugins — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "Plugins | VoxelVein" }] }),
   component: PluginsPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

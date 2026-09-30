@@ -19,9 +19,9 @@ import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 
 const SITE_NAME = "VoxelVein";
-const SITE_TITLE = "VoxelVein — Free & Open-Source Minecraft Mod Platform";
+const SITE_TITLE = "VoxelVein | Free & Open-Source Minecraft Mod Platform";
 const SITE_DESCRIPTION =
-  "Discover, install, and share Minecraft mods, resource packs, modpacks, shaders, plugins, and servers — free and open source, forever.";
+  "Discover, install, and share Minecraft mods, resource packs, modpacks, shaders, plugins, and servers. Free and open source, forever.";
 
 // Absolute origin, no trailing slash. Read from import.meta.env rather than
 // env.config so the value is inlined at build time and available during SSR

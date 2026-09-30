@@ -25,8 +25,8 @@ describe(formatCount, () => {
   });
 
   // English compact notation uses B for billion, not G, so 5e9 is "5B" and
-  // "T" does not appear until 10^12. Compact notation is for display only —
-  // never parse it back.
+  // "T" does not appear until 10^12. Compact notation is for display only.
+  // Never parse it back.
   it("uses B for billions and reserves T for trillions", () => {
     expect(formatCount(5_000_000_000)).toBe("5B");
     expect(formatCount(999_999_999_999)).toBe("1T");

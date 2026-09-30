@@ -205,7 +205,7 @@ describe(AdminSessions, () => {
     // The trigger is named by its <label>, so its text is the selection.
     const trigger = screen.getByLabelText("User");
     expect(trigger.textContent).toContain("alice@example.com");
-    // The handle marker is "(@" — the email's own "@" would match otherwise.
+    // The handle marker is "(@", because the email's own "@" would match otherwise.
     expect(trigger.textContent).not.toContain("(@");
   });
 

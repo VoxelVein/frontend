@@ -12,7 +12,7 @@ import type { SQL } from "drizzle-orm";
  *
  * 0.3 is the conventional floor. It is high enough that two unrelated names do
  * not match on a shared handful of letters, and low enough that a single
- * transposed or dropped letter still matches — "sodim" finds "Sodium", "optfine"
+ * transposed or dropped letter still matches: "sodim" finds "Sodium", "optfine"
  * finds "OptiFine". Users mistype mod and plugin names constantly, so this is
  * what makes search feel forgiving.
  */
@@ -23,7 +23,7 @@ export const FUZZY_THRESHOLD = 0.3;
  *
  * This expression is duplicated verbatim in the GIN index created by migration
  * `0010_postgres_search`. Postgres only uses a GIN expression index when the
- * query repeats the expression exactly, so the two must stay identical — same
+ * query repeats the expression exactly, so the two must stay identical: same
  * functions, same order, same `'english'::regconfig` casts. Changing one without
  * the other does not error, it silently falls back to a sequential scan.
  *
@@ -56,7 +56,7 @@ export const POST_SEARCH_VECTOR = sql`(
  * Builds a full-text query from raw user input.
  *
  * `websearch_to_tsquery` is used rather than `to_tsquery` because it accepts
- * quotes, `OR` and `-`, and — critically — never raises on malformed input. A
+ * quotes, `OR` and `-`, and (critically) never raises on malformed input. A
  * stray character in the search box degrades to a weaker query instead of
  * failing the request with a 500.
  */

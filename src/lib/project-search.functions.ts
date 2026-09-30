@@ -51,7 +51,7 @@ export interface ProjectSearchResponse {
  * failure.
  *
  * Filter values are checked against the same allowlists the UI offers, and an
- * unknown one is dropped rather than forwarded — which is all the old endpoint
+ * unknown one is dropped rather than forwarded, which is all the old endpoint
  * ever did, since it could only be reached with values the browser had already
  * validated.
  */

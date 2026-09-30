@@ -58,7 +58,7 @@ const PREFIXES: { bytes: readonly number[]; type: AllowedImageType }[] = [
   { bytes: [0x47, 0x49, 0x46, 0x38], type: "image/gif" },
 ];
 
-// "RIFF" .... "WEBP" — the size sits between, so the tag is checked at 8.
+// "RIFF" .... "WEBP": the size sits between, so the tag is checked at 8.
 const RIFF = "RIFF";
 const WEBP = "WEBP";
 
@@ -185,8 +185,8 @@ const SIZE_READERS: Record<AllowedImageType, SizeReader> = {
 /**
  * Reads the type, extension, and pixel dimensions from an image's leading
  * bytes. Returns null when the type is not allowed, when the dimensions
- * cannot be read, or when they are implausible — a zero or absurd size
- * would break the aspect ratio the UI reserves for the image.
+ * cannot be read, or when they are implausible. A zero or absurd size would
+ * break the aspect ratio the UI reserves for the image.
  */
 export const readImage = (bytes: Uint8Array): SniffedImage | null => {
   const contentType = sniffImageType(bytes);

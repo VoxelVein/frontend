@@ -10,7 +10,7 @@ interface FormErrorProps {
 /**
  * A form-level error above a form's fields.
  *
- * The three entry points — sign in, sign up, and the username picker — each
+ * The three entry points (sign in, sign up, and the username picker) each
  * render the same block, and each had it copy-pasted. It is a live region so
  * an error inserted after a failed submit is announced rather than appearing
  * silently; `Alert` in `ui/` is the same idea but a different visual weight,

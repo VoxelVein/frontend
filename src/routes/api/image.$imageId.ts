@@ -27,9 +27,8 @@ const notFound = () =>
  * would be readable by anyone who could guess its id.
  *
  * The response is proxied rather than redirected, because a redirect would
- * need a presigned URL — which expires in five minutes, so a cached page
- * would show broken images — and because the guard has to run on every
- * request anyway.
+ * need a presigned URL (which expires in five minutes, so a cached page would
+ * show broken images) and because the guard has to run on every request anyway.
  */
 const handleImage = async (imageId: string): Promise<Response> => {
   if (!safeParse(uuidSchema, imageId).success) {

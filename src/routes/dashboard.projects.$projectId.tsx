@@ -412,8 +412,8 @@ export const Route = createFileRoute("/dashboard/projects/$projectId")({
     meta: [
       {
         title: loaderData
-          ? `Manage ${loaderData.name} — VoxelVein`
-          : "Manage project — VoxelVein",
+          ? `Manage ${loaderData.name} | VoxelVein`
+          : "Manage project | VoxelVein",
       },
     ],
   }),

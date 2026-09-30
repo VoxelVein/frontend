@@ -13,7 +13,7 @@ const ServersPage = () => {
 
 export const Route = createFileRoute("/servers/")({
   loader: () => loadProjectBrowser("server"),
-  head: () => ({ meta: [{ title: "Servers — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "Servers | VoxelVein" }] }),
   component: ServersPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

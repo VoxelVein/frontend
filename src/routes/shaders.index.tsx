@@ -13,7 +13,7 @@ const ShadersPage = () => {
 
 export const Route = createFileRoute("/shaders/")({
   loader: () => loadProjectBrowser("shader"),
-  head: () => ({ meta: [{ title: "Shaders — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "Shaders | VoxelVein" }] }),
   component: ShadersPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

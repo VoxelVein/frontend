@@ -8,7 +8,7 @@ interface LogoProps {
  * The VoxelVein mark.
  *
  * Rendered as a CSS mask over `/logo.svg` rather than an `<img>`, for two
- * reasons. The mark is monochrome — it was previously shipped as two raster
+ * reasons. The mark is monochrome. It was previously shipped as two raster
  * files, `logo-light.png` (#000) and `logo_dark.png` (#fff), swapped with
  * `dark:hidden`/`hidden dark:block`. One masked SVG replaces that pair and
  * themes from CSS alone. And the SVG embeds its artwork as a base64 raster, so

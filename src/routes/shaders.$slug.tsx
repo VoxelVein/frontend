@@ -27,8 +27,8 @@ export const Route = createFileRoute("/shaders/$slug")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.name} — VoxelVein`
-          : "Shader not found — VoxelVein",
+          ? `${loaderData.name} | VoxelVein`
+          : "Shader not found | VoxelVein",
       },
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]

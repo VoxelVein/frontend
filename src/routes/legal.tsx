@@ -89,7 +89,7 @@ const LegalNotesPage = () => (
 
 export const Route = createFileRoute("/legal")({
   head: () => ({
-    meta: [{ title: "Legal Notes — VoxelVein" }],
+    meta: [{ title: "Legal Notes | VoxelVein" }],
   }),
   component: LegalNotesPage,
 });

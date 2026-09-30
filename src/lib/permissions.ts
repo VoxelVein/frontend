@@ -14,7 +14,7 @@ export const ac = createAccessControl({
  *
  * `moderator` reviews projects and drafts blog posts. It can disable an
  * account, which `ban` allows, but deliberately cannot delete users, change
- * roles, revoke sessions, or publish a post — those statements are absent, so
+ * roles, revoke sessions, or publish a post. Those statements are absent, so
  * Better Auth refuses the matching `/admin/*` endpoints even if a guard in
  * this app is ever missed. That is the reason the split is expressed here as
  * well as in `ROLE_RANK`.

@@ -106,7 +106,7 @@ const sessionsReducer = (
     case "LOAD_SUCCESS": {
       // Spread so errorCount survives: dropping it would make the next failure
       // compute `undefined + 1` (NaN), and React compares effect deps with
-      // Object.is, which treats NaN as equal to itself — the effect would then
+      // Object.is, which treats NaN as equal to itself. The effect would then
       // never re-run for two failures in a row.
       return {
         ...state,
@@ -161,8 +161,8 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 const userLabel = (user: AdminUser): string => {
   const handle = user.displayUsername ?? user.username;
   return handle
-    ? `${user.name} (@${handle}) — ${user.email}`
-    : `${user.name} — ${user.email}`;
+    ? `${user.name} (@${handle}) · ${user.email}`
+    : `${user.name} · ${user.email}`;
 };
 
 const parseUserAgent = (userAgent: string) => {

@@ -48,6 +48,6 @@ const NewProjectPage = () => {
 };
 
 export const Route = createFileRoute("/dashboard/projects/new")({
-  head: () => ({ meta: [{ title: "New project — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "New project | VoxelVein" }] }),
   component: NewProjectPage,
 });

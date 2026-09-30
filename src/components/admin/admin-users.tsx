@@ -78,7 +78,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
     case "LOAD_SUCCESS": {
       // Spread so errorCount survives: dropping it would make the next failure
       // compute `undefined + 1` (NaN), and React compares effect deps with
-      // Object.is, which treats NaN as equal to itself — the effect would then
+      // Object.is, which treats NaN as equal to itself. The effect would then
       // never re-run for two failures in a row.
       return { ...state, error: null, isLoading: false, users: action.users };
     }

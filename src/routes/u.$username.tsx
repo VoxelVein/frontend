@@ -89,7 +89,7 @@ export const Route = createFileRoute("/u/$username")({
     const bio = loaderData?.bio;
     return {
       meta: [
-        { title: `${loaderData?.displayUsername ?? "Profile"} — VoxelVein` },
+        { title: `${loaderData?.displayUsername ?? "Profile"} | VoxelVein` },
         // Markdown stripped to plain text, because a meta description is text
         // and rendering it would put tags in the search result.
         ...(bio ? [{ name: "description", content: toPreview(bio, 160) }] : []),

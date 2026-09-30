@@ -367,7 +367,7 @@ const Filters = ({
 );
 
 // ---------------------------------------------------------------------------
-// Search state managed via useReducer — consolidates result, error, and
+// Search state managed via useReducer: consolidates result, error, and
 // isSearching that were previously three separate useState hooks.
 // ---------------------------------------------------------------------------
 
@@ -538,7 +538,7 @@ const Results = ({
 );
 
 const PAGE_DESCRIPTIONS = {
-  mod: "Discover performance, technology, adventure, and more — search Minecraft mods.",
+  mod: "Discover performance, technology, adventure, and more. Search Minecraft mods.",
   modpack:
     "Play curated collections of mods, from lightweight packs to kitchen-sink adventures.",
   plugin:
