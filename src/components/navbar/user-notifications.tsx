@@ -39,12 +39,14 @@ const markRead = (items: UserNotification[], id: string): UserNotification[] =>
 export const NotificationsBody = ({
   items,
   onMarkAllRead,
+  onMarkRead,
   onOpenItem,
   unread,
 }: {
   /** Null until the first open has loaded, which renders as the empty state. */
   items: UserNotification[] | null;
   onMarkAllRead: () => Promise<void>;
+  onMarkRead: (id: string) => Promise<void>;
   onOpenItem: (id: string) => Promise<void>;
   unread: number;
 }) => (
@@ -64,36 +66,56 @@ export const NotificationsBody = ({
       </p>
     ) : (
       items.map((item) => (
-        <DropdownMenuItem
+        // The row is a container rather than a DropdownMenuItem because the
+        // item carries two controls: a link to the project and a button that
+        // marks it read. A menu item renders as a single interactive element,
+        // so a button inside one would be a control nested in a link, which is
+        // invalid HTML and unusable with a keyboard.
+        <div
           key={item.id}
-          onClick={() => onOpenItem(item.id)}
-          render={
-            <Link
-              to="/dashboard/projects/$projectId"
-              params={{ projectId: item.projectId }}
-            />
-          }
-          className="flex w-full cursor-pointer flex-col items-start gap-1 rounded-lg px-3 py-2.5 text-left"
+          className="hover:bg-muted/60 flex items-start gap-1 rounded-lg px-1.5 py-1 transition-colors"
         >
-          <span className="flex w-full items-center gap-2">
-            {item.isRead ? null : (
-              <span
-                aria-hidden="true"
-                className="bg-primary size-2 shrink-0 rounded-full"
-              />
-            )}
-            <span className="text-foreground text-sm font-medium">
-              {item.isRead ? null : <span className="sr-only">Unread: </span>}
-              {item.title}
+          <Link
+            to="/dashboard/projects/$projectId"
+            params={{ projectId: item.projectId }}
+            onClick={() => onOpenItem(item.id)}
+            className="focus-visible:ring-ring flex min-w-0 flex-1 flex-col items-start gap-1 rounded-md px-1.5 py-1.5 text-left focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <span className="flex w-full items-center gap-2">
+              {item.isRead ? null : (
+                <span
+                  aria-hidden="true"
+                  className="bg-primary size-2 shrink-0 rounded-full"
+                />
+              )}
+              <span className="text-foreground text-sm font-medium">
+                {item.isRead ? null : <span className="sr-only">Unread: </span>}
+                {item.title}
+              </span>
             </span>
-          </span>
-          <span className="text-muted-foreground line-clamp-2 text-sm">
-            {item.message}
-          </span>
-          <span className="text-muted-foreground text-xs">
-            {formatDate(item.createdAt)}
-          </span>
-        </DropdownMenuItem>
+            <span className="text-muted-foreground line-clamp-2 text-sm">
+              {item.message}
+            </span>
+            <span className="text-muted-foreground text-xs">
+              {formatDate(item.createdAt)}
+            </span>
+          </Link>
+
+          {item.isRead ? null : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground hover:text-foreground mt-0.5 shrink-0"
+              onClick={() => onMarkRead(item.id)}
+            >
+              <IconChecks size={16} stroke={1.8} aria-hidden="true" />
+              <span className="sr-only">
+                Mark &quot;{item.title}&quot; as read
+              </span>
+            </Button>
+          )}
+        </div>
       ))
     )}
 
@@ -169,15 +191,32 @@ export const UserNotifications = () => {
     }
   };
 
-  const openItem = async (id: string): Promise<void> => {
+  /**
+   * Marks one notification read without navigating to its project.
+   *
+   * The unread count is only decremented if the item actually was unread:
+   * calling this on an already-read row would otherwise drift the badge below
+   * the real count, and the next open would silently correct it.
+   */
+  const markItemRead = async (id: string): Promise<void> => {
+    const target = items?.find((item) => item.id === id);
+    if (!target || target.isRead) {
+      return;
+    }
     setItems((current) => (current ? markRead(current, id) : null));
     setUnread((current) => Math.max(0, current - 1));
     try {
       await markUserNotificationRead({ data: { notificationId: id } });
     } catch {
-      // The row already shows as read, and the next real load corrects it.
-      // Reporting here would be noise about something the user did see.
+      // The row already shows as read, and the next open reloads from the
+      // database. Reporting here would be noise about something the user did.
+      setItems(await listUserNotifications().catch(() => items ?? []));
+      setUnread(await countUnreadUserNotifications().catch(() => 0));
     }
+  };
+
+  const openItem = async (id: string): Promise<void> => {
+    await markItemRead(id);
   };
 
   const hasUnread = unread > 0;
@@ -218,6 +257,7 @@ export const UserNotifications = () => {
         <NotificationsBody
           items={items}
           onMarkAllRead={markAllRead}
+          onMarkRead={markItemRead}
           onOpenItem={openItem}
           unread={unread}
         />

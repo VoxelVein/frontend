@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -66,6 +66,7 @@ const openMenu = ({
         <NotificationsBody
           items={items}
           onMarkAllRead={noop}
+          onMarkRead={noop}
           onOpenItem={noop}
           unread={unread}
         />
@@ -104,5 +105,52 @@ describe(NotificationsBody, () => {
 
     openMenu({ items: [APPROVED], unread: 1 });
     expect(screen.getByText("Mark all as read")).toBeTruthy();
+  });
+
+  it("offers a mark-as-read button only on unread notifications", () => {
+    openMenu({ items: [APPROVED, NEEDS_WORK], unread: 1 });
+
+    // NEEDS_WORK is already read, so only one row can be dismissed.
+    expect(
+      screen.getAllByRole("button", { name: /^mark .* as read$/iu })
+    ).toHaveLength(1);
+  });
+
+  it("names the notification its mark-as-read button acts on", () => {
+    openMenu({ items: [APPROVED], unread: 1 });
+
+    // The visible control is only an icon, so the accessible name has to
+    // identify which notification it belongs to.
+    expect(
+      screen.getByRole("button", {
+        name: 'Mark "Project approved" as read',
+      })
+    ).toBeTruthy();
+  });
+
+  it("marks one notification read without navigating to its project", () => {
+    const onMarkRead = vi.fn<(id: string) => Promise<void>>(() =>
+      Promise.resolve()
+    );
+    render(
+      <DropdownMenu onOpenChange={noop} open>
+        <DropdownMenuTrigger />
+        <DropdownMenuContent>
+          <NotificationsBody
+            items={[APPROVED]}
+            onMarkAllRead={noop}
+            onMarkRead={onMarkRead}
+            onOpenItem={noop}
+            unread={1}
+          />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: 'Mark "Project approved" as read' })
+    );
+
+    expect(onMarkRead).toHaveBeenCalledWith(APPROVED.id);
   });
 });
