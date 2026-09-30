@@ -48,8 +48,8 @@ const normalize = (expression: string): string =>
  * The concatenated `setweight` chain a vector is built from, without the
  * parentheses wrapped around it.
  *
- * Those parentheses are not scaffolding to be ignored — `using gin (( ... ))`
- * indexes exactly the parenthesized expression — but they are the same on both
+ * Those parentheses are not scaffolding to be ignored (`using gin (( ... ))`
+ * indexes exactly the parenthesized expression), but they are the same on both
  * sides, so the test compares what the chain actually searches.
  */
 const vectorChain = (vector: SQL): string =>
@@ -137,7 +137,7 @@ describe("fuzzy matching", () => {
     // `field % query` and `field ilike '%query%'` are only accelerated when the
     // column is covered by a gin_trgm_ops index. Adding a field to the
     // predicate without one still returns correct results, so nothing fails
-    // loudly — the search just gets slower as the table grows.
+    // loudly. The search just gets slower as the table grows.
     const indexed = trgmIndexedFields();
     const forProjects = new Set(
       [...indexed].filter((field) => field.startsWith("projects."))

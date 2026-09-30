@@ -27,8 +27,8 @@ export const Route = createFileRoute("/resource-packs/$slug")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.name} — VoxelVein`
-          : "Resource Pack not found — VoxelVein",
+          ? `${loaderData.name} | VoxelVein`
+          : "Resource Pack not found | VoxelVein",
       },
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]

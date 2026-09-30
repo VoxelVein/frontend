@@ -11,8 +11,8 @@ interface RowIconProps {
  * The 40px icon tile at the leading edge of a settings or admin list row.
  *
  * Every one of those rows opens with a device, provider, or user mark in the
- * same bordered square. It is decorative in all of them — the row's own label
- * already names what it is — so it is hidden from assistive technology rather
+ * same bordered square. It is decorative in all of them (the row's own label
+ * already names what it is), so it is hidden from assistive technology rather
  * than given a redundant accessible name.
  */
 const RowIcon = ({ children, className }: RowIconProps) => (

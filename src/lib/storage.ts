@@ -38,8 +38,8 @@ export interface UploadInput {
   body: AsyncIterable<Uint8Array>;
   contentType: string;
   /**
-   * When true the object is served for display in a browser — inline
-   * disposition, revalidating cache — rather than as a download. Required
+   * When true the object is served for display in a browser (inline
+   * disposition, revalidating cache) rather than as a download. Required
    * for images, which a browser would otherwise save instead of rendering.
    */
   inline?: boolean;

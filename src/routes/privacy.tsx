@@ -113,7 +113,7 @@ const PrivacyPage = () => (
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
-    meta: [{ title: "Privacy Policy — VoxelVein" }],
+    meta: [{ title: "Privacy Policy | VoxelVein" }],
   }),
   component: PrivacyPage,
 });

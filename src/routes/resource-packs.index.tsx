@@ -13,7 +13,7 @@ const ResourcePacksPage = () => {
 
 export const Route = createFileRoute("/resource-packs/")({
   loader: () => loadProjectBrowser("resourcepack"),
-  head: () => ({ meta: [{ title: "Resource Packs — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "Resource Packs | VoxelVein" }] }),
   component: ResourcePacksPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

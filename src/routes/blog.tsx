@@ -183,7 +183,7 @@ export const Route = createFileRoute("/blog")({
     return { posts, searchAvailable };
   },
   head: () => ({
-    meta: [{ title: "Blog — VoxelVein" }],
+    meta: [{ title: "Blog | VoxelVein" }],
   }),
   component: BlogPage,
 });

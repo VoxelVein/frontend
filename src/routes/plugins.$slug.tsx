@@ -27,8 +27,8 @@ export const Route = createFileRoute("/plugins/$slug")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.name} — VoxelVein`
-          : "Plugin not found — VoxelVein",
+          ? `${loaderData.name} | VoxelVein`
+          : "Plugin not found | VoxelVein",
       },
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]

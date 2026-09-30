@@ -27,8 +27,8 @@ export const Route = createFileRoute("/servers/$slug")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.name} — VoxelVein`
-          : "Server not found — VoxelVein",
+          ? `${loaderData.name} | VoxelVein`
+          : "Server not found | VoxelVein",
       },
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]

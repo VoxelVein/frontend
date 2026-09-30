@@ -84,14 +84,14 @@
 }
 
 :root {
-  /* Light — clean with red brand accent
+  /* Light: clean with red brand accent
 
      The neutrals are a deliberately spaced ladder rather than a cluster of
      near-identical whites. Measured in 8-bit sRGB the steps are 255 / 241 /
      224 / 205 / 176, so adjacent surfaces differ by 14–19 levels instead of
      the 13–16 the previous values produced, which read as one flat white.
 
-     Chroma is a constant 0.002 on hue 70 — enough for the greys to read as
+     Chroma is a constant 0.002 on hue 70, enough for the greys to read as
      warm paper rather than dead grey, faint enough to stay white. Raising it
      toward 0.004 turns the background visibly cream, which is why it is
      kept this low. Every text pairing below stays above WCAG AA: the
@@ -157,7 +157,7 @@
 }
 
 .dark {
-  /* Obsidian — deep volcanic glass with red brand accent */
+  /* Obsidian: deep volcanic glass with red brand accent */
   --background: oklch(0.1398 0 0);
   --foreground: oklch(0.985 0.0041 91.4457);
   --card: oklch(0.1776 0 0);
@@ -232,7 +232,7 @@
   html {
     @apply font-sans;
   }
-  /* Ambient glow — soft brand-red bloom at the top of the page. */
+  /* Ambient glow: soft brand-red bloom at the top of the page. */
   .dark body {
     background-image: radial-gradient(
       1100px 520px at 50% -8%,
@@ -254,7 +254,7 @@
   }
 }
 
-/* Hero entrance — CSS animations load with the stylesheet, so the title is
+/* Hero entrance: CSS animations load with the stylesheet, so the title is
    visible immediately without waiting for the motion runtime. */
 @keyframes hero-fade-in {
   from {

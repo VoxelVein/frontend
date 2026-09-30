@@ -147,7 +147,7 @@ export const Route = createFileRoute("/welcome")({
   },
   loader: () => suggestUsername(),
   head: () => ({
-    meta: [{ title: "Choose your username — VoxelVein" }],
+    meta: [{ title: "Choose your username | VoxelVein" }],
   }),
   component: WelcomePage,
 });

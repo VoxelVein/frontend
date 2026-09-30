@@ -268,7 +268,7 @@ export const updatePost = createServerFn({ method: "POST" })
     const session = await getStaffSession();
 
     // A moderator editing a draft stays a draft, and cannot unpublish an
-    // already-published post either — that would be a publish decision.
+    // already-published post either, since that would be a publish decision.
     const published = isAdmin(session.user.role)
       ? data.published
       : await staysUnpublished(data.id, data.published);

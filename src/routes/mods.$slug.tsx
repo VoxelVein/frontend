@@ -27,8 +27,8 @@ export const Route = createFileRoute("/mods/$slug")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.name} — VoxelVein`
-          : "Mod not found — VoxelVein",
+          ? `${loaderData.name} | VoxelVein`
+          : "Mod not found | VoxelVein",
       },
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]

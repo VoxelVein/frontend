@@ -13,7 +13,7 @@ const ModsPage = () => {
 
 export const Route = createFileRoute("/mods/")({
   loader: () => loadProjectBrowser("mod"),
-  head: () => ({ meta: [{ title: "Mods — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "Mods | VoxelVein" }] }),
   component: ModsPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

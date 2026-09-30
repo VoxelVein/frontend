@@ -63,9 +63,9 @@ and what each status on your dashboard means.
 
 ### The statuses
 
-- **Draft** — only you can see it.
-- **In review** — we are looking at it.
-- **Published** — anyone can find, install and download it.
+- **Draft**: only you can see it.
+- **In review**: we are looking at it.
+- **Published**: anyone can find, install and download it.
 
 ### What we look at
 

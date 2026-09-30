@@ -111,7 +111,7 @@ const TermsPage = () => (
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
-    meta: [{ title: "Terms of Service — VoxelVein" }],
+    meta: [{ title: "Terms of Service | VoxelVein" }],
   }),
   component: TermsPage,
 });

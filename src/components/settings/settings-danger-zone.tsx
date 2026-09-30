@@ -417,7 +417,7 @@ const ConsequencesStep = ({
                         {project.name}
                       </p>
                       <p className="text-muted-foreground text-sm">
-                        Kept — marked as a large project by the VoxelVein team
+                        Kept, marked as a large project by the VoxelVein team
                       </p>
                     </div>
                   </li>

@@ -74,7 +74,7 @@ const TermsOfUsePage = () => (
 
 export const Route = createFileRoute("/terms-of-use")({
   head: () => ({
-    meta: [{ title: "Terms of Use — VoxelVein" }],
+    meta: [{ title: "Terms of Use | VoxelVein" }],
   }),
   component: TermsOfUsePage,
 });

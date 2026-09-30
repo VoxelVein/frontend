@@ -12,7 +12,7 @@
  */
 
 /**
- * The small uppercase label above a value — a date, a stat's name, a section
+ * The small uppercase label above a value (a date, a stat's name, a section
  * eyebrow. Used by the blog card, the blog post, the public project page, and
  * the stat tile, so the type treatment cannot drift between them.
  */

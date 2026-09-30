@@ -40,7 +40,7 @@ const FALLBACK_AUTHOR = "Unknown creator";
  * to union across versions.
  *
  * The shape is expand-dedupe-aggregate rather than two scalar subqueries over
- * `unnest(game_versions)`. Postgres rejects the latter outright — a subquery in
+ * `unnest(game_versions)`. Postgres rejects the latter outright: a subquery in
  * the select list cannot reference an outer column that the `GROUP BY` does not
  * cover, so it fails at plan time with `subquery uses ungrouped column`. The
  * inner `select distinct` flattens each version's version/loader cross product
@@ -265,8 +265,8 @@ const toDocument = ({
 /**
  * Runs a project search against Postgres.
  *
- * Everything the UI needs — hits, total count and all three facet
- * distributions — comes back in a single round trip, because a second query for
+ * Everything the UI needs (hits, total count and all three facet
+ * distributions) comes back in a single round trip, because a second query for
  * the facet counts would have to repeat the whole `matched` set.
  */
 export const searchProjectsInDatabase = async (

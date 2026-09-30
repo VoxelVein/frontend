@@ -64,7 +64,7 @@ const DisclaimerPage = () => (
 
 export const Route = createFileRoute("/disclaimer")({
   head: () => ({
-    meta: [{ title: "Disclaimer — VoxelVein" }],
+    meta: [{ title: "Disclaimer | VoxelVein" }],
   }),
   component: DisclaimerPage,
 });

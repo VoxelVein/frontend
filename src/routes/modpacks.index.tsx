@@ -13,7 +13,7 @@ const ModpacksPage = () => {
 
 export const Route = createFileRoute("/modpacks/")({
   loader: () => loadProjectBrowser("modpack"),
-  head: () => ({ meta: [{ title: "Modpacks — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "Modpacks | VoxelVein" }] }),
   component: ModpacksPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

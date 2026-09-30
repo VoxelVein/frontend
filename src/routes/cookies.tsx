@@ -68,7 +68,7 @@ const CookiesPage = () => (
 
 export const Route = createFileRoute("/cookies")({
   head: () => ({
-    meta: [{ title: "Cookie Policy — VoxelVein" }],
+    meta: [{ title: "Cookie Policy | VoxelVein" }],
   }),
   component: CookiesPage,
 });

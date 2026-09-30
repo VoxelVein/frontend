@@ -116,6 +116,6 @@ const MyProjectsPage = () => {
 export const Route = createFileRoute("/dashboard/projects/")({
   pendingComponent: MyProjectsSkeleton,
   loader: () => listMyProjects(),
-  head: () => ({ meta: [{ title: "My projects — VoxelVein" }] }),
+  head: () => ({ meta: [{ title: "My projects | VoxelVein" }] }),
   component: MyProjectsPage,
 });
