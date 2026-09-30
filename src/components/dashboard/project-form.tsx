@@ -4,6 +4,7 @@ import { safeParse } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
+import { MarkdownPreview } from "@/components/markdown-preview";
 import { RequiredLabel } from "@/components/required-label";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,6 +60,10 @@ const EMPTY_VALUES: ProjectFormValues = {
   type: "mod",
 };
 
+/** Referenced by aria-controls, so the ids have to be stable across renders. */
+const DESCRIPTION_PREVIEW_ID = "project-description-preview";
+const DESCRIPTION_PREVIEW_LABEL_ID = "project-description-preview-label";
+
 const slugify = (value: string): string =>
   value
     .toLowerCase()
@@ -79,6 +84,13 @@ const splitTags = (value: string): string[] => [
 const formatCategory = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
 
+// The form itself is capped rather than each field: every control is a grid
+// child, so this covers all of them and a field added later cannot forget it.
+// Narrower than the dashboard page's max-w-3xl wrapper, which leaves the right
+// side clear on a wide screen instead of stretching a short input across the
+// full column.
+const FORM_CLASS_NAME = "grid max-w-2xl gap-6";
+
 export const ProjectForm = ({
   initialValues = EMPTY_VALUES,
   mode,
@@ -91,6 +103,9 @@ export const ProjectForm = ({
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // Starts closed: the form is long, and a permanently open preview would
+  // make the fields below it harder to reach.
+  const [showDescriptionPreview, setShowDescriptionPreview] = useState(false);
 
   const update = <Key extends keyof ProjectFormValues>(
     key: Key,
@@ -138,7 +153,7 @@ export const ProjectForm = ({
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="grid gap-6">
+    <form noValidate onSubmit={handleSubmit} className={FORM_CLASS_NAME}>
       {mode === "create" ? (
         <div className="grid gap-2">
           <RequiredLabel htmlFor="project-type" isRequired>
@@ -248,15 +263,50 @@ export const ProjectForm = ({
         required
       />
 
-      <FormTextarea
-        id="project-description"
-        label="Description (Markdown)"
-        rows={10}
-        value={values.description}
-        onChange={(event) => update("description", event.target.value)}
-        error={errors.get("description")}
-        className="font-mono text-xs"
-      />
+      <div className="grid gap-2">
+        <FormTextarea
+          id="project-description"
+          label="Description (Markdown)"
+          rows={10}
+          value={values.description}
+          onChange={(event) => update("description", event.target.value)}
+          error={errors.get("description")}
+          className="font-mono text-xs"
+        />
+
+        {/* The description is the longest field in the form, so the preview is
+            behind a toggle rather than always beside the editor. The blog post
+            dialog shows it permanently because it has the room. */}
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-11"
+            aria-expanded={showDescriptionPreview}
+            aria-controls={DESCRIPTION_PREVIEW_ID}
+            onClick={() => setShowDescriptionPreview((open) => !open)}
+          >
+            {showDescriptionPreview ? "Hide preview" : "Preview"}
+          </Button>
+
+          {showDescriptionPreview ? (
+            <div className="mt-2" id={DESCRIPTION_PREVIEW_ID}>
+              <p
+                className="text-foreground text-sm font-medium"
+                id={DESCRIPTION_PREVIEW_LABEL_ID}
+              >
+                Description preview
+              </p>
+              <MarkdownPreview
+                labelledBy={DESCRIPTION_PREVIEW_LABEL_ID}
+                maxHeightClassName="max-h-96 min-h-32"
+                value={values.description}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
 
       <FormField
         id="project-tags"

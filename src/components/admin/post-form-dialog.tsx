@@ -1,9 +1,9 @@
-import { Markdown } from "@tanstack/markdown/react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useRef } from "react";
 
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
+import { MarkdownPreview } from "@/components/markdown-preview";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -169,20 +169,10 @@ const PostFormDialog = ({
                   >
                     Preview
                   </p>
-                  <div
-                    aria-labelledby="post-content-preview-label"
-                    className="border-border bg-background mt-1.5 max-h-72 min-h-32 overflow-y-auto rounded-lg border p-4"
-                  >
-                    {state.value.trim() ? (
-                      <div className="markdown-body text-sm">
-                        <Markdown>{state.value}</Markdown>
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">
-                        Nothing to preview yet.
-                      </p>
-                    )}
-                  </div>
+                  <MarkdownPreview
+                    labelledBy="post-content-preview-label"
+                    value={state.value}
+                  />
                 </div>
               </div>
             )}

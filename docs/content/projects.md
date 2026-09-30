@@ -96,6 +96,16 @@ children:
 * `/dashboard/projects/$projectId?tab=` — `details`, `images`, `versions`,
   or `danger`
 
+The description field on both forms has a **Preview** toggle that renders
+the Markdown beside the editor, so formatting can be checked without saving
+and navigating away. It reuses `MarkdownPreview`
+(`src/components/markdown-preview.tsx`), the same component the blog post
+editor uses, so a preview always matches the published output.
+
+The preview starts closed because the project form is long, and a
+permanently open preview pushes the fields below it further down. The blog
+post dialog has the room and shows its preview without a toggle.
+
 `/dashboard` redirects anyone whose `usernameConfirmed` is `false` to
 `/welcome` first, so a Google or GitHub account picks its username before
 it can create anything.
