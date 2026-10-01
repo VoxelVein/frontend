@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { boolean, object, parse, pipe, string, uuid } from "valibot";
 
 import { db } from "@/db";
@@ -23,7 +23,7 @@ import {
   requireUploader,
 } from "@/lib/project-access";
 import type { Session } from "@/lib/project-access";
-import { toProjectImages } from "@/lib/project-images";
+import { imageUrl, toProjectImages } from "@/lib/project-images";
 import {
   DELETED_USER_LABEL,
   hasLoaders,
@@ -216,9 +216,25 @@ export const listMyProjects = createServerFn({ method: "GET" }).handler(
         type: projects.type,
         updatedAt: projects.updatedAt,
         versionCount: count(projectVersions.id),
+        // The card shows the icon, so it is fetched here rather than per row.
+        // Aggregated because the versions join multiplies rows, and at most
+        // one icon exists per project, so the aggregate is that one row.
+        // The id is cast to text because Postgres has no max(uuid).
+        iconWidth: sql<number | null>`max(${projectImages.width})`,
+        iconHeight: sql<number | null>`max(${projectImages.height})`,
+        iconId: sql<string | null>`max(${projectImages.id}::text)`,
       })
       .from(projects)
       .leftJoin(projectVersions, eq(projectVersions.projectId, projects.id))
+      // Icon rows are filtered to the icon kind in a subquery-shaped join, so
+      // the aggregate cannot pick up a gallery image.
+      .leftJoin(
+        projectImages,
+        and(
+          eq(projectImages.projectId, projects.id),
+          eq(projectImages.kind, "icon")
+        )
+      )
       .where(
         and(
           eq(projects.ownerId, session.user.id),
@@ -230,6 +246,17 @@ export const listMyProjects = createServerFn({ method: "GET" }).handler(
 
     return rows.map((row) => ({
       ...row,
+      // Icon dimensions and id are nullable because a project need not have
+      // one, and the card falls back to a type glyph.
+      icon:
+        row.iconId === null
+          ? null
+          : {
+              height: row.iconHeight ?? 0,
+              id: row.iconId,
+              url: imageUrl(row.iconId),
+              width: row.iconWidth ?? 0,
+            },
       updatedAt: row.updatedAt.toISOString(),
     }));
   }

@@ -1,4 +1,4 @@
-import { IconTrash, IconVersions } from "@tabler/icons-react";
+import { IconArrowLeft, IconTrash, IconVersions } from "@tabler/icons-react";
 import {
   createFileRoute,
   Link,
@@ -18,6 +18,7 @@ import { PublishPanel } from "@/components/dashboard/publish-panel";
 import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
 import { EmptyState } from "@/components/empty-state";
+import { FilledPill } from "@/components/filled-pill";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -29,6 +30,7 @@ import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import type { ProjectImagesView } from "@/lib/project-images";
 import {
   hasVersions,
+  PROJECT_STATUS_LABELS,
   PROJECT_TYPE_LABELS,
   PROJECT_TYPE_PATHS,
 } from "@/lib/projects";
@@ -47,6 +49,13 @@ import {
 const ROUTE_ID = "/dashboard/projects/$projectId";
 const TABS = ["details", "images", "versions", "danger"] as const;
 type Tab = (typeof TABS)[number];
+
+/**
+ * Section rhythm and measure follow the landing page, at the narrower
+ * `max-w-3xl` band it uses for reading text. Matches the width cap on the
+ * form fields closely enough that they read as one column.
+ */
+const PAGE_WIDTH = "mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8";
 
 const searchSchema = object({ tab: optional(picklist(TABS)) });
 
@@ -174,9 +183,12 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
   return (
     <section
       aria-labelledby="delete-heading"
-      className="border-destructive/40 rounded-xl border p-6"
+      className="border-destructive/40 bg-destructive/5 rounded-xl border p-6"
     >
-      <h2 id="delete-heading" className="text-foreground text-lg font-semibold">
+      <h2
+        id="delete-heading"
+        className="text-destructive text-lg font-semibold"
+      >
         Delete project
       </h2>
       <p className="text-muted-foreground mt-1 text-sm">
@@ -244,19 +256,27 @@ const ManageProjectPage = () => {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+    <div className={PAGE_WIDTH}>
       <Link
         to="/dashboard/projects"
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
       >
-        ← My projects
+        <IconArrowLeft size={16} aria-hidden="true" />
+        My projects
       </Link>
-      <div className="mt-4">
-        <PageHeader
-          title={project.name}
-          description={`${PROJECT_TYPE_LABELS[project.type].singular} · ${PROJECT_TYPE_PATHS[project.type]}/${project.slug}`}
-        />
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
+          {project.name}
+        </h1>
+        <FilledPill className="text-sm">
+          {PROJECT_STATUS_LABELS[project.status]}
+        </FilledPill>
       </div>
+      <p className="text-muted-foreground mt-3 text-lg">
+        {PROJECT_TYPE_LABELS[project.type].singular} ·{" "}
+        {PROJECT_TYPE_PATHS[project.type]}/{project.slug}
+      </p>
 
       <div className="mt-8">
         <PublishPanel project={project} onChange={reload} />
@@ -275,9 +295,11 @@ const ManageProjectPage = () => {
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="versions">
-            {hasVersions(project.type) ? "Versions" : "Server"}
+            {hasVersions(project.type)
+              ? `Versions (${project.versions.length})`
+              : "Server"}
           </TabsTrigger>
-          <TabsTrigger value="danger">Danger zone</TabsTrigger>
+          <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="pt-4">
@@ -373,10 +395,7 @@ const ManageProjectPage = () => {
 
 /** The manage page while `getEditableProject` is in flight. */
 const ManageProjectSkeleton = () => (
-  <div
-    aria-busy="true"
-    className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
-  >
+  <div aria-busy="true" className={PAGE_WIDTH}>
     <Skeleton className="h-11 w-32" />
     <Skeleton className="mt-4 h-9 w-64" />
     <Skeleton className="mt-3 h-5 w-80 max-w-full" />

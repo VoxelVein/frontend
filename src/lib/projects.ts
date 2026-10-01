@@ -58,6 +58,19 @@ export const PROJECT_STATUSES = [
 ] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
+/**
+ * How each status reads to a person.
+ *
+ * `pending` reads as "In review" rather than "Pending", so it is obviously
+ * something a human has to act on rather than a background job.
+ */
+export const PROJECT_STATUS_LABELS = {
+  draft: "Draft",
+  pending: "In review",
+  published: "Published",
+  removed: "Removed",
+} as const satisfies Record<ProjectStatus, string>;
+
 export const RELEASE_CHANNELS = ["release", "beta", "alpha"] as const;
 export type ReleaseChannel = (typeof RELEASE_CHANNELS)[number];
 
@@ -555,6 +568,7 @@ export interface ProjectView {
 
 export interface ProjectListItem {
   downloads: number;
+  icon: ProjectImageView | null;
   id: string;
   name: string;
   slug: string;

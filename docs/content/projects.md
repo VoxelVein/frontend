@@ -96,6 +96,22 @@ children:
 * `/dashboard/projects/$projectId?tab=` — `details`, `images`, `versions`,
   or `danger`
 
+Both dashboard pages use the landing page's design language rather than the
+settings screens: the `py-16` section rhythm and `max-w-7xl` measure of the
+home page, big `text-3xl sm:text-4xl` bold headings instead of the smaller
+`PageHeader`, and the filled accent pill for a project's status. A creator
+dashboard that looks like the settings screen reads as a different product
+from the site they publish to.
+
+`FilledPill` (`src/components/filled-pill.tsx`) holds that accent shape. It
+was inline in the hero and the explore heading and is now used by the
+dashboard as well, so there is one definition rather than three copies.
+
+`ProjectSummaryCard` (`src/components/dashboard/project-summary-card.tsx`) is
+built from the landing page's category tile: same border, hover lift, icon
+well, and whole-card link. It shows the project's icon, falling back to a
+type glyph, so `listMyProjects` also selects the icon row.
+
 The description field on both forms has a **Preview** toggle that renders
 the Markdown beside the editor, so formatting can be checked without saving
 and navigating away. It reuses `MarkdownPreview`
