@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import { requireStaff } from "@/lib/role-guards";
+import { requireCapability } from "@/lib/role-guards";
 import { loadStorageConfig } from "@/lib/storage";
 import { getUsedBytes } from "@/lib/storage-quota";
 import type { StorageUsage } from "@/lib/storage-quota";
@@ -9,7 +9,7 @@ import type { StorageUsage } from "@/lib/storage-quota";
 export const getStorageUsage = createServerFn({ method: "GET" }).handler(
   async (): Promise<StorageUsage> => {
     // Site-wide usage, so it stays admin-only rather than moderator-readable.
-    await requireStaff("admin");
+    await requireCapability("manageStorage");
     const { fileBytes, fileCount, imageBytes, imageCount, usedBytes } =
       await getUsedBytes();
     return {

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
-import { ALL_ROLES, hasRole, isRole, ROLE_LABELS } from "@/lib/roles";
+import { ALL_ROLES, can, canActOn, isRole, ROLE_LABELS } from "@/lib/roles";
 import type { Role } from "@/lib/roles";
 
 interface AdminUser {
@@ -191,6 +191,14 @@ const UserStatusBadge = ({
 
 interface BanActionProps {
   isBanned: boolean;
+  /** False for a moderator, who holds no account capability at all. */
+  canManageUsers: boolean;
+  /**
+   * Blocks a ban: either a request is in flight, or the row is off-limits
+   * because it is your own account or outranks you. Deliberately not applied
+   * to unban, which has to stay available on your own row.
+   */
+  isBanInert: boolean;
   isMutating: boolean;
   isPendingDeletion: boolean;
   user: AdminUser;
@@ -200,6 +208,8 @@ interface BanActionProps {
 
 const BanAction = ({
   isBanned,
+  isBanInert,
+  canManageUsers,
   isMutating,
   isPendingDeletion,
   user,
@@ -220,7 +230,14 @@ const BanAction = ({
       </Link>
     );
   }
+  // The whole component is admin-only: a moderator reaching this panel gets a
+  // read-only list, and Better Auth refuses `/admin/ban-user` for them anyway.
+  // Checked here so the gate cannot be forgotten at a fourth call site.
+  if (!canManageUsers) {
+    return null;
+  }
   if (isBanned) {
+    // Not gated on `isBanInert`: unban has to work on your own row.
     return (
       <Button
         type="button"
@@ -240,7 +257,7 @@ const BanAction = ({
       variant="outline"
       size="sm"
       className="min-h-11"
-      disabled={isMutating}
+      disabled={isBanInert}
       onClick={() => onBan(user)}
     >
       Ban
@@ -248,10 +265,33 @@ const BanAction = ({
   );
 };
 
+/**
+ * Why a control on your own row is inert.
+ *
+ * Better Auth rejects self-ban and self-remove outright, so the controls are
+ * disabled rather than hidden: the row still has to look like every other row,
+ * and silently omitting them would read as a permissions bug. Self-deletion
+ * lives in Settings, where the flow can verify you and route through the
+ * deletion lifecycle.
+ */
+const SELF_ACTION_HINT = "Manage your own account in Settings.";
+
+/**
+ * Why a control is inert because of the target's rank rather than your own.
+ *
+ * Worth distinguishing from the self case: an inert control on your own row is
+ * expected, and one on a colleague's reads as a bug until you know the ladder.
+ */
+const RANK_ACTION_HINT = "You cannot act on an account above your rank.";
+
 interface AdminUserRowProps {
   isMutating: boolean;
-  /** False for moderators, who may ban but not delete or re-rank accounts. */
-  canManageRoles: boolean;
+  /** False for a moderator, who may not manage accounts at all. */
+  canManageUsers: boolean;
+  /** True on the signed-in admin's own row. */
+  isSelf: boolean;
+  /** True when the target sits above the signed-in admin in the ladder. */
+  isOutranked: boolean;
   user: AdminUser;
   onBan: (user: AdminUser) => void;
   onRemove: (user: AdminUser) => void;
@@ -260,8 +300,10 @@ interface AdminUserRowProps {
 }
 
 const AdminUserRow = ({
-  canManageRoles,
+  canManageUsers,
   isMutating,
+  isOutranked,
+  isSelf,
   user,
   onBan,
   onRemove,
@@ -271,6 +313,10 @@ const AdminUserRow = ({
   const isBanned = user.banned === true;
   const isPendingDeletion =
     isBanned && user.banReason === PENDING_DELETION_BAN_REASON;
+  // Unban is the one action that leaves the admin able to act, so it stays
+  // available on your own row: it is also the only way back if another admin
+  // ever bans you.
+  const isInert = isMutating || isSelf || isOutranked;
 
   return (
     <div className="border-border bg-muted/40 flex flex-wrap items-center gap-3 rounded-lg border p-3">
@@ -306,10 +352,10 @@ const AdminUserRow = ({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {canManageRoles ? (
+        {canManageUsers ? (
           <>
             <label className="sr-only" htmlFor={`role-${user.id}`}>
-              Role for {user.name}
+              {isSelf ? `Your own role` : `Role for ${user.name}`}
             </label>
             <Select
               value={user.role ?? "user"}
@@ -318,7 +364,7 @@ const AdminUserRow = ({
                   onRoleChange(user.id, value);
                 }
               }}
-              disabled={isMutating}
+              disabled={isInert}
             >
               <SelectTrigger id={`role-${user.id}`} className="min-h-11 w-28">
                 <SelectValue />
@@ -336,6 +382,8 @@ const AdminUserRow = ({
 
         <BanAction
           isBanned={isBanned}
+          isBanInert={isInert}
+          canManageUsers={canManageUsers}
           isMutating={isMutating}
           isPendingDeletion={isPendingDeletion}
           user={user}
@@ -343,26 +391,65 @@ const AdminUserRow = ({
           onUnban={onUnban}
         />
 
-        {canManageRoles ? (
+        {canManageUsers ? (
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             className="min-h-11 min-w-11"
             aria-label={`Remove ${user.name}`}
-            disabled={isMutating}
+            disabled={isInert}
             onClick={() => onRemove(user)}
           >
             <IconTrash size={16} stroke={1.8} />
           </Button>
         ) : null}
       </div>
+
+      {isSelf ? (
+        <p className="text-muted-foreground w-full text-xs">
+          {SELF_ACTION_HINT}
+        </p>
+      ) : null}
+      {isOutranked ? (
+        <p className="text-muted-foreground w-full text-xs">
+          {RANK_ACTION_HINT}
+        </p>
+      ) : null}
     </div>
   );
 };
 
+/**
+ * Why a removal cannot proceed, or null when it can.
+ *
+ * Named rather than inlined in JSX because the three cases are a ladder —
+ * yourself, then someone above you, then anyone — and a nested ternary in a
+ * prop buries that order under punctuation.
+ */
+const removalBlockReason = (
+  target: AdminUser | null,
+  callerId: string | null | undefined,
+  callerRole: string | null | undefined
+): string | null => {
+  if (target === null) {
+    return null;
+  }
+  if (target.id === callerId) {
+    return SELF_ACTION_HINT;
+  }
+  return canActOn(callerRole, target.role) ? null : RANK_ACTION_HINT;
+};
+
 interface AdminUsersDialogsProps {
   isMutating: boolean;
+  /**
+   * Why the pending removal cannot go ahead, or null when it can.
+   *
+   * Belt-and-braces: the row's control is already disabled, so this only
+   * appears if the row state drifts from the dialog state.
+   */
+  removeBlockReason: string | null;
   pendingBan: AdminUser | null;
   pendingRemove: AdminUser | null;
   pendingRole: { role: Role; userId: string } | null;
@@ -376,6 +463,7 @@ interface AdminUsersDialogsProps {
 
 const AdminUsersDialogs = ({
   isMutating,
+  removeBlockReason,
   pendingBan,
   pendingRemove,
   pendingRole,
@@ -399,6 +487,9 @@ const AdminUsersDialogs = ({
         pendingRole ? `Set ${pendingRole.role} as the role for this user?` : ""
       }
       confirmLabel="Change role"
+      // A routine privilege change, not a destructive one: it must not render
+      // as a red primary.
+      variant="default"
       pending={isMutating}
       onConfirm={() => {
         if (pendingRole) {
@@ -421,6 +512,7 @@ const AdminUsersDialogs = ({
           : ""
       }
       confirmLabel="Ban user"
+      size="md"
       pending={isMutating}
       onConfirm={() => {
         if (pendingBan) {
@@ -443,6 +535,8 @@ const AdminUsersDialogs = ({
           : ""
       }
       confirmLabel="Remove user"
+      size="md"
+      error={removeBlockReason}
       pending={isMutating}
       onConfirm={() => {
         if (pendingRemove) {
@@ -455,10 +549,12 @@ const AdminUsersDialogs = ({
 
 // oxlint-disable-next-line react-doctor/no-giant-component -- Splitting AdminUsers further would require major refactoring
 const AdminUsers = () => {
-  // A moderator may ban an account but not delete one or change its role, so
-  // those controls are hidden rather than shown and refused.
+  // Account management is admin-only, so a moderator sees the list read-only.
+  // The tab itself is gated on the same capability and is not rendered for a
+  // moderator at all; this is the defence for the component rendered directly.
   const { data: session } = authClient.useSession();
-  const canManageRoles = hasRole(session?.user.role, "admin");
+  const canManageUsers = can(session?.user.role, "manageUsers");
+  const currentUserId = session?.user.id;
 
   const [state, dispatch] = useReducer(usersReducer, {
     error: null,
@@ -654,8 +750,17 @@ const AdminUsers = () => {
               }}
             >
               <AdminUserRow
-                canManageRoles={canManageRoles}
+                canManageUsers={canManageUsers}
                 isMutating={isMutating}
+                // Two independent reasons a row is off-limits to the caller:
+                // it is their own account, or its role sits above theirs.
+                isOutranked={
+                  !canActOn(session?.user.role, users[virtualRow.index].role)
+                }
+                isSelf={
+                  currentUserId !== undefined &&
+                  users[virtualRow.index].id === currentUserId
+                }
                 user={users[virtualRow.index]}
                 onBan={setPendingBan}
                 onRemove={setPendingRemove}
@@ -703,6 +808,11 @@ const AdminUsers = () => {
 
           <AdminUsersDialogs
             isMutating={isMutating}
+            removeBlockReason={removalBlockReason(
+              pendingRemove,
+              currentUserId,
+              session?.user.role
+            )}
             pendingBan={pendingBan}
             pendingRemove={pendingRemove}
             pendingRole={pendingRole}

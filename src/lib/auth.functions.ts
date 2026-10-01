@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { auth } from "@/lib/auth";
-import { ADMIN_PANEL_ROLE, hasRole } from "@/lib/roles";
+import { can } from "@/lib/roles";
 
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -41,7 +41,7 @@ export const requireAdmin = createServerFn({ method: "GET" }).handler(
       return null;
     }
 
-    if (!hasRole(session.user.role, ADMIN_PANEL_ROLE)) {
+    if (!can(session.user.role, "viewAdminPanel")) {
       return null;
     }
 
