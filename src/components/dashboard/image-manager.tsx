@@ -181,6 +181,8 @@ const ImageManager = (props: ImageManagerProps) => {
         </Button>
         <span className="text-muted-foreground text-xs">
           PNG, JPEG, WebP, or GIF, up to {formatMegabytes(IMAGE_MAX_BYTES)}.
+          Larger images are shrunk in your browser before uploading, so the
+          full-size original is never stored.
           {!isIcon && atLimit ? ` Limit reached (${GALLERY_MAX_COUNT}).` : ""}
         </span>
       </div>

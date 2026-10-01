@@ -6,17 +6,14 @@
 
 ## Current Focus
 
-* **Image resizing** — project icons and gallery images now live in object
-  storage and are served through a caching proxy route, but originals are
-  stored **unresized**. A 4000px phone photo therefore becomes a multi-MB
-  icon that every listing page pays for. Two options, in order of cost:
-  1. **Client-side downscale before upload** — no new dependency, no server
-     CPU, works in every environment. The smaller, more certain fix.
-  2. **Cloudflare Image Resizing** — the only on-the-fly option that works
-     with R2, since Unpic can only rewrite URLs from third-party image CDNs
-     and R2 is not one. Requires a Cloudflare-proxied zone with the paid
-     Image Resizing add-on, and a public source URL, so it does not help
-     local development.
+* **Server-side image resizing** — images are now downscaled in the
+  browser before upload (512px for an icon, 1920px for a gallery image), so
+  the full-size original never reaches the bucket. The gap is that this is
+  client-side only, so a direct `PUT` to `/api/projects/$id/images` stores
+  whatever it sends. Closing that means resizing server-side with sharp,
+  which costs a native dependency and CPU per upload, or Cloudflare Image
+  Resizing, which only works with R2 behind a Cloudflare-proxied zone on the
+  paid add-on and so does not help local development.
 * **Legal review** — the six legal pages need a real operator name and
   address, a single consistent contact address, and review by a qualified
   professional.
