@@ -2,19 +2,18 @@ import {
   createFileRoute,
   redirect,
   useNavigate,
-  useRouter,
   useSearch,
 } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { object, optional, parse, picklist } from "valibot";
 
-import { SettingsDangerZone } from "@/components/settings/settings-danger-zone";
+import { ChangePasswordCard } from "@/components/settings/change-password-card";
+import { SettingsDangerZone } from "@/components/settings/danger/settings-danger-zone";
 import { SettingsPasskeys } from "@/components/settings/settings-passkeys";
 import { SettingsProfile } from "@/components/settings/settings-profile";
 import { SettingsSessions } from "@/components/settings/settings-sessions";
 import { SettingsSignInMethods } from "@/components/settings/settings-sign-in-methods";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authClient } from "@/lib/auth-client";
 import { getSession } from "@/lib/auth.functions";
 
 const settingsSearchSchema = object({
@@ -41,7 +40,6 @@ const resolveTab = ({ confirm, tab }: SettingsSearch) => {
 };
 
 const SettingsPage = () => {
-  const router = useRouter();
   const navigate = useNavigate();
   // oxlint-disable-next-line no-use-before-define -- Route must be exported after the component for TanStack Router; SettingsPage only executes after Route is initialized
   const session = Route.useLoaderData();
@@ -53,30 +51,6 @@ const SettingsPage = () => {
   const handleResumeHandled = useCallback(() => {
     navigate({ to: "/settings", search: { tab: "danger" }, replace: true });
   }, [navigate]);
-
-  const handleSignOut = async () => {
-    let signOutError: string | null = null;
-
-    try {
-      const { error } = await authClient.signOut();
-      if (error) {
-        signOutError = error.message ?? "Could not sign out.";
-      }
-    } catch {
-      signOutError = "Could not sign out.";
-    }
-
-    if (signOutError) {
-      // Fall back to a hard navigation so the session state is re-read from
-      // the cookie even if the client-side session store is stale.
-      window.location.assign("/");
-      return;
-    }
-
-    authClient.$store.notify("$sessionSignal");
-    router.invalidate();
-    router.navigate({ to: "/" });
-  };
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
@@ -111,6 +85,7 @@ const SettingsPage = () => {
 
         <TabsContent value="security">
           <div className="grid gap-6">
+            <ChangePasswordCard />
             <SettingsSignInMethods />
             <SettingsPasskeys />
           </div>
@@ -122,7 +97,6 @@ const SettingsPage = () => {
 
         <TabsContent value="danger">
           <SettingsDangerZone
-            onSignOut={handleSignOut}
             resumeDeletion={search.confirm === "delete"}
             onResumeHandled={handleResumeHandled}
           />
