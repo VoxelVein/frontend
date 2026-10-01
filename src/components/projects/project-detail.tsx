@@ -24,7 +24,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import { MICRO_LABEL_CLASS } from "@/lib/classes";
 import { errorMessage } from "@/lib/form-errors";
-import { formatBytes, formatCount, formatDate } from "@/lib/format";
+import {
+  formatBytes,
+  formatCategory,
+  formatCount,
+  formatDate,
+} from "@/lib/format";
 import {
   formatServerAddress,
   PROJECT_TYPE_LABELS,
@@ -506,7 +511,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-primary/80 border-primary/20 bg-primary/5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase">
-              {project.category.replaceAll("-", " ")}
+              {formatCategory(project.category)}
             </span>
             {canProtect && isProtected ? (
               <span className={`${badgeClassName} gap-1`}>

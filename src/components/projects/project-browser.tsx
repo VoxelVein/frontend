@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCategory } from "@/lib/format";
 import { filterGameVersions } from "@/lib/game-version-search";
 import { toSearchErrorMessage } from "@/lib/project-browser-loader";
 import type { ProjectBrowserData } from "@/lib/project-browser-loader";
@@ -223,9 +224,6 @@ const GameVersionFilter = ({
   );
 };
 
-const capitalize = (value: string) =>
-  value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
-
 const Filters = ({
   category,
   clientRequirement,
@@ -255,7 +253,7 @@ const Filters = ({
         items={[
           { label: "All categories", value: "" },
           ...CATEGORIES_BY_TYPE[type].map((value) => ({
-            label: capitalize(value),
+            label: formatCategory(value),
             value,
           })),
         ]}
@@ -269,7 +267,7 @@ const Filters = ({
           <SelectItem value="">All categories</SelectItem>
           {CATEGORIES_BY_TYPE[type].map((value) => (
             <SelectItem key={value} value={value}>
-              {capitalize(value)}
+              {formatCategory(value)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -320,7 +318,7 @@ const Filters = ({
               value: "",
             },
             ...LOADERS_BY_TYPE[type].map((value) => ({
-              label: capitalize(value),
+              label: formatCategory(value),
               value,
             })),
           ]}
@@ -338,7 +336,7 @@ const Filters = ({
             </SelectItem>
             {LOADERS_BY_TYPE[type].map((value) => (
               <SelectItem key={value} value={value}>
-                {capitalize(value)}
+                {formatCategory(value)}
               </SelectItem>
             ))}
           </SelectContent>

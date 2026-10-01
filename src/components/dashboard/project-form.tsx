@@ -20,6 +20,7 @@ import {
   toFieldErrors,
 } from "@/lib/form-errors";
 import type { FieldErrors } from "@/lib/form-errors";
+import { formatCategory } from "@/lib/format";
 import {
   CATEGORIES_BY_TYPE,
   isCategoryForType,
@@ -80,9 +81,6 @@ const splitTags = (value: string): string[] => [
       .filter(Boolean)
   ),
 ];
-
-const formatCategory = (value: string) =>
-  value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
 
 /**
  * Width cap applied to every field in this form.

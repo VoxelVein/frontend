@@ -237,7 +237,9 @@ const SettingsPasskeys = () => {
                 setPendingRemovalId(null);
               }
             }}
-            title="Remove passkey?"
+            // Titles here are bare verb phrases; the question belongs to the description,
+            // matching every other confirmation in the app.
+            title="Remove passkey"
             description="You will no longer be able to sign in with this passkey. You can add a new one at any time."
             confirmLabel="Remove"
             pending={removingId !== null}
