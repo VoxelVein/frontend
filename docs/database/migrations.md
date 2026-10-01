@@ -184,6 +184,7 @@ written by hand, and several do this alongside their DDL:
 | `0013_queue_published_projects_for_review.sql` | Queues published projects |
 | `0014_add_user_bio.sql` | `users.bio` |
 | `0015_add_project_servers.sql` | Servers and server links |
+| `0016_add_project_images.sql` | `project_images`, one icon per project |
 
 ## Related
 

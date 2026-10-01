@@ -150,3 +150,4 @@ nothing, and `ErrorState` with a retry on failure.
 * [Blog](blog.md)
 * [Accounts](../authentication/accounts.md)
 * [Object Storage](../storage/object-storage.md)
+* [Hardening](../security/hardening.md) — headers, CSRF, and upload gates

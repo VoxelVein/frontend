@@ -38,6 +38,8 @@ frontend. Each guide lives in its own directory under `docs/`.
 * [Setup](development/setup.md) — install dependencies and run the dev
   server
 * [Commands](development/commands.md) — reference for the pnpm scripts
+* [Resilience](development/resilience.md) — chunk-reload recovery,
+  download counting, and connection caps
 
 ## Deployment
 
@@ -48,6 +50,9 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 * [Projects and Files](content/projects.md) — all six project types,
   versions, uploads, downloads, permissions, and the review workflow
+* [Discovery](content/discovery.md) — the trending ranking and the
+  category registry
+* [Motion](content/motion.md) — the scroll-reveal and easing system
 * [Blog](content/blog.md) — posts, admin post management, and post search
 * [Admin Panel](content/admin-panel.md) — users, sessions, storage,
   notifications, account deletions, and the review queue
@@ -56,6 +61,11 @@ frontend. Each guide lives in its own directory under `docs/`.
 * [RustFS](storage/rustfs.md) — local development storage, set up through
   its web console
 * [Cloudflare R2](storage/cloudflare-r2.md) — the production provider
+
+## Security
+
+* [Hardening](security/hardening.md) — response headers, CSRF scope,
+  upload gates, and open-redirect protection
 
 ## Search
 

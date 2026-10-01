@@ -80,9 +80,17 @@ Debian trixie and has both.
 Local socket authentication inside the Postgres image is `trust`, so `psql`
 never asks for a password.
 
-If picking the right container proves awkward, skip the terminal entirely
-and use [Over SSH](#over-ssh-to-the-dokploy-server), which needs no
-container-name guessing.
+If picking the right container proves awkward, skip the terminal and find
+it over SSH instead:
+
+```bash
+docker ps --filter ancestor=postgres:18 --format '{{.Names}}'
+docker exec -it <name> psql -U voxelvein -d voxelvein -c "\dt users"
+```
+
+Filtering on the image needs no knowledge of container naming, which
+Dokploy sets from its own app name rather than the `name:` in
+`compose.yaml`.
 
 ## 3. Confirm you are in the right database
 
@@ -145,71 +153,6 @@ tabs visible. A moderator sees only Posts and Reviews.
 
 ## Other ways to run the same statement
 
-### Over SSH to the Dokploy server
-
-This is the most reliable route, because it runs on the host and can find
-the database container by image rather than by name. It needs nothing from
-the Dokploy UI.
-
-Find the container. Filtering on the image sidesteps container naming
-entirely:
-
-```bash
-docker ps --filter ancestor=postgres:18 --format '{{.Names}}  {{.Status}}'
-```
-
-Then resolve it into a variable and check the connection settings the
-compose file gave it:
-
-```bash
-DB=$(docker ps -q --filter ancestor=postgres:18)
-docker exec "$DB" printenv POSTGRES_USER POSTGRES_DB
-```
-
-Both should read `voxelvein`. If they read anything else, use those values
-instead of the defaults below. Then continue with the same `psql` calls as
-steps 3 to 5, prefixed with `docker exec -it "$DB"`:
-
-```bash
-docker exec -it "$DB" psql -U voxelvein -d voxelvein -c "\dt users"
-```
-
-#### Letting Compose resolve the service
-
-`exec db` resolves the service through the compose file, so no container
-name is needed at all. Dokploy checks the repository out under a directory
-named after the app:
-
-```bash
-ls /etc/dokploy/compose/
-cd /etc/dokploy/compose/voxelvein/code
-docker compose -p voxelvein ps
-docker compose -p voxelvein exec db psql -U voxelvein -d voxelvein -c "\dt users"
-```
-
-#### Why the app name, not `voxelvein-frontend`
-
-Dokploy deploys with `docker compose -p <appName> ...`, so the Compose
-project is Dokploy's **app name**. The `-p` flag takes precedence over the
-`name: voxelvein-frontend` in `compose.yaml`, and Dokploy also writes
-`COMPOSE_PROJECT_NAME` into the `.env` it generates beside the compose
-file.
-
-`docker compose ps` from the right directory prints the real container
-names, so it is the fastest way to recover the convention if you need one:
-
-```bash
-docker ps -a --filter label=com.docker.compose.project=voxelvein \
-  --format '{{.Names}}\t{{.Status}}'
-```
-
-Note the `-a`: it is what reveals the exited `migrate` container, which is
-also why the terminal lists it and then fails to open it.
-
-If the app is deployed to a Dokploy remote server, run all of this on that
-server. `docker exec` is node-local, and the containers are not on the
-manager node.
-
 ### From your own machine
 
 `pnpm db:seed:admin you@example.com admin` runs the same update through a
@@ -226,9 +169,9 @@ non-zero if no user matched.
 
 This is only practical when `DATABASE_URL` points at a database you can
 reach. `compose.yaml` publishes no host ports, so with the bundled
-Postgres you would need a tunnel first; the terminal above is less work.
-The running containers cannot do it for you either, since the web image
-ships only `.output` with no `node_modules` and no `scripts/`.
+Postgres you would need a tunnel first, and the Dokploy terminal is less
+work. The running containers cannot do it for you either, since the web
+image ships only `.output` with no `node_modules` and no `scripts/`.
 
 ### As a repeatable Dokploy job
 
@@ -269,7 +212,7 @@ plugin's role map and refuses anything unrecognised.
 **`psql: not found`**
 : Wrong container. The terminal pre-selects the first container it finds,
   which is one of the `node:24-alpine` app containers. Switch the dropdown
-  to the `db` container, or use [Over SSH](#over-ssh-to-the-dokploy-server).
+  to the `db` container, or use the SSH snippet in step 2.
 
 **`bash` is not available in the shell selector**
 : The same wrong-container symptom. `postgres:18` is Debian and has `bash`;

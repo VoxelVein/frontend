@@ -30,6 +30,36 @@ lives in one place, `src/lib/categories.ts`, and drives the navbar menu,
 the navbar overflow menu, the footer, and the home page's explore grid, so
 a category can never be advertised in one place and missing in another.
 
+## Subcategories
+
+Content types and subcategories are two different things, and both are often
+called "category":
+
+Top-level types
+: The six sections in `src/lib/categories.ts`, each with its own route.
+  `available` gates whether the browse route exists yet.
+
+Subcategories
+: A project type's own `category` column. One list per type in
+  `CATEGORIES_BY_TYPE` (`src/lib/projects.ts`) — `SERVER_CATEGORIES`,
+  `PLUGIN_CATEGORIES`, and so on. Servers carry gamemodes such as `town`
+  for CityBuild servers, `plots`, `skyblock`, and `prison`; plugins carry
+  purposes such as `economy` and `protection`.
+
+`isCategoryForType(type, category)` rejects a category that belongs to a
+different type, so it is used as a Valibot refinement on the publish and
+update schemas rather than checked by hand. The browse filter and the publish
+select both read the same list, and `formatCategory` (`src/lib/format.ts`)
+turns a stored slug into a label in all three places that show one — the
+filter, the form, and the project page.
+
+`projects.category` is a plain `text` column validated in app code, not a
+database enum. Extending a list therefore needs no migration and cannot
+break existing rows, as long as the old values stay. The trade-off is that a
+list change is invisible to the database: the app is the only thing enforcing
+it, and removing a value is the only edit that can strand a row with a
+category no filter can select.
+
 ## Data model
 
 Tables are defined in `src/db/schema.ts`:
@@ -350,6 +380,8 @@ required first: both seeders attach their content to the first admin.
 
 * [Object Storage](../storage/object-storage.md)
 * [Search](../search/postgres.md)
+* [Discovery](discovery.md) — how trending picks the home page five
+* [Motion](motion.md) — the reveal animation on listing grids
 * [Accounts](../authentication/accounts.md)
 * [Architecture Overview](../architecture/overview.md)
 * [API Server](../architecture/api.md)
