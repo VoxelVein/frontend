@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SettingsDangerZone } from "@/components/settings/settings-danger-zone";
+import { SettingsDangerZone } from "@/components/settings/danger/settings-danger-zone";
 import type { AccountDeletionContext } from "@/lib/account.functions";
 
 interface DeleteInput {
@@ -75,14 +75,14 @@ const renderDangerZone = () => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <SettingsDangerZone onSignOut={vi.fn<() => void>()} />
+      <SettingsDangerZone />
     </QueryClientProvider>
   );
 };
 
 const openDeleteDialog = async () => {
   fireEvent.click(
-    await screen.findByRole("button", { name: "Delete Account" })
+    await screen.findByRole("button", { name: "Delete account" })
   );
   return screen.findByRole("dialog");
 };
@@ -211,15 +211,35 @@ describe("SettingsDangerZone account deletion", () => {
     ).toBeInTheDocument();
   });
 
-  it("points password-less accounts to the Security tab", async () => {
-    getContextMock.mockResolvedValue({ ...baseContext, hasPassword: false });
+  it("keeps reversible actions off the tab", async () => {
+    getContextMock.mockResolvedValue({ ...baseContext, hasPassword: true });
     renderDangerZone();
 
-    await expect(
-      screen.findByRole("link", { name: "Go to Security" })
-    ).resolves.toHaveAttribute("href", "/settings?tab=security");
+    // The tab is for irreversible actions only. Changing a password moved to
+    // Security, and signing out lives in the navbar user menu, so neither
+    // should be reachable from here.
+    await waitFor(() => {
+      expect(screen.getByText("Danger Zone")).toBeInTheDocument();
+    });
     expect(
-      screen.queryByRole("heading", { name: "Change Password" })
+      screen.queryByRole("heading", { name: /change password/iu })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /sign out/iu })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /security/iu })
+    ).not.toBeInTheDocument();
+  });
+
+  it("frames the tab as destructive and says what it covers", async () => {
+    renderDangerZone();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "Danger Zone" })
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText(/cannot be undone/iu)).toBeInTheDocument();
   });
 });

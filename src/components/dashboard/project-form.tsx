@@ -275,7 +275,15 @@ export const ProjectForm = ({
       />
 
       <div className="grid gap-2">
-        <FormTextarea id="project-description" label="Description (Markdown)" />
+        <FormTextarea
+          id="project-description"
+          label="Description (Markdown)"
+          rows={10}
+          value={values.description}
+          onChange={(event) => update("description", event.target.value)}
+          error={errors.get("description")}
+          className={`${FIELD_WIDTH} font-mono text-xs`}
+        />
 
         {/* The description is the longest field in the form, so the preview is
             behind a toggle rather than always beside the editor. The blog post
