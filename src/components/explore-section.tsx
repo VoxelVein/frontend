@@ -1,6 +1,7 @@
 import { IconArrowRight } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
+import { FilledPill } from "@/components/filled-pill";
 import { Reveal } from "@/components/reveal";
 import { MINECRAFT_CATEGORIES } from "@/lib/categories";
 import type { MinecraftCategory } from "@/lib/categories";
@@ -87,13 +88,10 @@ const ExploreSection = () => (
         {/* The filled pill echoes the hero's rotating-text pill, which anchors
             this page's accent treatment. */}
         <h2
-          className="text-foreground text-3xl font-bold tracking-tight text-balance sm:text-4xl"
+          className="text-foreground mx-auto text-3xl font-bold tracking-tight text-balance sm:text-4xl"
           id="browse-heading"
         >
-          Explore{" "}
-          <span className="bg-primary text-primary-foreground inline-block rounded-lg px-2.5 py-1 align-middle">
-            Minecraft
-          </span>
+          Explore <FilledPill>Minecraft</FilledPill>
         </h2>
 
         <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8">

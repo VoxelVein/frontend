@@ -98,7 +98,7 @@ describe(PublishPanel, () => {
   it("offers review rather than publishing, and never publishes directly", () => {
     render(<PublishPanel onChange={onChange} project={project()} />);
 
-    expect(screen.getByRole("heading", { name: "Draft" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
     const button = screen.getByRole("button", { name: "Submit for review" });
     expect(button).toBeTruthy();
     // The old toggle published on click. There must be no such control.
@@ -139,7 +139,7 @@ describe(PublishPanel, () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "In review" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
     expect(
       screen.getByText(/stays hidden from the site until they approve it/u)
     ).toBeTruthy();
@@ -179,7 +179,7 @@ describe(PublishPanel, () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Published" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
     expect(screen.queryByText("Description mentions a dead API.")).toBeNull();
   });
 
@@ -213,7 +213,7 @@ describe(PublishPanel, () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Removed" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
     expect(
       screen.queryByRole("button", { name: "Submit for review" })
     ).toBeNull();

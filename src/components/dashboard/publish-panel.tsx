@@ -21,27 +21,30 @@ import { cn } from "@/lib/utils";
  * `action` is null where there is nothing to do, which is how a removed project
  * renders read-only instead of showing a button the server would reject.
  */
+/**
+ * Per-status copy and the action available from it.
+ *
+ * There is no `heading` here: the page header already carries the status as a
+ * badge, and repeating it as this panel's title said the same word twice
+ * within a few hundred pixels. The panel names its own job instead.
+ */
 const VISIBILITY = {
   draft: {
     action: "Submit for review",
     description: "Only you and admins can see this project.",
-    heading: "Draft",
   },
   pending: {
     action: "Withdraw request",
     description:
       "An admin is reviewing this. It stays hidden from the site until they approve it.",
-    heading: "In review",
   },
   published: {
     action: "Unpublish",
     description: "Everyone can find and download this project.",
-    heading: "Published",
   },
   removed: {
     action: null,
     description: "This project was removed and is no longer listed.",
-    heading: "Removed",
   },
 } as const;
 
@@ -158,7 +161,7 @@ export const PublishPanel = ({
         id="visibility-heading"
         className="text-foreground text-lg font-semibold"
       >
-        {visibility.heading}
+        Visibility
       </h2>
       <p className="text-muted-foreground mt-1 text-sm">
         {visibility.description}
