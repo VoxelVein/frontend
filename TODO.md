@@ -83,12 +83,15 @@ for the longer-term plan.
 
 ## Known limitations
 
-* [ ] **Images are not resized.** A 4000px phone photo is stored and served
-      as-is, so a project icon can be several MB and every listing page that
-      shows it pays for that. The 8 MB cap bounds the damage but does not
-      remove it. Client-side downscaling is the cheap fix;
-      `ROADMAP.md` has the full comparison including Cloudflare Image
-      Resizing.
+* [ ] **Resizing is client-side only.** `src/lib/image-resize.ts` runs in the
+      browser before upload, so the full-size original never reaches the
+      bucket. That is where the saving is, but it means anything that posts
+      straight to `/api/projects/$id/images` bypasses it and stores whatever
+      it sends, up to the 8 MB cap. A server-side resize would close that, at
+      the cost of a native dependency and CPU per upload.
+* [ ] **GIFs are never resized.** Canvas cannot preserve animation frames,
+      so a GIF is stored as uploaded. An animated GIF under the 8 MB cap can
+      still be the largest object in the bucket.
 * [ ] **Image bytes pass through the app.** `/api/image/$imageId` proxies
       from the bucket rather than redirecting to it, because the
       published-state check has to run on every request. That makes image

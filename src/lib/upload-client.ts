@@ -1,4 +1,5 @@
 import type { ProjectImageKind } from "@/db/schema";
+import { resizeImageForUpload } from "@/lib/image-resize";
 import type { ProjectFileView } from "@/lib/projects";
 import { contentTypeFor } from "@/lib/upload-validation";
 
@@ -96,7 +97,7 @@ export const uploadVersionFile = ({
  * Uploads a project icon or gallery image. Uses XMLHttpRequest for the same
  * reason as version files: fetch does not report upload progress.
  */
-export const uploadProjectImage = ({
+export const uploadProjectImage = async ({
   file,
   kind,
   onProgress,
@@ -109,11 +110,16 @@ export const uploadProjectImage = ({
 }): Promise<UploadedProjectImage> => {
   const url = `/api/projects/${projectId}/images?kind=${kind}`;
 
+  // Resized here rather than in the call site, so every upload path gets it
+  // and none can forget. The un-resized original never leaves the device,
+  // which is the point: it cannot be deleting bytes from the bucket later.
+  const payload = await resizeImageForUpload(file, kind);
+
   // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest has no promise API.
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("PUT", url);
-    request.setRequestHeader("content-type", file.type);
+    request.setRequestHeader("content-type", payload.type);
     request.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) {
         onProgress?.(event.loaded / event.total);
@@ -130,7 +136,7 @@ export const uploadProjectImage = ({
     request.addEventListener("error", () =>
       reject(new Error("The upload failed. Check your connection."))
     );
-    request.send(file);
+    request.send(payload);
   });
 };
 

@@ -445,9 +445,9 @@ The app only uses the S3 API, so switching providers means changing
 environment variables only. Images are proxied through the app rather than
 redirected, because the published-state check has to run on every request.
 
-> Images are **not resized**: originals are stored exactly as uploaded, so a
-> large photo becomes a large icon. [ROADMAP.md](ROADMAP.md) records the
-> options and their trade-offs.
+> Images are resized in the browser before upload (512px for an icon,
+> 1920px for a gallery image), so the full-size original never reaches the
+> bucket. GIFs are exempt, because resizing one would drop its animation.
 
 See [docs/storage/object-storage.md](docs/storage/object-storage.md) for the
 object layout, [rustfs](docs/storage/rustfs.md) for the local console

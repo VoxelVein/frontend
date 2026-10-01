@@ -47,9 +47,27 @@ ways:
   towards a version's download total. They are served by
   `/api/image/$imageId` instead, which applies the same published-state
   rule as a file download, so a draft project's icon stays private.
-* They are **not resized**. The file is stored exactly as uploaded,
-  capped at 8 MB, and the `project_images` table records the real pixel
+* They are **resized in the browser before upload**
+  (`src/lib/image-resize.ts`), so the full-size original never reaches the
+  bucket. An icon is stored with a longest edge of 512px and a gallery image
+  1920px, which is past what either is displayed at. An image already
+  smaller than that is uploaded untouched rather than re-encoded, so
+  resizing never costs quality or adds bytes. The upload is still capped at
+  8 MB server-side, and the `project_images` table records the real stored
   dimensions so the UI can reserve the right space before it loads.
+
+Resizing client-side rather than on the server is deliberate: the original
+is discarded in the browser, so it costs no storage, no server CPU per
+upload, and no new native dependency.
+
+Two deliberate exceptions:
+
+* **GIF is never resized.** Canvas cannot preserve animation frames, so
+  resizing would silently turn an animated GIF into a still image. GIFs are
+  stored as they are, under the 8 MB cap.
+* **PNG stays PNG**, so a transparent icon keeps its transparency. JPEGs are
+  re-encoded as WebP at quality 0.9, which is much smaller for the same
+  perceived quality.
 
 Accepted types are PNG, JPEG, WebP, and GIF, chosen by sniffing the file's
 leading bytes rather than trusting the request's `content-type`. SVG is
