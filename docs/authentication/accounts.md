@@ -175,11 +175,22 @@ their owner's account, and owners cannot choose to delete them that way.
 
 ## Roles
 
-There are exactly two roles, `user` and `admin`, defined in
-`src/lib/permissions.ts` alongside Better Auth's access-control
-statements. `admin` additionally has implicit access to every project
-operation. Adding a third role means changing that file and the schema
-check that reads it; see [Admin Panel](../content/admin-panel.md).
+There are three roles: `user`, `moderator`, and `admin`. Two files
+define them, and both must change together. `src/lib/roles.ts` holds the
+`ROLE_RANK` ladder, the labels, and the `hasRole` check;
+`src/lib/permissions.ts` holds Better Auth's access-control statements and
+a `assertRolesInSync` guard that fails startup if the two ever disagree.
+
+`admin` has implicit access to every project operation. `moderator`
+reviews projects and drafts, and can disable an account, but
+deliberately **cannot** delete users, change roles, revoke sessions, or
+publish a post. Those statements are absent from its role object rather
+than checked in app code, so Better Auth refuses the matching `/admin/*`
+endpoints even if a route guard is ever missed.
+
+`hasRole` fails closed on an unrecognised role string, so a bad value
+grants nothing. Adding a fourth role means editing both files; see
+[Admin Panel](../content/admin-panel.md).
 
 ## Related
 

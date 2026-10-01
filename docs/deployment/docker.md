@@ -111,14 +111,14 @@ Password sign-in and sign-up are rejected unless all three Turnstile
 values are set. In production the secret must not be a Cloudflare
 testing secret and `TURNSTILE_HOSTNAMES` must not include `localhost`.
 
-## Client IPs and `TRUST_PROXY`
+## Client IPs behind a reverse proxy
 
 The API limits event streams per client, and the web app counts a
 download once per client and file. Both identify the client by IP from
 `X-Forwarded-For`, using the **last** entry — the one the reverse proxy
 appends. That is only trustworthy when a proxy you control sits in front
 and appends to the header rather than passing a client-supplied one
-through unchanged.
+through unchanged, which is what `TRUST_PROXY` switches on.
 
 * `compose.yaml` defaults `TRUST_PROXY` to `true`, for Traefik in front.
 * `docker-compose.yml` publishes ports directly with no proxy and
@@ -142,6 +142,37 @@ through unchanged.
 * `migrate`, `web`, and `api` all read `.env` next to the compose file,
   never `.env.local`.
 
+## Before you go live
+
+Four things are hardcoded or unconfigured in the repository. None of them
+break a deploy, and all of them are visible to the public.
+
+**There is no admin on a fresh database.** Nothing bootstraps the first
+one, so `/admin` redirects to sign-in until a role is set by hand. See
+[Create the First Admin](../authentication/first-admin.md).
+
+**The legal operator is a placeholder.** `src/routes/legal.tsx:5` sets
+`OPERATOR` to `name: "Unknown"` and `address: "Unknown"`, and `/legal`
+renders both, alongside the § 5 DDG responsible-party details. That page
+cannot go live as-is. The email is the only real value.
+
+**The legal page dates are hardcoded.** Each of `/legal`, `/privacy`,
+`/terms`, `/terms-of-use`, `/disclaimer`, and `/cookies` passes its own
+`updated` date as a literal. Editing the text does not update the date,
+so there is nothing keeping the two in sync.
+
+**Cookie consent is recorded but not enforced.** The banner stores
+`accepted` or `declined` in `localStorage` under `voxelvein-cookie-consent`
+and nothing reads it back. That is consistent with the code today — there
+is no analytics, no third-party script, and no non-essential cookie, so
+there is nothing to gate. It is only worth knowing because the banner
+offers a choice that currently has no consequence, so adding a tracker
+later means wiring the gate up, not just adding the script.
+
+If the app is reachable at more than one origin, set
+`BETTER_AUTH_TRUSTED_ORIGINS` to a comma-separated list. See
+[Hardening](../security/hardening.md).
+
 ## Related
 
 * [Deploying with Dokploy](dokploy.md)
@@ -149,3 +180,6 @@ through unchanged.
 * [Commands](../development/commands.md)
 * [Object Storage](../storage/object-storage.md)
 * [Migrations](../database/migrations.md)
+* [Hardening](../security/hardening.md) — response headers and CSRF scope
+* [Resilience](../development/resilience.md) — chunk reload and download
+  counting
