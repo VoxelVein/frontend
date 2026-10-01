@@ -16,7 +16,6 @@ import {
 import { auth } from "@/lib/auth";
 import {
   hasSessionRole,
-  isAdmin,
   ProjectAccessError,
   PROJECT_ACCESS_ERROR,
   requireEditableProject,
@@ -47,6 +46,7 @@ import type {
   ServerInput,
   VersionInput,
 } from "@/lib/projects";
+import { can } from "@/lib/roles";
 import { loadServerDetails } from "@/lib/server-details";
 import { deleteObjects } from "@/lib/storage";
 import { getProjectImageKeys } from "@/lib/storage-quota";
@@ -519,7 +519,7 @@ export const removeProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await getSessionOrNull();
-    if (!session || !isAdmin(session)) {
+    if (!session || !can(session.user.role, "manageProtectedProjects")) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
     }
     await db
@@ -543,7 +543,7 @@ export const setProjectProtected = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<void> => {
     const session = await getSessionOrNull();
-    if (!session || !isAdmin(session)) {
+    if (!session || !can(session.user.role, "manageProtectedProjects")) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
     }
     await db

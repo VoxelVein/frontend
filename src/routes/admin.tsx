@@ -21,8 +21,8 @@ import { countUnreadAdminNotifications } from "@/lib/admin-accounts.functions";
 import { authClient } from "@/lib/auth-client";
 import { requireAdmin } from "@/lib/auth.functions";
 import { countPendingReviews } from "@/lib/project-moderation.functions";
-import { hasRole } from "@/lib/roles";
-import type { MinimumRole } from "@/lib/roles";
+import { can } from "@/lib/roles";
+import type { Capability } from "@/lib/roles";
 
 const adminSearchSchema = object({
   tab: optional(
@@ -43,21 +43,27 @@ type AdminTab = NonNullable<
 >;
 
 /**
- * The minimum role for each tab.
+ * The capability each tab needs.
+ *
+ * Named by the job rather than by a rank, so this table reads as policy and the
+ * minimum for a tab lives in `CAPABILITY_MINIMUM` with every other one. Adding
+ * a tab means naming what it does; the role that implies comes from the table.
  *
  * A tab is hidden rather than disabled, so staff never see a control that
  * would fail. The server functions behind each tab enforce the same bar, so
  * this is presentation and not the security boundary.
+ *
+ * A moderator's panel is therefore the Reviews tab alone.
  */
-const TAB_MINIMUM_ROLE = {
-  deletions: "admin",
-  notifications: "admin",
-  posts: "moderator",
-  reviews: "moderator",
-  sessions: "admin",
-  storage: "admin",
-  users: "moderator",
-} as const satisfies Record<AdminTab, MinimumRole>;
+const TAB_CAPABILITY = {
+  deletions: "manageDeletions",
+  notifications: "manageNotifications",
+  posts: "managePosts",
+  reviews: "reviewProjects",
+  sessions: "manageSessions",
+  storage: "manageStorage",
+  users: "manageUsers",
+} as const satisfies Record<AdminTab, Capability>;
 
 const TABS = [
   { label: "Users", value: "users" },
@@ -70,7 +76,7 @@ const TABS = [
 ] as const satisfies { label: string; value: AdminTab }[];
 
 const canSee = (tab: { value: AdminTab }, role: string) =>
-  hasRole(role, TAB_MINIMUM_ROLE[tab.value]);
+  can(role, TAB_CAPABILITY[tab.value]);
 
 /** Two tabs carry a count badge; the rest are plain text. */
 const tabLabel = (

@@ -37,7 +37,7 @@ import type {
   ProjectView,
 } from "@/lib/projects";
 import { setProjectProtected } from "@/lib/projects.functions";
-import { hasRole } from "@/lib/roles";
+import { can } from "@/lib/roles";
 
 const badgeClassName =
   "border-border bg-muted text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium";
@@ -415,11 +415,14 @@ interface ProtectedOverride {
 
 export const ProjectDetail = ({ project }: { project: ProjectView }) => {
   const { data: session } = authClient.useSession();
-  const isAdmin = hasRole(session?.user.role, "admin");
-  const isStaff = hasRole(session?.user.role, "moderator");
   // Staff can reach a project's dashboard to review it, so the link follows
   // the same bar as editing on the server.
-  const canManage = session?.user.id === project.ownerId || isStaff;
+  const canManage =
+    session?.user.id === project.ownerId ||
+    can(session?.user.role, "reviewProjects");
+  // Marking a project large shields it from deletion with its owner's account,
+  // so it is a separate capability from ordinary review.
+  const canProtect = can(session?.user.role, "manageProtectedProjects");
 
   const [protectedOverride, setProtectedOverride] =
     useState<ProtectedOverride | null>(null);
@@ -462,13 +465,13 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         ) : null}
       </div>
 
-      {isAdmin && project.pendingDeletion ? (
+      {canProtect && project.pendingDeletion ? (
         <output className="border-border bg-muted text-foreground mt-4 block rounded-xl border px-4 py-3 text-sm">
           Scheduled for deletion with its owner&apos;s account.
         </output>
       ) : null}
 
-      {isAdmin ? (
+      {canProtect ? (
         <ProtectionControl
           isProtected={isProtected}
           isSaving={isSavingProtection}
@@ -505,7 +508,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
             <span className="text-primary/80 border-primary/20 bg-primary/5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase">
               {project.category.replaceAll("-", " ")}
             </span>
-            {isAdmin && isProtected ? (
+            {canProtect && isProtected ? (
               <span className={`${badgeClassName} gap-1`}>
                 <IconShieldCheck size={12} aria-hidden="true" />
                 Large project

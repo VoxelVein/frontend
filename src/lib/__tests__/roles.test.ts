@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_ROLES,
   assertRolesInSync,
+  can,
+  canActOn,
+  ALL_CAPABILITIES,
+  CAPABILITY_MINIMUM,
   hasRole,
   isAdmin,
   isModerator,
@@ -10,60 +14,86 @@ import {
   ROLE_LABELS,
   ROLE_RANK,
 } from "@/lib/roles";
+import type { Capability } from "@/lib/roles";
 
 /**
- * The capability matrix, stated once.
+ * The policy, in prose, so a reviewer can check it without reading the code.
  *
- * Every other test derives from this table, so a role change is a one-line
- * edit here and a failing assertion everywhere it matters.
+ * `CAPABILITY_MINIMUM` is the machine-readable source of truth and this mirrors
+ * it — `it("matches the capability table")` below fails if the two drift. The
+ * duplication is deliberate: a permissions change should be a thing you can
+ * see is wrong, not a thing you have to reconstruct from a table of ranks.
  */
-const CAPABILITIES = {
-  "delete users": "admin",
-  "disable an account": "moderator",
-  "draft a blog post": "moderator",
-  "publish a blog post": "admin",
-  "read draft projects": "moderator",
-  "remove a project": "admin",
-  "restore a scheduled deletion": "admin",
-  "revoke sessions": "admin",
-  "set a role": "admin",
-  "view site storage": "admin",
-} as const satisfies Record<string, keyof typeof ROLE_RANK>;
+const EXPECTED = {
+  admin: [
+    "manageDeletions",
+    "manageNotifications",
+    "managePosts",
+    "manageProtectedProjects",
+    "manageSessions",
+    "manageStorage",
+    "manageUsers",
+    "publishPosts",
+    "reviewProjects",
+    "viewAdminPanel",
+  ],
+  moderator: ["reviewProjects", "viewAdminPanel"],
+  user: [],
+} as const satisfies Record<string, readonly Capability[]>;
 
-type Capability = keyof typeof CAPABILITIES;
+/**
+ * What a role actually holds, sorted, for comparison against `EXPECTED`.
+ *
+ * `ALL_CAPABILITIES` is already in table order, and `EXPECTED` is written in
+ * the same order, so the arrays compare directly with no sorting — which also
+ * avoids `toSorted`, unavailable at this file's ES2022 target.
+ */
+const held = (role: string): Capability[] =>
+  ALL_CAPABILITIES.filter((capability) => can(role, capability));
 
-// SAFETY: Object.keys returns this object's own enumerable string keys, which
-// for CAPABILITIES are exactly the Capability union.
-const ALL_CAPABILITIES = Object.keys(CAPABILITIES) as Capability[];
-
-const grants = (role: string, capability: Capability) =>
-  hasRole(role, CAPABILITIES[capability]);
-
-describe(hasRole, () => {
-  it("grants a capability at or above the required rank", () => {
-    expect(grants("admin", "publish a blog post")).toBeTruthy();
-    expect(grants("moderator", "draft a blog post")).toBeTruthy();
-    expect(grants("user", "read draft projects")).toBeFalsy();
-  });
-
-  it("keeps a moderator below every admin-only capability", () => {
-    const wronglyGranted = ALL_CAPABILITIES.filter(
-      (capability) =>
-        CAPABILITIES[capability] === "admin" && grants("moderator", capability)
-    );
-    expect(wronglyGranted).toStrictEqual([]);
-  });
-
+describe(can, () => {
   it("lets an admin do everything", () => {
-    for (const capability of ALL_CAPABILITIES) {
-      expect(grants("admin", capability)).toBeTruthy();
-    }
+    expect(held("admin")).toStrictEqual(EXPECTED.admin);
+  });
+
+  it("restricts a moderator to reviewing projects", () => {
+    // A moderator reviews submissions and nothing else. In particular they
+    // hold no `manageUsers`, which is what stops them reaching an admin's
+    // account at all.
+    expect(held("moderator")).toStrictEqual(EXPECTED.moderator);
   });
 
   it("grants a user nothing", () => {
-    for (const capability of ALL_CAPABILITIES) {
-      expect(grants("user", capability)).toBeFalsy();
+    expect(held("user")).toStrictEqual([]);
+  });
+
+  it("grants nothing to a role that does not exist", () => {
+    // Fails closed, so a typo in a setRole call cannot widen access.
+    expect(held("superadmin")).toStrictEqual([]);
+    expect(can(null, "reviewProjects")).toBeFalsy();
+    expect(can(undefined, "viewAdminPanel")).toBeFalsy();
+  });
+
+  it("matches the capability table the guards read", () => {
+    // The prose above and `CAPABILITY_MINIMUM` must agree, or the docs are
+    // describing a policy the code does not implement.
+    for (const role of ALL_ROLES) {
+      for (const capability of ALL_CAPABILITIES) {
+        expect(can(role, capability), `${role}.${capability}`).toBe(
+          CAPABILITY_MINIMUM[capability] === "admin"
+            ? role === "admin"
+            : role !== "user"
+        );
+      }
     }
+  });
+});
+
+describe(hasRole, () => {
+  it("grants a rank at or above the required one", () => {
+    expect(hasRole("admin", "moderator")).toBeTruthy();
+    expect(hasRole("moderator", "moderator")).toBeTruthy();
+    expect(hasRole("user", "moderator")).toBeFalsy();
   });
 
   it("fails closed for a role that does not exist", () => {
@@ -100,6 +130,52 @@ describe(isRole, () => {
   it("accepts ladder members and rejects anything else", () => {
     expect(isRole("moderator")).toBeTruthy();
     expect(isRole("owner")).toBeFalsy();
+  });
+
+  it("treats a missing role as not one", () => {
+    // The value comes off a nullable database column, so an empty one has to
+    // fail closed rather than throw. An *absent* role is covered by the
+    // `can(undefined, ...)` and `canActOn(undefined, ...)` cases above, which
+    // pass one through the same predicate.
+    expect(isRole(null)).toBeFalsy();
+    expect(isRole("")).toBeFalsy();
+  });
+});
+
+describe(canActOn, () => {
+  it("lets an admin act on a user or another admin", () => {
+    // Equal rank is allowed on purpose: only a handful of people hold admin,
+    // and two admins need to be able to clean up a compromised peer.
+    expect(canActOn("admin", "user")).toBeTruthy();
+    expect(canActOn("admin", "moderator")).toBeTruthy();
+    expect(canActOn("admin", "admin")).toBeTruthy();
+  });
+
+  it("stops a moderator acting on an admin", () => {
+    expect(canActOn("moderator", "user")).toBeTruthy();
+    expect(canActOn("moderator", "moderator")).toBeTruthy();
+    expect(canActOn("moderator", "admin")).toBeFalsy();
+  });
+
+  it("stops a plain user acting on anyone, including another user", () => {
+    // The bare seniority test would pass here, since both are rank 0. A user
+    // reaching a manage-accounts control at all is the bug this prevents.
+    for (const target of ALL_ROLES) {
+      expect(canActOn("user", target)).toBeFalsy();
+    }
+    expect(canActOn(null, "user")).toBeFalsy();
+  });
+
+  it("treats an unrecognised target role as outranking everyone", () => {
+    // Fails closed, matching hasRole: a role wired into the database but not
+    // the ladder must not become something an admin can casually act on.
+    expect(canActOn("admin", "superuser")).toBeFalsy();
+    expect(canActOn("admin", null)).toBeFalsy();
+  });
+
+  it("grants nothing to a caller with no role", () => {
+    expect(canActOn(null, "user")).toBeFalsy();
+    expect(canActOn(undefined, "user")).toBeFalsy();
   });
 });
 

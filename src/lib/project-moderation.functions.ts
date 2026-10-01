@@ -17,7 +17,7 @@ import {
   withdrawReview,
 } from "@/lib/project-moderation";
 import type { PendingReview } from "@/lib/project-moderation";
-import { requireStaff } from "@/lib/role-guards";
+import { requireCapability } from "@/lib/role-guards";
 
 /**
  * Resolves the caller's staff session.
@@ -26,7 +26,8 @@ import { requireStaff } from "@/lib/role-guards";
  * is the failure mode that would let a non-staff account reach a decision
  * endpoint. Reviewing is the moderator's core duty, so the bar is moderator.
  */
-const requireReviewer = (): Promise<Session> => requireStaff("moderator");
+const requireReviewer = (): Promise<Session> =>
+  requireCapability("reviewProjects");
 
 const getOwner = (): Promise<Session> => requireUploader(getRequestHeaders());
 

@@ -1,8 +1,8 @@
 import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { auth } from "@/lib/auth";
-import { hasRole } from "@/lib/roles";
-import type { MinimumRole } from "@/lib/roles";
+import { CAPABILITY_MINIMUM, hasRole } from "@/lib/roles";
+import type { Capability, MinimumRole } from "@/lib/roles";
 
 /**
  * Session-based role guards.
@@ -52,8 +52,9 @@ const DENIAL = {
  * The caller's session, or throws with a message naming the role that was
  * needed.
  *
- * Every staff endpoint goes through this rather than re-reading the session,
- * so a new admin surface cannot forget the check.
+ * `requireCapability` is the better default for new endpoints, since it reads
+ * its minimum from `CAPABILITY_MINIMUM`. This stays for the guards that are
+ * genuinely about a rank rather than a job.
  */
 export const requireStaff = async (
   minimum: Exclude<MinimumRole, "user">
@@ -61,6 +62,28 @@ export const requireStaff = async (
   const session = await getRoleSession(minimum);
   if (!session) {
     throw new Error(DENIAL[minimum]);
+  }
+  return session;
+};
+
+/**
+ * The caller's session, or throws unless they hold a capability.
+ *
+ * The guard a new staff endpoint should reach for. It reads the minimum from
+ * `CAPABILITY_MINIMUM` rather than taking a role, so the endpoint names the job
+ * it protects — `requireCapability("manageUsers")` says why the check exists —
+ * and the minimum rank is stated once, in one place, instead of being repeated
+ * as `"admin"` at every guard.
+ *
+ * Pair it with `can()` on the client to hide what this refuses; neither is the
+ * boundary on its own, and this one is the one that actually is.
+ */
+export const requireCapability = async (
+  capability: Capability
+): Promise<StaffSession> => {
+  const session = await getRoleSession(CAPABILITY_MINIMUM[capability]);
+  if (!session) {
+    throw new Error(DENIAL[CAPABILITY_MINIMUM[capability]]);
   }
   return session;
 };

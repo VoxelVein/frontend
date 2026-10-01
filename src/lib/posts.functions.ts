@@ -8,7 +8,7 @@ import { posts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { postInputSchema, postUpdateSchema, resolvePreview } from "@/lib/posts";
 import type { Post, PostInput, PostSummary } from "@/lib/posts";
-import { hasRole, isAdmin } from "@/lib/roles";
+import { can } from "@/lib/roles";
 import { hasSearchablePosts, searchPostsInDatabase } from "@/lib/search/posts";
 import type { PostSearchResult } from "@/lib/search/posts";
 
@@ -16,14 +16,14 @@ const getStaffSessionOrNull = async () => {
   const headers = getRequestHeaders();
   const session = await auth.api.getSession({ headers });
 
-  if (!session || !hasRole(session.user.role, "moderator")) {
+  if (!session || !can(session.user.role, "managePosts")) {
     return null;
   }
 
   return session;
 };
 
-/** Any staff member, which is enough to write and read drafts. */
+/** Any staff member with `managePosts`, enough to write and read drafts. */
 const getStaffSession = async () => {
   const session = await getStaffSessionOrNull();
 
@@ -34,11 +34,15 @@ const getStaffSession = async () => {
   return session;
 };
 
-/** Admins only: publishing a post makes it public. */
+/**
+ * Publishing a post makes it public, so that half is admin-only even though
+ * drafting is not. Read through `publishPosts` rather than `managePosts` so the
+ * day drafting is opened up, publishing does not follow by accident.
+ */
 const getAdminSession = async () => {
   const session = await getStaffSessionOrNull();
 
-  if (!session || !isAdmin(session.user.role)) {
+  if (!session || !can(session.user.role, "publishPosts")) {
     throw new Error("Only admins can publish or delete blog posts.");
   }
 
@@ -48,14 +52,13 @@ const getAdminSession = async () => {
 /**
  * Whether a staff member may set the published flag.
  *
- * A moderator drafts; an admin publishes. The check lives here so both the
- * create and update paths agree, rather than each trusting a value that came
- * from the client.
+ * The check lives here so both the create and update paths agree, rather than
+ * each trusting a value that came from the client.
  */
 const resolvePublished = (
   requested: boolean,
   role: string | null | undefined
-): boolean => (isAdmin(role) ? requested : false);
+): boolean => (can(role, "publishPosts") ? requested : false);
 
 const POST_NOT_FOUND = "Post not found.";
 
@@ -269,7 +272,7 @@ export const updatePost = createServerFn({ method: "POST" })
 
     // A moderator editing a draft stays a draft, and cannot unpublish an
     // already-published post either, since that would be a publish decision.
-    const published = isAdmin(session.user.role)
+    const published = can(session.user.role, "publishPosts")
       ? data.published
       : await staysUnpublished(data.id, data.published);
 

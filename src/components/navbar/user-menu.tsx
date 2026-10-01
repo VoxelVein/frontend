@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ADMIN_PANEL_ROLE, hasRole } from "@/lib/roles";
+import { can } from "@/lib/roles";
 
 interface UserMenuProps {
   user: {
@@ -100,7 +100,7 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
           Settings
         </DropdownMenuItem>
 
-        {hasRole(user.role, ADMIN_PANEL_ROLE) ? (
+        {can(user.role, "viewAdminPanel") ? (
           <DropdownMenuItem
             render={<Link to="/admin" />}
             className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"

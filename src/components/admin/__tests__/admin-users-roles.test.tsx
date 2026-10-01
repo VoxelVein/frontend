@@ -30,7 +30,8 @@ const { listUsersMock, unusedEndpoint, useSessionMock } = vi.hoisted(() => ({
   // Declared in the same hoisted block as the factory that references it,
   // since a vi.mock factory is hoisted above ordinary top-level declarations.
   unusedEndpoint: vi.fn<() => Promise<{ error: null }>>(),
-  useSessionMock: vi.fn<() => { data: { user: { role: string } } | null }>(),
+  useSessionMock:
+    vi.fn<() => { data: { user: { id: string; role: string } } | null }>(),
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The component talks to the auth client and Better Auth's admin API; string paths avoid strict factory type-checking
@@ -83,6 +84,9 @@ const USER: AdminUser = {
   role: "user",
 };
 
+/** The signed-in admin, distinct from `USER` so the row is not "your own". */
+const OTHER_ADMIN_ID = "22222222-2222-4222-8222-222222222222";
+
 /**
  * The list payload as Better Auth returns it.
  *
@@ -101,9 +105,10 @@ describe("AdminUsers role visibility", () => {
     useSessionMock.mockReset();
   });
 
-  it("gives a moderator the ban control but not delete or role change", async () => {
+  it("gives a moderator no account controls at all", async () => {
+    // A different id: this staff member is looking at someone else's account.
     useSessionMock.mockReturnValue({
-      data: { user: { role: "moderator" } },
+      data: { user: { id: OTHER_ADMIN_ID, role: "moderator" } },
     });
     render(<AdminUsers />);
 
@@ -115,17 +120,24 @@ describe("AdminUsers role visibility", () => {
       expect(screen.getByText("Ada")).toBeInTheDocument();
     });
 
-    // A moderator may still act on a misbehaving account.
-    expect(screen.getByRole("button", { name: "Ban" })).toBeInTheDocument();
-
-    // The role selector and the delete button are admin-only, so a moderator
-    // must not find them by any accessible name.
+    // Account management is admin-only. A moderator used to get the ban
+    // control, which is what let them ban an admin; `manageUsers` now starts
+    // at admin, so none of the four controls are rendered.
+    expect(
+      screen.queryByRole("button", { name: "Ban" })
+    ).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/^role for/iu)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/remove ada/iu)).not.toBeInTheDocument();
+
+    // The row still renders, so the panel reads as read-only rather than
+    // broken.
+    expect(screen.getByText("Ada")).toBeInTheDocument();
   });
 
   it("gives an admin the role selector and delete control", async () => {
-    useSessionMock.mockReturnValue({ data: { user: { role: "admin" } } });
+    useSessionMock.mockReturnValue({
+      data: { user: { id: OTHER_ADMIN_ID, role: "admin" } },
+    });
     render(<AdminUsers />);
 
     await waitFor(() => {
@@ -136,5 +148,107 @@ describe("AdminUsers role visibility", () => {
     // named by the row so the target account is unambiguous.
     expect(screen.getByLabelText(/^role for/iu)).toBeInTheDocument();
     expect(screen.getByLabelText(/remove ada/iu)).toBeInTheDocument();
+  });
+
+  it("disables ban, delete, and role change on the admin's own row", async () => {
+    // Same id as the listed user, so the row is the admin's own account.
+    useSessionMock.mockReturnValue({
+      data: { user: { id: USER.id, role: "admin" } },
+    });
+    render(<AdminUsers />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Ada")).toBeInTheDocument();
+    });
+
+    // Better Auth rejects self-ban and self-remove outright, so the controls
+    // stay present but inert. They are disabled rather than removed: a row
+    // missing controls would read as a permissions bug rather than a choice.
+    expect(screen.getByRole("button", { name: "Ban" })).toBeDisabled();
+    expect(screen.getByLabelText(/remove ada/iu)).toBeDisabled();
+
+    // Self-demotion would end the admin's own access mid-session, so the role
+    // selector is inert too and relabelled to say the row is theirs.
+    expect(screen.getByLabelText(/^your own role$/iu)).toBeDisabled();
+
+    // The row explains where self-service actually lives.
+    expect(
+      screen.getByText("Manage your own account in Settings.")
+    ).toBeInTheDocument();
+  });
+
+  it("lets an admin act on another admin", async () => {
+    // Equal rank is allowed: only a handful of people hold the role, and two
+    // admins need to be able to clean up a compromised peer. `canActOn` is
+    // seniority, so admin-on-admin is 2 >= 2.
+    const peer: AdminUser = { ...USER, name: "Rival", role: "admin" };
+    listUsersMock.mockResolvedValue({
+      data: { total: 1, users: [peer] },
+      error: null,
+    });
+    useSessionMock.mockReturnValue({
+      data: { user: { id: OTHER_ADMIN_ID, role: "admin" } },
+    });
+    render(<AdminUsers />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Rival")).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: "Ban" })).toBeEnabled();
+    expect(screen.getByLabelText(/remove rival/iu)).toBeEnabled();
+
+    // No rank warning: an equal rank is not above yours.
+    expect(
+      screen.queryByText("You cannot act on an account above your rank.")
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the controls disabled on a row whose role is not recognised", async () => {
+    // An unknown role outranks everyone and fails closed, matching `hasRole`.
+    // The row explains why, so an inert button does not read as a bug.
+    const odd: AdminUser = { ...USER, role: "superuser" };
+    listUsersMock.mockResolvedValue({
+      data: { total: 1, users: [odd] },
+      error: null,
+    });
+    useSessionMock.mockReturnValue({
+      data: { user: { id: OTHER_ADMIN_ID, role: "admin" } },
+    });
+    render(<AdminUsers />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("You cannot act on an account above your rank.")
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: "Ban" })).toBeDisabled();
+    expect(screen.getByLabelText(/remove ada/iu)).toBeDisabled();
+  });
+
+  it("leaves unban enabled on the admin's own row", async () => {
+    // The recovery path if another admin ever bans this one. Gating it behind
+    // the same self check would make a bad ban unrecoverable.
+    const bannedSelf: AdminUser = {
+      ...USER,
+      banReason: "misconduct",
+      banned: true,
+      role: "admin",
+    };
+    listUsersMock.mockResolvedValue({
+      data: { total: 1, users: [bannedSelf] },
+      error: null,
+    });
+    useSessionMock.mockReturnValue({
+      data: { user: { id: USER.id, role: "admin" } },
+    });
+    render(<AdminUsers />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Unban" })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: "Unban" })).toBeEnabled();
   });
 });

@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/empty-state";
 import { Reveal } from "@/components/reveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listMyProjects } from "@/lib/projects.functions";
-import { hasRole } from "@/lib/roles";
+import { can } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/";
@@ -58,7 +58,7 @@ const MyProjectsPage = () => {
   const projects = useLoaderData({ from: ROUTE_ID });
   const { session } = useRouteContext({ from: ROUTE_ID });
   const canUpload =
-    session.user.emailVerified || hasRole(session.user.role, "moderator");
+    session.user.emailVerified || can(session.user.role, "reviewProjects");
 
   return (
     <div className={PAGE_SHELL}>
