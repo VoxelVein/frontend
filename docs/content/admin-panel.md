@@ -69,6 +69,11 @@ To grant a role outside the UI:
 pnpm db:seed:admin you@example.com moderator
 ```
 
+That is the only way to create the **first** admin, since `/admin` and
+`setRole` both require a role the account does not have yet. See
+[Bootstrapping the First Admin](../authentication/first-admin.md) for the
+production and Dokploy walkthrough.
+
 The Notifications and Reviews tabs carry unread and pending counts. Both
 are fetched client-side after mount and fail soft to `null`, because a
 badge must never be the reason the page fails to render — the tab itself
