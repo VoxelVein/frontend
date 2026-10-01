@@ -150,8 +150,14 @@ const VersionList = ({
             setError(null);
           }
         }}
-        title={`Delete version ${target?.versionNumber ?? ""}?`}
-        description="Its files are deleted permanently and existing download links stop working. This can't be undone."
+        // The version number moves into the description so the title stays a stable
+        // verb phrase, matching every other confirmation.
+        title="Delete version"
+        description={
+          target
+            ? `Delete version ${target.versionNumber}? Its files are deleted permanently and existing download links stop working. This can't be undone.`
+            : ""
+        }
         confirmLabel="Delete version"
         onConfirm={confirmDelete}
         pending={pending}
@@ -212,9 +218,10 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
             setError(null);
           }
         }}
-        title={`Delete ${project.name}?`}
-        description="All versions and files are deleted permanently, and the project's URL becomes available to others. This can't be undone."
+        title="Delete project"
+        description={`Delete ${project.name}? All versions and files are deleted permanently, and the project's URL becomes available to others. This can't be undone.`}
         confirmLabel="Delete project"
+        size="md"
         onConfirm={confirmDelete}
         pending={pending}
         error={error}

@@ -108,14 +108,34 @@ export const SHADER_CATEGORIES = [
   "cartoon",
 ] as const;
 
+/**
+ * Server gamemodes.
+ *
+ * `category` is a free-text column validated against this list in app code
+ * rather than a database enum, so extending it needs no migration — existing
+ * rows stay valid, since every prior value is still here.
+ *
+ * Order is roughly by how commonly a listing site labels a server this way,
+ * which is also the order the category filter lists them in. Nothing depends
+ * on the order, so appending is safe.
+ */
 export const SERVER_CATEGORIES = [
   "survival",
   "creative",
   "minigames",
+  "town",
+  "plots",
   "pvp",
   "roleplay",
   "skyblock",
+  "oneblock",
+  "prison",
+  "rpg",
   "modded",
+  "hardcore",
+  "events",
+  "earth",
+  "lobby",
   "anarchy",
 ] as const;
 

@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 
 import {
@@ -13,6 +14,16 @@ import { Spinner } from "@/components/ui/spinner";
 
 type ConfirmDialogVariant = "default" | "destructive";
 
+type ConfirmDialogSize = "sm" | "md" | "lg";
+
+const SIZES: Record<ConfirmDialogSize, string> = {
+  // `sm` matches the primitive default; the rest are opt-in so a confirmation
+  // whose copy embeds a long name is not squeezed into a 24rem column.
+  sm: "",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+};
+
 interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,6 +35,7 @@ interface ConfirmDialogProps {
   error?: string | null;
   cancelLabel?: string;
   variant?: ConfirmDialogVariant;
+  size?: ConfirmDialogSize;
 }
 
 const ConfirmDialog = ({
@@ -37,9 +49,15 @@ const ConfirmDialog = ({
   error = null,
   cancelLabel = "Cancel",
   variant = "destructive",
+  size = "sm",
 }: ConfirmDialogProps) => (
   <AlertDialog open={open} onOpenChange={onOpenChange}>
-    <AlertDialogContent>
+    <AlertDialogContent
+      className={cn(
+        SIZES[size],
+        variant === "destructive" && "border-destructive/40"
+      )}
+    >
       <AlertDialogHeader>
         <AlertDialogTitle>{title}</AlertDialogTitle>
         <AlertDialogDescription>{description}</AlertDialogDescription>

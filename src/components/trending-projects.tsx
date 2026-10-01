@@ -1,9 +1,10 @@
 import { IconArrowRight, IconFlame } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import type { CSSProperties } from "react";
 
 import { EmptyState } from "@/components/empty-state";
-import { ProjectCard } from "@/components/projects/project-card";
+import { TrendingProjectCard } from "@/components/projects/trending-project-card";
 import { Reveal } from "@/components/reveal";
 import { buttonVariants } from "@/components/ui/button-variants";
 import type { ProjectDocument } from "@/lib/projects";
@@ -17,6 +18,48 @@ interface TrendingProjectsProps {
   /** Server-rendered list, so the section never flashes empty. */
   initialProjects: ProjectDocument[];
 }
+
+/**
+ * One column per project, so a short list never leaves holes.
+ *
+ * A fixed column count would leave four empty cells beside a single project.
+ * Dividing by the actual count instead means one project fills the row, two
+ * split it, five fill it — and every card is the same width, which is what
+ * makes the row read as a ranking rather than an arbitrary slice of a grid.
+ *
+ * The count goes in a custom property rather than an inline `grid-template-columns`
+ * so the responsive class below still wins at the breakpoints: an inline style
+ * outranks any class, which would pin five cards across a phone.
+ *
+ * `minmax(0, 1fr)` rather than plain `1fr`: grid tracks default to
+ * `minmax(auto, 1fr)`, and an `auto` minimum lets a long project name push its
+ * column wider than its share, which would break the equal widths.
+ */
+/**
+ * The custom property carrying the column count.
+ *
+ * React's `CSSProperties` does not know about custom properties, so the
+ * widening is asserted rather than worked around.
+ */
+const columnCount = (count: number) =>
+  // SAFETY: the object literal holds exactly one custom property, which React
+  // forwards to the element verbatim; `CSSProperties` simply has no index
+  // signature for them.
+  ({ "--trending-cols": count }) as CSSProperties;
+
+const TrendingGrid = ({ projects }: { projects: ProjectDocument[] }) => (
+  <ol
+    aria-label="Trending projects"
+    className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(var(--trending-cols),minmax(0,1fr))]"
+    style={columnCount(projects.length)}
+  >
+    {projects.map((project, index) => (
+      <li key={project.id}>
+        <TrendingProjectCard project={project} rank={index + 1} />
+      </li>
+    ))}
+  </ol>
+);
 
 const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
   const { data: projects = initialProjects } = useQuery({
@@ -87,16 +130,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
             variant="inline"
           />
         ) : (
-          <ol
-            aria-label="Trending projects"
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
-          >
-            {projects.map((project) => (
-              <li key={project.id}>
-                <ProjectCard project={project} />
-              </li>
-            ))}
-          </ol>
+          <TrendingGrid projects={projects} />
         )}
       </Reveal>
     </section>

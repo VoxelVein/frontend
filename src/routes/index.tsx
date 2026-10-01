@@ -26,9 +26,11 @@ const HomeSkeleton = () => (
       <div className="mx-auto max-w-7xl">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="mt-4 h-5 w-96 max-w-full" />
+        {/* Mirrors `TrendingGrid`'s five-across shape so the placeholder does
+            not reflow once the real cards land. */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {Array.from({ length: 5 }, (_, index) => (
-            <Skeleton key={index} className="h-64 rounded-xl" />
+            <Skeleton key={index} className="h-64 rounded-2xl" />
           ))}
         </div>
       </div>

@@ -77,8 +77,12 @@ const PostFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+      {/* Five fields plus a live preview overflow a short viewport, so the
+          panel caps its height and lets the body scroll. The form is the
+          scroll container and the footer sits inside it, which keeps the
+          submit button reachable from inside the form element. */}
+      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden p-0 sm:max-w-xl">
+        <DialogHeader className="p-4 pb-0">
           <DialogTitle>{post ? "Edit post" : "New post"}</DialogTitle>
           <DialogDescription>
             {post
@@ -93,7 +97,7 @@ const PostFormDialog = ({
             event.stopPropagation();
             void form.handleSubmit();
           }}
-          className="grid gap-4"
+          className="grid min-h-0 gap-4 overflow-y-auto p-4"
         >
           <form.Field name="title" validators={{ onChange: postTitleSchema }}>
             {({ state, handleChange, handleBlur }) => (
@@ -202,16 +206,21 @@ const PostFormDialog = ({
             )}
           </form.Field>
 
-          <DialogFooter>
+          {/* The footer is sticky rather than at the end of the scroll
+              container, so Save stays reachable without scrolling to the
+              bottom. `bg-popover` rather than the footer default's translucent
+              `bg-muted/50`, since content passes behind it. */}
+          <DialogFooter className="bg-popover sticky bottom-0 z-10 -mx-4 mt-0 -mb-4 rounded-b-none">
             <Button
               type="button"
               variant="outline"
+              className="min-h-11"
               disabled={isSubmitting}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" className="min-h-11" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Spinner label="Saving post" />
