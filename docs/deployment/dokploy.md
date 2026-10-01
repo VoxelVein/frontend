@@ -82,14 +82,17 @@ indexes, and search works as soon as there is something to find. See
 ## 5. Afterwards
 
 * Set up volume backups for `pgdata`.
-* To make yourself admin, sign up on the site, then open the Dokploy
-  terminal on the `db` container and run:
+* To make yourself admin, sign up on the site first, then run the role
+  update against the `db` container:
 
   ```bash
   psql -U voxelvein -c "UPDATE users SET role = 'admin' WHERE email = 'you@example.com'"
   ```
 
-  Locally, `pnpm db:seed:admin you@example.com` does the same thing.
+  See [Bootstrapping the First Admin](../authentication/first-admin.md)
+  for where to open that terminal, how to confirm the account first, and
+  the SSH and job-based alternatives. Locally,
+  `pnpm db:seed:admin you@example.com` does the same thing.
 
 * To populate the site with demo content, run `pnpm db:seed` against the
   deployed database. It attaches content to the first admin and uploads

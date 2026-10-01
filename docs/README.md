@@ -20,6 +20,8 @@ frontend. Each guide lives in its own directory under `docs/`.
   expiration, and sign-out
 * [Cloudflare Turnstile](authentication/turnstile.md) — bot protection
   for password sign-in and sign-up
+* [Bootstrapping the First Admin](authentication/first-admin.md) — grant
+  the first `admin` role on a live deployment with no admin yet
 
 ## Social Providers
 
