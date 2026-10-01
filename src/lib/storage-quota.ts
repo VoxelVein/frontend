@@ -24,7 +24,11 @@ const IMAGE_LOCK_NAMESPACE = 7_140_003;
 type Executor = Pick<typeof db, "select">;
 
 export interface StorageUsage {
+  /** Bytes held by downloadable project files. */
+  fileBytes: number;
   fileCount: number;
+  /** Bytes held by project icons and gallery images. */
+  imageBytes: number;
   imageCount: number;
   quotaBytes: number | null;
   usedBytes: number;
@@ -37,7 +41,9 @@ type ImageValues = typeof projectImages.$inferInsert;
  *
  * Images count toward the same quota as downloadable files, so the limit
  * reflects what the bucket actually holds and the admin storage panel stays
- * truthful.
+ * truthful. The per-kind byte totals are returned because the two grow very
+ * differently: images are stored unresized, so a handful of photos can
+ * dominate the bucket, and an admin cannot act on one combined number.
  */
 export const getUsedBytes = async (executor: Executor = db) => {
   const [[file], [image]] = await Promise.all([
@@ -48,10 +54,14 @@ export const getUsedBytes = async (executor: Executor = db) => {
       .select({ images: count(), used: sum(projectImages.size) })
       .from(projectImages),
   ]);
+  const fileBytes = Number(file?.used ?? 0);
+  const imageBytes = Number(image?.used ?? 0);
   return {
+    fileBytes,
     fileCount: file?.files ?? 0,
+    imageBytes,
     imageCount: image?.images ?? 0,
-    usedBytes: Number(file?.used ?? 0) + Number(image?.used ?? 0),
+    usedBytes: fileBytes + imageBytes,
   };
 };
 
