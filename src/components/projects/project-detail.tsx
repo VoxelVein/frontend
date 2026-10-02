@@ -10,11 +10,11 @@ import {
   IconVersions,
   IconWorld,
 } from "@tabler/icons-react";
-import { Markdown } from "@tanstack/markdown/react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
+import { MarkdownBody } from "@/components/markdown-body";
 import { ProjectGallery } from "@/components/projects/project-gallery";
 import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
@@ -559,7 +559,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
             Description
           </h2>
           <div className="markdown-body mt-3">
-            <Markdown>{project.description}</Markdown>
+            <MarkdownBody>{project.description}</MarkdownBody>
           </div>
         </section>
       ) : null}

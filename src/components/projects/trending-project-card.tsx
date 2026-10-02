@@ -52,7 +52,10 @@ const TrendingProjectCard = ({ project, rank }: TrendingProjectCardProps) => (
         <span className="text-muted-foreground text-xs font-medium">
           #{rank}
         </span>
-        <h3 className="text-foreground mt-0.5 truncate font-semibold tracking-tight">
+        {/* An explicit size, not an inherited one: the row sits inside a
+            section that does not set one, so leaving it off ties the card title
+            to whatever the body size happens to be. */}
+        <h3 className="text-foreground mt-0.5 truncate text-base font-semibold tracking-tight">
           {project.name}
         </h3>
         <p className="text-muted-foreground truncate text-xs">

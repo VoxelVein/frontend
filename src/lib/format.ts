@@ -24,10 +24,19 @@ export const formatCount = (value: number): string =>
  * both read as typos, and they appear in the browse filter, the publish form,
  * and on every project card, so the mistake is everywhere at once.
  */
-const CATEGORY_LABELS = {
-  pvp: "PvP",
-  rpg: "RPG",
-} as const satisfies Record<string, string>;
+/**
+ * A `Map`, not an object literal.
+ *
+ * `CATEGORY_LABELS[value]` on a plain object also matches `Object.prototype`
+ * keys, so a category of `"constructor"` or `"toString"` returned the native
+ * function instead of a label — a value typed as `string` that React then threw
+ * on. `Map.get` looks only at its own entries, so any unknown slug simply
+ * misses and falls through to the title-casing below.
+ */
+const CATEGORY_LABELS = new Map([
+  ["pvp", "PvP"],
+  ["rpg", "RPG"],
+]);
 
 /**
  * A stored category slug -> the label to show: "skyblock" -> "Skyblock".
@@ -37,19 +46,9 @@ const CATEGORY_LABELS = {
  * produces something readable, since a project can carry a category this build
  * no longer lists.
  */
-export const formatCategory = (value: string): string => {
-  // SAFETY: the lookup is a widening rather than a narrowing on purpose —
-  // `value` is a plain string because categories come off a text column, and
-  // the `in` guard is what makes it sound to read.
-  const override: string | undefined =
-    value in CATEGORY_LABELS
-      ? CATEGORY_LABELS[value as keyof typeof CATEGORY_LABELS]
-      : undefined;
-  return (
-    override ??
-    value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ")
-  );
-};
+export const formatCategory = (value: string): string =>
+  CATEGORY_LABELS.get(value) ??
+  value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
 
 /** ISO timestamp -> "Aug 14, 2026" (UTC, so server and client agree). */
 export const formatDate = (value: string): string =>

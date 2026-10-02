@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBytes, formatCount, formatDate } from "@/lib/format";
+import {
+  formatBytes,
+  formatCategory,
+  formatCount,
+  formatDate,
+} from "@/lib/format";
 
 describe(formatBytes, () => {
   it("picks a readable unit", () => {
@@ -40,5 +45,34 @@ describe(formatCount, () => {
 describe(formatDate, () => {
   it("formats in UTC so server and client agree", () => {
     expect(formatDate("2026-08-14T23:30:00.000Z")).toBe("Aug 14, 2026");
+  });
+});
+
+describe(formatCategory, () => {
+  it("title-cases a stored slug", () => {
+    expect(formatCategory("skyblock")).toBe("Skyblock");
+    expect(formatCategory("resource-pack")).toBe("Resource pack");
+  });
+
+  it("uses the spelling the community uses for acronyms", () => {
+    // Title-casing alone gives "Pvp" and "Rpg", which read as typos.
+    expect(formatCategory("pvp")).toBe("PvP");
+    expect(formatCategory("rpg")).toBe("RPG");
+  });
+
+  it("returns a string for a slug that is an Object.prototype key", () => {
+    // `projects.category` is a free-text column, so a row written outside the
+    // publish form can hold anything. An object-literal lookup returned the
+    // native function here, which React throws on as a child. Asserting the
+    // exact label is stronger than checking the type: the function case could
+    // not have produced a matching string.
+    expect(formatCategory("constructor")).toBe("Constructor");
+    expect(formatCategory("toString")).toBe("ToString");
+    expect(formatCategory("valueOf")).toBe("ValueOf");
+    expect(formatCategory("hasOwnProperty")).toBe("HasOwnProperty");
+  });
+
+  it("still renders a slug this build no longer lists", () => {
+    expect(formatCategory("removed-gamemode")).toBe("Removed gamemode");
   });
 });

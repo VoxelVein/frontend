@@ -3,7 +3,7 @@ import { and, eq, max, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { projects, projectVersions } from "@/db/schema";
-import { buildProjectDocument } from "@/lib/project-document";
+import { buildProjectDocuments } from "@/lib/project-document";
 import type { ProjectDocument } from "@/lib/projects";
 import { pickTrending } from "@/lib/trending";
 
@@ -30,8 +30,19 @@ const computeTrending = async (): Promise<ProjectDocument[]> => {
     .groupBy(projects.id);
 
   const ids = pickTrending(candidates, new Date());
-  const documents = await Promise.all(ids.map(buildProjectDocument));
-  return documents.filter((document) => document !== null);
+  // One batched read rather than a query per project: `buildProjectDocuments`
+  // already does the `inArray` fan-out for projects, versions and images.
+  const documents = await buildProjectDocuments(ids);
+
+  // The batch builder returns rows in database order, but the caller labels
+  // these #1..#n, so the score order has to be reapplied here. Projects that
+  // stopped being public between the two queries are simply absent, which is
+  // what the old per-id `null` filter did too.
+  const byId = new Map(documents.map((document) => [document.id, document]));
+  return ids.flatMap((id) => {
+    const document = byId.get(id);
+    return document ? [document] : [];
+  });
 };
 
 /** Five trending projects for the home page, refreshed every minute. */
