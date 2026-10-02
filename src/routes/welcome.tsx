@@ -1,9 +1,8 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { toast } from "sonner";
 import { fallback, object, optional, parse, string } from "valibot";
 
-import { FormError } from "@/components/form-error";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { UsernameField } from "@/components/username-field";
@@ -23,22 +22,27 @@ const welcomeSearchSchema = object({
   redirect: optional(fallback(string(), "")),
 });
 
+/**
+ * A failed submit is action feedback, not a field's validation message, so it
+ * goes to a toast rather than an inline block above the form. Field-level errors
+ * stay inline, wired to their input with `aria-invalid` and `aria-describedby`,
+ * because a toast is not associated with a control.
+ */
 const WelcomePage = () => {
   const router = useRouter();
   // oxlint-disable-next-line no-use-before-define -- Route must be exported after the component for TanStack Router; WelcomePage only executes after Route is initialized
   const suggestion = Route.useLoaderData();
   // oxlint-disable-next-line no-use-before-define -- Route must be exported after the component for TanStack Router; WelcomePage only executes after Route is initialized
   const { redirect: redirectTo } = Route.useSearch();
-  const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: { username: suggestion },
     onSubmit: async ({ value }) => {
-      setFormError(null);
+      toast.dismiss();
       try {
         await confirmUsername({ data: { username: value.username.trim() } });
       } catch (error) {
-        setFormError(
+        toast.error(
           error instanceof Error
             ? error.message
             : "Could not save your username."
@@ -53,7 +57,7 @@ const WelcomePage = () => {
       });
     },
     onSubmitInvalid: () => {
-      setFormError(null);
+      toast.dismiss();
     },
   });
 
@@ -72,8 +76,6 @@ const WelcomePage = () => {
           You can change it later, but after a change it stays locked for 14
           days.
         </p>
-
-        {formError ? <FormError>{formError}</FormError> : null}
 
         <form
           onSubmit={(event) => {

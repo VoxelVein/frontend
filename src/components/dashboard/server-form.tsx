@@ -2,6 +2,7 @@ import { IconX } from "@tabler/icons-react";
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { toast } from "sonner";
 import { safeParse } from "valibot";
 
 import { GameVersionPicker } from "@/components/dashboard/game-version-picker";
@@ -268,12 +269,11 @@ export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
   );
   const [links, setLinks] = useState<ServerLinkView[]>(server?.links ?? []);
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
-  const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
+    toast.dismiss();
 
     const trimmedPort = port.trim();
     if (trimmedPort && !PORT_PATTERN.test(trimmedPort)) {
@@ -302,7 +302,7 @@ export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
       await saveServerDetails({ data: result.output });
       await onSaved();
     } catch (error) {
-      setFormError(errorMessage(error, "Could not save the server."));
+      toast.error(errorMessage(error, "Could not save the server."));
     }
     setPending(false);
   };
@@ -348,12 +348,6 @@ export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
         onChange={setLinks}
         error={errors.get("links")}
       />
-
-      {formError ? (
-        <p role="alert" className="text-destructive text-sm">
-          {formError}
-        </p>
-      ) : null}
 
       <div>
         <Button type="submit" className="min-h-11" disabled={pending}>

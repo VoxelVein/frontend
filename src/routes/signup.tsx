@@ -5,10 +5,10 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { toast } from "sonner";
 import { check, minLength, nonEmpty, pipe, regex, string } from "valibot";
 
-import { FormError } from "@/components/form-error";
 import { FormField } from "@/components/form-field";
 import { GitHubSignInButton } from "@/components/github-sign-in-button";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
@@ -45,9 +45,15 @@ const passwordSchema = pipe(
   minLength(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters.")
 );
 
+/**
+ * A failed submit is action feedback, not a field's validation message, so it
+ * goes to a toast rather than an inline block above the form. Field-level errors
+ * stay inline, wired to their input with `aria-invalid` and `aria-describedby`,
+ * because a toast is not associated with a control.
+ */
 const SignupPage = () => {
   const router = useRouter();
-  const [formError, setFormError] = useState<string | null>(null);
+
   // A ref, not state: useForm keeps the onSubmit from the first render, so
   // state read there would always be the initial null.
   const turnstileTokenRef = useRef<string | null>(null);
@@ -63,11 +69,11 @@ const SignupPage = () => {
       password: "",
     },
     onSubmit: async ({ value }) => {
-      setFormError(null);
+      toast.dismiss();
 
       const turnstileToken = turnstileTokenRef.current;
       if (isTurnstileEnabled() && !turnstileToken) {
-        setFormError(MISSING_VERIFICATION_MESSAGE);
+        toast.error(MISSING_VERIFICATION_MESSAGE);
         return;
       }
 
@@ -78,13 +84,13 @@ const SignupPage = () => {
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
-        setFormError(error.message ?? "Could not create your account.");
+        toast.error(error.message ?? "Could not create your account.");
         return;
       }
       router.navigate({ to: "/" });
     },
     onSubmitInvalid: () => {
-      setFormError(null);
+      toast.dismiss();
     },
   });
 
@@ -99,8 +105,6 @@ const SignupPage = () => {
         <p className="text-muted-foreground mt-1.5 text-sm">
           Join VoxelVein to publish and discover Minecraft content.
         </p>
-
-        {formError ? <FormError>{formError}</FormError> : null}
 
         <div className="mt-6">
           <GoogleSignInButton />

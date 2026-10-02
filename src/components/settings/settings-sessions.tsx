@@ -1,6 +1,7 @@
 import { IconDeviceDesktop, IconDeviceMobile } from "@tabler/icons-react";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
 import { RowIcon } from "@/components/row-icon";
@@ -41,8 +42,7 @@ type SessionsAction =
   | { type: "LOAD_SUCCESS"; sessions: SessionItem[] }
   | { type: "LOAD_ERROR"; error: string }
   | { type: "REVOKE_SUCCESS"; token: string }
-  | { type: "REVOKE_OTHERS_SUCCESS"; token: string }
-  | { type: "REVOKE_ERROR"; error: string };
+  | { type: "REVOKE_OTHERS_SUCCESS"; token: string };
 
 const sessionsReducer = (
   state: SessionsState,
@@ -75,9 +75,6 @@ const sessionsReducer = (
           (session) => session.token === action.token
         ),
       };
-    }
-    case "REVOKE_ERROR": {
-      return { ...state, error: action.error };
     }
     default: {
       return state;
@@ -155,10 +152,10 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
     const { error: revokeError } = await authClient.revokeSession({ token });
 
     if (revokeError) {
-      dispatch({
-        error: revokeError.message ?? "Could not revoke session.",
-        type: "REVOKE_ERROR",
-      });
+      // A revoke is action feedback, so a toast. The *load* failure stays
+      // inline: it has a retry button and leaves the list empty, which a
+      // transient toast cannot convey.
+      toast.error(revokeError.message ?? "Could not revoke session.");
       return;
     }
 
@@ -171,10 +168,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
     setIsRevokingOther(false);
 
     if (revokeError) {
-      dispatch({
-        error: revokeError.message ?? "Could not revoke other sessions.",
-        type: "REVOKE_ERROR",
-      });
+      toast.error(revokeError.message ?? "Could not revoke other sessions.");
       return;
     }
 

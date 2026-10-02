@@ -1,9 +1,8 @@
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { toast } from "sonner";
 import { check, minLength, nonEmpty, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
-import { AlertDescription, Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   CardContent,
@@ -13,11 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
-
-type PasswordFormStatus =
-  | { type: "idle" }
-  | { type: "success" }
-  | { type: "error"; message: string };
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -44,10 +38,6 @@ const newPasswordSchema = pipe(
  * already offers to set one.
  */
 export const ChangePasswordCard = () => {
-  const [passwordStatus, setPasswordStatus] = useState<PasswordFormStatus>({
-    type: "idle",
-  });
-
   const passwordForm = useForm({
     defaultValues: {
       confirmPassword: "",
@@ -61,14 +51,12 @@ export const ChangePasswordCard = () => {
         revokeOtherSessions: true,
       });
       if (changeError) {
-        setPasswordStatus({
-          message: changeError.message ?? "Could not change your password.",
-          type: "error",
-        });
+        // Action feedback, so a toast. Field-level validation stays inline.
+        toast.error(changeError.message ?? "Could not change your password.");
         return;
       }
       passwordForm.reset();
-      setPasswordStatus({ type: "success" });
+      toast.success("Password updated.");
     },
   });
 
@@ -104,18 +92,6 @@ export const ChangePasswordCard = () => {
         </CardHeader>
 
         <CardContent>
-          {passwordStatus.type === "error" ? (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{passwordStatus.message}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          {passwordStatus.type === "success" ? (
-            <Alert className="mt-4">
-              <AlertDescription>Password updated.</AlertDescription>
-            </Alert>
-          ) : null}
-
           <form
             onSubmit={(event) => {
               event.preventDefault();

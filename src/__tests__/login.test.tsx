@@ -19,10 +19,23 @@ interface SignInUsernameOptions {
   username: string;
 }
 
-const { navigate, signInEmail, signInUsername } = vi.hoisted(() => ({
-  navigate: vi.fn<(opts: { to: string }) => void>(),
-  signInEmail: vi.fn<(opts: SignInEmailOptions) => Promise<AuthResult>>(),
-  signInUsername: vi.fn<(opts: SignInUsernameOptions) => Promise<AuthResult>>(),
+const { navigate, signInEmail, signInUsername, toastDismiss, toastError } =
+  vi.hoisted(() => ({
+    navigate: vi.fn<(opts: { to: string }) => void>(),
+    toastDismiss: vi.fn<() => void>(),
+    toastError: vi.fn<(message: string) => void>(),
+    signInEmail: vi.fn<(opts: SignInEmailOptions) => Promise<AuthResult>>(),
+    signInUsername:
+      vi.fn<(opts: SignInUsernameOptions) => Promise<AuthResult>>(),
+  }));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback is a toast; stubbing Sonner is what makes the call assertable
+vi.mock("sonner", () => ({
+  toast: {
+    dismiss: toastDismiss,
+    error: toastError,
+    success: vi.fn<(message: string) => void>(),
+  },
 }));
 
 // Cloudflare's documented always-passing test site key.
@@ -212,9 +225,10 @@ describe("LoginPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
-    await expect(
-      screen.findByText("Invalid email or password")
-    ).resolves.toBeTruthy();
+    // Action feedback is a toast, which renders outside the form.
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith("Invalid email or password");
+    });
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -230,11 +244,12 @@ describe("LoginPage", () => {
     fillValidCredentials();
     fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
-    await expect(
-      screen.findByText(
+    // Action feedback is a toast, which renders outside the form.
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(
         "Complete the human verification check before signing in."
-      )
-    ).resolves.toBeTruthy();
+      );
+    });
     expect(signInEmail).not.toHaveBeenCalled();
   });
 

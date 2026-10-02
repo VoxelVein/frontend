@@ -1,11 +1,10 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { toast } from "sonner";
 import { check, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +20,7 @@ import {
 import { changeUsername, confirmUsername } from "@/lib/account.functions";
 import { authClient } from "@/lib/auth-client";
 import { BIO_MAX_LENGTH, bioSchema, normalizeBio } from "@/lib/bio";
+import { errorMessage } from "@/lib/form-errors";
 import { formatDate } from "@/lib/format";
 import { getNextUsernameChange } from "@/lib/usernames";
 
@@ -61,8 +61,6 @@ const useRefreshSession = () => {
 
 const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   const refreshSession = useRefreshSession();
-  const [formError, setFormError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   // Fields are initialized from the session user and become the source of
   // truth; TanStack Form only re-syncs defaultValues while the form is
@@ -70,8 +68,7 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   const form = useForm({
     defaultValues: { bio: user.bio ?? "", name: user.name },
     onSubmit: async ({ value }) => {
-      setFormError(null);
-      setSuccess(false);
+      toast.dismiss();
       // Only the name and the bio: usernames go through their own server
       // functions, which enforce the cooldown and reservations.
       const { error } = await authClient.updateUser({
@@ -81,15 +78,14 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
         name: value.name.trim(),
       });
       if (error) {
-        setFormError(error.message ?? "Could not update your profile.");
+        toast.error(error.message ?? "Could not update your profile.");
         return;
       }
-      setSuccess(true);
+      toast.success("Profile updated.");
       await refreshSession();
     },
     onSubmitInvalid: () => {
-      setFormError(null);
-      setSuccess(false);
+      toast.dismiss();
     },
   });
 
@@ -111,18 +107,6 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
         </CardHeader>
 
         <CardContent>
-          {formError ? (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{formError}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          {success ? (
-            <Alert className="mt-4">
-              <AlertDescription>Profile updated.</AlertDescription>
-            </Alert>
-          ) : null}
-
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -204,8 +188,6 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
 
 const UsernameCard = ({ user }: SettingsProfileProps) => {
   const refreshSession = useRefreshSession();
-  const [formError, setFormError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const currentUsername = user.displayUsername ?? user.username ?? null;
   // Accounts from Google or GitHub that never confirmed their generated name
@@ -219,11 +201,10 @@ const UsernameCard = ({ user }: SettingsProfileProps) => {
   const form = useForm({
     defaultValues: { username: currentUsername ?? "" },
     onSubmit: async ({ value }) => {
-      setFormError(null);
-      setSuccess(null);
+      toast.dismiss();
       const username = value.username.trim();
       if (username === currentUsername) {
-        setSuccess("That is already your username.");
+        toast.success("That is already your username.");
         return;
       }
       try {
@@ -231,19 +212,15 @@ const UsernameCard = ({ user }: SettingsProfileProps) => {
           ? confirmUsername({ data: { username } })
           : changeUsername({ data: { username } }));
       } catch (error) {
-        setFormError(
-          error instanceof Error
-            ? error.message
-            : "Could not change your username."
-        );
+        toast.error(errorMessage(error, "Could not change your username."));
         return;
       }
-      setSuccess("Username updated.");
+      toast.success("Username updated.");
       await refreshSession();
     },
     onSubmitInvalid: () => {
-      setFormError(null);
-      setSuccess(null);
+      // A retry after a failed submit should not leave the old error up.
+      toast.dismiss();
     },
   });
 
@@ -276,18 +253,6 @@ const UsernameCard = ({ user }: SettingsProfileProps) => {
         </CardHeader>
 
         <CardContent>
-          {formError ? (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{formError}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          {success ? (
-            <Alert className="mt-4">
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          ) : null}
-
           <form
             onSubmit={(event) => {
               event.preventDefault();

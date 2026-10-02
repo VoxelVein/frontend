@@ -3,6 +3,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ComponentType, ReactNode } from "react";
+import { toast } from "sonner";
 import { check, minLength, nonEmpty, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
@@ -30,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { setPassword } from "@/lib/account.functions";
 import { authClient } from "@/lib/auth-client";
+import { errorMessage } from "@/lib/form-errors";
 
 type StatusMessage =
   | { type: "idle" }
@@ -52,20 +54,14 @@ interface SetPasswordFormProps {
 }
 
 const SetPasswordForm = ({ onDone }: SetPasswordFormProps) => {
-  const [formError, setFormError] = useState<string | null>(null);
-
   const form = useForm({
     defaultValues: { confirmPassword: "", newPassword: "" },
     onSubmit: async ({ value }) => {
-      setFormError(null);
+      toast.dismiss();
       try {
         await setPassword({ data: { newPassword: value.newPassword } });
       } catch (submitError) {
-        setFormError(
-          submitError instanceof Error
-            ? submitError.message
-            : "Could not set your password."
-        );
+        toast.error(errorMessage(submitError, "Could not set your password."));
         return;
       }
       form.reset();
@@ -99,12 +95,6 @@ const SetPasswordForm = ({ onDone }: SetPasswordFormProps) => {
       aria-busy={isSubmitting}
       className="border-border mt-3 grid gap-4 rounded-lg border p-4"
     >
-      {formError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      ) : null}
-
       <form.Field
         name="newPassword"
         validators={{
@@ -229,10 +219,7 @@ const SettingsSignInMethods = () => {
     });
     setBusyProvider(null);
     if (error) {
-      setStatus({
-        message: error.message ?? `Could not link ${provider.label}.`,
-        type: "error",
-      });
+      toast.error(error.message ?? `Could not link ${provider.label}.`);
     }
   };
 
@@ -246,10 +233,7 @@ const SettingsSignInMethods = () => {
     const { error } = await authClient.unlinkAccount({ accountId: account.id });
     setBusyProvider(null);
     if (error) {
-      setStatus({
-        message: error.message ?? `Could not unlink ${provider.label}.`,
-        type: "error",
-      });
+      toast.error(error.message ?? `Could not unlink ${provider.label}.`);
       return;
     }
     setStatus({ message: `${provider.label} unlinked.`, type: "success" });
@@ -292,12 +276,6 @@ const SettingsSignInMethods = () => {
                   Try again
                 </Button>
               </AlertDescription>
-            </Alert>
-          ) : null}
-
-          {status.type === "error" ? (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{status.message}</AlertDescription>
             </Alert>
           ) : null}
 

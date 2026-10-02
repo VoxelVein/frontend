@@ -21,7 +21,13 @@ const {
   invalidateMock,
   notifyMock,
   updateUserMock,
+  toastDismissMock,
+  toastErrorMock,
+  toastSuccessMock,
 } = vi.hoisted(() => ({
+  toastDismissMock: vi.fn<() => void>(),
+  toastErrorMock: vi.fn<(message: string) => void>(),
+  toastSuccessMock: vi.fn<(message: string) => void>(),
   changeUsernameMock:
     vi.fn<(opts: { data: { username: string } }) => Promise<string>>(),
   checkUsernameMock:
@@ -35,6 +41,15 @@ const {
       error: { message: string } | null;
     }>
   >(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback is a toast; stubbing Sonner is what makes the call assertable
+vi.mock("sonner", () => ({
+  toast: {
+    dismiss: toastDismissMock,
+    error: toastErrorMock,
+    success: toastSuccessMock,
+  },
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Server functions run on the server; string path avoids strict factory type-checking against the server function types
@@ -99,9 +114,10 @@ describe(SettingsProfile, () => {
     });
     // The username has its own path, so it must not ride along here.
     expect(changeUsernameMock).not.toHaveBeenCalled();
-    await expect(
-      screen.findByText("Profile updated.")
-    ).resolves.toBeInTheDocument();
+    // Action feedback is a toast, which renders outside the card.
+    await waitFor(() => {
+      expect(toastSuccessMock).toHaveBeenCalledWith("Profile updated.");
+    });
     expect(notifyMock).toHaveBeenCalledWith("$sessionSignal");
   });
 
@@ -204,9 +220,11 @@ describe(SettingsProfile, () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
-    await expect(
-      screen.findByText("Bio is too long.")
-    ).resolves.toBeInTheDocument();
+    // A refused save is action feedback. Client-side field validation stays
+    // inline and is covered by the cases below.
+    await waitFor(() => {
+      expect(toastErrorMock).toHaveBeenCalledWith("Bio is too long.");
+    });
   });
 
   it("says the bio is Markdown and that it is public", () => {
@@ -290,9 +308,9 @@ describe(SettingsProfile, () => {
         data: { username: "alex" },
       });
     });
-    await expect(
-      screen.findByText("Username updated.")
-    ).resolves.toBeInTheDocument();
+    await waitFor(() => {
+      expect(toastSuccessMock).toHaveBeenCalledWith("Username updated.");
+    });
     expect(updateUserMock).not.toHaveBeenCalled();
   });
 
@@ -308,9 +326,11 @@ describe(SettingsProfile, () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Change username" }));
 
-    await expect(screen.findByRole("alert")).resolves.toHaveTextContent(
-      "This username is already taken."
-    );
+    await waitFor(() => {
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        "This username is already taken."
+      );
+    });
   });
 
   it("uses the first-time confirmation for unconfirmed accounts", async () => {

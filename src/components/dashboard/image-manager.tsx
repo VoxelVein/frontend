@@ -1,7 +1,7 @@
 import { IconPhoto, IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { FormError } from "@/components/form-error";
 import { ProjectImage } from "@/components/projects/project-image";
 import { Button } from "@/components/ui/button";
 import { PROJECT_IMAGE_KIND } from "@/db/schema";
@@ -44,7 +44,6 @@ type ImageManagerProps = ImageManagerBase &
 const ImageManager = (props: ImageManagerProps) => {
   const { kind, onChange, projectId, projectName } = props;
   const inputRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const isIcon = kind === PROJECT_IMAGE_KIND.icon;
@@ -58,7 +57,7 @@ const ImageManager = (props: ImageManagerProps) => {
   const atLimit = gallery.length >= GALLERY_MAX_COUNT;
 
   const upload = async (file: File) => {
-    setError(null);
+    toast.dismiss();
     setBusy(true);
     try {
       const uploaded = await uploadProjectImage({ file, kind, projectId });
@@ -75,13 +74,15 @@ const ImageManager = (props: ImageManagerProps) => {
         onChange({ gallery: [...gallery, view] });
       }
     } catch (uploadError) {
-      setError(errorMessage(uploadError, "The image could not be uploaded."));
+      toast.error(
+        errorMessage(uploadError, "The image could not be uploaded.")
+      );
     }
     setBusy(false);
   };
 
   const remove = async (id: string) => {
-    setError(null);
+    toast.dismiss();
     setBusy(true);
     try {
       await deleteProjectImage(projectId, id);
@@ -93,7 +94,7 @@ const ImageManager = (props: ImageManagerProps) => {
         });
       }
     } catch (deleteError) {
-      setError(errorMessage(deleteError, "The image could not be deleted."));
+      toast.error(errorMessage(deleteError, "The image could not be deleted."));
     }
     setBusy(false);
   };
@@ -107,8 +108,6 @@ const ImageManager = (props: ImageManagerProps) => {
   return (
     <div className="grid gap-2">
       <span className="text-foreground text-sm font-medium">{label}</span>
-
-      {error ? <FormError>{error}</FormError> : null}
 
       {images.length > 0 ? (
         <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">

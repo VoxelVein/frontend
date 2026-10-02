@@ -5,10 +5,10 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { toast } from "sonner";
 import { check, nonEmpty, pipe, string } from "valibot";
 
-import { FormError } from "@/components/form-error";
 import { FormField } from "@/components/form-field";
 import { GitHubSignInButton } from "@/components/github-sign-in-button";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
@@ -54,9 +54,16 @@ const identifierSchema = pipe(
 
 const passwordSchema = pipe(string(), nonEmpty("Password is required."));
 
+/**
+ * A failed submit is action feedback, not a field's validation message, so it
+ * goes to a toast rather than an inline block above the form. Field-level
+ * errors stay inline, wired to their input with `aria-invalid` and
+ * `aria-describedby`, because a toast is not associated with a control.
+ */
+const reportError = (message: string) => toast.error(message);
+
 const LoginPage = () => {
   const router = useRouter();
-  const [formError, setFormError] = useState<string | null>(null);
   // A ref, not state: useForm keeps the onSubmit from the first render, so
   // state read there would always be the initial null.
   const turnstileTokenRef = useRef<string | null>(null);
@@ -71,11 +78,9 @@ const LoginPage = () => {
       password: "",
     },
     onSubmit: async ({ value }) => {
-      setFormError(null);
-
       const turnstileToken = turnstileTokenRef.current;
       if (isTurnstileEnabled() && !turnstileToken) {
-        setFormError(MISSING_VERIFICATION_MESSAGE);
+        reportError(MISSING_VERIFICATION_MESSAGE);
         return;
       }
 
@@ -96,14 +101,15 @@ const LoginPage = () => {
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
-        setFormError(error.message ?? INVALID_CREDENTIALS_MESSAGE);
+        reportError(error.message ?? INVALID_CREDENTIALS_MESSAGE);
         return;
       }
 
       router.navigate({ to: "/" });
     },
     onSubmitInvalid: () => {
-      setFormError(null);
+      // A retry after a failed submit should not leave the old error up.
+      toast.dismiss();
     },
   });
 
@@ -118,8 +124,6 @@ const LoginPage = () => {
         <p className="text-muted-foreground mt-1.5 text-sm">
           Sign in to your VoxelVein account.
         </p>
-
-        {formError ? <FormError>{formError}</FormError> : null}
 
         <div className="mt-6">
           <GoogleSignInButton />

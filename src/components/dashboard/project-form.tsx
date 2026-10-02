@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { toast } from "sonner";
 import { safeParse } from "valibot";
 
 import { FormField } from "@/components/form-field";
@@ -104,7 +105,6 @@ export const ProjectForm = ({
   // Once the slug is typed by hand, stop deriving it from the name.
   const slugEditedRef = useRef(mode === "edit");
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
-  const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   // Starts closed: the form is long, and a permanently open preview would
   // make the fields below it harder to reach.
@@ -134,7 +134,7 @@ export const ProjectForm = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
+    toast.dismiss();
 
     const result = safeParse(projectInputSchema, {
       ...values,
@@ -150,7 +150,7 @@ export const ProjectForm = ({
     try {
       await onSubmit(result.output);
     } catch (error) {
-      setFormError(errorMessage(error, "Could not save the project."));
+      toast.error(errorMessage(error, "Could not save the project."));
     }
     setPending(false);
   };
@@ -327,12 +327,6 @@ export const ProjectForm = ({
         helperText="Comma-separated, up to 8."
         autoComplete="off"
       />
-
-      {formError ? (
-        <p role="alert" className="text-destructive text-sm">
-          {formError}
-        </p>
-      ) : null}
 
       <div>
         <Button type="submit" className="min-h-11" disabled={pending}>
