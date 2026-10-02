@@ -23,6 +23,8 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -39,7 +41,9 @@ import { Route as ServersSlugRouteImport } from './routes/servers.$slug'
 import { Route as ShadersIndexRouteImport } from './routes/shaders.index'
 import { Route as ShadersSlugRouteImport } from './routes/shaders.$slug'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as AdminPostsNewRouteImport } from './routes/admin.posts.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAvatarAvatarIdRouteImport } from './routes/api/avatar.$avatarId'
 import { Route as ApiDownloadFileIdRouteImport } from './routes/api/download.$fileId'
 import { Route as ApiImageImageIdRouteImport } from './routes/api/image.$imageId'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
@@ -51,7 +55,9 @@ import { Route as PluginsSlugGalleryRouteImport } from './routes/plugins.$slug.g
 import { Route as ResourcePacksSlugGalleryRouteImport } from './routes/resource-packs.$slug.gallery'
 import { Route as ServersSlugGalleryRouteImport } from './routes/servers.$slug.gallery'
 import { Route as ShadersSlugGalleryRouteImport } from './routes/shaders.$slug.gallery'
+import { Route as AdminPostsPostIdEditRouteImport } from './routes/admin.posts.$postId.edit'
 import { Route as ApiProjectsProjectIdImagesRouteImport } from './routes/api/projects.$projectId.images'
+import { Route as ApiUsersMeAvatarRouteImport } from './routes/api/users.me.avatar'
 import { Route as ApiProjectsProjectIdImagesImageIdRouteImport } from './routes/api/projects.$projectId.images.$imageId'
 import { Route as ApiProjectsProjectIdVersionsVersionIdFilesRouteImport } from './routes/api/projects.$projectId.versions.$versionId.files'
 
@@ -124,6 +130,16 @@ const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => AdminRoute,
 } as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/',
@@ -205,9 +221,19 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPostsNewRoute = AdminPostsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminPostsRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAvatarAvatarIdRoute = ApiAvatarAvatarIdRouteImport.update({
+  id: '/api/avatar/$avatarId',
+  path: '/api/avatar/$avatarId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDownloadFileIdRoute = ApiDownloadFileIdRouteImport.update({
@@ -267,12 +293,22 @@ const ShadersSlugGalleryRoute = ShadersSlugGalleryRouteImport.update({
   path: '/gallery',
   getParentRoute: () => ShadersSlugRoute,
 } as any)
+const AdminPostsPostIdEditRoute = AdminPostsPostIdEditRouteImport.update({
+  id: '/$postId/edit',
+  path: '/$postId/edit',
+  getParentRoute: () => AdminPostsRoute,
+} as any)
 const ApiProjectsProjectIdImagesRoute =
   ApiProjectsProjectIdImagesRouteImport.update({
     id: '/api/projects/$projectId/images',
     path: '/api/projects/$projectId/images',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiUsersMeAvatarRoute = ApiUsersMeAvatarRouteImport.update({
+  id: '/api/users/me/avatar',
+  path: '/api/users/me/avatar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProjectsProjectIdImagesImageIdRoute =
   ApiProjectsProjectIdImagesImageIdRouteImport.update({
     id: '/$imageId',
@@ -288,7 +324,7 @@ const ApiProjectsProjectIdVersionsVersionIdFilesRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
@@ -301,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -309,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/servers/$slug': typeof ServersSlugRouteWithChildren
   '/shaders/$slug': typeof ShadersSlugRouteWithChildren
   '/u/$username': typeof UUsernameRoute
+  '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
@@ -317,7 +355,9 @@ export interface FileRoutesByFullPath {
   '/resource-packs/': typeof ResourcePacksIndexRoute
   '/servers/': typeof ServersIndexRoute
   '/shaders/': typeof ShadersIndexRoute
+  '/admin/posts/new': typeof AdminPostsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/avatar/$avatarId': typeof ApiAvatarAvatarIdRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
@@ -329,13 +369,14 @@ export interface FileRoutesByFullPath {
   '/servers/$slug/gallery': typeof ServersSlugGalleryRoute
   '/shaders/$slug/gallery': typeof ShadersSlugGalleryRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/admin/posts/$postId/edit': typeof AdminPostsPostIdEditRoute
   '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
+  '/api/users/me/avatar': typeof ApiUsersMeAvatarRoute
   '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
   '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/cookies': typeof CookiesRoute
   '/disclaimer': typeof DisclaimerRoute
   '/legal': typeof LegalRoute
@@ -346,6 +387,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -354,6 +396,7 @@ export interface FileRoutesByTo {
   '/servers/$slug': typeof ServersSlugRouteWithChildren
   '/shaders/$slug': typeof ShadersSlugRouteWithChildren
   '/u/$username': typeof UUsernameRoute
+  '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/modpacks': typeof ModpacksIndexRoute
@@ -362,7 +405,9 @@ export interface FileRoutesByTo {
   '/resource-packs': typeof ResourcePacksIndexRoute
   '/servers': typeof ServersIndexRoute
   '/shaders': typeof ShadersIndexRoute
+  '/admin/posts/new': typeof AdminPostsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/avatar/$avatarId': typeof ApiAvatarAvatarIdRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
@@ -374,14 +419,16 @@ export interface FileRoutesByTo {
   '/servers/$slug/gallery': typeof ServersSlugGalleryRoute
   '/shaders/$slug/gallery': typeof ShadersSlugGalleryRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/admin/posts/$postId/edit': typeof AdminPostsPostIdEditRoute
   '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
+  '/api/users/me/avatar': typeof ApiUsersMeAvatarRoute
   '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
   '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
@@ -394,6 +441,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -402,6 +450,7 @@ export interface FileRoutesById {
   '/servers/$slug': typeof ServersSlugRouteWithChildren
   '/shaders/$slug': typeof ShadersSlugRouteWithChildren
   '/u/$username': typeof UUsernameRoute
+  '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
@@ -410,7 +459,9 @@ export interface FileRoutesById {
   '/resource-packs/': typeof ResourcePacksIndexRoute
   '/servers/': typeof ServersIndexRoute
   '/shaders/': typeof ShadersIndexRoute
+  '/admin/posts/new': typeof AdminPostsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/avatar/$avatarId': typeof ApiAvatarAvatarIdRoute
   '/api/download/$fileId': typeof ApiDownloadFileIdRoute
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
@@ -422,7 +473,9 @@ export interface FileRoutesById {
   '/servers/$slug/gallery': typeof ServersSlugGalleryRoute
   '/shaders/$slug/gallery': typeof ShadersSlugGalleryRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/admin/posts/$postId/edit': typeof AdminPostsPostIdEditRoute
   '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
+  '/api/users/me/avatar': typeof ApiUsersMeAvatarRoute
   '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
   '/api/projects/$projectId/versions/$versionId/files': typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
@@ -443,6 +496,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/terms-of-use'
     | '/welcome'
+    | '/admin/posts'
     | '/blog/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -451,6 +505,7 @@ export interface FileRouteTypes {
     | '/servers/$slug'
     | '/shaders/$slug'
     | '/u/$username'
+    | '/admin/'
     | '/blog/'
     | '/dashboard/'
     | '/modpacks/'
@@ -459,7 +514,9 @@ export interface FileRouteTypes {
     | '/resource-packs/'
     | '/servers/'
     | '/shaders/'
+    | '/admin/posts/new'
     | '/api/auth/$'
+    | '/api/avatar/$avatarId'
     | '/api/download/$fileId'
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
@@ -471,13 +528,14 @@ export interface FileRouteTypes {
     | '/servers/$slug/gallery'
     | '/shaders/$slug/gallery'
     | '/dashboard/projects/'
+    | '/admin/posts/$postId/edit'
     | '/api/projects/$projectId/images'
+    | '/api/users/me/avatar'
     | '/api/projects/$projectId/images/$imageId'
     | '/api/projects/$projectId/versions/$versionId/files'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/cookies'
     | '/disclaimer'
     | '/legal'
@@ -488,6 +546,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/terms-of-use'
     | '/welcome'
+    | '/admin/posts'
     | '/blog/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -496,6 +555,7 @@ export interface FileRouteTypes {
     | '/servers/$slug'
     | '/shaders/$slug'
     | '/u/$username'
+    | '/admin'
     | '/blog'
     | '/dashboard'
     | '/modpacks'
@@ -504,7 +564,9 @@ export interface FileRouteTypes {
     | '/resource-packs'
     | '/servers'
     | '/shaders'
+    | '/admin/posts/new'
     | '/api/auth/$'
+    | '/api/avatar/$avatarId'
     | '/api/download/$fileId'
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
@@ -516,7 +578,9 @@ export interface FileRouteTypes {
     | '/servers/$slug/gallery'
     | '/shaders/$slug/gallery'
     | '/dashboard/projects'
+    | '/admin/posts/$postId/edit'
     | '/api/projects/$projectId/images'
+    | '/api/users/me/avatar'
     | '/api/projects/$projectId/images/$imageId'
     | '/api/projects/$projectId/versions/$versionId/files'
   id:
@@ -535,6 +599,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/terms-of-use'
     | '/welcome'
+    | '/admin/posts'
     | '/blog/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -543,6 +608,7 @@ export interface FileRouteTypes {
     | '/servers/$slug'
     | '/shaders/$slug'
     | '/u/$username'
+    | '/admin/'
     | '/blog/'
     | '/dashboard/'
     | '/modpacks/'
@@ -551,7 +617,9 @@ export interface FileRouteTypes {
     | '/resource-packs/'
     | '/servers/'
     | '/shaders/'
+    | '/admin/posts/new'
     | '/api/auth/$'
+    | '/api/avatar/$avatarId'
     | '/api/download/$fileId'
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
@@ -563,14 +631,16 @@ export interface FileRouteTypes {
     | '/servers/$slug/gallery'
     | '/shaders/$slug/gallery'
     | '/dashboard/projects/'
+    | '/admin/posts/$postId/edit'
     | '/api/projects/$projectId/images'
+    | '/api/users/me/avatar'
     | '/api/projects/$projectId/images/$imageId'
     | '/api/projects/$projectId/versions/$versionId/files'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRouteWithChildren
@@ -597,9 +667,11 @@ export interface RootRouteChildren {
   ServersIndexRoute: typeof ServersIndexRoute
   ShadersIndexRoute: typeof ShadersIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiAvatarAvatarIdRoute: typeof ApiAvatarAvatarIdRoute
   ApiDownloadFileIdRoute: typeof ApiDownloadFileIdRoute
   ApiImageImageIdRoute: typeof ApiImageImageIdRoute
   ApiProjectsProjectIdImagesRoute: typeof ApiProjectsProjectIdImagesRouteWithChildren
+  ApiUsersMeAvatarRoute: typeof ApiUsersMeAvatarRoute
   ApiProjectsProjectIdVersionsVersionIdFilesRoute: typeof ApiProjectsProjectIdVersionsVersionIdFilesRoute
 }
 
@@ -702,6 +774,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/blog/': {
       id: '/blog/'
@@ -815,11 +901,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/posts/new': {
+      id: '/admin/posts/new'
+      path: '/new'
+      fullPath: '/admin/posts/new'
+      preLoaderRoute: typeof AdminPostsNewRouteImport
+      parentRoute: typeof AdminPostsRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/avatar/$avatarId': {
+      id: '/api/avatar/$avatarId'
+      path: '/api/avatar/$avatarId'
+      fullPath: '/api/avatar/$avatarId'
+      preLoaderRoute: typeof ApiAvatarAvatarIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/download/$fileId': {
@@ -899,11 +999,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShadersSlugGalleryRouteImport
       parentRoute: typeof ShadersSlugRoute
     }
+    '/admin/posts/$postId/edit': {
+      id: '/admin/posts/$postId/edit'
+      path: '/$postId/edit'
+      fullPath: '/admin/posts/$postId/edit'
+      preLoaderRoute: typeof AdminPostsPostIdEditRouteImport
+      parentRoute: typeof AdminPostsRoute
+    }
     '/api/projects/$projectId/images': {
       id: '/api/projects/$projectId/images'
       path: '/api/projects/$projectId/images'
       fullPath: '/api/projects/$projectId/images'
       preLoaderRoute: typeof ApiProjectsProjectIdImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/me/avatar': {
+      id: '/api/users/me/avatar'
+      path: '/api/users/me/avatar'
+      fullPath: '/api/users/me/avatar'
+      preLoaderRoute: typeof ApiUsersMeAvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/projects/$projectId/images/$imageId': {
@@ -922,6 +1036,32 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminPostsRouteChildren {
+  AdminPostsNewRoute: typeof AdminPostsNewRoute
+  AdminPostsPostIdEditRoute: typeof AdminPostsPostIdEditRoute
+}
+
+const AdminPostsRouteChildren: AdminPostsRouteChildren = {
+  AdminPostsNewRoute: AdminPostsNewRoute,
+  AdminPostsPostIdEditRoute: AdminPostsPostIdEditRoute,
+}
+
+const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
+  AdminPostsRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminPostsRoute: typeof AdminPostsRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminPostsRoute: AdminPostsRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
@@ -1041,7 +1181,7 @@ const ApiProjectsProjectIdImagesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRouteWithChildren,
@@ -1068,9 +1208,11 @@ const rootRouteChildren: RootRouteChildren = {
   ServersIndexRoute: ServersIndexRoute,
   ShadersIndexRoute: ShadersIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiAvatarAvatarIdRoute: ApiAvatarAvatarIdRoute,
   ApiDownloadFileIdRoute: ApiDownloadFileIdRoute,
   ApiImageImageIdRoute: ApiImageImageIdRoute,
   ApiProjectsProjectIdImagesRoute: ApiProjectsProjectIdImagesRouteWithChildren,
+  ApiUsersMeAvatarRoute: ApiUsersMeAvatarRoute,
   ApiProjectsProjectIdVersionsVersionIdFilesRoute:
     ApiProjectsProjectIdVersionsVersionIdFilesRoute,
 }

@@ -49,6 +49,26 @@ export const requireAdmin = createServerFn({ method: "GET" }).handler(
   }
 );
 
+/**
+ * The caller's session when they may write blog posts, else null.
+ *
+ * A server function rather than a direct `role-guards` import, because that
+ * module reaches for `@tanstack/react-start/server` and so cannot be pulled
+ * into a route module that also renders on the client.
+ */
+export const requirePostAuthor = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const headers = getRequestHeaders();
+    const session = await auth.api.getSession({ headers });
+
+    if (!session || !can(session.user.role, "managePosts")) {
+      return null;
+    }
+
+    return session;
+  }
+);
+
 export const listPasskeys = createServerFn({ method: "GET" }).handler(
   async () => {
     const headers = getRequestHeaders();

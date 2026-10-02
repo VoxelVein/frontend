@@ -73,7 +73,12 @@ const DrawerOverlay = ({
   <DrawerPrimitive.Backdrop
     data-slot="drawer-overlay"
     className={cn(
-      "fixed inset-0 z-50 min-h-dvh bg-black/30 opacity-[max(var(--drawer-overlay-min-opacity,0),calc(1-var(--drawer-swipe-progress)))] backdrop-blur-sm transition-opacity duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] select-none data-ending-style:pointer-events-none data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-snap-points:[--drawer-overlay-min-opacity:0.5] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute",
+      // No `backdrop-blur` here, unlike the two dialogs. This overlay's opacity
+      // is driven per frame by --drawer-swipe-progress, and a full-viewport
+      // backdrop-filter has to re-run on every frame of that animation, which
+      // drops frames on the phones a drawer is used on. The scrim carries the
+      // separation instead.
+      "fixed inset-0 z-50 min-h-dvh bg-black/30 opacity-[max(var(--drawer-overlay-min-opacity,0),calc(1-var(--drawer-swipe-progress)))] transition-opacity duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] select-none data-ending-style:pointer-events-none data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-snap-points:[--drawer-overlay-min-opacity:0.5] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute",
       className
     )}
     {...props}

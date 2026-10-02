@@ -1,13 +1,14 @@
 import { IconDownload, IconPackage } from "@tabler/icons-react";
-import { Markdown } from "@tanstack/markdown/react";
 import {
   createFileRoute,
+  Link,
   notFound,
   useLoaderData,
 } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
+import { MarkdownBody } from "@/components/markdown-body";
 import { ProjectCard } from "@/components/projects/project-card";
 import { StatCard } from "@/components/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -83,8 +84,8 @@ const ProfileAvatar = ({
  * One filter chip per type the creator has published in.
  *
  * Only types actually present get a chip, so a single-type creator is not shown
- * a filter with one option. The link goes to the section browse page too, which
- * is where someone lands when they want more than this profile offers.
+ * a filter with one option. Clicking a chip narrows the grid; clicking it again
+ * clears the filter.
  */
 const TypeFilter = ({
   counts,
@@ -112,7 +113,7 @@ const TypeFilter = ({
             onSelect(selected === type ? null : type);
           }}
           className={cn(
-            "focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none",
+            "focus-visible:ring-ring focus-visible:ring-ring/50 inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none",
             selected === type
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -209,7 +210,7 @@ const ProfileRoute = () => {
           // heading an author writes becomes a real heading and their bio is
           // prose rather than a lead-in paragraph.
           <div className="markdown-body border-border mt-6 max-w-prose border-t pt-6">
-            <Markdown>{profile.bio}</Markdown>
+            <MarkdownBody>{profile.bio}</MarkdownBody>
           </div>
         ) : null}
       </div>
@@ -266,13 +267,15 @@ const ProfileRoute = () => {
             }
             action={
               selectedType === null ? null : (
-                <a
-                  className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-                  href={PROJECT_TYPE_PATHS[selectedType]}
+                // A `Link`, not an `<a>`: this is an internal route, and a raw
+                // anchor forces a full document load.
+                <Link
+                  className="text-primary focus-visible:ring-ring focus-visible:ring-ring/50 inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-3 focus-visible:outline-none"
+                  to={PROJECT_TYPE_PATHS[selectedType]}
                 >
                   Browse{" "}
                   {PROJECT_TYPE_LABELS[selectedType].plural.toLowerCase()}
-                </a>
+                </Link>
               )
             }
           />
