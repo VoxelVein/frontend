@@ -1,6 +1,7 @@
 import {
   IconChevronLeft,
   IconChevronRight,
+  IconPackage,
   IconSearch,
   IconSearchOff,
   IconX,
@@ -29,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { categoryIconForPath } from "@/lib/categories";
 import { formatCategory } from "@/lib/format";
 import { filterGameVersions } from "@/lib/game-version-search";
 import { toSearchErrorMessage } from "@/lib/project-browser-loader";
@@ -47,6 +49,7 @@ import {
   LOADER_LABELS,
   LOADERS_BY_TYPE,
   PROJECT_TYPE_LABELS,
+  PROJECT_TYPE_PATHS,
 } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
 import { cn } from "@/lib/utils";
@@ -222,6 +225,30 @@ const GameVersionFilter = ({
       </ComboboxContent>
     </Combobox>
   );
+};
+
+/**
+ * The icon for the browse empty state.
+ *
+ * A filtered page that matched nothing is a search that failed, so it gets the
+ * search glyph. An unfiltered empty page is simply a section with nothing in it
+ * yet, and gets that section's own icon from the category registry — the same
+ * one its navbar entry, explore tile, and footer link already use. A generic
+ * "nothing found" mark on a page nobody searched reads as an error.
+ *
+ * A plain function rather than a component: the icon is chosen from a lookup
+ * and rendering `<Icon />` would otherwise define a component during render.
+ */
+const emptyStateIcon = (type: ProjectType, isFiltered: boolean) => {
+  if (isFiltered) {
+    return <IconSearchOff size={24} aria-hidden="true" />;
+  }
+
+  const Icon = categoryIconForPath(PROJECT_TYPE_PATHS[type]);
+  if (Icon) {
+    return <Icon size={24} aria-hidden="true" />;
+  }
+  return <IconPackage size={24} aria-hidden="true" />;
 };
 
 const Filters = ({
@@ -674,6 +701,9 @@ export const ProjectBrowser = ({
     loader,
     query,
   ].some(Boolean);
+  // Shared by the heading, the empty state, and the result count so the three
+  // cannot disagree on what this section is called.
+  const label = PROJECT_TYPE_LABELS[type].plural;
   const showSkeletons = isSearching && !result && !error;
   const showEmpty =
     !isSearching && !error && result && result.hits.length === 0;
@@ -767,9 +797,17 @@ export const ProjectBrowser = ({
 
       {showEmpty ? (
         <EmptyState
-          icon={<IconSearchOff size={24} aria-hidden="true" />}
-          title={`No ${PROJECT_TYPE_LABELS[type].plural.toLowerCase()} found`}
-          description="Try a different search or clear your filters."
+          icon={emptyStateIcon(type, hasFilters)}
+          title={
+            hasFilters
+              ? `No ${label.toLowerCase()} found`
+              : `No ${label.toLowerCase()} yet`
+          }
+          description={
+            hasFilters
+              ? "Try a different search or clear your filters."
+              : `Once ${label.toLowerCase()} are published, the newest ones show up here.`
+          }
           action={
             hasFilters ? (
               <button
