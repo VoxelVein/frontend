@@ -1,14 +1,23 @@
 import {
   IconBan,
   IconClockX,
+  IconSearch,
   IconShield,
   IconTrash,
   IconUser,
   IconUsers,
+  IconX,
 } from "@tabler/icons-react";
+import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { Link } from "@tanstack/react-router";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -49,13 +58,17 @@ interface AdminUser {
 }
 
 interface UsersState {
-  error: string | null;
   /**
-   * Bumped on every failure. The toast keys on this rather than on `error`, so
-   * two failures reporting the same message are still two separate events and
-   * the admin hears about both.
+   * The most recent failure, or null.
+   *
+   * Carries its own `id` rather than sitting beside an `errorCount`. The counter
+   * existed only to make two identical messages distinct to the toast effect,
+   * since a repeated failure leaves the message unchanged; making the failure
+   * itself unique removes that coupling instead of working around it.
    */
-  errorCount: number;
+  failure: { id: number; message: string } | null;
+  /** Monotonic, so two identical messages are still two distinct failures. */
+  failureId: number;
   isLoading: boolean;
   users: AdminUser[];
 }
@@ -73,27 +86,23 @@ type UsersAction =
 const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
   switch (action.type) {
     case "LOAD_START": {
-      return { ...state, error: null, isLoading: true };
+      return { ...state, failure: null, isLoading: true };
     }
     case "LOAD_SUCCESS": {
-      // Spread so errorCount survives: dropping it would make the next failure
-      // compute `undefined + 1` (NaN), and React compares effect deps with
-      // Object.is, which treats NaN as equal to itself. The effect would then
-      // never re-run for two failures in a row.
-      return { ...state, error: null, isLoading: false, users: action.users };
+      return { ...state, failure: null, isLoading: false, users: action.users };
     }
     case "LOAD_ERROR": {
       return {
         ...state,
-        error: action.error,
-        errorCount: state.errorCount + 1,
+        failure: { id: state.failureId + 1, message: action.error },
+        failureId: state.failureId + 1,
         isLoading: false,
       };
     }
     case "ROLE_SUCCESS": {
       return {
         ...state,
-        error: null,
+        failure: null,
         users: state.users.map((user) =>
           user.id === action.userId ? { ...user, role: action.role } : user
         ),
@@ -102,7 +111,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
     case "BAN_SUCCESS": {
       return {
         ...state,
-        error: null,
+        failure: null,
         users: state.users.map((user) =>
           user.id === action.userId ? { ...user, banned: true } : user
         ),
@@ -111,7 +120,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
     case "UNBAN_SUCCESS": {
       return {
         ...state,
-        error: null,
+        failure: null,
         users: state.users.map((user) =>
           user.id === action.userId
             ? { ...user, banExpires: null, banReason: null, banned: false }
@@ -122,15 +131,15 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
     case "REMOVE_SUCCESS": {
       return {
         ...state,
-        error: null,
+        failure: null,
         users: state.users.filter((user) => user.id !== action.userId),
       };
     }
     case "ACTION_ERROR": {
       return {
         ...state,
-        error: action.error,
-        errorCount: state.errorCount + 1,
+        failure: { id: state.failureId + 1, message: action.error },
+        failureId: state.failureId + 1,
       };
     }
     default: {
@@ -147,7 +156,15 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 const formatDate = (value: Date | string) =>
   dateFormatter.format(new Date(value));
 
-const ROW_HEIGHT_ESTIMATE = 80;
+/**
+ * How many accounts one search returns.
+ *
+ * Matches the sessions panel. There is no pagination here, so this is the whole
+ * result set an admin sees for a query — deliberately small enough to render
+ * without the virtualizer, which a fixed 50-row list does not need.
+ */
+const USER_SEARCH_LIMIT = 50;
+const SEARCH_DEBOUNCE_MS = 300;
 
 /**
  * Ban reason the account-deletion flow sets. Such an account is not banned
@@ -557,8 +574,8 @@ const AdminUsers = () => {
   const currentUserId = session?.user.id;
 
   const [state, dispatch] = useReducer(usersReducer, {
-    error: null,
-    errorCount: 0,
+    failureId: 0,
+    failure: null,
     isLoading: true,
     users: [],
   });
@@ -569,26 +586,40 @@ const AdminUsers = () => {
   const [pendingBan, setPendingBan] = useState<AdminUser | null>(null);
   const [pendingRemove, setPendingRemove] = useState<AdminUser | null>(null);
   const [isMutating, setIsMutating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState<Role | "all">("all");
 
-  const parentRef = useRef<HTMLDivElement>(null);
+  const { failure, isLoading, users } = state;
 
-  const { error, errorCount, isLoading, users } = state;
-
-  // oxlint-disable-next-line react/incompatible-library -- useVirtualizer returns functions that cannot be memoized
-  const rowVirtualizer = useVirtualizer({
-    count: users.length,
-    estimateSize: () => ROW_HEIGHT_ESTIMATE,
-    gap: 12,
-    getScrollElement: () => parentRef.current,
-    overscan: 5,
+  // Same debouncer and window as the other two search fields, so typing here
+  // feels like typing there.
+  const [debouncedSearch] = useDebouncedValue(searchTerm, {
+    wait: SEARCH_DEBOUNCE_MS,
   });
 
+  // The term the current failure belongs to, so "Try again" repeats the same
+  // query rather than whatever the field holds when the button is clicked.
+  const lastTermRef = useRef("");
+
   // oxlint-disable-next-line react-doctor/react-compiler-no-manual-memoization -- React Compiler is not enabled in this project; useCallback keeps loadUsers stable so the effect does not re-run on every render
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (term: string) => {
     dispatch({ type: "LOAD_START" });
 
+    // Search the database rather than paging a fixed list into the DOM. The
+    // previous version loaded the first 100 accounts once, which quietly made
+    // every user past that row unreachable — there was no way to look them up
+    // at all. An empty term lists the most recent accounts.
+    const query = term
+      ? {
+          limit: USER_SEARCH_LIMIT,
+          searchField: "name" as const,
+          searchOperator: "contains" as const,
+          searchValue: term,
+        }
+      : { limit: USER_SEARCH_LIMIT };
+
     const { data, error: loadError } = await authClient.admin.listUsers({
-      query: { limit: 100 },
+      query,
     });
 
     if (loadError) {
@@ -603,22 +634,27 @@ const AdminUsers = () => {
   }, []);
 
   useEffect(() => {
-    if (error) {
-      toast.error(error, {
+    if (failure) {
+      toast.error(failure.message, {
         action: {
           label: "Try again",
-          onClick: () => loadUsers(),
+          // Repeats the query that failed, not the one now in the field.
+          onClick: () => {
+            void loadUsers(lastTermRef.current);
+          },
         },
       });
     }
-    // errorCount is in the deps so the effect re-runs for a repeat failure that
-    // carries the same message; without it the second identical failure would
-    // leave `error` unchanged and be announced to nobody.
-  }, [error, errorCount, loadUsers]);
+    // `failure` is a fresh object per failure, so two identical messages are
+    // two runs without a separate counter to keep in step.
+  }, [failure, loadUsers]);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    lastTermRef.current = debouncedSearch;
+    void loadUsers(debouncedSearch);
+    // `lastTermRef` is a ref, not reactive state: it records the term for the
+    // retry handler to read later and must not re-trigger the load itself.
+  }, [debouncedSearch, loadUsers]);
 
   const handleRoleChange = async (userId: string, role: Role) => {
     setPendingRole(null);
@@ -704,6 +740,22 @@ const AdminUsers = () => {
     dispatch({ type: "REMOVE_SUCCESS", userId: user.id });
   };
 
+  /**
+   * The role chips narrow what came back, rather than re-querying.
+   *
+   * The server already applied the search; a second round trip per chip would
+   * be slower for no extra reach. The cost is that the chips filter a page of
+   * results rather than the whole table, which is why the count in the header
+   * describes the rows on screen.
+   */
+  const visibleUsers = useMemo(
+    () =>
+      roleFilter === "all"
+        ? users
+        : users.filter((user) => user.role === roleFilter),
+    [roleFilter, users]
+  );
+
   let content: ReactNode;
 
   if (isLoading) {
@@ -718,77 +770,72 @@ const AdminUsers = () => {
     content = (
       <EmptyState
         variant="inline"
-        title="No users found"
-        description="Users who sign in will appear here."
+        title={debouncedSearch ? "No users match" : "No users found"}
+        description={
+          debouncedSearch
+            ? `Nothing matches “${debouncedSearch}”.`
+            : "Users who sign in will appear here."
+        }
+        icon={<IconUsers size={20} aria-hidden="true" />}
+      />
+    );
+  } else if (visibleUsers.length === 0) {
+    content = (
+      <EmptyState
+        variant="inline"
+        title={`No ${ROLE_LABELS[roleFilter === "all" ? "user" : roleFilter].toLowerCase()} accounts`}
+        description="Clear the role filter to see the rest of these results."
         icon={<IconUsers size={20} aria-hidden="true" />}
       />
     );
   } else {
+    // No virtualizer: a search returns at most 50 rows, which renders without
+    // one and without the measure/ref plumbing that comes with it.
     content = (
-      <div ref={parentRef} className="mt-4 max-h-[32rem] overflow-auto">
-        <ul
-          aria-label="Users"
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            position: "relative",
-            width: "100%",
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => (
-            <li
-              key={virtualRow.key}
-              data-index={virtualRow.index}
-              ref={(el) => {
-                rowVirtualizer.measureElement(el);
-              }}
-              style={{
-                left: 0,
-                position: "absolute",
-                top: 0,
-                transform: `translateY(${virtualRow.start}px)`,
-                width: "100%",
-              }}
-            >
-              <AdminUserRow
-                canManageUsers={canManageUsers}
-                isMutating={isMutating}
-                // Two independent reasons a row is off-limits to the caller:
-                // it is their own account, or its role sits above theirs.
-                isOutranked={
-                  !canActOn(session?.user.role, users[virtualRow.index].role)
-                }
-                isSelf={
-                  currentUserId !== undefined &&
-                  users[virtualRow.index].id === currentUserId
-                }
-                user={users[virtualRow.index]}
-                onBan={setPendingBan}
-                onRemove={setPendingRemove}
-                onRoleChange={(userId, role) =>
-                  setPendingRole({ role, userId })
-                }
-                onUnban={handleUnban}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul aria-label="Users" className="mt-4 grid gap-3">
+        {visibleUsers.map((user) => (
+          <li key={user.id}>
+            <AdminUserRow
+              canManageUsers={canManageUsers}
+              isMutating={isMutating}
+              // Two independent reasons a row is off-limits to the caller:
+              // it is their own account, or its role sits above theirs.
+              isOutranked={!canActOn(session?.user.role, user.role)}
+              isSelf={currentUserId !== undefined && user.id === currentUserId}
+              user={user}
+              onBan={setPendingBan}
+              onRemove={setPendingRemove}
+              onRoleChange={(userId, role) => setPendingRole({ role, userId })}
+              onUnban={handleUnban}
+            />
+          </li>
+        ))}
+      </ul>
     );
   }
+
+  const userCount = visibleUsers.length;
+  const countLabel = userCount === 1 ? "account" : "accounts";
 
   return (
     <section aria-labelledby="admin-users-heading">
       <Card>
         <CardHeader>
-          <h2
-            id="admin-users-heading"
-            className="text-foreground text-lg font-semibold"
-          >
-            Users
-          </h2>
-          <CardDescription>
-            Manage user roles, bans, and accounts.
-          </CardDescription>
+          <div className="grid gap-1">
+            <h2
+              id="admin-users-heading"
+              className="text-foreground text-lg font-semibold"
+            >
+              Users
+            </h2>
+            {/* The count describes the rows actually on screen, which is what
+                the role chips below decide. */}
+            <CardDescription>
+              {isLoading
+                ? "Manage user roles, bans, and accounts."
+                : `${userCount} ${countLabel} shown. Manage roles, bans, and removals.`}
+            </CardDescription>
+          </div>
           <CardAction>
             <Button
               type="button"
@@ -796,7 +843,9 @@ const AdminUsers = () => {
               size="sm"
               className="min-h-11"
               disabled={isLoading}
-              onClick={() => loadUsers()}
+              onClick={() => {
+                void loadUsers(debouncedSearch);
+              }}
             >
               Refresh
             </Button>
@@ -804,6 +853,59 @@ const AdminUsers = () => {
         </CardHeader>
 
         <CardContent>
+          <div className="relative">
+            <IconSearch
+              aria-hidden="true"
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+            />
+            <input
+              type="search"
+              value={searchTerm}
+              aria-label="Search users by name"
+              placeholder="Search users by name…"
+              className="border-border bg-background focus-visible:ring-ring focus-visible:ring-ring/50 h-11 w-full rounded-lg border pr-10 pl-9 text-sm focus-visible:ring-3 focus-visible:outline-none"
+              onChange={(event) => {
+                setSearchTerm(event.target.value);
+              }}
+            />
+            {searchTerm ? (
+              <button
+                type="button"
+                aria-label="Clear search"
+                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md focus-visible:ring-2 focus-visible:outline-none"
+                onClick={() => setSearchTerm("")}
+              >
+                <IconX size={14} aria-hidden="true" />
+              </button>
+            ) : null}
+          </div>
+
+          <fieldset className="mt-3">
+            <legend className="sr-only">Filter by role</legend>
+            <div className="flex flex-wrap items-center gap-2">
+              {(["all", ...ALL_ROLES] as const).map((role) => {
+                const isActive = roleFilter === role;
+                return (
+                  <button
+                    key={role}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      setRoleFilter(role);
+                    }}
+                    className={`focus-visible:ring-ring focus-visible:ring-ring/50 inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none ${
+                      isActive
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    }`}
+                  >
+                    {role === "all" ? "All roles" : ROLE_LABELS[role]}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
           {content}
 
           <AdminUsersDialogs

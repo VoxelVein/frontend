@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdminUsers } from "@/components/admin/admin-users";
@@ -103,6 +103,33 @@ describe("AdminUsers role visibility", () => {
   beforeEach(() => {
     listUsersMock.mockReset().mockResolvedValue(USER_LIST_RESPONSE);
     useSessionMock.mockReset();
+  });
+
+  it("searches users in the database rather than paging a fixed list", async () => {
+    // The previous version loaded the first 100 accounts once, which made every
+    // user past that row unreachable: there was no way to look them up at all.
+    // The query must carry the typed term so the server does the search.
+    useSessionMock.mockReturnValue({
+      data: { user: { id: OTHER_ADMIN_ID, role: "admin" } },
+    });
+    render(<AdminUsers />);
+
+    fireEvent.change(screen.getByLabelText("Search users by name"), {
+      target: { value: "Ali" },
+    });
+
+    // The field debounces at 300ms like the other search inputs, so this waits
+    // on real time rather than a microtask flush.
+    await waitFor(() => {
+      expect(listUsersMock).toHaveBeenCalledWith({
+        query: {
+          limit: 50,
+          searchField: "name",
+          searchOperator: "contains",
+          searchValue: "Ali",
+        },
+      });
+    });
   });
 
   it("gives a moderator no account controls at all", async () => {
