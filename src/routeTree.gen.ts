@@ -23,6 +23,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as ModpacksIndexRouteImport } from './routes/modpacks.index'
@@ -44,6 +45,12 @@ import { Route as ApiImageImageIdRouteImport } from './routes/api/image.$imageId
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard.projects.$projectId'
 import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard.projects.new'
+import { Route as ModpacksSlugGalleryRouteImport } from './routes/modpacks.$slug.gallery'
+import { Route as ModsSlugGalleryRouteImport } from './routes/mods.$slug.gallery'
+import { Route as PluginsSlugGalleryRouteImport } from './routes/plugins.$slug.gallery'
+import { Route as ResourcePacksSlugGalleryRouteImport } from './routes/resource-packs.$slug.gallery'
+import { Route as ServersSlugGalleryRouteImport } from './routes/servers.$slug.gallery'
+import { Route as ShadersSlugGalleryRouteImport } from './routes/shaders.$slug.gallery'
 import { Route as ApiProjectsProjectIdImagesRouteImport } from './routes/api/projects.$projectId.images'
 import { Route as ApiProjectsProjectIdImagesImageIdRouteImport } from './routes/api/projects.$projectId.images.$imageId'
 import { Route as ApiProjectsProjectIdVersionsVersionIdFilesRouteImport } from './routes/api/projects.$projectId.versions.$versionId.files'
@@ -117,6 +124,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
@@ -224,6 +236,37 @@ const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
   path: '/projects/new',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ModpacksSlugGalleryRoute = ModpacksSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => ModpacksSlugRoute,
+} as any)
+const ModsSlugGalleryRoute = ModsSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => ModsSlugRoute,
+} as any)
+const PluginsSlugGalleryRoute = PluginsSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => PluginsSlugRoute,
+} as any)
+const ResourcePacksSlugGalleryRoute =
+  ResourcePacksSlugGalleryRouteImport.update({
+    id: '/gallery',
+    path: '/gallery',
+    getParentRoute: () => ResourcePacksSlugRoute,
+  } as any)
+const ServersSlugGalleryRoute = ServersSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => ServersSlugRoute,
+} as any)
+const ShadersSlugGalleryRoute = ShadersSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => ShadersSlugRoute,
+} as any)
 const ApiProjectsProjectIdImagesRoute =
   ApiProjectsProjectIdImagesRouteImport.update({
     id: '/api/projects/$projectId/images',
@@ -259,13 +302,14 @@ export interface FileRoutesByFullPath {
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/modpacks/$slug': typeof ModpacksSlugRoute
-  '/mods/$slug': typeof ModsSlugRoute
-  '/plugins/$slug': typeof PluginsSlugRoute
-  '/resource-packs/$slug': typeof ResourcePacksSlugRoute
-  '/servers/$slug': typeof ServersSlugRoute
-  '/shaders/$slug': typeof ShadersSlugRoute
+  '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
+  '/mods/$slug': typeof ModsSlugRouteWithChildren
+  '/plugins/$slug': typeof PluginsSlugRouteWithChildren
+  '/resource-packs/$slug': typeof ResourcePacksSlugRouteWithChildren
+  '/servers/$slug': typeof ServersSlugRouteWithChildren
+  '/shaders/$slug': typeof ShadersSlugRouteWithChildren
   '/u/$username': typeof UUsernameRoute
+  '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
@@ -278,6 +322,12 @@ export interface FileRoutesByFullPath {
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/modpacks/$slug/gallery': typeof ModpacksSlugGalleryRoute
+  '/mods/$slug/gallery': typeof ModsSlugGalleryRoute
+  '/plugins/$slug/gallery': typeof PluginsSlugGalleryRoute
+  '/resource-packs/$slug/gallery': typeof ResourcePacksSlugGalleryRoute
+  '/servers/$slug/gallery': typeof ServersSlugGalleryRoute
+  '/shaders/$slug/gallery': typeof ShadersSlugGalleryRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
   '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
   '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
@@ -286,7 +336,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/disclaimer': typeof DisclaimerRoute
   '/legal': typeof LegalRoute
@@ -298,13 +347,14 @@ export interface FileRoutesByTo {
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/modpacks/$slug': typeof ModpacksSlugRoute
-  '/mods/$slug': typeof ModsSlugRoute
-  '/plugins/$slug': typeof PluginsSlugRoute
-  '/resource-packs/$slug': typeof ResourcePacksSlugRoute
-  '/servers/$slug': typeof ServersSlugRoute
-  '/shaders/$slug': typeof ShadersSlugRoute
+  '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
+  '/mods/$slug': typeof ModsSlugRouteWithChildren
+  '/plugins/$slug': typeof PluginsSlugRouteWithChildren
+  '/resource-packs/$slug': typeof ResourcePacksSlugRouteWithChildren
+  '/servers/$slug': typeof ServersSlugRouteWithChildren
+  '/shaders/$slug': typeof ShadersSlugRouteWithChildren
   '/u/$username': typeof UUsernameRoute
+  '/blog': typeof BlogIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/modpacks': typeof ModpacksIndexRoute
   '/mods': typeof ModsIndexRoute
@@ -317,6 +367,12 @@ export interface FileRoutesByTo {
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/modpacks/$slug/gallery': typeof ModpacksSlugGalleryRoute
+  '/mods/$slug/gallery': typeof ModsSlugGalleryRoute
+  '/plugins/$slug/gallery': typeof PluginsSlugGalleryRoute
+  '/resource-packs/$slug/gallery': typeof ResourcePacksSlugGalleryRoute
+  '/servers/$slug/gallery': typeof ServersSlugGalleryRoute
+  '/shaders/$slug/gallery': typeof ShadersSlugGalleryRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
   '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
   '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
@@ -339,13 +395,14 @@ export interface FileRoutesById {
   '/terms-of-use': typeof TermsOfUseRoute
   '/welcome': typeof WelcomeRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/modpacks/$slug': typeof ModpacksSlugRoute
-  '/mods/$slug': typeof ModsSlugRoute
-  '/plugins/$slug': typeof PluginsSlugRoute
-  '/resource-packs/$slug': typeof ResourcePacksSlugRoute
-  '/servers/$slug': typeof ServersSlugRoute
-  '/shaders/$slug': typeof ShadersSlugRoute
+  '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
+  '/mods/$slug': typeof ModsSlugRouteWithChildren
+  '/plugins/$slug': typeof PluginsSlugRouteWithChildren
+  '/resource-packs/$slug': typeof ResourcePacksSlugRouteWithChildren
+  '/servers/$slug': typeof ServersSlugRouteWithChildren
+  '/shaders/$slug': typeof ShadersSlugRouteWithChildren
   '/u/$username': typeof UUsernameRoute
+  '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
@@ -358,6 +415,12 @@ export interface FileRoutesById {
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/modpacks/$slug/gallery': typeof ModpacksSlugGalleryRoute
+  '/mods/$slug/gallery': typeof ModsSlugGalleryRoute
+  '/plugins/$slug/gallery': typeof PluginsSlugGalleryRoute
+  '/resource-packs/$slug/gallery': typeof ResourcePacksSlugGalleryRoute
+  '/servers/$slug/gallery': typeof ServersSlugGalleryRoute
+  '/shaders/$slug/gallery': typeof ShadersSlugGalleryRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
   '/api/projects/$projectId/images': typeof ApiProjectsProjectIdImagesRouteWithChildren
   '/api/projects/$projectId/images/$imageId': typeof ApiProjectsProjectIdImagesImageIdRoute
@@ -388,6 +451,7 @@ export interface FileRouteTypes {
     | '/servers/$slug'
     | '/shaders/$slug'
     | '/u/$username'
+    | '/blog/'
     | '/dashboard/'
     | '/modpacks/'
     | '/mods/'
@@ -400,6 +464,12 @@ export interface FileRouteTypes {
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/modpacks/$slug/gallery'
+    | '/mods/$slug/gallery'
+    | '/plugins/$slug/gallery'
+    | '/resource-packs/$slug/gallery'
+    | '/servers/$slug/gallery'
+    | '/shaders/$slug/gallery'
     | '/dashboard/projects/'
     | '/api/projects/$projectId/images'
     | '/api/projects/$projectId/images/$imageId'
@@ -408,7 +478,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
-    | '/blog'
     | '/cookies'
     | '/disclaimer'
     | '/legal'
@@ -427,6 +496,7 @@ export interface FileRouteTypes {
     | '/servers/$slug'
     | '/shaders/$slug'
     | '/u/$username'
+    | '/blog'
     | '/dashboard'
     | '/modpacks'
     | '/mods'
@@ -439,6 +509,12 @@ export interface FileRouteTypes {
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/modpacks/$slug/gallery'
+    | '/mods/$slug/gallery'
+    | '/plugins/$slug/gallery'
+    | '/resource-packs/$slug/gallery'
+    | '/servers/$slug/gallery'
+    | '/shaders/$slug/gallery'
     | '/dashboard/projects'
     | '/api/projects/$projectId/images'
     | '/api/projects/$projectId/images/$imageId'
@@ -467,6 +543,7 @@ export interface FileRouteTypes {
     | '/servers/$slug'
     | '/shaders/$slug'
     | '/u/$username'
+    | '/blog/'
     | '/dashboard/'
     | '/modpacks/'
     | '/mods/'
@@ -479,6 +556,12 @@ export interface FileRouteTypes {
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/modpacks/$slug/gallery'
+    | '/mods/$slug/gallery'
+    | '/plugins/$slug/gallery'
+    | '/resource-packs/$slug/gallery'
+    | '/servers/$slug/gallery'
+    | '/shaders/$slug/gallery'
     | '/dashboard/projects/'
     | '/api/projects/$projectId/images'
     | '/api/projects/$projectId/images/$imageId'
@@ -500,12 +583,12 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
   WelcomeRoute: typeof WelcomeRoute
-  ModpacksSlugRoute: typeof ModpacksSlugRoute
-  ModsSlugRoute: typeof ModsSlugRoute
-  PluginsSlugRoute: typeof PluginsSlugRoute
-  ResourcePacksSlugRoute: typeof ResourcePacksSlugRoute
-  ServersSlugRoute: typeof ServersSlugRoute
-  ShadersSlugRoute: typeof ShadersSlugRoute
+  ModpacksSlugRoute: typeof ModpacksSlugRouteWithChildren
+  ModsSlugRoute: typeof ModsSlugRouteWithChildren
+  PluginsSlugRoute: typeof PluginsSlugRouteWithChildren
+  ResourcePacksSlugRoute: typeof ResourcePacksSlugRouteWithChildren
+  ServersSlugRoute: typeof ServersSlugRouteWithChildren
+  ShadersSlugRoute: typeof ShadersSlugRouteWithChildren
   UUsernameRoute: typeof UUsernameRoute
   ModpacksIndexRoute: typeof ModpacksIndexRoute
   ModsIndexRoute: typeof ModsIndexRoute
@@ -619,6 +702,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -767,6 +857,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsNewRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/modpacks/$slug/gallery': {
+      id: '/modpacks/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/modpacks/$slug/gallery'
+      preLoaderRoute: typeof ModpacksSlugGalleryRouteImport
+      parentRoute: typeof ModpacksSlugRoute
+    }
+    '/mods/$slug/gallery': {
+      id: '/mods/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/mods/$slug/gallery'
+      preLoaderRoute: typeof ModsSlugGalleryRouteImport
+      parentRoute: typeof ModsSlugRoute
+    }
+    '/plugins/$slug/gallery': {
+      id: '/plugins/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/plugins/$slug/gallery'
+      preLoaderRoute: typeof PluginsSlugGalleryRouteImport
+      parentRoute: typeof PluginsSlugRoute
+    }
+    '/resource-packs/$slug/gallery': {
+      id: '/resource-packs/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/resource-packs/$slug/gallery'
+      preLoaderRoute: typeof ResourcePacksSlugGalleryRouteImport
+      parentRoute: typeof ResourcePacksSlugRoute
+    }
+    '/servers/$slug/gallery': {
+      id: '/servers/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/servers/$slug/gallery'
+      preLoaderRoute: typeof ServersSlugGalleryRouteImport
+      parentRoute: typeof ServersSlugRoute
+    }
+    '/shaders/$slug/gallery': {
+      id: '/shaders/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/shaders/$slug/gallery'
+      preLoaderRoute: typeof ShadersSlugGalleryRouteImport
+      parentRoute: typeof ShadersSlugRoute
+    }
     '/api/projects/$projectId/images': {
       id: '/api/projects/$projectId/images'
       path: '/api/projects/$projectId/images'
@@ -793,10 +925,12 @@ declare module '@tanstack/react-router' {
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 const BlogRouteChildren: BlogRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
@@ -817,6 +951,77 @@ const DashboardRouteChildren: DashboardRouteChildren = {
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
+)
+
+interface ModpacksSlugRouteChildren {
+  ModpacksSlugGalleryRoute: typeof ModpacksSlugGalleryRoute
+}
+
+const ModpacksSlugRouteChildren: ModpacksSlugRouteChildren = {
+  ModpacksSlugGalleryRoute: ModpacksSlugGalleryRoute,
+}
+
+const ModpacksSlugRouteWithChildren = ModpacksSlugRoute._addFileChildren(
+  ModpacksSlugRouteChildren,
+)
+
+interface ModsSlugRouteChildren {
+  ModsSlugGalleryRoute: typeof ModsSlugGalleryRoute
+}
+
+const ModsSlugRouteChildren: ModsSlugRouteChildren = {
+  ModsSlugGalleryRoute: ModsSlugGalleryRoute,
+}
+
+const ModsSlugRouteWithChildren = ModsSlugRoute._addFileChildren(
+  ModsSlugRouteChildren,
+)
+
+interface PluginsSlugRouteChildren {
+  PluginsSlugGalleryRoute: typeof PluginsSlugGalleryRoute
+}
+
+const PluginsSlugRouteChildren: PluginsSlugRouteChildren = {
+  PluginsSlugGalleryRoute: PluginsSlugGalleryRoute,
+}
+
+const PluginsSlugRouteWithChildren = PluginsSlugRoute._addFileChildren(
+  PluginsSlugRouteChildren,
+)
+
+interface ResourcePacksSlugRouteChildren {
+  ResourcePacksSlugGalleryRoute: typeof ResourcePacksSlugGalleryRoute
+}
+
+const ResourcePacksSlugRouteChildren: ResourcePacksSlugRouteChildren = {
+  ResourcePacksSlugGalleryRoute: ResourcePacksSlugGalleryRoute,
+}
+
+const ResourcePacksSlugRouteWithChildren =
+  ResourcePacksSlugRoute._addFileChildren(ResourcePacksSlugRouteChildren)
+
+interface ServersSlugRouteChildren {
+  ServersSlugGalleryRoute: typeof ServersSlugGalleryRoute
+}
+
+const ServersSlugRouteChildren: ServersSlugRouteChildren = {
+  ServersSlugGalleryRoute: ServersSlugGalleryRoute,
+}
+
+const ServersSlugRouteWithChildren = ServersSlugRoute._addFileChildren(
+  ServersSlugRouteChildren,
+)
+
+interface ShadersSlugRouteChildren {
+  ShadersSlugGalleryRoute: typeof ShadersSlugGalleryRoute
+}
+
+const ShadersSlugRouteChildren: ShadersSlugRouteChildren = {
+  ShadersSlugGalleryRoute: ShadersSlugGalleryRoute,
+}
+
+const ShadersSlugRouteWithChildren = ShadersSlugRoute._addFileChildren(
+  ShadersSlugRouteChildren,
 )
 
 interface ApiProjectsProjectIdImagesRouteChildren {
@@ -849,12 +1054,12 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TermsOfUseRoute: TermsOfUseRoute,
   WelcomeRoute: WelcomeRoute,
-  ModpacksSlugRoute: ModpacksSlugRoute,
-  ModsSlugRoute: ModsSlugRoute,
-  PluginsSlugRoute: PluginsSlugRoute,
-  ResourcePacksSlugRoute: ResourcePacksSlugRoute,
-  ServersSlugRoute: ServersSlugRoute,
-  ShadersSlugRoute: ShadersSlugRoute,
+  ModpacksSlugRoute: ModpacksSlugRouteWithChildren,
+  ModsSlugRoute: ModsSlugRouteWithChildren,
+  PluginsSlugRoute: PluginsSlugRouteWithChildren,
+  ResourcePacksSlugRoute: ResourcePacksSlugRouteWithChildren,
+  ServersSlugRoute: ServersSlugRouteWithChildren,
+  ShadersSlugRoute: ShadersSlugRouteWithChildren,
   UUsernameRoute: UUsernameRoute,
   ModpacksIndexRoute: ModpacksIndexRoute,
   ModsIndexRoute: ModsIndexRoute,
