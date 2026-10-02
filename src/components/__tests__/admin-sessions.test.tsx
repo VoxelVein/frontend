@@ -103,20 +103,14 @@ const settle = async () => {
   });
 };
 
-// Base UI Select renders a button trigger, so tests must open the popup and
-// click the option instead of firing a change event on a native <select>.
-// A pointerDown must precede the click so Base UI's mouse-selection guard
-// accepts the selection.
+// The picker is a search field plus a result list of buttons, not a Select, so
+// a user is chosen by clicking their row.
 const selectUser = async (name: string) => {
-  // The user list is fetched on mount, so it has to commit before the picker
-  // opens; otherwise the popup still shows its "Loading users…" item. Options
-  // read "Alice (alice@example.com)", so match on the role and a substring.
+  // The user list is fetched on mount, so it has to commit before a row exists.
   await settle();
-  fireEvent.click(screen.getByLabelText("User"));
-  const option = await screen.findByRole("option", {
+  const option = await screen.findByRole("button", {
     name: new RegExp(name, "u"),
   });
-  fireEvent.pointerDown(option);
   fireEvent.click(option);
   await settle();
 };
@@ -149,13 +143,12 @@ describe(AdminSessions, () => {
 
     await selectUser("Alice");
 
-    // Base UI renders the raw select value with no formatter, and the value is
-    // a user id, so the trigger has to format it or it shows a UUID.
-    // The trigger is named by its <label>, so its text is the selection.
-    const trigger = screen.getByLabelText("User");
-    expect(trigger.textContent).toContain("Alice");
-    expect(trigger.textContent).toContain("alice@example.com");
-    expect(trigger.textContent).not.toContain(ALICE.id);
+    // A user id is a UUID, so the panel must name the person rather than show
+    // a raw value anywhere.
+    const panel = screen.getByRole("region", { name: "Sessions" });
+    expect(panel).toHaveTextContent("Alice");
+    expect(panel).toHaveTextContent("alice@example.com");
+    expect(panel).not.toHaveTextContent(ALICE.id);
   });
 
   it("shows the handle in the picker when the user has one", async () => {
@@ -172,8 +165,9 @@ describe(AdminSessions, () => {
 
     await selectUser("AliceC");
 
-    const trigger = screen.getByLabelText("User");
-    expect(trigger.textContent).toContain("@AliceC");
+    expect(screen.getByRole("region", { name: "Sessions" })).toHaveTextContent(
+      "@AliceC"
+    );
   });
 
   it("falls back to the plain username when no display name was chosen", async () => {
@@ -187,8 +181,9 @@ describe(AdminSessions, () => {
 
     await selectUser("alicec");
 
-    const trigger = screen.getByLabelText("User");
-    expect(trigger.textContent).toContain("@alicec");
+    expect(screen.getByRole("region", { name: "Sessions" })).toHaveTextContent(
+      "@alicec"
+    );
   });
 
   it("omits the handle for an account that never chose one", async () => {
@@ -202,11 +197,39 @@ describe(AdminSessions, () => {
 
     await selectUser("Alice");
 
-    // The trigger is named by its <label>, so its text is the selection.
-    const trigger = screen.getByLabelText("User");
-    expect(trigger.textContent).toContain("alice@example.com");
+    const panel = screen.getByRole("region", { name: "Sessions" });
+    expect(panel).toHaveTextContent("alice@example.com");
     // The handle marker is "(@", because the email's own "@" would match otherwise.
-    expect(trigger.textContent).not.toContain("(@");
+    expect(panel).not.toHaveTextContent("(@");
+  });
+
+  it("searches users in the database rather than paging a fixed list", async () => {
+    // The previous version loaded the first 100 accounts once, which made
+    // every user past that unreachable: there was no way to look them up at
+    // all. The query must carry the typed term so the server does the search.
+    listUsersMock.mockResolvedValue({
+      data: { total: 1, users: [ALICE] },
+      error: null,
+    });
+    render(<AdminSessions />);
+    await settle();
+
+    fireEvent.change(screen.getByLabelText("Search users by name"), {
+      target: { value: "Ali" },
+    });
+
+    // The picker debounces at 300ms like the other search fields, so this
+    // waits on real time rather than `settle`, which only flushes microtasks.
+    await waitFor(() => {
+      expect(listUsersMock).toHaveBeenCalledWith({
+        query: {
+          limit: 50,
+          searchField: "name",
+          searchOperator: "contains",
+          searchValue: "Ali",
+        },
+      });
+    });
   });
 
   it("reports a failed session load once", async () => {
