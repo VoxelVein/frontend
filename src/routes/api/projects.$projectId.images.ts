@@ -18,6 +18,11 @@ import {
   requireUploader,
 } from "@/lib/project-access";
 import {
+  consumeRateLimit,
+  rateLimitedResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
+import {
   deleteObjects,
   loadStorageConfig,
   STORAGE_ERROR,
@@ -99,6 +104,17 @@ const handleUpload = async (
 
   const session = await requireUploader(request.headers);
   const project = await requireEditableProject(session, projectId);
+
+  // Per user rather than per address: an upload costs bucket writes, so it is
+  // worth bounding per account, and a session is already proven here.
+  const quota = await consumeRateLimit(
+    "image-upload",
+    `user:${session.user.id}`,
+    RATE_LIMITS.upload
+  );
+  if (quota.limited) {
+    return rateLimitedResponse(quota.retryAfterSeconds);
+  }
 
   const { quotaBytes } = loadStorageConfig();
   const declaredLength = Number(request.headers.get("content-length") ?? "0");

@@ -65,7 +65,7 @@ frontend. Each guide lives in its own directory under `docs/`.
 ## Security
 
 * [Hardening](security/hardening.md) — response headers, CSRF scope,
-  upload gates, and open-redirect protection
+  upload gates, open-redirect protection, and rate limits
 
 ## Search
 

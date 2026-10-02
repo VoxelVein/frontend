@@ -72,9 +72,9 @@ docker-dev:
 # Build and run the production environment with Docker
 docker-prod:
     docker compose -f compose.yaml -f compose.prod.yaml up -d --build
-# Start local infrastructure (Postgres, Garage)
+# Start local infrastructure (Postgres, Garage, Valkey)
 infra:
-    docker compose -f docker-compose.yml --env-file .env.local up -d db garage
+    docker compose -f docker-compose.yml --env-file .env.local up -d db garage valkey
 
 # Prepare the local Garage bucket and access key (idempotent)
 storage-init:

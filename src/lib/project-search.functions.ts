@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 
+import { readTrustProxy } from "@/lib/client-key";
 import {
   CATEGORIES_BY_TYPE,
   GAME_VERSIONS as ALL_GAME_VERSIONS,
@@ -8,7 +10,18 @@ import {
   LOADERS_BY_TYPE,
 } from "@/lib/projects";
 import type { ProjectDocument, ProjectType } from "@/lib/projects";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  consumeServerLimit,
+  RATE_LIMIT_MESSAGE,
+  rateLimitIdentity,
+} from "@/lib/rate-limit-server";
 import { searchProjectsInDatabase } from "@/lib/search/projects";
+
+const TRUST_PROXY = readTrustProxy(
+  process.env.TRUST_PROXY,
+  process.env.NODE_ENV === "production"
+);
 
 const GAME_VERSIONS = new Set<string>(ALL_GAME_VERSIONS);
 
@@ -62,7 +75,19 @@ export const searchProjects = createServerFn({ method: "GET" })
     }
     return data;
   })
-  .handler(({ data }): Promise<ProjectSearchResponse> => {
+  .handler(async ({ data }): Promise<ProjectSearchResponse> => {
+    // Anonymous and uncached: every keystroke that survives the 300ms debounce
+    // lands here and costs a ranked query, so this is the endpoint most worth
+    // capping.
+    const quota = await consumeServerLimit(
+      "project-search",
+      rateLimitIdentity(getRequestHeaders(), TRUST_PROXY),
+      RATE_LIMITS.read
+    );
+    if (quota) {
+      throw new Error(RATE_LIMIT_MESSAGE);
+    }
+
     const categories = new Set<string>(CATEGORIES_BY_TYPE[data.type]);
     const loaders = new Set<string>(LOADERS_BY_TYPE[data.type]);
     // SAFETY: SORTS is a readonly tuple of strings; widening to readonly

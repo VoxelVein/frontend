@@ -10,6 +10,11 @@ import {
   createDownloadDeduper,
   isPrefetchRequest,
 } from "@/lib/download-counter";
+import {
+  consumeRateLimit,
+  rateLimitedResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 import { getDownloadUrl } from "@/lib/storage";
 
 const uuidSchema = pipe(string(), uuid());
@@ -58,6 +63,18 @@ const handleDownload = async (
 ): Promise<Response> => {
   if (!safeParse(uuidSchema, fileId).success) {
     return notFound();
+  }
+
+  // Before the database, so a throttled client costs nothing but the counter.
+  // `getClientKey` is the same identity the download dedupe uses, so a session
+  // is counted per account and an anonymous visitor per address.
+  const quota = await consumeRateLimit(
+    "download",
+    (await getClientKey(request)) ?? "unknown",
+    RATE_LIMITS.download
+  );
+  if (quota.limited) {
+    return rateLimitedResponse(quota.retryAfterSeconds);
   }
 
   const [file] = await db

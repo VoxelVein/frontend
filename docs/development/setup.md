@@ -81,7 +81,7 @@ docker run -d \
 ```
 
 Or start the whole local infrastructure stack, which adds Garage for
-object storage:
+object storage and Valkey for rate-limit counters:
 
 ```bash
 just infra

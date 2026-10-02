@@ -19,6 +19,7 @@ database, not a separate service.
 | API          | ElysiaJS (webhooks, SSE)                           |
 | Runtime      | Nitro (production server, tasks)                   |
 | Storage      | S3-compatible object storage                       |
+| Rate limits  | Valkey (Linux Foundation fork of Redis)            |
 | Validation   | Valibot                                            |
 | Lint         | Ultracite (Oxlint + Oxfmt)                         |
 | Tests        | Vitest, Testing Library                            |

@@ -12,6 +12,11 @@ import {
 } from "@/lib/project-access";
 import type { ProjectFileView } from "@/lib/projects";
 import {
+  consumeRateLimit,
+  rateLimitedResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
+import {
   deleteObjects,
   loadStorageConfig,
   STORAGE_ERROR,
@@ -93,6 +98,18 @@ const handleUpload = async (
 
   const session = await requireUploader(request.headers);
   const project = await requireEditableProject(session, params.projectId);
+
+  // Per user rather than per address: a version upload writes several objects
+  // and a row, so bounding it per account is what keeps one client from
+  // filling the bucket.
+  const quota = await consumeRateLimit(
+    "file-upload",
+    `user:${session.user.id}`,
+    RATE_LIMITS.upload
+  );
+  if (quota.limited) {
+    return rateLimitedResponse(quota.retryAfterSeconds);
+  }
 
   const [version] = await db
     .select({ id: projectVersions.id })

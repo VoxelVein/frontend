@@ -17,6 +17,11 @@ import {
   withdrawReview,
 } from "@/lib/project-moderation";
 import type { PendingReview } from "@/lib/project-moderation";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  consumeServerLimit,
+  RATE_LIMIT_MESSAGE,
+} from "@/lib/rate-limit-server";
 import { requireCapability } from "@/lib/role-guards";
 
 /**
@@ -28,6 +33,23 @@ import { requireCapability } from "@/lib/role-guards";
  */
 const requireReviewer = (): Promise<Session> =>
   requireCapability("reviewProjects");
+
+/**
+ * Caps the moderation decisions one account can make.
+ *
+ * Reviewing is the highest-value staff action here — approving publishes a
+ * project — so it gets its own bucket rather than sharing the post-write one.
+ */
+const requireReviewQuota = async (session: Session): Promise<void> => {
+  const quota = await consumeServerLimit(
+    "project-review",
+    `user:${session.user.id}`,
+    RATE_LIMITS.write
+  );
+  if (quota) {
+    throw new Error(RATE_LIMIT_MESSAGE);
+  }
+};
 
 const getOwner = (): Promise<Session> => requireUploader(getRequestHeaders());
 
@@ -56,6 +78,7 @@ export const approveProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await requireReviewer();
+    await requireReviewQuota(session);
     await approveReview(data.projectId, session.user.id);
   });
 
@@ -66,6 +89,7 @@ export const rejectProject = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<void> => {
     const session = await requireReviewer();
+    await requireReviewQuota(session);
     await rejectReview(data.projectId, session.user.id, data.reason);
   });
 
@@ -79,6 +103,7 @@ export const submitProjectForReview = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await getOwner();
+    await requireReviewQuota(session);
     await requireEditableProject(session, data.projectId);
     await submitForReview(data.projectId);
   });
@@ -93,6 +118,7 @@ export const withdrawProjectReview = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await getOwner();
+    await requireReviewQuota(session);
     await requireEditableProject(session, data.projectId);
     await withdrawReview(data.projectId);
   });
@@ -108,6 +134,7 @@ export const unpublishProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await getOwner();
+    await requireReviewQuota(session);
     await requireEditableProject(session, data.projectId);
     await db
       .update(projects)
