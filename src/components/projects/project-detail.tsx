@@ -564,7 +564,12 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         </section>
       ) : null}
 
-      <ProjectGallery images={project.gallery} projectName={project.name} />
+      <ProjectGallery
+        images={project.gallery}
+        projectName={project.name}
+        slug={project.slug}
+        type={project.type}
+      />
 
       <ProjectDownloads project={project} />
 
