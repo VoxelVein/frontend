@@ -185,6 +185,7 @@ written by hand, and several do this alongside their DDL:
 | `0014_add_user_bio.sql` | `users.bio` |
 | `0015_add_project_servers.sql` | Servers and server links |
 | `0016_add_project_images.sql` | `project_images`, one icon per project |
+| `0017_add_user_images.sql` | `user_images`, one avatar per account |
 
 ## Related
 

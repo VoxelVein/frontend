@@ -7,6 +7,7 @@ import {
 import { useCallback } from "react";
 import { object, optional, parse, picklist } from "valibot";
 
+import { AvatarCard } from "@/components/settings/avatar-card";
 import { ChangePasswordCard } from "@/components/settings/change-password-card";
 import { SettingsDangerZone } from "@/components/settings/danger/settings-danger-zone";
 import { SettingsPasskeys } from "@/components/settings/settings-passkeys";
@@ -80,7 +81,15 @@ const SettingsPage = () => {
         </TabsList>
 
         <TabsContent value="profile">
-          {session?.user ? <SettingsProfile user={session.user} /> : null}
+          {session?.user ? (
+            <div className="grid gap-6">
+              <AvatarCard
+                image={session.user.image ?? null}
+                name={session.user.name}
+              />
+              <SettingsProfile user={session.user} />
+            </div>
+          ) : null}
         </TabsContent>
 
         <TabsContent value="security">

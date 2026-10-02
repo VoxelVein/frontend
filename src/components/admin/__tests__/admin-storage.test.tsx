@@ -14,12 +14,14 @@ vi.mock("@/lib/storage.functions", () => ({
 }));
 
 const USAGE: StorageUsage = {
+  avatarBytes: 20_000_000,
+  avatarCount: 40,
   fileBytes: 4_000_000_000,
   fileCount: 12,
   imageBytes: 500_000_000,
   imageCount: 30,
   quotaBytes: 10_000_000_000,
-  usedBytes: 4_500_000_000,
+  usedBytes: 4_520_000_000,
 };
 
 const renderPanel = () => render(<AdminStorage />);

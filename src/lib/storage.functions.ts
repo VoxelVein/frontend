@@ -10,9 +10,18 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
   async (): Promise<StorageUsage> => {
     // Site-wide usage, so it stays admin-only rather than moderator-readable.
     await requireCapability("manageStorage");
-    const { fileBytes, fileCount, imageBytes, imageCount, usedBytes } =
-      await getUsedBytes();
+    const {
+      avatarBytes,
+      avatarCount,
+      fileBytes,
+      fileCount,
+      imageBytes,
+      imageCount,
+      usedBytes,
+    } = await getUsedBytes();
     return {
+      avatarBytes,
+      avatarCount,
       fileBytes,
       fileCount,
       imageBytes,

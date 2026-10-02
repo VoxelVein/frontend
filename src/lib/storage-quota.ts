@@ -1,7 +1,7 @@
 import { and, count, eq, inArray, sql, sum } from "drizzle-orm";
 
 import { db } from "@/db";
-import { projectFiles, projectImages } from "@/db/schema";
+import { projectFiles, projectImages, userImages } from "@/db/schema";
 import { STORAGE_ERROR, StorageError } from "@/lib/storage";
 
 // Arbitrary constant key for pg_advisory_xact_lock. Holding it serializes
@@ -21,9 +21,19 @@ const PG_UNIQUE_VIOLATION = "23505";
 // second key is a hash of the project id.
 const IMAGE_LOCK_NAMESPACE = 7_140_003;
 
+// Namespace for the same lock taken per avatar upload, so two concurrent
+// avatar uploads for one account cannot both read the superseded key and leave
+// an orphan object behind. Distinct from IMAGE_LOCK_NAMESPACE because the
+// second key is a user id, not a project id, and the two namespaces must not
+// interleave.
+const AVATAR_LOCK_NAMESPACE = 7_140_004;
+
 type Executor = Pick<typeof db, "select">;
 
 export interface StorageUsage {
+  /** Bytes held by user avatars. */
+  avatarBytes: number;
+  avatarCount: number;
   /** Bytes held by downloadable project files. */
   fileBytes: number;
   fileCount: number;
@@ -46,22 +56,31 @@ type ImageValues = typeof projectImages.$inferInsert;
  * dominate the bucket, and an admin cannot act on one combined number.
  */
 export const getUsedBytes = async (executor: Executor = db) => {
-  const [[file], [image]] = await Promise.all([
+  // Avatars are counted here rather than tracked separately: they consume the
+  // same site-wide quota, so leaving them out would let a few thousand accounts
+  // fill the bucket past the configured ceiling without ever tripping it.
+  const [[file], [image], [avatar]] = await Promise.all([
     executor
       .select({ files: count(), used: sum(projectFiles.size) })
       .from(projectFiles),
     executor
       .select({ images: count(), used: sum(projectImages.size) })
       .from(projectImages),
+    executor
+      .select({ avatars: count(), used: sum(userImages.size) })
+      .from(userImages),
   ]);
   const fileBytes = Number(file?.used ?? 0);
   const imageBytes = Number(image?.used ?? 0);
+  const avatarBytes = Number(avatar?.used ?? 0);
   return {
+    avatarBytes,
+    avatarCount: avatar?.avatars ?? 0,
     fileBytes,
     fileCount: file?.files ?? 0,
     imageBytes,
     imageCount: image?.images ?? 0,
-    usedBytes: fileBytes + imageBytes,
+    usedBytes: fileBytes + imageBytes + avatarBytes,
   };
 };
 
@@ -118,6 +137,89 @@ export const insertImageWithinQuota = async (
     }
     await tx.insert(projectImages).values(values);
   });
+};
+
+type AvatarValues = typeof userImages.$inferInsert;
+
+/**
+ * Records an avatar for an account, replacing any previous one.
+ *
+ * Deliberately a sibling of `insertImageWithinQuota` rather than a
+ * generalisation of it: that one deletes the superseded row and inserts into
+ * `project_images`, so sharing it would have meant writing a user id into the
+ * project table. What is shared is the discipline, and it is the part that
+ * matters — the quota is checked inside the same transaction as the insert, and
+ * both take the same `QUOTA_LOCK_KEY`, so a project upload and an avatar upload
+ * cannot each see room for themselves and overshoot together.
+ *
+ * Returns the superseded storage key so the caller can delete the object it
+ * replaced, or null when there was none. The key is read *before* the delete,
+ * which is why the per-user advisory lock is taken first.
+ */
+export const insertAvatarWithinQuota = async (
+  values: AvatarValues,
+  quotaBytes: number | null
+): Promise<string | null> => {
+  let superseded: string | null = null;
+
+  await db.transaction(async (tx) => {
+    // Serialises concurrent uploads for one account, so two of them cannot both
+    // read the same previous key and leave one object orphaned.
+    await tx.execute(
+      sql`select pg_advisory_xact_lock(${AVATAR_LOCK_NAMESPACE}, hashtext(${values.userId}))`
+    );
+
+    const [previous] = await tx
+      .select({ storageKey: userImages.storageKey })
+      .from(userImages)
+      .where(eq(userImages.userId, values.userId))
+      .limit(1);
+    superseded = previous?.storageKey ?? null;
+
+    if (quotaBytes !== null) {
+      await tx.execute(sql`select pg_advisory_xact_lock(${QUOTA_LOCK_KEY})`);
+      const { usedBytes } = await getUsedBytes(tx);
+      // The superseded row is still counted, since it has not been deleted yet.
+      // Subtracting it is what lets a user replace a large avatar without
+      // needing room for both at once.
+      const replaced = superseded
+        ? await tx
+            .select({ size: userImages.size })
+            .from(userImages)
+            .where(eq(userImages.storageKey, superseded))
+            .limit(1)
+        : [];
+      const freed = Number(replaced[0]?.size ?? 0);
+      if (usedBytes - freed + values.size > quotaBytes) {
+        throw quotaExceededError();
+      }
+    }
+
+    await tx
+      .insert(userImages)
+      .values(values)
+      .onConflictDoUpdate({
+        set: {
+          contentType: values.contentType,
+          height: values.height,
+          size: values.size,
+          storageKey: values.storageKey,
+          width: values.width,
+        },
+        target: userImages.userId,
+      });
+  });
+
+  return superseded;
+};
+
+/** Removes an account's avatar row and returns the key so it can be deleted. */
+export const removeAvatar = async (userId: string): Promise<string | null> => {
+  const [row] = await db
+    .delete(userImages)
+    .where(eq(userImages.userId, userId))
+    .returning({ storageKey: userImages.storageKey });
+  return row?.storageKey ?? null;
 };
 
 /** Storage keys of a project's images, for cleanup before deleting it. */

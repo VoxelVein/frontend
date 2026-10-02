@@ -386,6 +386,47 @@ export type ProjectImageKind =
  * version ships. Images are never served as downloads and never counted as
  * project downloads.
  */
+/**
+ * A user's uploaded avatar.
+ *
+ * A table rather than a column on `users` for the same reason project images
+ * get one: the stored object has to be deleted when it is replaced, and that
+ * needs the key captured *before* the row is overwritten. A single column
+ * cannot hold both the old and the new key.
+ *
+ * One row per account. The partial unique index enforces that in the database,
+ * so two concurrent uploads cannot leave two live avatars.
+ *
+ * Avatars count against the same site-wide quota as project files — see
+ * `insertFileWithinQuota` — so a few thousand accounts cannot quietly displace
+ * the mods that are the point of the site.
+ */
+export const userImages = pgTable(
+  "user_images",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    // Sniffed from the uploaded bytes, never from the request.
+    contentType: text("content_type").notNull(),
+    height: integer("height").notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    // `text`, not `uuid`, because `users.id` is text: Better Auth's key type,
+    // and a foreign key cannot reference across types. The avatar id is a
+    // uuid because it is ours, not Better Auth's.
+    //
+    // Cascades, so purging an account takes its avatar row with it.
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    size: bigint("size", { mode: "number" }).notNull(),
+    storageKey: text("storage_key").notNull().unique(),
+    width: integer("width").notNull(),
+  },
+  (table) => [
+    // At most one avatar per account.
+    uniqueIndex("user_images_userId_uidx").on(table.userId),
+  ]
+);
+
 export const projectImages = pgTable(
   "project_images",
   {
@@ -469,6 +510,13 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
     references: [users.id],
   }),
   versions: many(projectVersions),
+}));
+
+export const userImagesRelations = relations(userImages, ({ one }) => ({
+  user: one(users, {
+    fields: [userImages.userId],
+    references: [users.id],
+  }),
 }));
 
 export const projectImagesRelations = relations(projectImages, ({ one }) => ({
