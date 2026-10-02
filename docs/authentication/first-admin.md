@@ -9,8 +9,9 @@ on a production Dokploy deployment without a redeploy.
 
 Three rules combine into a dead end:
 
-* `/admin` needs at least `moderator`. `beforeLoad` calls `requireAdmin()`
-  (`src/routes/admin.tsx`), which returns `null` for anything below that.
+* `/admin` needs the `viewAdminPanel` capability, whose minimum is
+  `moderator`. `beforeLoad` calls `requireAdmin()`
+  (`src/routes/admin.tsx`), which returns `null` for anyone without it.
 * A signed-in visitor is then redirected to `/login`, whose own `beforeLoad`
   bounces them back to `/`. So a plain user clicking **Admin** appears to
   do nothing at all.
@@ -138,8 +139,10 @@ psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
    RETURNING id, name, email, role;"
 ```
 
-`UPDATE 1` plus a row showing `admin` is the success case. Swap `admin` for
-`moderator` if you only need the review queue and ban controls.
+`UPDATE 1` plus a row showing `admin` is the success case. Swap `admin`
+for `moderator` if you only need the review queue. A moderator holds
+`reviewProjects` and `viewAdminPanel` and nothing else, so they cannot ban,
+delete, or even list an account, and cannot reach the blog.
 
 ## 6. Confirm in the browser
 
@@ -148,8 +151,8 @@ request, so a reload is enough; there is no cache to purge and no
 deployment to trigger.
 
 `/admin` should now open on the Users tab, with the role selector, the
-Delete button, and the Sessions, Storage, Notifications, and Deletions
-tabs visible. A moderator sees only Posts and Reviews.
+Remove button, and the Sessions, Posts, Storage, Notifications, and
+Deletions tabs visible. A moderator sees only Reviews.
 
 ## Other ways to run the same statement
 
@@ -201,9 +204,11 @@ plugin's role map and refuses anything unrecognised.
 : You are signed in as a different account. Google or GitHub sign-in can
   create a second row with another address, so list all users.
 
-**The panel opens with only Posts and Reviews**
-: The account is a `moderator`. `ADMIN_PANEL_ROLE` is `moderator`, which
-  is enough to reach `/admin` but not to change roles.
+**The panel opens with only Reviews**
+: The account is a `moderator`. That clears `viewAdminPanel`, which is
+  enough to reach `/admin`, but not `manageUsers`, `managePosts`, or
+  anything else. There is no `ADMIN_PANEL_ROLE` setting to change — the
+  bar is the `CAPABILITY_MINIMUM` table in `src/lib/roles.ts`.
 
 **`UPDATE 0`**
 : No row matched. The stored email differs from the one you typed. Run the

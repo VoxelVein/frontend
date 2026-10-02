@@ -186,9 +186,30 @@ every project byline.
 
 ### What a profile shows
 
-Only `published` projects that are not marked for deletion. Drafts,
-projects awaiting review, and removed projects are absent, and a user with
-no published projects still gets a page with an empty grid.
+The page opens with an identity card rather than a bare heading: an
+avatar tile (`ProfileAvatar`) beside the display name, reusing the project
+detail header's treatment so a profile and the projects it lists are
+visibly the same kind of thing.
+
+The card separates the three name-shaped strings rather than collapsing
+them into one muted line. The **display username** is the `<h1>`; the
+**handle** (`@username`) is hidden when it is just the display username in
+lower case, and the **account name** when it matches neither the display
+username nor the username.
+A profile where all three are the same string should say so once. The
+separators between them are `aria-hidden`, so a screen reader hears the
+names rather than "Ada, middot, Ada".
+
+Below the bio sit totals, as the `StatCard` the project page already used
+and this one ignored: project count and summed downloads. Both are
+computed from the projects already loaded for the page rather than fetched
+separately, so the header and the list below it can never disagree.
+
+The list itself holds only `published` projects that are not marked for
+deletion. Drafts, projects awaiting review, and removed projects are
+absent, and a user with no published projects still gets a page with an
+empty grid. A project-type filter appears when there is more than one
+type to filter between.
 
 An account that has requested deletion resolves to null, so the bio and
 display name do not outlive the request. The `by` byline on a project links
@@ -204,18 +225,38 @@ their owner's account, and owners cannot choose to delete them that way.
 
 ## Roles
 
-There are three roles: `user`, `moderator`, and `admin`. Two files
-define them, and both must change together. `src/lib/roles.ts` holds the
-`ROLE_RANK` ladder, the labels, and the `hasRole` check;
-`src/lib/permissions.ts` holds Better Auth's access-control statements and
-a `assertRolesInSync` guard that fails startup if the two ever disagree.
+There are three roles: `user`, `moderator`, and `admin`, ordered in
+`ROLE_RANK` (`src/lib/roles.ts`). Almost nothing checks rank directly,
+though — authorization is expressed as **capabilities**, and each one
+declares its own minimum in `CAPABILITY_MINIMUM`. A call site asks
+`can(role, "manageUsers")`, never `role === "admin"`, so the minimum for
+every job is stated in exactly one place.
 
-`admin` has implicit access to every project operation. `moderator`
-reviews projects and drafts, and can disable an account, but
-deliberately **cannot** delete users, change roles, revoke sessions, or
-publish a post. Those statements are absent from its role object rather
-than checked in app code, so Better Auth refuses the matching `/admin/*`
-endpoints even if a route guard is ever missed.
+**`admin`** holds all eleven capabilities: user and session management,
+posts, publishing, storage, deletions, notifications, protected projects.
+
+**`moderator`** holds exactly two — `reviewProjects` and
+`viewAdminPanel` — and nothing else. It works the publishing review queue
+and nothing beyond it. It deliberately **cannot** list, ban, or delete an
+account, revoke sessions, or read or write blog posts. Those statements
+are absent from its role object rather than checked in app code, so Better
+Auth refuses the matching `/admin/*` endpoints even if a route guard is
+ever missed.
+
+**`user`** holds nothing and reaches only its own projects.
+
+Three layers carry this policy, and each catches what the others miss:
+the capability table in `src/lib/roles.ts` (pure, so client components
+can use it), the session guards in `src/lib/role-guards.ts`
+(`requireCapability` for new endpoints), and Better Auth's access-control
+statements in `src/lib/permissions.ts`.
+
+`src/lib/permissions.ts` runs two assertions at startup.
+`assertRolesInSync` fails if the ladder names a role the plugin does not
+know about. `assertCapabilitiesAgree` fails if a role holds statements for
+a capability it does not have — a drift that would fail **open**, since
+the admin panel only hides tabs and would show nothing about a power that
+had been granted.
 
 `hasRole` fails closed on an unrecognised role string, so a bad value
 grants nothing. Adding a fourth role means editing both files; see

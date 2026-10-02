@@ -60,6 +60,14 @@ list change is invisible to the database: the app is the only thing enforcing
 it, and removing a value is the only edit that can strand a row with a
 category no filter can select.
 
+That is also why `formatCategory` looks its labels up in a **`Map`**, not a
+plain object. A `value in LABELS` check walks the prototype chain, so a
+stored category of `constructor` or `toString` matched `Object.prototype`
+and returned the *function* — which reached React as a child and threw. A
+`Map` consults only its own entries, so a hostile slug misses and takes the
+fallback path, which title-cases the slug and turns `-` into a space. Any
+lookup keyed by user-influenced data should follow the same rule.
+
 ## Data model
 
 Tables are defined in `src/db/schema.ts`:
@@ -176,11 +184,18 @@ by the CSRF middleware in `src/start.ts`, and the upload route additionally
 rejects a cross-origin `Origin` header rather than relying on the session
 cookie alone.
 
-"Staff" means `moderator` or `admin`; the roles are a ladder in
-`ROLE_RANK` (`src/lib/roles.ts`) and every check calls `hasRole(role,
-minimum)`. A moderator can reach a project they do not own because
-reviewing a submission means reading it. See
-[Admin Panel](admin-panel.md#roles) for the full matrix.
+"Staff" means `moderator` or `admin`. Project access is expressed through
+the `ROLE_RANK` ladder in `src/lib/roles.ts`, and the ownership checks in
+`src/lib/project-access.ts` call `hasSessionRole(session, minimum)` —
+these are genuinely about rank, because "an owner or anyone above a plain
+user" is the whole rule. The moderation decision endpoints instead use
+`requireCapability("reviewProjects")` from `src/lib/role-guards.ts`, which
+is the preferred form for new code: it names the job rather than
+repeating the role. Both arrive at the same bar.
+
+A moderator can reach a project they do not own because reviewing a
+submission means reading it. See [Admin Panel](admin-panel.md#roles) for
+the full matrix.
 
 Password sign-ups cannot verify their email yet, because the app does not
 send email. Until it does, only Google and GitHub accounts (verified by

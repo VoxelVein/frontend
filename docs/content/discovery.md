@@ -64,13 +64,32 @@ knowing before scaling up:
   project, and ranking happens in JavaScript. It is a single indexed scan
   with a `LEFT JOIN` and `GROUP BY`, so it is cheap at small scale and the
   first thing to move into a window function if the catalogue grows large.
-* Building each winner's document is a separate `buildProjectDocument`
-  call (`src/lib/trending.functions.ts:33`), so five winners cost six
-  queries.
+* Ranking happens in JavaScript, so the winner's documents are a second
+  query. That one is batched: `buildProjectDocuments(ids)`
+  (`src/lib/trending.functions.ts:35`) does the `inArray` fan-out for
+  projects, versions, and images in one go, so the whole list costs two
+  queries rather than one per project. The batch builder returns rows in
+  database order while the caller labels them #1..#n, so the score order
+  is reapplied from `ids` afterwards. A project that stopped being public
+  between the two queries is simply absent, which is what the old per-id
+  `null` filter did too.
 
 The client polls at the same 60 s interval and seeds `initialData` from
 the loader, so the list never flashes empty on refresh
-(`src/components/trending-projects.tsx:22`).
+(`src/components/trending-projects.tsx`).
+
+### One card per project, in rank order
+
+The row is a ranking, not an arbitrary slice of a card grid, so each
+project gets its own column: `TrendingProjectCard` renders the rank and
+lays its own content out inside. The number of columns goes into a
+`--trending-cols` custom property rather than an inline
+`grid-template-columns`, because the count and the track template have to
+change together and Tailwind classes cannot be built at runtime.
+
+The track is `minmax(0, 1fr)` rather than plain `1fr`: grid tracks default
+to `auto` minimum sizing, so a long title in one card would widen its
+column and push the row past the container.
 
 ### Tweaking it
 
