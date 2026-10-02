@@ -27,6 +27,12 @@ x-env-file: &env-file
 
 x-database-url: &database-url ${DATABASE_URL:-postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}}
 
+# Valkey, not Redis. Same wire protocol, so the client is unchanged; Valkey is
+# BSD-licensed under the Linux Foundation where Redis moved to a
+# source-available licence. Point VALKEY_URL at an external managed Valkey or
+# Redis and this default goes unused.
+x-valkey-url: &valkey-url ${VALKEY_URL:-redis://valkey:6379}
+
 services:
   db:
     image: postgres:18
@@ -39,6 +45,33 @@ services:
       - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-voxelvein}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Rate-limit counters and other short-lived shared state. Both web and api
+  # read it, which is the point: the counters have to be shared or every
+  # replica would enforce its own, multiplied limit.
+  #
+  # No volume and persistence off. Every key here carries a TTL, so losing the
+  # contents on restart costs nothing beyond a momentary reset of the limits.
+  # `volatile-lru` evicts only keys that have an expiry set, so it can never
+  # drop a key the app expects to persist.
+  valkey:
+    image: valkey/valkey:8
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - ${VALKEY_MAXMEMORY:-128mb}
+      - --maxmemory-policy
+      - volatile-lru
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,11 +118,15 @@ services:
       PORT: 3000
       DATABASE_URL: *database-url
       API_URL: http://api:3002
+      # Shared rate-limit counters. See the valkey service above.
+      VALKEY_URL: *valkey-url
       # Trust X-Forwarded-For for per-client download dedupe ("true"/"false").
       TRUST_PROXY: ${TRUST_PROXY:-true}
     depends_on:
       migrate:
         condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
     restart: unless-stopped
 
   api:
@@ -110,6 +147,11 @@ services:
       # X-Forwarded-For (Traefik under Dokploy, hence the default), "false"
       # otherwise. The API refuses to start in production without it.
       TRUST_PROXY: ${TRUST_PROXY:-true}
+      # Shared rate-limit counters. See the valkey service above.
+      VALKEY_URL: *valkey-url
+    depends_on:
+      valkey:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

@@ -131,6 +131,36 @@ The split is on purpose: the byte-parsing helpers in
 component to read these two numbers would pull the whole parser into the
 browser bundle.
 
+### Avatars
+
+The avatar route (`src/routes/api/users.me.avatar.ts`) is the project image
+route with the project replaced by the session's user, and it inherits every
+gate above: byte sniffing, a regenerated filename, a server-derived
+`users/{userId}/avatar/{uuid}.{ext}` key, and a quota enforced inside the
+write rather than checked before it.
+
+Avatars **count against the same site-wide quota** as project files.
+`getUsedBytes` sums `user_images` alongside `project_files` and
+`project_images`, so leaving them out would have let a few thousand
+accounts fill the bucket past the configured ceiling without ever
+tripping it. `insertAvatarWithinQuota` takes the same `QUOTA_LOCK_KEY` the
+project path takes, so a project upload and an avatar upload cannot each
+see room for themselves and overshoot together. It also nets off the
+avatar being replaced, so swapping a large avatar does not need room for
+both at once.
+
+Two deliberate differences from project images:
+
+The avatar of an account **waiting to be deleted** stays readable.
+`/api/image/$imageId` hides a pending project's images, but a profile
+byline already shows "Deleted user" for such an account; dropping its
+avatar too would leave the byline's picture suddenly broken.
+
+`users.image` is written with the new `/api/avatar/$id` URL. That is
+Better Auth's existing avatar field, so the navbar, the account menu, and
+the public profile all pick the upload up with no per-surface change — and
+there is only one copy of the URL rather than one per component.
+
 ### Filenames
 
 `src/lib/upload-validation.ts` gates arbitrary uploads with
@@ -140,10 +170,118 @@ alphanumeric, which rules out leading dots and hyphens in one rule. It
 also rejects `..` explicitly and checks for ZIP magic (`PK\x03\x04`), since
 this platform's payload is archives.
 
+## Rate limits
+
+`src/lib/rate-limit.ts` enforces a fixed-window budget per bucket, and
+`src/lib/rate-limit-server.ts` is the thin shape a server function needs.
+
+Counters live in **Valkey**, not in process memory. That is the whole
+reason the store is shared: `web` and `api` both enforce limits, and a
+per-process counter would be enforced separately by each replica,
+multiplying the real limit by the number of them. Valkey is the
+BSD-licensed Linux Foundation fork of Redis and speaks the same protocol,
+so the client is the standard `redis` package — see
+[Docker deployment](../deployment/docker.md) for the service and
+`VALKEY_URL`.
+
+The budget is deliberately coarse. The point is to stop a runaway client
+or a script, not to enforce a product quota — nobody typing in a search
+box comes near these numbers, while a loop over them does.
+
+| Bucket        | Budget  | Where                                             |
+| ------------- | ------- | ------------------------------------------------- |
+| `auth`        | 10/min  | Reserved; sign-in and sign-up are Turnstile-gated |
+| `read`        | 120/min | Project and post search, anonymous                |
+| `download`    | 120/min | `/api/download/$fileId`                           |
+| `sse-connect` | 30/min  | `/api/events`, catches reconnect storms           |
+| `upload`      | 20/min  | Image and file uploads, per user                  |
+| `write`       | 30/min  | Post create/update/delete, review decisions       |
+
+Identity prefers the session's user id and falls back to the client
+address, so a shared NAT does not throttle everyone behind it while an
+anonymous visitor still has a bucket. Upload and write limits key on the
+user id only: the thing being bounded is one account, which an address
+cannot express.
+
+The counter is incremented by a Lua script rather than `INCR` then
+`EXPIRE`. Two commands leave a window where a crash between them leaves a
+key with no TTL, and that key then counts forever. The script sets the
+expiry only on the first hit, in one round trip.
+
+### Fails open
+
+If Valkey is unreachable the request is **allowed**, and the failure is
+logged. A limiter that takes the site down when its store is down is a
+worse outage than the abuse it prevents. Two things keep that from
+becoming a hang:
+
+* `getValkey` sets a bounded `connectTimeout` and disables reconnection.
+  node-redis retries a refused connection with backoff by default, which
+  would leave the caller — and the request waiting on it — pending long
+  past any useful answer.
+* A failed connect throws into the caller, and the next request builds a
+  fresh client, so an outage self-heals without a restart.
+
+In production the app refuses to start without `VALKEY_URL`, so the
+"shared counters" path cannot be silently reduced to per-process
+counters by a missing variable.
+
+### Sign-in and sign-up
+
+Those endpoints belong to Better Auth, so app code cannot wrap them. Two
+things cover them instead.
+
+Turnstile, which gates the credential and sign-up forms.
+
+Better Auth's **own** limiter, configured as `rateLimit` in
+`src/lib/auth.ts`. `customRules` set the tightest budgets in the app on
+the paths that matter: 5/min on `/sign-in/email` and `/sign-up/email`,
+3/min on the two mail-sending paths.
+
+Its counters are in **process memory**, which is a real limitation and
+worth stating plainly: on N replicas the effective limit is N times those
+numbers. They still stop one runaway client, which is the job.
+
+**Known gap — two tempting transports, both refused.** Everything outside
+Better Auth's own endpoints uses Valkey, so it is natural to want it here
+too. Both alternatives were tried and both broke sign-in:
+
+`storage: "secondaryStorage"`
+: Makes Better Auth treat the store as the **session** store. Its
+  `findSession` then reads the session token from there and returns `null`
+  when the key is missing, so every session that actually lives in
+  Postgres becomes invisible. The symptom is silent and nasty: the cookie is
+  still valid, every `/api/auth/*` call succeeds, and the UI simply stays
+  signed out.
+
+`storage: "database"`
+: Runs Better Auth's runtime schema check, which rejected the table this
+  project declares (`drizzle/0018_add_rate_limit.sql`) and turned **every**
+  `/api/auth/*` request into a 500 with `Drizzle schema mismatch`. Resolving
+  it needs the adapter's exact expected column set for the `rateLimit`
+  model, which is not documented; the declared table is `count`, `id`,
+  `key`, `lastRequest`, and `db.query` is keyed by the TS export name while
+  the adapter looks the table up as `<model>s` under `usePlural`.
+
+Both are recorded here so the next attempt starts from what broke rather
+than from the idea. A rate limit is not worth breaking authentication
+over; the per-process limit is the acceptable cost until the expected
+schema is confirmed against the installed adapter.
+
+### Circuit breaker
+
+After a failed check the limiter stops calling Valkey for ten seconds and
+allows everything in the meantime. Without it, one broken dependency would
+cost **every** request on the site a connect attempt against a server that
+is not answering — the opposite of what a rate limiter is for. A single
+successful call closes it again, so recovery needs no restart.
+
 ## Related
 
 * [Resilience](../development/resilience.md) — chunk recovery, download
   counting, and connection caps
+* [Docker deployment](../deployment/docker.md) — the Valkey service and
+  `VALKEY_URL`
 * [Object Storage](../storage/object-storage.md) — buckets, keys, quotas
 * [Email and Password](../authentication/email-password.md) — why email
   verification is off, and what that means for account linking

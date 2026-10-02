@@ -55,11 +55,12 @@ client IDs from `GOOGLE_CLIENT_ID` and `GITHUB_CLIENT_ID`.
 
 ## Run with Compose
 
-`compose.yaml` defines `db` (Postgres), `migrate`, `web`, and `api`. It
-is the file Dokploy deploys. `migrate` applies
+`compose.yaml` defines `db` (Postgres), `valkey`, `migrate`, `web`, and
+`api`. It is the file Dokploy deploys. `migrate` applies
 pending migrations and exits; `web` only starts after it exits
 successfully, so a deploy never serves new code against an old schema.
-`api` does not use the database and starts independently.
+`api` does not use the database. Both `web` and `api` wait for `valkey`
+to be healthy, since both enforce rate limits through it.
 
 ```bash
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build
@@ -97,6 +98,8 @@ For a self-contained local stack with Postgres and Garage, use
 | `GOOGLE_CLIENT_ID`/`SECRET` | web (+ build) | No            |
 | `GITHUB_CLIENT_ID`/`SECRET` | web (+ build) | No            |
 | `TRUST_PROXY`               | web, api      | In production |
+| `VALKEY_URL`                | web, api      | In production |
+| `VALKEY_MAXMEMORY`          | valkey        | No            |
 | `DATABASE_URL`              | web, migrate  | No            |
 | `TAG`                       | all           | No            |
 | `WEB_PORT`, `API_HOST_PORT` | host ports    | No            |
@@ -107,14 +110,54 @@ allowed to call the API, and `TRUST_PROXY` (default `true` in
 `https://voxelvein.vomlabs.com` in `compose.yaml`; set it explicitly for
 any other domain.
 
+## Valkey
+
+`compose.yaml` ships a `valkey` service. **Valkey, not Redis**: it is the
+BSD-licensed Linux Foundation fork, and it speaks the same wire protocol,
+so the client is the standard `redis` package and nothing in the code
+knows which server it is talking to.
+
+It holds rate-limit counters and nothing else, and it has to be shared:
+`web` and `api` both enforce limits, so a per-process counter would be
+enforced separately by each replica, multiplying the real limit by the
+number of them. See [Hardening](../security/hardening.md).
+
+No volume, persistence off
+: Every key carries a TTL, so the contents are disposable. Losing them on
+  a restart costs a momentary reset of the limits and nothing else, which
+  is not worth a volume and a backup policy.
+
+`--maxmemory 128mb`, `--maxmemory-policy volatile-lru`
+: A ceiling so a runaway client cannot grow the heap without bound.
+  `volatile-lru` evicts only keys that have an expiry set, so it can
+  never drop a key the app expects to persist. Raise it with
+  `VALKEY_MAXMEMORY`.
+
+No published port
+: Reachable only from the compose network, the same trust boundary as
+  everything else in `compose.yaml`. `docker-compose.yml` publishes
+  `127.0.0.1:${VALKEY_PORT}` for local `valkey-cli` poking.
+
+No password
+: Defensible only because of the above. Nothing outside the compose
+  network can reach it and the data is disposable counters. **If you ever
+  publish the port, set a password first.**
+
+`VALKEY_URL` defaults to `redis://valkey:6379`, so the bundled stack needs
+no configuration; set it to use a managed instance instead. In production
+the app refuses to start without it, for the same reason `TRUST_PROXY` is
+mandatory there: a silent fallback to a loopback default would leave every
+replica enforcing its own limit while looking like it worked.
+
 Password sign-in and sign-up are rejected unless all three Turnstile
 values are set. In production the secret must not be a Cloudflare
 testing secret and `TURNSTILE_HOSTNAMES` must not include `localhost`.
 
 ## Client IPs behind a reverse proxy
 
-The API limits event streams per client, and the web app counts a
-download once per client and file. Both identify the client by IP from
+Rate limits key anonymous callers by IP, and the API limits event
+streams per client while the web app counts a download once per client
+and file. All of them identify the client by IP from
 `X-Forwarded-For`, using the **last** entry — the one the reverse proxy
 appends. That is only trustworthy when a proxy you control sits in front
 and appends to the header rather than passing a client-supplied one

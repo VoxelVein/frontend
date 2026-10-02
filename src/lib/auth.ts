@@ -198,6 +198,53 @@ const trustedOrigins = [
 ];
 
 export const auth = betterAuth({
+  // Better Auth rate limiting, which is the only way to bound sign-in and
+  // sign-up: those endpoints are Better Auth's own, so app code cannot wrap
+  // them. Turnstile is the first gate on a credential attempt; this is the
+  // second, for a client that solves it in a loop.
+  //
+  // Defaults to on in production and off in development, so the values here
+  // only tighten it. `customRules` are matched before the default and use the
+  // same window/max shape.
+  rateLimit: {
+    customRules: {
+      // A password attempt is expensive to verify and is the target of
+      // credential stuffing, so it gets the tightest budget in the app.
+      "/sign-in/email": { max: 5, window: 60 },
+      "/sign-up/email": { max: 5, window: 60 },
+      // Forgot-password and verification resend send mail. A few a minute is
+      // already generous for a human.
+      "/forget-password": { max: 3, window: 60 },
+      "/send-verification-email": { max: 3, window: 60 },
+      // OAuth starts are far less expensive, but a callback-heavy flow still
+      // should not be looped.
+      "/sign-in/social": { max: 20, window: 60 },
+    },
+    enabled: true,
+    max: 60,
+    // Counters live in process memory.
+    //
+    // NOT `secondaryStorage`, even though Valkey is right there and would be
+    // the obvious transport: setting it makes Better Auth treat it as the
+    // *session* store. Its `findSession` then reads the token from there and
+    // returns null when the key is missing, so every session that actually
+    // lives in Postgres becomes invisible and the UI silently drops to
+    // signed-out. That was a real regression here.
+    //
+    // NOT `"database"` either: that path runs Better Auth's runtime schema
+    // check, which rejected the table this project declares and 500s every
+    // `/api/auth/*` request. Getting it to pass needs the adapter's exact
+    // expected column set, which is not documented — see the note in
+    // docs/security/hardening.md.
+    //
+    // So the tradeoff stands: these limits are per-process, and on N replicas
+    // the effective limit is N times the number below. They still stop one
+    // runaway client, which is what Turnstile is not there to do. Everything
+    // outside Better Auth's own endpoints uses Valkey and is shared properly.
+    storage: "memory",
+    window: 60,
+  },
+
   account: {
     accountLinking: {
       // Signed-in users may link a GitHub or Google account whose email

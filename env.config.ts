@@ -28,6 +28,8 @@ const envWithDefaults = {
   STORAGE_QUOTA_BYTES: process.env.STORAGE_QUOTA_BYTES || undefined,
   TURNSTILE_HOSTNAMES: process.env.TURNSTILE_HOSTNAMES,
   TURNSTILE_SECRET: process.env.TURNSTILE_SECRET,
+  // Blank optional values from .env files mean "unset", not an empty URL.
+  VALKEY_URL: process.env.VALKEY_URL || undefined,
   VITE_GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   VITE_GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   // Absolute origin of the deployment. Used for Open Graph URLs, JSON-LD, and
@@ -59,6 +61,10 @@ const env = defineEnv({
     STORAGE_SECRET_ACCESS_KEY: optional(string()),
     TURNSTILE_HOSTNAMES: optional(string()),
     TURNSTILE_SECRET: optional(string()),
+    // Shared rate-limit counters. Optional so a local run without Valkey still
+    // starts; `src/lib/valkey.ts` throws in production rather than silently
+    // falling back to a loopback default and enforcing nothing.
+    VALKEY_URL: optional(pipe(string(), url())),
   },
   shared: {
     NODE_ENV: picklist(["development", "production", "test"]),

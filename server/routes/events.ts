@@ -2,6 +2,11 @@ import { Elysia, sse } from "elysia";
 
 import "../env";
 import { getForwardedClientIp, readTrustProxy } from "../../src/lib/client-key";
+import {
+  consumeRateLimit,
+  rateLimitedResponse,
+  RATE_LIMITS,
+} from "../../src/lib/rate-limit";
 import { AsyncQueue, events } from "../lib/events";
 import type { ModEvent } from "../lib/events";
 
@@ -100,15 +105,31 @@ const streamModEvents = async function* streamModEvents(
   }
 };
 
-export const eventsRoute = new Elysia().get("/api/events", ({ request }) => {
-  const clientKey = getForwardedClientIp(request.headers, TRUST_PROXY);
+export const eventsRoute = new Elysia().get(
+  "/api/events",
+  async ({ request }) => {
+    const clientKey = getForwardedClientIp(request.headers, TRUST_PROXY);
 
-  if (!acquireSlot(clientKey)) {
-    return new Response("Too many event streams", {
-      headers: { "Retry-After": "30" },
-      status: 429,
-    });
+    // The slot count below caps how many streams a client holds open. This caps
+    // how fast it may ask for them, so a client cannot burn through its
+    // reconnects and starve others between attempts. Reconnect storms after a
+    // deploy are the common case this catches.
+    const quota = await consumeRateLimit(
+      "sse-connect",
+      clientKey ?? "unknown",
+      RATE_LIMITS.sseConnect
+    );
+    if (quota.limited) {
+      return rateLimitedResponse(quota.retryAfterSeconds);
+    }
+
+    if (!acquireSlot(clientKey)) {
+      return new Response("Too many event streams", {
+        headers: { "Retry-After": "30" },
+        status: 429,
+      });
+    }
+
+    return streamModEvents(request.signal, clientKey);
   }
-
-  return streamModEvents(request.signal, clientKey);
-});
+);

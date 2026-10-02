@@ -20,6 +20,32 @@ services:
       timeout: 5s
       retries: 5
 
+  # Valkey, not Redis: same wire protocol, BSD licence under the Linux
+  # Foundation. Holds rate-limit counters and other short-lived shared state.
+  # No volume and persistence off — every key carries a TTL, so a restart costs
+  # nothing but a momentary reset of the limits.
+  valkey:
+    image: valkey/valkey:8
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - ${VALKEY_MAXMEMORY:-128mb}
+      - --maxmemory-policy
+      - volatile-lru
+    # Bound to loopback only, like db and garage below, so it is never reachable
+    # from outside the host. Useful for `valkey-cli` poking during development.
+    ports:
+      - "127.0.0.1:${VALKEY_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   garage:
     image: dxflrs/garage:v2.4.1
     # Development object storage (S3-compatible). Production uses
@@ -69,11 +95,14 @@ services:
       # Ports are published directly here, with no proxy in front, so
       # X-Forwarded-For is client-controlled and must not be trusted.
       TRUST_PROXY: ${TRUST_PROXY:-false}
+      VALKEY_URL: redis://valkey:6379
     ports:
       - "${API_PORT:-3002}:3002"
     depends_on:
       migrate:
         condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
@@ -88,6 +117,7 @@ services:
       PORT: 6001
       API_URL: http://api:3002
       TRUST_PROXY: ${TRUST_PROXY:-false}
+      VALKEY_URL: redis://valkey:6379
       DATABASE_URL: postgresql://${POSTGRES_USER:-voxelvein}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-voxelvein}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
@@ -98,6 +128,8 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

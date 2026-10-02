@@ -20,6 +20,9 @@ services:
       PORT: 6001
       # The API runs in this same container under `pnpm dev`.
       API_URL: http://localhost:3002
+      # Rate-limit counters. The valkey service is kept in the dev stack (it is
+      # not under the `prod` profile below) because web and api both need it.
+      VALKEY_URL: redis://valkey:6379
     volumes:
       # Mount source for hot reload
       - .:/app
@@ -29,6 +32,11 @@ services:
     restart: "no"
     # The dev server runs the API itself and migrations stay manual
     # (`pnpm db:migrate`), so drop the production-only services below.
+    # `!reset` clears the inherited list outright rather than merging with it;
+    # a merged list would keep pointing at `migrate`, which the `prod` profile
+    # above removes and which therefore does not exist in the dev project.
+    # Valkey is deliberately not gated on here: it is not under a profile, so it
+    # still starts, and the limiter retries if it is not up on the first request.
     depends_on: !reset {}
 
   migrate:

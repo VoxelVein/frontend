@@ -114,6 +114,20 @@ download route compares `process.env.TRUST_PROXY === "true"` directly and
 so stays lenient: a web request failing on a missing variable is worse
 than one that undercounts.
 
+### Reconnect rate
+
+The slot cap bounds how many streams a client holds **open**. It does not
+bound how fast a client opens them, so `/api/events` also spends a
+rate-limit budget per connect (`sse-connect`, 30/min) from the shared
+limiter. That is what catches a reconnect storm: right after a deploy,
+every open browser tab reconnects at once, and without this one bad
+network could have every client retrying in a tight loop. The two limits
+are complementary — slots cap concurrency, the budget cap the rate.
+
+Counters live in Valkey rather than in process memory, because this route
+runs in the API container while the web container enforces limits of its
+own. See [Hardening](../security/hardening.md).
+
 See [API Server](../architecture/api.md) for the event stream itself.
 
 ## Related

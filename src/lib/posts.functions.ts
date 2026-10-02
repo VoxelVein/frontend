@@ -6,11 +6,40 @@ import { parse } from "valibot";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { readTrustProxy } from "@/lib/client-key";
 import { postInputSchema, postUpdateSchema, resolvePreview } from "@/lib/posts";
 import type { Post, PostInput, PostSummary } from "@/lib/posts";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  consumeServerLimit,
+  RATE_LIMIT_MESSAGE,
+  rateLimitIdentity,
+} from "@/lib/rate-limit-server";
 import { can } from "@/lib/roles";
 import { hasSearchablePosts, searchPostsInDatabase } from "@/lib/search/posts";
 import type { PostSearchResult } from "@/lib/search/posts";
+
+const TRUST_PROXY = readTrustProxy(
+  process.env.TRUST_PROXY,
+  process.env.NODE_ENV === "production"
+);
+
+/**
+ * Caps a staff member's writes.
+ *
+ * Keyed on the account rather than the address: the point is to bound how much
+ * content one person can push in a minute, which an address cannot express.
+ */
+const requireWriteQuota = async (userId: string): Promise<void> => {
+  const quota = await consumeServerLimit(
+    "post-write",
+    `user:${userId}`,
+    RATE_LIMITS.write
+  );
+  if (quota) {
+    throw new Error(RATE_LIMIT_MESSAGE);
+  }
+};
 
 const getStaffSessionOrNull = async () => {
   const headers = getRequestHeaders();
@@ -145,9 +174,18 @@ export const getLatestPosts = createServerFn({ method: "GET" }).handler(
  */
 export const searchPosts = createServerFn({ method: "GET" })
   .validator((data: { query: string }) => data)
-  .handler(({ data }): Promise<PostSearchResult> =>
-    searchPostsInDatabase({ query: data.query })
-  );
+  .handler(async ({ data }): Promise<PostSearchResult> => {
+    // Anonymous and uncached, like project search.
+    const quota = await consumeServerLimit(
+      "post-search",
+      rateLimitIdentity(getRequestHeaders(), TRUST_PROXY),
+      RATE_LIMITS.read
+    );
+    if (quota) {
+      throw new Error(RATE_LIMIT_MESSAGE);
+    }
+    return searchPostsInDatabase({ query: data.query });
+  });
 
 /**
  * Admin post search, including drafts.
@@ -224,6 +262,7 @@ export const createPost = createServerFn({ method: "POST" })
   .validator((data: PostInput) => parse(postInputSchema, data))
   .handler(async ({ data }): Promise<Post> => {
     const session = await getStaffSession();
+    await requireWriteQuota(session.user.id);
 
     const [row] = await db
       .insert(posts)
@@ -269,6 +308,7 @@ export const updatePost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<Post> => {
     const session = await getStaffSession();
+    await requireWriteQuota(session.user.id);
 
     // A moderator editing a draft stays a draft, and cannot unpublish an
     // already-published post either, since that would be a publish decision.
@@ -298,7 +338,8 @@ export const updatePost = createServerFn({ method: "POST" })
 export const deletePost = createServerFn({ method: "POST" })
   .validator((data: { id: string }) => data)
   .handler(async ({ data }): Promise<{ ok: true }> => {
-    await getAdminSession();
+    const session = await getAdminSession();
+    await requireWriteQuota(session.user.id);
 
     const result = await db.delete(posts).where(eq(posts.id, data.id));
 
