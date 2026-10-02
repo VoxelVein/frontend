@@ -71,18 +71,11 @@ const Notice = ({
 
 const BlogPage = () => {
   const { posts, searchAvailable } = useLoaderData({ from: ROUTE_ID });
-  const {
-    error,
-    hits,
-    isActive,
-    isAvailable,
-    isSearching,
-    onQueryChange,
-    query,
-  } = usePostSearch({
-    availability: searchAvailable,
-    fetchResults: (value) => searchPosts({ data: { query: value } }),
-  });
+  const { hits, isActive, isAvailable, isSearching, onQueryChange, query } =
+    usePostSearch({
+      availability: searchAvailable,
+      fetchResults: (value) => searchPosts({ data: { query: value } }),
+    });
 
   let content: ReactNode;
 
@@ -144,12 +137,6 @@ const BlogPage = () => {
           placeholder="Search posts…"
           query={query}
         />
-      ) : null}
-
-      {error ? (
-        <p className="text-destructive mt-8 text-sm" role="alert">
-          {error}
-        </p>
       ) : null}
 
       {content}

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { usePostSearch } from "@/hooks/use-post-search";
-import type { Post, PostSummary } from "@/lib/posts";
+import type { PostSummary } from "@/lib/posts";
 import {
   deletePost,
-  getPostById,
   listPosts,
   postSearchAvailable,
   searchPostsAdmin,
@@ -17,6 +16,12 @@ interface PostsState {
   error: string | null;
   isInitialLoading: boolean;
   isRefreshing: boolean;
+  /**
+   * One instant, stamped whenever the list changes, so every row's relative
+   * timestamp is measured against the same moment instead of against whenever
+   * that row happened to render.
+   */
+  loadedAt: number;
   posts: PostSummary[];
 }
 
@@ -24,8 +29,6 @@ type PostsAction =
   | { type: "LOAD_START" }
   | { type: "REFRESH_START" }
   | { type: "LOAD_SUCCESS"; posts: PostSummary[] }
-  | { type: "CREATE_SUCCESS"; post: Post }
-  | { type: "UPDATE_SUCCESS"; post: Post }
   | { type: "DELETE_SUCCESS"; id: string }
   | { type: "ERROR"; error: string };
 
@@ -33,6 +36,7 @@ const initialState: PostsState = {
   error: null,
   isInitialLoading: true,
   isRefreshing: false,
+  loadedAt: Date.now(),
   posts: [],
 };
 
@@ -51,18 +55,7 @@ const postsReducer = (state: PostsState, action: PostsAction): PostsState => {
         isInitialLoading: false,
         isRefreshing: false,
         posts: action.posts,
-      };
-    }
-    case "CREATE_SUCCESS": {
-      return { ...state, error: null, posts: [action.post, ...state.posts] };
-    }
-    case "UPDATE_SUCCESS": {
-      return {
-        ...state,
-        error: null,
-        posts: state.posts.map((post) =>
-          post.id === action.post.id ? action.post : post
-        ),
+        loadedAt: Date.now(),
       };
     }
     case "DELETE_SUCCESS": {
@@ -70,6 +63,7 @@ const postsReducer = (state: PostsState, action: PostsAction): PostsState => {
         ...state,
         error: null,
         posts: state.posts.filter((post) => post.id !== action.id),
+        loadedAt: Date.now(),
       };
     }
     case "ERROR": {
@@ -122,11 +116,9 @@ export interface UseAdminPostsResult {
   isMutating: boolean;
   isRefreshing: boolean;
   isSearching: boolean;
+  loadedAt: number;
   /** Loads the full post behind a summary, for the edit dialog. */
-  loadPostForEdit: (post: PostSummary) => Promise<Post | null>;
-  onCreated: (post: Post) => void;
   onQueryChange: (value: string) => void;
-  onUpdated: (post: Post) => void;
   posts: AdminPostRow[];
   query: string;
   removePost: (post: PostSummary) => Promise<void>;
@@ -226,37 +218,6 @@ export const useAdminPosts = (): UseAdminPostsResult => {
     probe: postSearchAvailable,
   });
 
-  const onCreated = (post: Post) => {
-    // Bumped like every other mutation, so a refresh already in flight
-    // recognises that the list it is fetching has been superseded.
-    mutationCountRef.current += 1;
-    dispatch({ post, type: "CREATE_SUCCESS" });
-  };
-
-  const onUpdated = (post: Post) => {
-    mutationCountRef.current += 1;
-    dispatch({ post, type: "UPDATE_SUCCESS" });
-  };
-
-  /** Loads the full post for editing, since the list only carries summaries. */
-  const loadPostForEdit = async (post: PostSummary): Promise<Post | null> => {
-    setIsMutating(true);
-    let loaded: Post | null = null;
-
-    try {
-      loaded = await getPostById({ data: { id: post.id } });
-    } catch (editError) {
-      dispatch({
-        error: toMessage(editError, "Could not load the post."),
-        type: "ERROR",
-      });
-    }
-
-    setIsMutating(false);
-
-    return loaded;
-  };
-
   const removePost = async (post: PostSummary) => {
     mutationCountRef.current += 1;
     setIsMutating(true);
@@ -277,13 +238,11 @@ export const useAdminPosts = (): UseAdminPostsResult => {
   return {
     error: error ?? searchError,
     isInitialLoading,
+    loadedAt: state.loadedAt,
     isMutating,
     isRefreshing,
     isSearching,
-    loadPostForEdit,
-    onCreated,
     onQueryChange,
-    onUpdated,
     posts: isActive ? hits : posts,
     query,
     removePost,
