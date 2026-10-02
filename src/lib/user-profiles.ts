@@ -9,6 +9,8 @@ import { normalizeUsername } from "@/lib/usernames";
 export interface PublicProfile {
   bio: string | null;
   displayUsername: string;
+  /** The account's avatar, or null when they have not set one. */
+  image: string | null;
   joinedAt: string;
   name: string;
   projects: ProjectDocument[];
@@ -45,6 +47,7 @@ export const loadPublicProfile = async (
       createdAt: users.createdAt,
       displayUsername: users.displayUsername,
       id: users.id,
+      image: users.image,
       name: users.name,
       username: users.username,
     })
@@ -75,6 +78,7 @@ export const loadPublicProfile = async (
     // Falls back to the normalised username, which is what the URL already
     // resolved on, so the heading is never empty.
     displayUsername: user.displayUsername ?? user.username ?? requested,
+    image: user.image ?? null,
     joinedAt: user.createdAt.toISOString(),
     name: user.name,
     // Visibility is re-checked by the builder, so a project that changes state

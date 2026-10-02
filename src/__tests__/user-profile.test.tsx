@@ -88,6 +88,7 @@ const project = (
 const profile = (overrides: Partial<PublicProfile> = {}): PublicProfile => ({
   bio: "I make mods that make Minecraft run faster.",
   displayUsername: "Ada",
+  image: null,
   joinedAt: "2025-01-01T00:00:00.000Z",
   name: "Ada Lovelace",
   projects: [project()],
