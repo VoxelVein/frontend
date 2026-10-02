@@ -13,7 +13,7 @@ can be linked to:
 
 | Tab        | Contents                                                |
 | ---------- | ------------------------------------------------------- |
-| `profile`  | Display name, Markdown bio, username                    |
+| `profile`  | Display name, Markdown bio, avatar, username            |
 | `security` | Sign-in methods (password, Google, GitHub) and passkeys |
 | `sessions` | Active sessions, revoke one or all others               |
 | `danger`   | Password change and the account-deletion wizard         |
@@ -116,12 +116,41 @@ Related docs: [Admin Panel](../content/admin-panel.md) for the Deletions
 tab, [Projects and Files](../content/projects.md) for what a project
 deletion does.
 
-## Bios and public profiles
+## Bios, avatars, and public profiles
 
 Every account has an optional bio, edited in **Settings → Profile** and
 shown on a public profile page at `/u/<username>`. The rules live in
 `src/lib/bio.ts`; the lookup is `src/lib/user-profiles.ts`, wrapped by
 `getPublicProfile` in `src/lib/user-profiles.functions.ts`.
+
+### Avatars
+
+Uploaded in **Settings → Profile** by `src/components/settings/avatar-card.tsx`,
+which posts to `/api/users/me/avatar`. The bytes go through the same
+sniffing, filename regeneration, and quota gate as a project image — see
+[Hardening](../security/hardening.md).
+
+Three decisions worth knowing:
+
+`users.image` holds the **URL**, `/api/avatar/<id>`
+: That is Better Auth's own avatar field, which the navbar, the account
+  menu, and the public profile already read. Writing it there means an
+  upload appears everywhere at once, and there is exactly one copy of the
+  URL rather than one per component.
+
+A separate `user_images` table, not a key on `users`
+: Replacing an avatar has to delete the object it replaced, which needs
+  the previous key captured *before* the row is overwritten. A single
+  column cannot hold both. One row per account, enforced by a unique
+  index.
+
+`users.id` is `text`, so `user_images.user_id` is too
+: Better Auth's key type. A foreign key cannot reference across types,
+  and the avatar's own `id` stays a `uuid` because that one is ours.
+
+The image is resized in the browser before it is sent, using the `icon`
+kind — an avatar renders at 24-80px, the same range as a project icon —
+so a phone photo is scaled rather than stored and never used.
 
 * The bio is **Markdown**, rendered with `@tanstack/markdown/react` in the
   same `.markdown-body` container as a project description, so raw HTML and

@@ -30,6 +30,12 @@ export interface UploadedProjectImage {
   width: number;
 }
 
+/** Header every upload sets. The server re-sniffs the bytes regardless. */
+const CONTENT_TYPE_HEADER = "content-type";
+
+/** Shared by all three uploads, since they fail the same way. */
+const UPLOAD_FAILED_MESSAGE = "The upload failed. Check your connection.";
+
 const readError = (request: XMLHttpRequest): string => {
   try {
     // SAFETY: the upload route always answers errors with { error: string }.
@@ -72,7 +78,7 @@ export const uploadVersionFile = ({
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("PUT", url);
-    request.setRequestHeader("content-type", contentTypeFor(uploadName));
+    request.setRequestHeader(CONTENT_TYPE_HEADER, contentTypeFor(uploadName));
     request.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) {
         onProgress?.(event.loaded / event.total);
@@ -87,7 +93,7 @@ export const uploadVersionFile = ({
       reject(new Error(readError(request)));
     });
     request.addEventListener("error", () =>
-      reject(new Error("The upload failed. Check your connection."))
+      reject(new Error(UPLOAD_FAILED_MESSAGE))
     );
     request.send(file);
   });
@@ -119,7 +125,7 @@ export const uploadProjectImage = async ({
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("PUT", url);
-    request.setRequestHeader("content-type", payload.type);
+    request.setRequestHeader(CONTENT_TYPE_HEADER, payload.type);
     request.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) {
         onProgress?.(event.loaded / event.total);
@@ -134,10 +140,70 @@ export const uploadProjectImage = async ({
       reject(new Error(readError(request)));
     });
     request.addEventListener("error", () =>
-      reject(new Error("The upload failed. Check your connection."))
+      reject(new Error(UPLOAD_FAILED_MESSAGE))
     );
     request.send(payload);
   });
+};
+
+export interface UploadedAvatar {
+  contentType: string;
+  height: number;
+  size: number;
+  url: string;
+  width: number;
+}
+
+/**
+ * Uploads the signed-in account's avatar.
+ *
+ * Resized with the `icon` kind, which is the right one: an avatar is displayed
+ * at 24-80px, exactly like a project icon, so it gets the same 512px ceiling
+ * rather than a second constant for the same job.
+ *
+ * Uses XMLHttpRequest like the other uploads because `upload.onprogress` has no
+ * promise equivalent.
+ */
+export const uploadAvatar = async ({
+  file,
+  onProgress,
+}: {
+  file: File;
+  onProgress?: (fraction: number) => void;
+}): Promise<UploadedAvatar> => {
+  const payload = await resizeImageForUpload(file, "icon");
+
+  // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest has no promise API.
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("PUT", "/api/users/me/avatar");
+    request.setRequestHeader(CONTENT_TYPE_HEADER, payload.type);
+    request.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) {
+        onProgress?.(event.loaded / event.total);
+      }
+    });
+    request.addEventListener("load", () => {
+      if (request.status === 201) {
+        // SAFETY: a 201 from the avatar route always carries an avatar record.
+        resolve(JSON.parse(request.responseText) as UploadedAvatar);
+        return;
+      }
+      reject(new Error(readError(request)));
+    });
+    request.addEventListener("error", () =>
+      reject(new Error(UPLOAD_FAILED_MESSAGE))
+    );
+    request.send(payload);
+  });
+};
+
+/** Removes the signed-in account's avatar. */
+export const deleteAvatar = async (): Promise<void> => {
+  const response = await fetch("/api/users/me/avatar", { method: "DELETE" });
+  if (!response.ok) {
+    throw new Error(await readErrorLike(response));
+  }
 };
 
 /** Deletes one of a project's images. */
