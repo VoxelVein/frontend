@@ -7,8 +7,10 @@ interface AuthResult {
   error: { message: string } | null;
 }
 
-const { navigate, signUpEmail } = vi.hoisted(() => ({
+const { navigate, signUpEmail, toastDismiss, toastError } = vi.hoisted(() => ({
   navigate: vi.fn<(opts: { to: string }) => void>(),
+  toastDismiss: vi.fn<() => void>(),
+  toastError: vi.fn<(message: string) => void>(),
   signUpEmail:
     vi.fn<
       (opts: {
@@ -17,6 +19,15 @@ const { navigate, signUpEmail } = vi.hoisted(() => ({
         password: string;
       }) => Promise<AuthResult>
     >(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback is a toast; stubbing Sonner is what makes the call assertable
+vi.mock("sonner", () => ({
+  toast: {
+    dismiss: toastDismiss,
+    error: toastError,
+    success: vi.fn<(message: string) => void>(),
+  },
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the signup form requires a faithful auth client stub; string path avoids strict factory type-checking against the real auth client
@@ -144,9 +155,12 @@ describe("SignupPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Create Account" }));
 
-    await expect(
-      screen.findByText("User already exists. Use another email.")
-    ).resolves.toBeTruthy();
+    // Action feedback is a toast, which renders outside the form.
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(
+        "User already exists. Use another email."
+      );
+    });
     expect(navigate).not.toHaveBeenCalled();
   });
 });

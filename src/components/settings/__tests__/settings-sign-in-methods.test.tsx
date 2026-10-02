@@ -10,18 +10,36 @@ interface AccountRow {
   providerId: string;
 }
 
-const { linkSocialMock, listAccountsMock, setPasswordMock, unlinkAccountMock } =
-  vi.hoisted(() => ({
-    linkSocialMock:
-      vi.fn<
-        (opts: { callbackURL: string; provider: string }) => Promise<object>
-      >(),
-    listAccountsMock: vi.fn<() => Promise<object>>(),
-    setPasswordMock:
-      vi.fn<(opts: { data: { newPassword: string } }) => Promise<void>>(),
-    unlinkAccountMock:
-      vi.fn<(opts: { accountId: string }) => Promise<object>>(),
-  }));
+const {
+  linkSocialMock,
+  listAccountsMock,
+  setPasswordMock,
+  toastDismissMock,
+  toastErrorMock,
+  toastSuccessMock,
+  unlinkAccountMock,
+} = vi.hoisted(() => ({
+  linkSocialMock:
+    vi.fn<
+      (opts: { callbackURL: string; provider: string }) => Promise<object>
+    >(),
+  listAccountsMock: vi.fn<() => Promise<object>>(),
+  setPasswordMock:
+    vi.fn<(opts: { data: { newPassword: string } }) => Promise<void>>(),
+  unlinkAccountMock: vi.fn<(opts: { accountId: string }) => Promise<object>>(),
+  toastDismissMock: vi.fn<() => void>(),
+  toastErrorMock: vi.fn<(message: string) => void>(),
+  toastSuccessMock: vi.fn<(message: string) => void>(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback goes to a toast; stubbing Sonner keeps the assertion on the component
+vi.mock("sonner", () => ({
+  toast: {
+    dismiss: toastDismissMock,
+    error: toastErrorMock,
+    success: toastSuccessMock,
+  },
+}));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The component talks to Better Auth over the network; string paths avoid strict factory type-checking against the client types
 vi.mock("@/lib/auth-client", () => ({
@@ -95,9 +113,12 @@ describe(SettingsSignInMethods, () => {
     expect(unlink).toBeEnabled();
     fireEvent.click(unlink);
 
-    await expect(screen.findByRole("alert")).resolves.toHaveTextContent(
-      "You can't unlink your last account"
-    );
+    // Action feedback is a toast, not an inline block.
+    await waitFor(() => {
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        "You can't unlink your last account"
+      );
+    });
     expect(unlinkAccountMock).toHaveBeenCalledWith({ accountId: "google-row" });
   });
 

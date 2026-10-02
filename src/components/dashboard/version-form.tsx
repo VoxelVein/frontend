@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { toast } from "sonner";
 import { safeParse } from "valibot";
 
 import { CheckboxGroup } from "@/components/dashboard/checkbox-group";
@@ -60,7 +61,6 @@ export const VersionForm = ({
   const [changelog, setChangelog] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
-  const [formError, setFormError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [fileInputKey, setFileInputKey] = useState(0);
 
@@ -81,7 +81,7 @@ export const VersionForm = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
+    toast.dismiss();
 
     const result = safeParse(versionInputSchema, {
       changelog,
@@ -124,7 +124,7 @@ export const VersionForm = ({
       if (versionId) {
         await deleteVersion({ data: { versionId } }).catch(() => null);
       }
-      setFormError(errorMessage(error, "Could not create the version."));
+      toast.error(errorMessage(error, "Could not create the version."));
     }
     setProgress(null);
   };
@@ -241,12 +241,6 @@ export const VersionForm = ({
           </progress>
         </div>
       )}
-
-      {formError ? (
-        <p role="alert" className="text-destructive text-sm">
-          {formError}
-        </p>
-      ) : null}
 
       <div>
         <Button type="submit" className="min-h-11" disabled={pending}>

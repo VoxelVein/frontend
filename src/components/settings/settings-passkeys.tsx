@@ -7,6 +7,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
 import { RowIcon } from "@/components/row-icon";
@@ -44,13 +45,12 @@ const SettingsPasskeys = () => {
   });
   const [name, setName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
 
   const handleAdd = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setActionError(null);
+    toast.dismiss();
     setIsAdding(true);
 
     const { error } = await authClient.passkey.addPasskey({
@@ -60,7 +60,7 @@ const SettingsPasskeys = () => {
     setIsAdding(false);
 
     if (error) {
-      setActionError(error.message ?? "Could not add passkey.");
+      toast.error(error.message ?? "Could not add passkey.");
       return;
     }
 
@@ -69,7 +69,7 @@ const SettingsPasskeys = () => {
   };
 
   const handleRemove = async (id: string) => {
-    setActionError(null);
+    toast.dismiss();
     setRemovingId(id);
 
     const { error } = await authClient.$fetch("/passkey/delete-passkey", {
@@ -81,7 +81,7 @@ const SettingsPasskeys = () => {
     setPendingRemovalId(null);
 
     if (error) {
-      setActionError(error.message ?? "Could not remove passkey.");
+      toast.error(error.message ?? "Could not remove passkey.");
       return;
     }
 
@@ -118,12 +118,6 @@ const SettingsPasskeys = () => {
                   Try again
                 </Button>
               </AlertDescription>
-            </Alert>
-          ) : null}
-
-          {actionError ? (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{actionError}</AlertDescription>
             </Alert>
           ) : null}
 
