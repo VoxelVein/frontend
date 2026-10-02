@@ -21,42 +21,12 @@ import {
 } from "@/lib/admin-accounts.functions";
 import type { AdminNotification } from "@/lib/admin-accounts.functions";
 import { errorMessage } from "@/lib/form-errors";
+import { relativeTime } from "@/lib/relative-time";
 
 const absoluteFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
   timeStyle: "short",
 });
-
-const relativeFormatter = new Intl.RelativeTimeFormat(undefined, {
-  numeric: "auto",
-});
-
-const SECONDS_PER_MINUTE = 60;
-const SECONDS_PER_HOUR = 3600;
-const SECONDS_PER_DAY = 86_400;
-const MS_PER_SECOND = 1000;
-
-/** ISO timestamp -> "3 hours ago", measured against `now`. */
-const formatRelative = (value: string, now: number): string => {
-  const seconds = Math.round((new Date(value).getTime() - now) / MS_PER_SECOND);
-  const magnitude = Math.abs(seconds);
-  if (magnitude < SECONDS_PER_MINUTE) {
-    return relativeFormatter.format(seconds, "second");
-  }
-  if (magnitude < SECONDS_PER_HOUR) {
-    return relativeFormatter.format(
-      Math.round(seconds / SECONDS_PER_MINUTE),
-      "minute"
-    );
-  }
-  if (magnitude < SECONDS_PER_DAY) {
-    return relativeFormatter.format(
-      Math.round(seconds / SECONDS_PER_HOUR),
-      "hour"
-    );
-  }
-  return relativeFormatter.format(Math.round(seconds / SECONDS_PER_DAY), "day");
-};
 
 interface NotificationItemProps {
   isMutating: boolean;
@@ -104,7 +74,7 @@ const NotificationItem = ({
               dateTime={notification.createdAt}
               title={absoluteFormatter.format(new Date(notification.createdAt))}
             >
-              {formatRelative(notification.createdAt, loadedAt)}
+              {relativeTime(notification.createdAt, loadedAt)}
             </time>{" "}
             · {absoluteFormatter.format(new Date(notification.createdAt))}
           </p>
