@@ -1,7 +1,7 @@
 import { IconArrowLeft } from "@tabler/icons-react";
-import { Markdown } from "@tanstack/markdown/react";
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 
+import { MarkdownBody } from "@/components/markdown-body";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MICRO_LABEL_CLASS } from "@/lib/classes";
 import type { Post } from "@/lib/posts";
@@ -65,7 +65,7 @@ const BlogPostPage = () => {
         </header>
 
         <div className="markdown-body mt-8">
-          <Markdown>{post.content}</Markdown>
+          <MarkdownBody>{post.content}</MarkdownBody>
         </div>
       </article>
     </div>

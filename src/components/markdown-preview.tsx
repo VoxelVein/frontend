@@ -1,4 +1,4 @@
-import { Markdown } from "@tanstack/markdown/react";
+import { MarkdownBody } from "@/components/markdown-body";
 
 interface MarkdownPreviewProps {
   /**
@@ -30,7 +30,7 @@ export const MarkdownPreview = ({
   >
     {value.trim() ? (
       <div className="markdown-body text-sm">
-        <Markdown>{value}</Markdown>
+        <MarkdownBody>{value}</MarkdownBody>
       </div>
     ) : (
       <p className="text-muted-foreground text-sm">Nothing to preview yet.</p>
