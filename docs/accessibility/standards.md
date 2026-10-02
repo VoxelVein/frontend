@@ -84,6 +84,16 @@ it is a regression.
 * Use `EASE_OUT_CSS` from `src/lib/ease.ts` for scroll reveals and page
   transitions, not ad-hoc keyframes.
 * Do not create flashing content (no more than 3 flashes per second).
+* A `backdrop-filter` on an overlay is not free. `Dialog` and
+  `AlertDialog` carry `backdrop-blur-sm` because their overlay is static
+  and short-lived. `Drawer` deliberately does **not**, because its overlay
+  opacity is animated on every frame of a swipe gesture, and a blur
+  re-rasterising each frame costs more than the effect is worth on a
+  low-power device. Do not add blur to an overlay whose opacity animates.
+* Sheet and dialog surfaces animate `transform` and `opacity` only. The
+  drawer additionally animates `height` for its snap points, which is
+  unavoidable for that component and worth remembering before adding a
+  third one.
 
 ## Loading and empty states
 
@@ -99,11 +109,36 @@ it is a regression.
   that says what would fill it, and an action where one exists. Use
   `variant="inline"` inside a card, panel, or list region, where the
   default's margins and heading size would dominate.
-* Failures use `ErrorState` with a retry, or `FormError` for a
-  form-level failure above the fields. Both are live regions, so an
-  error inserted after a failed submit is announced.
+* Failures use `ErrorState`, which carries `role="alert"` and a retry.
+  Field validation errors render inside `FormField`, which sets
+  `aria-invalid` and points `aria-describedby` at the message and marks
+  it `role="alert"`.
 * Anything that updates in place should be inside an `aria-busy`
   container so assistive technology knows the region is in flux.
+
+## Feedback: toast or inline
+
+Deciding *where* a message appears is an accessibility decision, not a
+stylistic one. The rule:
+
+* **Action feedback goes to Sonner.** A save, delete, role change, or
+  failed request reports on something the person just did. It has no
+  field to sit beside, and a toast does not move focus or interrupt a
+  screen reader mid-sentence. The `<Toaster>` is mounted once in
+  `__root.tsx`.
+* **Field-level validation stays inline**, because the message must be
+  next to the field and associated with it. `FormField` does both.
+* **A retryable load failure stays inline**, because the retry control
+  has to be visible where the content failed rather than in a corner that
+  may have scrolled away.
+
+An action failure that offers **Try again** must repeat the request that
+*failed*, not whatever the form or search field holds when the button is
+clicked — otherwise correcting the query and retrying silently re-runs the
+old one. Hold the failed query in a ref for the handler to read.
+
+This replaced a shared `FormError` component that every form mounted above
+its fields.
 
 ## Testing
 

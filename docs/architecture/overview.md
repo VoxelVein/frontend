@@ -79,6 +79,7 @@ Signed-in pages, with the tab in the URL:
 | `/settings?tab=`      | Account settings  |
 | `/dashboard/projects` | Creator dashboard |
 | `/admin?tab=`         | Admin panel       |
+| `/admin/posts/*`      | Post editor       |
 
 Every route whose loader hits the database has a skeleton
 `pendingComponent`: the home page, all six browse pages, all six detail
@@ -86,7 +87,22 @@ pages, the blog, a single post, an author profile, and both dashboard
 project routes. The legal and auth routes load synchronously and need
 none. `/settings` and `/admin` render their panels immediately and
 skeleton inside each tab instead, so the tab list and its labels are never
-replaced. Long lists (admin users and sessions) are virtualized.
+replaced.
+
+`/admin` is a layout whose index route holds the panel, and `/blog` is a
+layout whose index route holds the listing. Both were parents that once
+rendered their own content instead of an `Outlet`, which meant their
+children never mounted — `/blog/$slug` swapped the URL and ran its loader
+while the parent kept painting the list. A parent route with children must
+render `<Outlet />`, so anything that should be a page belongs in an
+index route.
+
+The only virtualized lists left are the admin **sessions** panel (one
+account can hold many sessions) and the project **versions** list. The
+admin **users** and **posts** tabs are not virtualized: both are
+server-side searches capped at 50 rows, which render as a plain grid. An
+earlier users tab loaded a fixed first 100 accounts once and virtualized
+them, which made every account past that row unreachable.
 
 ## Request flow
 
@@ -99,11 +115,15 @@ replaced. Long lists (admin users and sessions) are virtualized.
 3. Better Auth handles sessions, social login, passkeys, and the admin
    API. The server config is in `src/lib/auth.ts`; the client is in
    `src/lib/auth-client.ts`; the HTTP surface is mounted at
-   `/api/auth/*` by `src/routes/api/auth/$.tsx`. Authorization is the
+   `/api/auth/*` by `src/routes/api/auth/$.tsx`. Authorization is a
    `user` / `moderator` / `admin` ladder in `src/lib/roles.ts` (pure, with
-   no server imports, so client components can use it), with session
-   guards in `src/lib/role-guards.ts` and the plugin's own statements in
-   `src/lib/permissions.ts`. See
+   no server imports, so client components can use it) expressed as
+   **capabilities**: each job names its own minimum in
+   `CAPABILITY_MINIMUM`, and call sites ask `can(role, "manageUsers")`
+   rather than naming a role. Session guards live in
+   `src/lib/role-guards.ts` (`requireCapability` for new endpoints) and
+   the plugin's own statements in `src/lib/permissions.ts`, with startup
+   assertions that keep the two from drifting apart. See
    [Admin Panel](../content/admin-panel.md#roles).
 4. Drizzle reads and writes PostgreSQL through the pool in
    `src/db/index.ts`.
