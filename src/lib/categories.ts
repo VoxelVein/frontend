@@ -87,3 +87,12 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
 
 export { MINECRAFT_CATEGORIES };
 export type { MinecraftCategory };
+
+/**
+ * The category icon for a browse path, or null if the path is not a category.
+ *
+ * Keyed off `href`, which the registry already stores, so a section's icon has
+ * exactly one home rather than a second copy per call site.
+ */
+export const categoryIconForPath = (path: string): Icon | null =>
+  MINECRAFT_CATEGORIES.find((category) => category.href === path)?.icon ?? null;
