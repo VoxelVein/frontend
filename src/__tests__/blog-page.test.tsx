@@ -8,6 +8,9 @@ import type { PostSummary } from "@/lib/posts";
 import { Route } from "@/routes/blog.index";
 
 const {
+  toastErrorMock,
+  toastSuccessMock,
+  toastDismissMock,
   listPostsMock,
   postSearchAvailableMock,
   searchPostsMock,
@@ -15,6 +18,9 @@ const {
 } = vi.hoisted(() => ({
   listPostsMock: vi.fn<(opts: { data: object }) => Promise<PostSummary[]>>(),
   postSearchAvailableMock: vi.fn<() => Promise<boolean>>(),
+  toastDismissMock: vi.fn<() => void>(),
+  toastErrorMock: vi.fn<(message: string) => void>(),
+  toastSuccessMock: vi.fn<(message: string) => void>(),
   searchPostsMock: vi.fn<
     (opts: { data: { query: string } }) => Promise<{
       estimatedTotalHits: number;
@@ -28,6 +34,15 @@ const {
       searchAvailable: boolean;
     }
   >(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback is a toast; stubbing Sonner is what makes the call assertable
+vi.mock("sonner", () => ({
+  toast: {
+    dismiss: toastDismissMock,
+    error: toastErrorMock,
+    success: toastSuccessMock,
+  },
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route reads server functions; string paths avoid strict factory type-checking against the server function types
@@ -152,10 +167,9 @@ describe("BlogPage", () => {
     render(<BlogPage />);
     typeQuery("veins");
 
+    // A failed search is action feedback, so a toast.
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Search is unavailable."
-      );
+      expect(toastErrorMock).toHaveBeenCalledWith("Search is unavailable.");
     });
 
     // A transient failure must not cost the reader the search field.

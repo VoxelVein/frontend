@@ -1,5 +1,6 @@
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import type { PostSummary } from "@/lib/posts";
 
@@ -169,6 +170,13 @@ export const usePostSearch = ({
     } catch (searchError) {
       if (requestIdRef.current === thisRequestId) {
         pendingRef.current = false;
+        // A failed search is action feedback, so a toast. It still lands in
+        // reducer state so a consumer can render it inline if it wants to.
+        toast.error(
+          searchError instanceof Error
+            ? searchError.message
+            : "Could not search posts."
+        );
         dispatch({
           error:
             searchError instanceof Error

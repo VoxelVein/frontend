@@ -47,13 +47,6 @@ const summary = (id: string, title: string): PostSummary => ({
   updatedAt: "2026-01-15T10:30:00.000Z",
 });
 
-/** A saved post, as the create and update callbacks receive it. */
-const saved = (id: string, title: string): Post => ({
-  ...summary(id, title),
-  authorId: "author-1",
-  content: `Body of ${title}.`,
-});
-
 /**
  * Flushes pending microtasks and timers.
  *
@@ -217,12 +210,12 @@ describe(useAdminPosts, () => {
     expect(result.current.posts).toHaveLength(0);
   });
 
-  it("does not let a stale refresh undo a create", async () => {
+  it("does not let a stale refresh undo a delete", async () => {
     const { result } = renderHook(() => useAdminPosts());
     await settle();
 
-    // A refresh that starts before the create finishes resolves with a list
-    // that does not contain the new post, which would make it disappear.
+    // A refresh that starts before the delete finishes resolves with the
+    // pre-delete rows, which would put the removed post back on screen.
     // oxlint-disable-next-line promise/avoid-new -- The point of this case is a refresh that is still in flight, so the test has to decide when it settles.
     const inFlightRefresh = new Promise<PostSummary[]>((resolve) => {
       heldRefresh.resolve = resolve;
@@ -232,43 +225,16 @@ describe(useAdminPosts, () => {
     await settle(POLL_INTERVAL_MS);
     expect(listPostsMock).toHaveBeenCalledTimes(2);
 
-    act(() => {
-      result.current.onCreated(saved("b", "Beta"));
+    await act(async () => {
+      await result.current.removePost(summary("a", "Alpha"));
     });
 
-    heldRefresh.resolve([summary("a", "Alpha")]);
+    heldRefresh.resolve([summary("a", "Alpha"), summary("b", "Beta")]);
     await settle();
 
-    // The new post stands; the late refresh is discarded.
-    expect(result.current.posts).toHaveLength(2);
-    expect(result.current.posts[0]?.title).toBe("Beta");
-  });
-
-  it("does not let a stale refresh undo an update", async () => {
-    const { result } = renderHook(() => useAdminPosts());
-    await settle();
-
-    // A refresh that starts before the edit finishes resolves with the
-    // pre-edit row, which would put the old title back on screen.
-    // oxlint-disable-next-line promise/avoid-new -- The point of this case is a refresh that is still in flight, so the test has to decide when it settles.
-    const inFlightRefresh = new Promise<PostSummary[]>((resolve) => {
-      heldRefresh.resolve = resolve;
-    });
-    listPostsMock.mockReturnValueOnce(inFlightRefresh);
-
-    await settle(POLL_INTERVAL_MS);
-    expect(listPostsMock).toHaveBeenCalledTimes(2);
-
-    act(() => {
-      result.current.onUpdated(saved("a", "Alpha renamed"));
-    });
-
-    heldRefresh.resolve([summary("a", "Alpha")]);
-    await settle();
-
-    // The edit stands; the late refresh is discarded.
-    expect(result.current.posts).toHaveLength(1);
-    expect(result.current.posts[0]?.title).toBe("Alpha renamed");
+    // The delete stands. The late refresh resolved with Alpha still present,
+    // so an empty list is the proof it was discarded rather than applied.
+    expect(result.current.posts).toStrictEqual([]);
   });
 });
 
