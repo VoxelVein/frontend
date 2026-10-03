@@ -175,8 +175,8 @@ export const GameVersionPicker = ({
 
       <p id={helpId} className="text-muted-foreground text-sm">
         {values.length === 0
-          ? "Type to search. Enter a line like 1.20 to add all of its releases."
-          : `${values.length} selected. Type to add more.`}
+          ? "Search to find a version. Enter a line like 1.20 to add every release in it."
+          : `${values.length} selected. Search to add more.`}
       </p>
       {error ? (
         <p id={errorId} role="alert" className="text-destructive text-sm">

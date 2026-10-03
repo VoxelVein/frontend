@@ -1,5 +1,4 @@
 import { useForm, useStore } from "@tanstack/react-form";
-import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { check, pipe, string } from "valibot";
 
@@ -13,6 +12,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { UsernameField } from "@/components/username-field";
+import { useRefreshSession } from "@/hooks/use-refresh-session";
 import {
   usernameSchema,
   useUsernameAvailability,
@@ -22,7 +22,7 @@ import { authClient } from "@/lib/auth-client";
 import { BIO_MAX_LENGTH, bioSchema, normalizeBio } from "@/lib/bio";
 import { errorMessage } from "@/lib/form-errors";
 import { formatDate } from "@/lib/format";
-import { getNextUsernameChange } from "@/lib/usernames";
+import { getNextUsernameChange, USERNAME_HINT } from "@/lib/usernames";
 
 interface SettingsProfileUser {
   name: string;
@@ -49,15 +49,6 @@ const USERNAME_CHANGE_NOTE =
   "After changing, you can't change it again for 14 days. Your old username keeps working for sign-in for 14 days.";
 
 const USERNAME_NOTE_ID = "profile-username-note";
-
-/** Tells the rest of the app (header, route loaders) the session changed. */
-const useRefreshSession = () => {
-  const router = useRouter();
-  return async () => {
-    authClient.$store.notify("$sessionSignal");
-    await router.invalidate();
-  };
-};
 
 const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   const refreshSession = useRefreshSession();
@@ -279,10 +270,7 @@ const UsernameCard = ({ user }: SettingsProfileProps) => {
                   onChange={(event) => field.handleChange(event.target.value)}
                   onBlur={field.handleBlur}
                   error={field.state.meta.errors[0]?.message}
-                  helperText={
-                    lockedMessage ??
-                    "3-30 characters. Letters, numbers, underscores, and periods."
-                  }
+                  helperText={lockedMessage ?? USERNAME_HINT}
                   availability={availability}
                   disabled={isLocked}
                   required

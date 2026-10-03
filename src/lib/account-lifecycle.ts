@@ -12,6 +12,8 @@ import {
   usernameHistory,
   users,
 } from "@/db/schema";
+import { formatDate } from "@/lib/format";
+import { PROTECTED_PROJECT_LABEL } from "@/lib/projects";
 import { deleteObjects } from "@/lib/storage";
 import { getProjectImageKeys } from "@/lib/storage-quota";
 import {
@@ -480,7 +482,9 @@ export const requestAccountDeletion = async ({
 
   const now = new Date();
   const purgeAt = new Date(now.getTime() + ACCOUNT_DELETION_GRACE_MS);
-  const purgeDate = purgeAt.toISOString().slice(0, 10);
+  // Readable in the notification body, not the raw ISO day this used to slice
+  // out: an admin reading "2026-10-16" mid-sentence had to parse it themselves.
+  const purgeDate = formatDate(purgeAt.toISOString());
   const who = username ? `@${username}` : "A user";
 
   await db.transaction(async (tx) => {
@@ -504,9 +508,9 @@ export const requestAccountDeletion = async ({
 
   await notifyAdmins(
     protectedProjects.map((project) => ({
-      message: `${who} requested account deletion. "${project.name}" is a protected project, so it is kept without an owner when the account is deleted on ${purgeDate}.`,
+      message: `${who} requested account deletion. "${project.name}" is a ${PROTECTED_PROJECT_LABEL.toLowerCase()}, so we will keep it without an owner when that account is deleted on ${purgeDate}.`,
       projectId: project.id,
-      title: `Protected project "${project.name}" is losing its owner`,
+      title: `${PROTECTED_PROJECT_LABEL} "${project.name}" is losing its owner`,
       type: "protected-project-orphaned",
       userId,
     }))

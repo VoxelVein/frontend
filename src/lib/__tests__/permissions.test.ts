@@ -167,6 +167,7 @@ describe("capability statements", () => {
         "manageNotifications",
         "managePosts",
         "manageProtectedProjects",
+        "manageReports",
         "manageSessions",
         "manageStorage",
         "manageUsers",
@@ -174,7 +175,7 @@ describe("capability statements", () => {
         "reviewProjects",
         "viewAdminPanel",
       ],
-      moderator: ["reviewProjects", "viewAdminPanel"],
+      moderator: ["manageReports", "reviewProjects", "viewAdminPanel"],
       user: [],
     } satisfies Record<Role, readonly Capability[]>;
 

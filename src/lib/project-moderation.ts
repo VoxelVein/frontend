@@ -276,7 +276,10 @@ export const approveReview = async (
     // A project whose owner deleted their account has nobody to tell.
     if (updated.ownerId) {
       await tx.insert(userNotifications).values({
-        message: `An admin approved "${updated.name}". It is now listed on the site and can be downloaded by anyone.`,
+        // Active voice, and it says what the creator gains rather than restating
+        // the status change: "It is now listed on the site" told the reader
+        // nothing they could not see for themselves a moment later.
+        message: `An admin approved "${updated.name}". Anyone can now find it on the site and download it.`,
         projectId,
         title: "Project approved",
         type: "project-approved",
@@ -324,7 +327,10 @@ export const rejectReview = async (
 
     if (updated.ownerId) {
       await tx.insert(userNotifications).values({
-        message: `An admin sent "${updated.name}" back to draft: ${trimmed}`,
+        // "Asked for changes", not "sent back to draft": the creator's publish
+        // panel already uses the plainer phrase for the same event, and the
+        // internal status name is not something a creator has to learn.
+        message: `An admin asked for changes to "${updated.name}": ${trimmed}`,
         projectId,
         title: "Project needs changes",
         type: "project-rejected",

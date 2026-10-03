@@ -18,6 +18,7 @@ import { MarkdownBody } from "@/components/markdown-body";
 import { ProjectGallery } from "@/components/projects/project-gallery";
 import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
+import { ReportDialog } from "@/components/reports/report-dialog";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +35,7 @@ import {
   formatServerAddress,
   PROJECT_TYPE_LABELS,
   PROJECT_TYPE_PATHS,
+  PROTECTED_PROJECT_LABEL,
 } from "@/lib/projects";
 import type {
   ProjectServerView,
@@ -94,9 +96,9 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
   if (versions.length === 0) {
     return (
       <EmptyState
-        description="Nothing is downloadable on this page yet. Published projects always have at least one version, so this is a transient state."
+        description="No downloads available yet. This project is still being set up — check back soon."
         icon={<IconVersions size={24} aria-hidden="true" />}
-        title="No versions have been uploaded yet"
+        title="No versions yet"
         variant="inline"
       />
     );
@@ -117,7 +119,7 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
               Compatibility
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
-              Published
+              Released
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
               Files
@@ -386,7 +388,7 @@ const ProtectionControl = ({
       Admin moderation
     </h2>
     <p id="protection-help" className="text-muted-foreground mt-1 text-sm">
-      Large projects are never deleted with their owner&apos;s account.
+      A protected project is kept when its owner deletes their account.
     </p>
     <div className="mt-3 flex flex-wrap items-center gap-3">
       <Button
@@ -398,7 +400,9 @@ const ProtectionControl = ({
         onClick={onToggle}
       >
         <IconShieldCheck size={16} aria-hidden="true" />
-        {isProtected ? "Unmark large project" : "Mark as large project"}
+        {isProtected
+          ? "Stop protecting this project"
+          : "Protect from owner deletion"}
       </Button>
       {saveError ? (
         <p role="alert" className="text-destructive text-sm">
@@ -472,7 +476,9 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
 
       {canProtect && project.pendingDeletion ? (
         <output className="border-border bg-muted text-foreground mt-4 block rounded-xl border px-4 py-3 text-sm">
-          Scheduled for deletion with its owner&apos;s account.
+          {/* Shown to an admin, not the owner, so this talks about "its owner"
+            rather than "your account". */}
+          Scheduled for deletion when its owner&apos;s account is.
         </output>
       ) : null}
 
@@ -508,7 +514,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
           }
         />
 
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-primary/80 border-primary/20 bg-primary/5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase">
               {formatCategory(project.category)}
@@ -516,7 +522,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
             {canProtect && isProtected ? (
               <span className={`${badgeClassName} gap-1`}>
                 <IconShieldCheck size={12} aria-hidden="true" />
-                Large project
+                {PROTECTED_PROJECT_LABEL}
               </span>
             ) : null}
           </div>
@@ -542,6 +548,24 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
             )}
           </p>
         </div>
+
+        {/* Placed in the header rather than buried in a menu: a member who can
+            see something wrong should not have to go looking for the control.
+            Hidden on a draft, because an unpublished project is visible only to
+            its owner and staff, and there is nothing for another member to
+            report. */}
+        {project.status === "published" ? (
+          <ReportDialog
+            projectId={project.id}
+            targetKind="project"
+            targetLabel={`this ${PROJECT_TYPE_LABELS[project.type].singular.toLowerCase()}`}
+            unavailableReason={
+              session?.user.id === project.ownerId
+                ? "This is your project."
+                : undefined
+            }
+          />
+        ) : null}
       </header>
 
       <p className="text-muted-foreground mt-6 text-base leading-7">

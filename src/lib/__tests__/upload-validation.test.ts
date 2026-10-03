@@ -45,12 +45,16 @@ describe(sanitizeFilename, () => {
     expect(sanitizeFilename("complementary.zip", "shader")).toBe(
       "complementary.zip"
     );
+    expect(sanitizeFilename("better-caves.zip", "datapack")).toBe(
+      "better-caves.zip"
+    );
   });
 
   it("rejects extensions another type uses", () => {
     expect(sanitizeFilename("mod.zip", "mod")).toBeNull();
     expect(sanitizeFilename("pack.jar", "resourcepack")).toBeNull();
     expect(sanitizeFilename("pack.mrpack", "shader")).toBeNull();
+    expect(sanitizeFilename("pack.jar", "datapack")).toBeNull();
     expect(sanitizeFilename("world.zip", "server")).toBeNull();
   });
 

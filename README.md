@@ -464,9 +464,14 @@ operator's name and address:
 * `/legal` legal notes (§ 5 DDG service-provider notice)
 * `/privacy` privacy policy
 * `/cookies` cookie policy
-* `/terms` terms of service
-* `/terms-of-use` terms of use
-* `/disclaimer` disclaimer
+* `/terms` terms of service — the single binding legal document
+* `/disclaimer` trademark and content-provenance notes, cross-referencing the
+  terms rather than restating them
+
+`/terms-of-use` redirects to `/terms`. It used to be a second, shorter set of
+terms with overlapping warranty and account rules, which left no single document
+a reader could point to as the operative one. The route is kept so existing
+links and bookmarks still resolve.
 
 All six share the renderer in
 [`src/components/legal/legal-page.tsx`](src/components/legal/legal-page.tsx)

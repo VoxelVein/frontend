@@ -16,6 +16,7 @@ export const ALLOWED_EXTENSIONS_BY_TYPE = {
   resourcepack: [".zip"],
   server: [],
   shader: [".zip"],
+  datapack: [".zip"],
 } as const satisfies Record<ProjectType, readonly string[]>;
 
 const CONTENT_TYPE_BY_EXTENSION = {

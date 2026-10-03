@@ -71,12 +71,26 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   };
 });
 
+/** Points the route's loader data at a given listing. */
+const withPosts = (posts: PostSummary[], searchAvailable = false) => {
+  listPostsMock.mockReset().mockResolvedValue(posts);
+  postSearchAvailableMock.mockReset().mockResolvedValue(searchAvailable);
+  useLoaderDataMock.mockReset().mockReturnValue({ posts, searchAvailable });
+};
+
+/** Presses one of the category filters. */
+const chooseCategory = (name: string | RegExp) => {
+  fireEvent.click(screen.getByRole("button", { name }));
+};
+
 const BlogPage = Route.options.component;
 if (!BlogPage) {
   throw new Error("BlogPage component not found");
 }
 
 const postSummary: PostSummary = {
+  authors: [],
+  category: null,
   createdAt: "2026-01-15T10:30:00.000Z",
   excerpt: null,
   id: "post-1",
@@ -88,6 +102,8 @@ const postSummary: PostSummary = {
 };
 
 const searchHit: PostSummary = {
+  authors: [],
+  category: null,
   createdAt: "2026-02-01T09:00:00.000Z",
   excerpt: null,
   id: "post-2",
@@ -199,5 +215,167 @@ describe("BlogPage", () => {
     render(<BlogPage />);
 
     expect(screen.getByText("No posts yet")).toBeInTheDocument();
+  });
+});
+
+describe("BlogPage category filter", () => {
+  const engineering: PostSummary = {
+    ...postSummary,
+    category: "engineering",
+    id: "post-eng",
+    title: "Shipping the API",
+  };
+  const security: PostSummary = {
+    ...postSummary,
+    category: "security",
+    id: "post-sec",
+    title: "Rotating a leaked key",
+  };
+  const uncategorised: PostSummary = {
+    ...postSummary,
+    category: null,
+    id: "post-none",
+    title: "Unfiled thoughts",
+  };
+
+  beforeEach(() => {
+    searchPostsMock.mockReset();
+    withPosts([engineering, security, uncategorised]);
+  });
+
+  it("offers a control only when there is a choice to make", () => {
+    // One category means the filter could only ever confirm what is already
+    // shown, so it is withheld rather than offered as a dead toggle.
+    withPosts([engineering, { ...uncategorised, category: "engineering" }]);
+    render(<BlogPage />);
+
+    expect(
+      screen.queryByRole("button", { name: /engineering/iu })
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers only the categories that have posts behind them", () => {
+    render(<BlogPage />);
+
+    expect(chooseCategory).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: /engineering/iu })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /security/iu })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /changelog/iu })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows every post until a category is chosen", () => {
+    render(<BlogPage />);
+
+    expect(screen.getByText("Shipping the API")).toBeInTheDocument();
+    expect(screen.getByText("Rotating a leaked key")).toBeInTheDocument();
+    expect(screen.getByText("Unfiled thoughts")).toBeInTheDocument();
+  });
+
+  it("narrows the listing to the chosen category", () => {
+    render(<BlogPage />);
+    chooseCategory(/engineering/iu);
+
+    expect(screen.getByText("Shipping the API")).toBeInTheDocument();
+    expect(screen.queryByText("Rotating a leaked key")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unfiled thoughts")).not.toBeInTheDocument();
+  });
+
+  it("marks the active category as pressed so the state is not visual only", () => {
+    render(<BlogPage />);
+    chooseCategory(/security/iu);
+
+    expect(screen.getByRole("button", { name: /security/iu })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(
+      screen.getByRole("button", { name: /engineering/iu })
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("names each category button with its count in words", () => {
+    withPosts([engineering, { ...engineering, id: "post-eng-2" }, security]);
+    render(<BlogPage />);
+
+    // Read off the children this would be "Engineering2": JSX drops the gap,
+    // which is CSS, so the announced name has to be stated.
+    expect(
+      screen.getByRole("button", { name: "Engineering, 2 posts" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Security, 1 post" })
+    ).toBeInTheDocument();
+  });
+
+  it("returns to the full listing from All", () => {
+    render(<BlogPage />);
+    chooseCategory(/engineering/iu);
+    chooseCategory(/^all$/iu);
+
+    expect(screen.getByText("Rotating a leaked key")).toBeInTheDocument();
+    expect(screen.getByText("Unfiled thoughts")).toBeInTheDocument();
+  });
+
+  it("announces the narrowed count, because the list changes in place", () => {
+    render(<BlogPage />);
+    chooseCategory(/engineering/iu);
+
+    // Filtering does not navigate, so without a live region the change would
+    // only ever be visible.
+    expect(screen.getByText("1 post")).toBeInTheDocument();
+  });
+
+  it("keeps a chosen category while the reader searches", async () => {
+    withPosts([engineering, security], true);
+    searchPostsMock.mockResolvedValue({
+      estimatedTotalHits: 1,
+      hits: [security],
+      query: "key",
+    });
+
+    render(<BlogPage />);
+    chooseCategory(/security/iu);
+    typeQuery("key");
+
+    await waitFor(() => {
+      expect(screen.getByText("Rotating a leaked key")).toBeInTheDocument();
+    });
+
+    // Both filters apply together: the reader asked for this category *and*
+    // this term, and dropping either would widen the result set.
+    expect(screen.getByRole("button", { name: /security/iu })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("says so when the two filters exclude everything rather than ignoring one", async () => {
+    withPosts([engineering, security], true);
+    searchPostsMock.mockResolvedValue({
+      estimatedTotalHits: 1,
+      hits: [security],
+      query: "key",
+    });
+
+    render(<BlogPage />);
+    chooseCategory(/engineering/iu);
+    typeQuery("key");
+
+    // Silently falling back to the unfiltered hits would put the reader in a
+    // security post they had just ruled out by asking for Engineering.
+    await waitFor(() => {
+      expect(screen.getByText("Nothing in this category")).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByText("No post matches both that category and your search.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Rotating a leaked key")).not.toBeInTheDocument();
   });
 });

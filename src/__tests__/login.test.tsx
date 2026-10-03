@@ -107,7 +107,7 @@ describe("LoginPage", () => {
 
     expect(screen.getByLabelText(IDENTIFIER_LABEL)).toBeTruthy();
     expect(screen.getByLabelText("Password")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Sign In" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeTruthy();
   });
 
   it("offers no username/email toggle to switch between", () => {
@@ -121,7 +121,7 @@ describe("LoginPage", () => {
   it("shows validation errors for empty fields", async () => {
     render(<LoginPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await expect(
       screen.findByText("Email or username is required.")
@@ -135,7 +135,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     fillCredentials("user@example");
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await expect(
       screen.findByText("Enter a valid email address.")
@@ -148,7 +148,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     fillCredentials("ab");
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await expect(
       screen.findByText("Username must be at least 3 characters.")
@@ -163,7 +163,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     fillValidCredentials();
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(signInEmail).toHaveBeenCalledWith({
@@ -182,7 +182,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     fillCredentials("alice");
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(signInUsername).toHaveBeenCalledWith({
@@ -201,7 +201,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     fillCredentials("  alice  ");
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(signInUsername).toHaveBeenCalledWith(
@@ -223,7 +223,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "wrong-password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     // Action feedback is a toast, which renders outside the form.
     await waitFor(() => {
@@ -242,7 +242,7 @@ describe("LoginPage", () => {
 
     render(<LoginPage />);
     fillValidCredentials();
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     // Action feedback is a toast, which renders outside the form.
     await waitFor(() => {
@@ -279,7 +279,7 @@ describe("LoginPage", () => {
       );
     });
     fillValidCredentials();
-    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(signInEmail).toHaveBeenCalledWith(

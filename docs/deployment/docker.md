@@ -200,9 +200,10 @@ renders both, alongside the § 5 DDG responsible-party details. That page
 cannot go live as-is. The email is the only real value.
 
 **The legal page dates are hardcoded.** Each of `/legal`, `/privacy`,
-`/terms`, `/terms-of-use`, `/disclaimer`, and `/cookies` passes its own
-`updated` date as a literal. Editing the text does not update the date,
-so there is nothing keeping the two in sync.
+`/terms`, `/disclaimer`, and `/cookies` passes its own `updated` date as a
+literal. Editing the text does not update the date, so there is nothing keeping
+the two in sync. (`/terms-of-use` no longer renders a page — it redirects to
+`/terms`.)
 
 **Cookie consent is recorded but not enforced.** The banner stores
 `accepted` or `declined` in `localStorage` under `voxelvein-cookie-consent`

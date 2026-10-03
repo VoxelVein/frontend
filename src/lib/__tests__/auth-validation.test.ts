@@ -6,6 +6,7 @@ import {
   validateProfileInput,
   validateSignupInput,
 } from "@/lib/auth-validation";
+import { USERNAME_PROBLEM_MESSAGES } from "@/lib/usernames";
 
 describe(validateLoginInput, () => {
   it("returns no errors for valid input", () => {
@@ -111,21 +112,24 @@ describe(validateProfileInput, () => {
     });
   });
 
+  // Asserted against the shared message table rather than literals: this
+  // module used to keep its own wording, which is how the profile form and the
+  // validator ended up disagreeing about the same rule.
   it("rejects a short username", () => {
     expect(validateProfileInput("Test User", "ab")).toStrictEqual({
-      username: "Username must be 3-30 characters.",
+      username: USERNAME_PROBLEM_MESSAGES["too-short"],
     });
   });
 
   it("rejects a long username", () => {
     expect(validateProfileInput("Test User", "a".repeat(31))).toStrictEqual({
-      username: "Username must be 3-30 characters.",
+      username: USERNAME_PROBLEM_MESSAGES["too-long"],
     });
   });
 
   it("rejects invalid username characters", () => {
     expect(validateProfileInput("Test User", "bad name!")).toStrictEqual({
-      username: "Use letters, numbers, underscores, or periods.",
+      username: USERNAME_PROBLEM_MESSAGES.invalid,
     });
   });
 });

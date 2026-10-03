@@ -1,14 +1,93 @@
 import {
+  array,
   boolean,
   check,
   nonEmpty,
+  nullable,
   object,
   optional,
+  picklist,
   pipe,
   string,
 } from "valibot";
 
+/**
+ * The sections a post can be filed under, in the order they are offered.
+ *
+ * The order is deliberate and is not alphabetical: it runs from what the
+ * engineering team writes most through to release notes, so the picker leads
+ * with the categories that actually get used. An alphabetical list would put
+ * Changelog first, which is the least interesting section on the site.
+ *
+ * This is the single source for the stored slug, the admin picker, and the
+ * breadcrumb, so a category can never be spelled one way in the form and
+ * another on the page. Adding one is a change here and nowhere else.
+ */
+export const POST_CATEGORIES = [
+  { label: "Engineering", value: "engineering" },
+  { label: "Community", value: "community" },
+  { label: "Company News", value: "company-news" },
+  { label: "Customers", value: "customers" },
+  { label: "Security", value: "security" },
+  { label: "Changelog", value: "changelog" },
+] as const;
+
+export type PostCategory = (typeof POST_CATEGORIES)[number]["value"];
+
+const POST_CATEGORY_VALUES = POST_CATEGORIES.map((category) => category.value);
+
+/**
+ * The label a category is shown under.
+ *
+ * A stored value the registry does not know falls back to the raw slug rather
+ * than rendering as blank, so a post written before a category was renamed stays
+ * readable instead of silently losing its breadcrumb.
+ */
+export const postCategoryLabel = (value: string | null): string | null => {
+  if (value === null) {
+    return null;
+  }
+
+  return (
+    POST_CATEGORIES.find((category) => category.value === value)?.label ?? value
+  );
+};
+
+/** One credited author of a post. */
+export interface PostAuthor {
+  id: string;
+  /** Null when the account has no avatar; the UI falls back to initials. */
+  image: string | null;
+  name: string;
+  /** Null when the account never set one, so no profile link is offered. */
+  username: string | null;
+}
+
+/**
+ * A staff account offered in the editor's author picker.
+ *
+ * A superset of `PostAuthor`, so the picker renders each candidate through the
+ * same component the byline uses and cannot drift from it.
+ */
+export interface SelectableAuthor extends PostAuthor {
+  /** Whether this is the account doing the editing. */
+  isCurrentUser: boolean;
+  role: string;
+}
+
+/**
+ * The byline as one line of text, e.g. "Hedi Zandi, Ben Sabic, Dima Voytenko".
+ *
+ * A plain comma join rather than `Intl.ListFormat`, which would insert an
+ * Oxford comma and read as a different list.
+ */
+export const formatAuthorNames = (authors: PostAuthor[]): string =>
+  authors.map((author) => author.name).join(", ");
+
 export interface PostSummary {
+  authors: PostAuthor[];
+  /** Null means uncategorised. See `POST_CATEGORIES`. */
+  category: string | null;
   createdAt: Date | string;
   excerpt: string | null;
   id: string;
@@ -20,11 +99,13 @@ export interface PostSummary {
 }
 
 export interface Post extends PostSummary {
-  authorId: string;
   content: string;
 }
 
 export interface PostInput {
+  /** Ordered; index 0 is the primary author. Staff-only, enforced server-side. */
+  authorIds: string[];
+  category?: PostCategory | null;
   content: string;
   excerpt?: string;
   published: boolean;
@@ -36,7 +117,7 @@ export const postTitleSchema = pipe(string(), nonEmpty("Title is required."));
 
 export const postSlugSchema = pipe(
   string(),
-  nonEmpty("Slug is required."),
+  nonEmpty("URL slug is required."),
   check(
     (value) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(value),
     "Use lowercase letters, numbers, and hyphens."
@@ -48,7 +129,11 @@ export const postContentSchema = pipe(
   nonEmpty("Content is required.")
 );
 
+export const postCategorySchema = picklist(POST_CATEGORY_VALUES);
+
 export const postInputSchema = object({
+  authorIds: array(string()),
+  category: optional(nullable(postCategorySchema)),
   content: postContentSchema,
   excerpt: optional(string()),
   published: boolean(),
@@ -57,6 +142,8 @@ export const postInputSchema = object({
 });
 
 export const postUpdateSchema = object({
+  authorIds: array(string()),
+  category: optional(nullable(postCategorySchema)),
   content: postContentSchema,
   excerpt: optional(string()),
   id: string(),

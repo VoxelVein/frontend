@@ -74,13 +74,13 @@ describe("SignupPage", () => {
     expect(screen.getByLabelText("Name")).toBeTruthy();
     expect(screen.getByLabelText("Email")).toBeTruthy();
     expect(screen.getByLabelText("Password")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Create Account" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Create account" })).toBeTruthy();
   });
 
   it("shows validation errors for empty fields", async () => {
     render(<SignupPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await expect(screen.findByText("Name is required.")).resolves.toBeTruthy();
     expect(screen.getByText("Email is required.")).toBeTruthy();
@@ -100,7 +100,7 @@ describe("SignupPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "short" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Create Account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await expect(
       screen.findByText("Password must be at least 8 characters.")
@@ -123,7 +123,7 @@ describe("SignupPage", () => {
       // oxlint-disable-next-line sonarjs/no-hardcoded-passwords -- Test fixture password
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Create Account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
       expect(signUpEmail).toHaveBeenCalledWith({
@@ -153,7 +153,7 @@ describe("SignupPage", () => {
       // oxlint-disable-next-line sonarjs/no-hardcoded-passwords -- Test fixture password
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Create Account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     // Action feedback is a toast, which renders outside the form.
     await waitFor(() => {

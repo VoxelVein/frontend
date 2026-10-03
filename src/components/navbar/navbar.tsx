@@ -20,7 +20,7 @@ const Navbar = () => {
     try {
       const { error } = await authClient.signOut();
       if (error) {
-        toast.error(error.message ?? "Could not sign out.", {
+        toast.error(error.message ?? "Could not sign you out.", {
           action: {
             label: "Try again",
             onClick: () => handleSignOut(),
@@ -29,7 +29,7 @@ const Navbar = () => {
         return;
       }
     } catch {
-      toast.error("Could not sign out.", {
+      toast.error("Could not sign you out.", {
         action: {
           label: "Try again",
           onClick: () => handleSignOut(),

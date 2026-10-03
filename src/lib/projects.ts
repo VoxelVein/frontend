@@ -26,12 +26,21 @@ import type { InferOutput } from "valibot";
 import { MINECRAFT_VERSION_MANIFEST } from "@/lib/minecraft-version-manifest";
 import type { ProjectImageView } from "@/lib/project-images";
 
+/**
+ * Every project type, in the order the browse sections appear.
+ *
+ * Adding one here means adding a matching key to each `Record<ProjectType, …>`
+ * below — the compiler will list every one it finds missing, so the registry
+ * cannot be extended halfway. The columns are `text` validated in app code, not
+ * database enums, so a new type needs no migration.
+ */
 export const PROJECT_TYPES = [
   "mod",
   "modpack",
   "plugin",
   "resourcepack",
   "shader",
+  "datapack",
   "server",
 ] as const;
 export type ProjectType = (typeof PROJECT_TYPES)[number];
@@ -109,6 +118,24 @@ export const SHADER_CATEGORIES = [
 ] as const;
 
 /**
+ * Datapack categories, named after what the pack actually changes.
+ *
+ * A datapack is JSON in `world/datapacks/<name>/` — dimensions, biomes, loot
+ * tables, advancements, recipes, enchantments, functions. So unlike the
+ * visual types there is no "pack format" axis to sort on, and the categories
+ * that matter are the game systems a pack touches. These are the six that
+ * recur across published packs.
+ */
+export const DATAPACK_CATEGORIES = [
+  "world-generation",
+  "progression",
+  "combat",
+  "commands",
+  "survival",
+  "utility",
+] as const;
+
+/**
  * Server gamemodes.
  *
  * `category` is a free-text column validated against this list in app code
@@ -177,12 +204,17 @@ export const CATEGORIES_BY_TYPE = {
   resourcepack: RESOURCE_PACK_CATEGORIES,
   server: SERVER_CATEGORIES,
   shader: SHADER_CATEGORIES,
+  datapack: DATAPACK_CATEGORIES,
 } as const satisfies Record<ProjectType, readonly string[]>;
 
 /**
  * What a version runs on: mod loaders, server platforms, or shader loaders.
- * Empty for types that need nothing (resource packs) or have no versions
- * (servers).
+ * Empty for types that need nothing (resource packs, datapacks) or have no
+ * versions (servers).
+ *
+ * A datapack is empty here because the game loads one from a world's own
+ * `datapacks` folder — there is no mod loader in the picture, so there is
+ * nothing for a player to pick.
  */
 export const LOADERS_BY_TYPE = {
   mod: MOD_LOADERS,
@@ -191,6 +223,7 @@ export const LOADERS_BY_TYPE = {
   resourcepack: [],
   server: [],
   shader: SHADER_LOADERS,
+  datapack: [],
 } as const satisfies Record<ProjectType, readonly string[]>;
 
 /** Singular and plural label for the loader field, per type. */
@@ -201,12 +234,18 @@ export const LOADER_LABELS = {
   resourcepack: { plural: "Loaders", singular: "Loader" },
   server: { plural: "Loaders", singular: "Loader" },
   shader: { plural: "Shader loaders", singular: "Shader loader" },
+  datapack: { plural: "Loaders", singular: "Loader" },
 } as const satisfies Record<ProjectType, { plural: string; singular: string }>;
 
 export const hasLoaders = (type: ProjectType): boolean =>
   LOADERS_BY_TYPE[type].length > 0;
 
-/** Servers are listings with an address; every other type ships files. */
+/**
+ * Whether a type ships versioned release files.
+ *
+ * Everything but a server does: a datapack has its own `pack_format`, so its
+ * releases are versioned exactly like a resource pack's.
+ */
 export const hasVersions = (type: ProjectType): boolean => type !== "server";
 
 export const PROJECT_TYPE_LABELS = {
@@ -216,6 +255,7 @@ export const PROJECT_TYPE_LABELS = {
   resourcepack: { plural: "Resource Packs", singular: "Resource Pack" },
   server: { plural: "Servers", singular: "Server" },
   shader: { plural: "Shaders", singular: "Shader" },
+  datapack: { plural: "Datapacks", singular: "Datapack" },
 } as const satisfies Record<ProjectType, { plural: string; singular: string }>;
 
 /** URL section each type's pages live under. */
@@ -226,6 +266,30 @@ export const PROJECT_TYPE_PATHS = {
   resourcepack: "/resource-packs",
   server: "/servers",
   shader: "/shaders",
+  datapack: "/datapacks",
+} as const satisfies Record<ProjectType, string>;
+
+/**
+ * The meta description for each type's browse page.
+ *
+ * Kept here rather than in the browser component so the type registry holds
+ * every per-type string, and so a test can check that adding a type also adds
+ * its page description without importing a React component.
+ */
+export const PROJECT_TYPE_DESCRIPTIONS = {
+  mod: "Discover performance, technology, adventure, and more. Search Minecraft mods.",
+  modpack:
+    "Play curated collections of mods, from lightweight packs to kitchen-sink adventures.",
+  plugin:
+    "Find administration, economy, protection, and minigame plugins for Minecraft servers.",
+  resourcepack:
+    "Change how Minecraft looks and sounds with textures, models, and audio packs.",
+  server:
+    "Find a Minecraft server to join, from survival and creative to minigames and modded worlds.",
+  shader:
+    "Add realistic lighting, shadows, and atmosphere to Minecraft with shader packs.",
+  datapack:
+    "Add dimensions, biomes, loot tables, and recipes to your world with datapacks.",
 } as const satisfies Record<ProjectType, string>;
 
 // Slugs appear in URLs: lowercase letters, digits, and single dashes.
@@ -233,6 +297,22 @@ export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 export const SLUG_MAX_LENGTH = 64;
 
 /** The shape search and trending both read for one published project. */
+/**
+ * The user-facing name for `projects.isProtected`.
+ *
+ * One term, defined once, because the flag was previously called a "large
+ * project" in the account-deletion flow and a "protected project" in the admin
+ * notification about the same event — two names for one thing, neither defined
+ * anywhere a user could read. "Protected" is also the honest word: it names
+ * exactly what happens (the project survives its owner's account) without
+ * implying a download threshold that nothing enforces.
+ *
+ * Upper-case for a sentence start or a heading; `.toLowerCase()` mid-sentence.
+ */
+export const PROTECTED_PROJECT_LABEL = "Protected project";
+
+export const PROTECTED_PROJECT_LABEL_PLURAL = "Protected projects";
+
 export interface ProjectDocument {
   author: string;
   /**
@@ -274,14 +354,26 @@ const MAX_TAGS = 8;
 const TAG_MAX_LENGTH = 24;
 const VERSION_NUMBER_MAX_LENGTH = 32;
 
+/**
+ * One phrasing for every character limit.
+ *
+ * Three different sentences were in use for the same fact: "Use at most 64
+ * characters." on some fields, "The description is too long." on others — with
+ * no number, so the user had to guess how much room was left — and "Tags are at
+ * most 24 characters.", which reads as though the whole list shared one budget
+ * rather than each tag having its own. Every limit is now the same sentence
+ * with the number in it.
+ */
+const maxChars = (limit: number): string => `Use at most ${limit} characters.`;
+
 // Version numbers go into storage keys and filenames: keep them simple.
 const VERSION_NUMBER_PATTERN = /^[0-9A-Za-z][0-9A-Za-z.+_-]*$/u;
 
 export const projectSlugSchema = pipe(
   string(),
   trim(),
-  nonEmpty("Slug is required."),
-  maxLength(SLUG_MAX_LENGTH, `Use at most ${SLUG_MAX_LENGTH} characters.`),
+  nonEmpty("URL slug is required."),
+  maxLength(SLUG_MAX_LENGTH, maxChars(SLUG_MAX_LENGTH)),
   regex(SLUG_PATTERN, "Use lowercase letters, numbers, and single hyphens.")
 );
 
@@ -289,22 +381,19 @@ const projectFieldsEntries = {
   category: pipe(string(), nonEmpty("Choose a category.")),
   description: pipe(
     string(),
-    maxLength(DESCRIPTION_MAX_LENGTH, "The description is too long.")
+    maxLength(DESCRIPTION_MAX_LENGTH, maxChars(DESCRIPTION_MAX_LENGTH))
   ),
   name: pipe(
     string(),
     trim(),
     nonEmpty("Name is required."),
-    maxLength(NAME_MAX_LENGTH, `Use at most ${NAME_MAX_LENGTH} characters.`)
+    maxLength(NAME_MAX_LENGTH, maxChars(NAME_MAX_LENGTH))
   ),
   summary: pipe(
     string(),
     trim(),
     nonEmpty("Summary is required."),
-    maxLength(
-      SUMMARY_MAX_LENGTH,
-      `Use at most ${SUMMARY_MAX_LENGTH} characters.`
-    )
+    maxLength(SUMMARY_MAX_LENGTH, maxChars(SUMMARY_MAX_LENGTH))
   ),
   tags: pipe(
     array(
@@ -312,9 +401,11 @@ const projectFieldsEntries = {
         string(),
         trim(),
         nonEmpty(),
+        // "Each tag" rather than "Tags": the limit is per entry, and the
+        // plural phrasing implied a shared budget for the whole list.
         maxLength(
           TAG_MAX_LENGTH,
-          `Tags are at most ${TAG_MAX_LENGTH} characters.`
+          `Each tag can be at most ${TAG_MAX_LENGTH} characters.`
         )
       )
     ),
@@ -363,20 +454,24 @@ const gameVersionsSchema = pipe(
 export const versionInputSchema = object({
   changelog: pipe(
     string(),
-    maxLength(CHANGELOG_MAX_LENGTH, "The changelog is too long.")
+    maxLength(CHANGELOG_MAX_LENGTH, maxChars(CHANGELOG_MAX_LENGTH))
   ),
   channel: picklist(RELEASE_CHANNELS),
   gameVersions: gameVersionsSchema,
   // Types without loaders send an empty list; createVersion checks the
   // choice against the project's type.
   loaders: array(string()),
-  name: pipe(string(), trim(), maxLength(NAME_MAX_LENGTH)),
+  name: pipe(
+    string(),
+    trim(),
+    maxLength(NAME_MAX_LENGTH, maxChars(NAME_MAX_LENGTH))
+  ),
   projectId: pipe(string(), uuid()),
   versionNumber: pipe(
     string(),
     trim(),
     nonEmpty("Version number is required."),
-    maxLength(VERSION_NUMBER_MAX_LENGTH),
+    maxLength(VERSION_NUMBER_MAX_LENGTH, maxChars(VERSION_NUMBER_MAX_LENGTH)),
     regex(
       VERSION_NUMBER_PATTERN,
       "Use letters, numbers, dots, dashes, underscores, and plus signs."
@@ -399,12 +494,20 @@ const IPV6_PATTERN = /^[0-9a-f]{0,4}(?::[0-9a-f]{0,4}){2,7}$/iu;
 export const isServerAddress = (value: string): boolean =>
   HOSTNAME_PATTERN.test(value) || IPV6_PATTERN.test(value);
 
-/** Project types a server can ask or suggest players to install. */
+/**
+ * Project types a server can ask or suggest players to install.
+ *
+ * Plugins are excluded because the server itself runs them — a player never
+ * installs one. Datapacks are included because the common case is the reverse:
+ * the server ships a datapack for its own world (custom dimensions, loot
+ * tables) and needs every connecting client to have it too.
+ */
 export const SERVER_LINK_TYPES = [
   "modpack",
   "mod",
   "shader",
   "resourcepack",
+  "datapack",
 ] as const;
 export type ServerLinkType = (typeof SERVER_LINK_TYPES)[number];
 
@@ -459,7 +562,7 @@ export const serverInputSchema = object({
     trim(),
     toLowerCase(),
     nonEmpty("Server address is required."),
-    maxLength(ADDRESS_MAX_LENGTH),
+    maxLength(ADDRESS_MAX_LENGTH, maxChars(ADDRESS_MAX_LENGTH)),
     check(
       isServerAddress,
       "Enter a hostname or IP address without a port, like play.example.net."
@@ -468,7 +571,10 @@ export const serverInputSchema = object({
   gameVersions: gameVersionsSchema,
   links: pipe(
     array(serverLinkSchema),
-    maxLength(MAX_SERVER_LINKS, `Link at most ${MAX_SERVER_LINKS} projects.`),
+    // The count is of links, not of the projects they point at: the old
+    // message said "Link at most 5 projects", which read as an instruction to
+    // link rather than as a limit, and named the wrong thing to count.
+    maxLength(MAX_SERVER_LINKS, `Add at most ${MAX_SERVER_LINKS} links.`),
     check(
       (links) =>
         new Set(links.map((link) => link.projectId)).size === links.length,
@@ -561,7 +667,7 @@ export interface ProjectView {
   /** The project's icon, or null when it has none. */
   icon: ProjectImageView | null;
   id: string;
-  /** Admin-marked large project, kept when its owner deletes their account. */
+  /** Admin-marked protected project, kept when its owner deletes their account. */
   isProtected: boolean;
   name: string;
   /** Null when the owner deleted their account and the project was kept. */

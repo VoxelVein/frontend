@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProjectBrowser } from "@/components/projects/project-browser";
+import { formatCategory } from "@/lib/format";
 import type { ProjectBrowserData } from "@/lib/project-browser-loader";
 import type {
   ProjectSearchParams,
@@ -56,9 +57,9 @@ const ModsPage = () => <ProjectBrowser type="mod" {...useLoaderDataMock()} />;
 // accepts the selection.
 const selectCategory = async (value: string) => {
   fireEvent.click(screen.getByLabelText("Category"));
-  const option = await screen.findByText(
-    value.charAt(0).toUpperCase() + value.slice(1)
-  );
+  // The real formatter, not a local re-implementation: the option label is
+  // rendered by `formatCategory`, so a copy of its logic here would drift.
+  const option = await screen.findByText(formatCategory(value));
   fireEvent.pointerDown(option);
   fireEvent.click(option);
 };
@@ -271,7 +272,7 @@ describe(ProjectBrowser, () => {
       event: "mod.created",
     });
 
-    await expect(screen.findByText(/New mod added/u)).resolves.toBeTruthy();
+    await expect(screen.findByText(/New project added/u)).resolves.toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Refresh results" }));
 

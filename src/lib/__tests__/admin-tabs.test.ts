@@ -36,10 +36,12 @@ describe(resolveAdminTab, () => {
     }
   });
 
-  it("gives an admin everything and a moderator only Reviews", () => {
+  it("gives an admin everything and a moderator only the moderation queues", () => {
     expect(visibleTabsFor("admin")).toHaveLength(ADMIN_TABS.length);
+    // Reviews and Reports are the two a moderator holds; nothing else.
     expect(visibleTabsFor("moderator").map((t) => t.value)).toStrictEqual([
       "reviews",
+      "reports",
     ]);
   });
 });

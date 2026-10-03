@@ -24,6 +24,11 @@ vi.mock("@/lib/projects.functions", () => ({
   setProjectProtected: setProjectProtectedMock,
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The report dialog posts to a server function; this suite is about the moderation controls, so the call is stubbed rather than exercised
+vi.mock("@/lib/reports.functions", () => ({
+  createReport: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The session comes from Better Auth over the network; a stub picks the signed-in role per test
 vi.mock("@/lib/auth-client", () => ({
   authClient: { useSession: useSessionMock },
@@ -69,20 +74,24 @@ describe(ProjectDetail, () => {
     useSessionMock.mockReset();
   });
 
-  it("hides the large-project control from non-admins", () => {
+  it("hides the protection control from non-admins", () => {
     signInAs("user");
     render(<ProjectDetail project={{ ...PROJECT, isProtected: true }} />);
 
-    expect(screen.queryByRole("button", { name: /large project/u })).toBeNull();
-    expect(screen.queryByText("Large project")).toBeNull();
+    expect(
+      screen.queryByRole("button", {
+        name: /protecting this project|Protect from owner deletion/u,
+      })
+    ).toBeNull();
+    expect(screen.queryByText("Protected project")).toBeNull();
   });
 
-  it("lets an admin mark a project as large", async () => {
+  it("lets an admin protect a project from owner deletion", async () => {
     signInAs("admin");
     render(<ProjectDetail project={PROJECT} />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Mark as large project" })
+      screen.getByRole("button", { name: "Protect from owner deletion" })
     );
 
     await waitFor(() => {
@@ -91,9 +100,9 @@ describe(ProjectDetail, () => {
       });
     });
     await expect(
-      screen.findByRole("button", { name: "Unmark large project" })
+      screen.findByRole("button", { name: "Stop protecting this project" })
     ).resolves.toBeTruthy();
-    expect(screen.getByText("Large project")).toBeTruthy();
+    expect(screen.getByText("Protected project")).toBeTruthy();
   });
 
   it("tells admins when the project is scheduled for deletion", () => {
@@ -101,7 +110,7 @@ describe(ProjectDetail, () => {
     render(<ProjectDetail project={{ ...PROJECT, pendingDeletion: true }} />);
 
     expect(
-      screen.getByText("Scheduled for deletion with its owner's account.")
+      screen.getByText("Scheduled for deletion when its owner's account is.")
     ).toBeTruthy();
   });
 });

@@ -1,14 +1,13 @@
 # Projects and Files
 
-Mods, modpacks, plugins, resource packs, shaders, and servers are
-**projects**. All six types are fully implemented: each has a browse page,
-a detail page, a creator form, and search filters. Every type except
-servers has **versions**, and each
-version has one or more uploaded **files**. Servers are listings with
-join details instead. Metadata lives in Postgres,
-files live in [object storage](../storage/object-storage.md), and
-published projects are [searchable](../search/postgres.md) straight
-from Postgres.
+Mods, modpacks, plugins, resource packs, shaders, datapacks, and servers
+are **projects**. All seven types are fully implemented: each has a browse
+page, a detail page, a creator form, and search filters. Every type except
+servers has **versions**, and each version has one or more uploaded
+**files**. Servers are listings with join details instead. Metadata lives in
+Postgres, files live in
+[object storage](../storage/object-storage.md), and published projects are
+[searchable](../search/postgres.md) straight from Postgres.
 
 ## Pages
 
@@ -21,9 +20,10 @@ Each type has a browse page and a detail page:
 | `plugin`       | `/plugins`        | `/plugins/$slug`        |
 | `resourcepack` | `/resource-packs` | `/resource-packs/$slug` |
 | `shader`       | `/shaders`        | `/shaders/$slug`        |
+| `datapack`     | `/datapacks`      | `/datapacks/$slug`      |
 | `server`       | `/servers`        | `/servers/$slug`        |
 
-All six browse pages render the same `ProjectBrowser` component with a
+All seven browse pages render the same `ProjectBrowser` component with a
 different type, so filters, sorting, pagination, the SSE live banner, and
 the empty/error states behave identically everywhere. The category list
 lives in one place, `src/lib/categories.ts`, and drives the navbar menu,
@@ -73,7 +73,7 @@ lookup keyed by user-influenced data should follow the same rule.
 Tables are defined in `src/db/schema.ts`:
 
 * `projects`: `slug` (unique, used in URLs), `type` (`mod`, `modpack`,
-  `plugin`, `resourcepack`, `shader`, or `server`), `status` (`draft`,
+  `plugin`, `resourcepack`, `shader`, `datapack`, or `server`), `status` (`draft`,
   `pending`, `published`, or `removed`), owner, category, tags, summary,
   Markdown description, and a download counter.
 * `project_versions`: version number (unique per project), release
@@ -84,8 +84,9 @@ Tables are defined in `src/db/schema.ts`:
 * `project_servers` (migration `drizzle/0015_add_project_servers.sql`):
   one row per server project with its address, optional port (empty means
   25565), and supported game versions.
-* `project_server_links`: mods, modpacks, shaders, and resource packs a
-  server links to, in any mix, each marked required or recommended. A
+* `project_server_links`: mods, modpacks, shaders, resource packs, and
+  datapacks a server links to, in any mix, each marked required or
+  recommended. Plugins are excluded — the server itself runs those. A
   server links to at most `MAX_SERVER_LINKS` (20) projects.
 * `project_images` (migration
   `drizzle/0016_add_project_images.sql`): a project's icon and gallery
@@ -110,10 +111,13 @@ URL paths per type) are in `src/lib/projects.ts`.
 | `plugin`       | `/plugins`        | `.jar`              |
 | `resourcepack` | `/resource-packs` | `.zip`              |
 | `shader`       | `/shaders`        | `.zip`              |
+| `datapack`     | `/datapacks`      | `.zip`              |
 | `server`       | `/servers`        | None                |
 
 Mods and modpacks list mod loaders, plugins list server platforms, and
-shaders list shader loaders. Resource packs and servers have none.
+shaders list shader loaders. Resource packs, datapacks, and servers have
+none: a datapack has no loader because the game reads it straight out of
+the world's `datapacks` folder.
 
 ## Game versions
 
@@ -393,6 +397,7 @@ required first: both seeders attach their content to the first admin.
 
 ## Related
 
+* [Reports](reports.md) — reporting a project or an account
 * [Object Storage](../storage/object-storage.md)
 * [Search](../search/postgres.md)
 * [Discovery](discovery.md) — how trending picks the home page five

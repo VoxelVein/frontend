@@ -41,7 +41,7 @@ const NewProjectPage = () => {
           />
         </div>
       ) : (
-        <VerificationNotice />
+        <VerificationNotice email={session.user.email} />
       )}
     </div>
   );

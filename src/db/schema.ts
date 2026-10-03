@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
   index,
   integer,
   pgTable,
@@ -161,9 +162,26 @@ export const passkeys = pgTable(
 export const posts = pgTable(
   "posts",
   {
-    authorId: text("author_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    /**
+     * @deprecated Superseded by the `postAuthors` table; nothing reads it.
+     *
+     * Kept only because a migration drops columns automatically at merge time
+     * while the previous version is still serving, and the previous version
+     * still inserts into this column. Dropping it in the same deploy would fail
+     * those inserts. Once this version is live everywhere, the follow-up is a
+     * single migration: drop `author_id` and `posts_authorId_idx`, then delete
+     * this field.
+     *
+     * Nullable rather than NOT NULL so this version can insert without naming
+     * it — the original constraint would have rejected every new post.
+     */
+    authorId: text("author_id"),
+    // One of `POST_CATEGORIES` in src/lib/posts.ts, or null for "none". Stored as
+    // text rather than a Postgres enum so a category can be added without a
+    // migration, matching how `projects.category` works. Null rather than the
+    // string "none" so "uncategorised" stays distinguishable from a category
+    // whose label happens to be a real word.
+    category: text("category"),
     content: text("content").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     excerpt: text("excerpt"),
@@ -185,6 +203,39 @@ export const posts = pgTable(
     // A single-column index on `published` cannot supply the sort, so Postgres
     // sorts every matching row. This composite index serves both.
     index("posts_published_createdAt_idx").on(table.published, table.createdAt),
+    // Groups the blog index by category.
+    index("posts_category_idx").on(table.category),
+  ]
+);
+
+/**
+ * Who a post is written by, in display order.
+ *
+ * A post can credit several people — an engineering write-up usually has more
+ * than one author — so authorship cannot live on `posts` itself. This is the
+ * only record of a post's authors: an earlier `posts.authorId` column was
+ * backfilled into here and dropped, because two places naming the author can
+ * disagree about who the author is.
+ *
+ * `position` is explicit rather than relying on insertion order, because a
+ * re-save that rewrites the rows must not reshuffle the byline. 0 is the
+ * primary author and is what the post card falls back to for its avatar.
+ */
+export const postAuthors = pgTable(
+  "post_authors",
+  {
+    postId: text("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    position: integer("position").default(0).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.postId, table.userId] }),
+    // Reads a user's posts, and the profile lists them.
+    index("post_authors_userId_idx").on(table.userId),
   ]
 );
 
@@ -197,7 +248,7 @@ export const projects = pgTable(
     downloads: integer("downloads").default(0).notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
-    // Admin-marked large project: never deleted along with its owner's
+    // Admin-marked protected project: never deleted along with its owner's
     // account, it is kept without an owner instead.
     isProtected: boolean("is_protected").default(false).notNull(),
     // Null once the owner's account is deleted and the project was kept.
@@ -427,6 +478,69 @@ export const userImages = pgTable(
   ]
 );
 
+/**
+ * Something a member reported, for a moderator to triage.
+ *
+ * One table for both target kinds rather than two, so the inbox, the ordering,
+ * and the resolution flow are written once. `targetKind` says which of the two
+ * nullable id columns is the subject, and a CHECK constraint enforces that
+ * exactly one is set — an application-level "only set one" rule would be a
+ * request the next write path forgets.
+ *
+ * The reporter is `set null` on delete rather than cascading: a report is
+ * evidence about the target and stays useful after the person who filed it
+ * leaves. Their identity goes with the account, which is what account deletion
+ * promises, so the row survives as an unattributed report.
+ *
+ * A report about a project cascades instead, because there is nothing left to
+ * moderate once the project is gone.
+ */
+export const reports = pgTable(
+  "reports",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    // Free text the reporter adds. Optional, because the reason alone is often
+    // enough and requiring prose would push people towards leaving nothing.
+    details: text("details"),
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Cascades: a report about a deleted project has nothing left to act on.
+    projectId: uuid("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    reason: text("reason").notNull(),
+    // Null once the reporter's account is deleted; see the note above.
+    reporterId: text("reporter_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    // Null once the account is deleted, but the report itself stays.
+    reportedUserId: text("reported_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    /** Null while the report is awaiting a decision. */
+    resolvedAt: timestamp("resolved_at"),
+    /** Null while awaiting a decision, or when dismissed without review. */
+    resolvedById: text("resolved_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    status: text("status").default("open").notNull(),
+    targetKind: text("target_kind").notNull(),
+  },
+  (table) => [
+    // The inbox: open reports, newest first.
+    index("reports_status_createdAt_idx").on(table.status, table.createdAt),
+    // "Has this account already reported this?" and the abuse trail per reporter.
+    index("reports_reporterId_idx").on(table.reporterId),
+    check(
+      "reports_one_target_check",
+      sql`(
+        (${table.targetKind} = 'project' AND ${table.projectId} IS NOT NULL AND ${table.reportedUserId} IS NULL)
+        OR
+        (${table.targetKind} = 'user' AND ${table.reportedUserId} IS NOT NULL AND ${table.projectId} IS NULL)
+      )`
+    ),
+  ]
+);
+
 export const projectImages = pgTable(
   "project_images",
   {
@@ -459,7 +573,7 @@ export const projectImages = pgTable(
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   passkeys: many(passkeys),
-  posts: many(posts),
+  postAuthors: many(postAuthors),
   projects: many(projects),
   sessions: many(sessions),
   usernameHistory: many(usernameHistory),
@@ -496,9 +610,17 @@ export const passkeysRelations = relations(passkeys, ({ one }) => ({
   }),
 }));
 
-export const postsRelations = relations(posts, ({ one }) => ({
-  author: one(users, {
-    fields: [posts.authorId],
+export const postsRelations = relations(posts, ({ many }) => ({
+  authors: many(postAuthors),
+}));
+
+export const postAuthorsRelations = relations(postAuthors, ({ one }) => ({
+  post: one(posts, {
+    fields: [postAuthors.postId],
+    references: [posts.id],
+  }),
+  user: one(users, {
+    fields: [postAuthors.userId],
     references: [users.id],
   }),
 }));

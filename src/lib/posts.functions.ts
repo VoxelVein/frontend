@@ -1,14 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { parse } from "valibot";
 
 import { db } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, users } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { readTrustProxy } from "@/lib/client-key";
+import {
+  AUTHOR_ROLES,
+  requireAuthorIds,
+  resolveAuthors,
+  writeAuthors,
+} from "@/lib/post-authors";
 import { postInputSchema, postUpdateSchema, resolvePreview } from "@/lib/posts";
-import type { Post, PostInput, PostSummary } from "@/lib/posts";
+import type {
+  Post,
+  PostInput,
+  PostSummary,
+  SelectableAuthor,
+} from "@/lib/posts";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import {
   consumeServerLimit,
@@ -92,6 +103,7 @@ const resolvePublished = (
 const POST_NOT_FOUND = "Post not found.";
 
 const postSummaryColumns = {
+  category: posts.category,
   content: posts.content,
   createdAt: posts.createdAt,
   excerpt: posts.excerpt,
@@ -103,6 +115,7 @@ const postSummaryColumns = {
 } as const;
 
 interface PostSummaryRow {
+  category: string | null;
   content: string;
   createdAt: Date;
   excerpt: string | null;
@@ -113,15 +126,35 @@ interface PostSummaryRow {
   updatedAt: Date;
 }
 
-/**
- * Derives each teaser from the stored body. The body itself is dropped here and
- * never leaves the server.
+/** A full post row, as `select()` returns it. */
+type PostRow = typeof posts.$inferSelect;
+
+/** Derives each teaser from the stored body and attaches the byline.
+ *
+ * The body itself is dropped here and never leaves the server.
  */
-const toPostSummaries = (rows: PostSummaryRow[]): PostSummary[] =>
-  rows.map(({ content, ...row }) => ({
+const toPostSummaries = async (
+  rows: PostSummaryRow[]
+): Promise<PostSummary[]> => {
+  const authorsByPost = await resolveAuthors(rows.map((row) => row.id));
+
+  return rows.map(({ content, ...row }) => ({
     ...row,
+    authors: authorsByPost.get(row.id) ?? [],
     preview: resolvePreview({ content, excerpt: row.excerpt }),
   }));
+};
+
+/** A single post row plus its teaser and byline. */
+const withAuthors = async (post: PostRow): Promise<Post> => {
+  const authorsByPost = await resolveAuthors([post.id]);
+
+  return {
+    ...post,
+    authors: authorsByPost.get(post.id) ?? [],
+    preview: resolvePreview(post),
+  };
+};
 
 export const listPosts = createServerFn({ method: "GET" })
   .validator((data: { includeUnpublished?: boolean }) => data)
@@ -138,7 +171,7 @@ export const listPosts = createServerFn({ method: "GET" })
       .where(includeUnpublished ? undefined : eq(posts.published, true))
       .orderBy(desc(posts.createdAt));
 
-    return toPostSummaries(rows);
+    return await toPostSummaries(rows);
   });
 
 /** How many posts the home page shows. */
@@ -239,7 +272,7 @@ export const getPost = createServerFn({ method: "GET" })
       }
     }
 
-    return { ...post, preview: resolvePreview(post) };
+    return withAuthors(post);
   });
 
 export const getPostById = createServerFn({ method: "GET" })
@@ -255,8 +288,45 @@ export const getPostById = createServerFn({ method: "GET" })
 
     const [post] = rows;
 
-    return post ? { ...post, preview: resolvePreview(post) } : null;
+    return post ? withAuthors(post) : null;
   });
+
+/**
+ * Everyone a post may credit, for the editor's author picker.
+ *
+ * Returned in the same shape the published byline renders, so the editor shows
+ * an author exactly as the post page will — including which accounts have no
+ * avatar and therefore fall back to initials.
+ *
+ * Staff-only, because the picker is part of writing a post. Ordered by name so
+ * the list cannot reorder under the cursor while an editor is reaching for it.
+ *
+ * The caller is flagged so the editor can pre-select them for a new post and
+ * label them in the list, rather than making a new post start with no byline and
+ * relying on the author to remember to add themselves.
+ */
+export const listSelectableAuthors = createServerFn({
+  method: "GET",
+}).handler(async (): Promise<SelectableAuthor[]> => {
+  const session = await getStaffSession();
+
+  const rows = await db
+    .select({
+      id: users.id,
+      image: users.image,
+      name: users.name,
+      role: users.role,
+      username: users.username,
+    })
+    .from(users)
+    .where(inArray(users.role, AUTHOR_ROLES))
+    .orderBy(asc(users.name));
+
+  return rows.map((row) => ({
+    ...row,
+    isCurrentUser: row.id === session.user.id,
+  }));
+});
 
 export const createPost = createServerFn({ method: "POST" })
   .validator((data: PostInput) => parse(postInputSchema, data))
@@ -264,10 +334,14 @@ export const createPost = createServerFn({ method: "POST" })
     const session = await getStaffSession();
     await requireWriteQuota(session.user.id);
 
+    // Validated before the insert so a bad byline cannot leave a post row with
+    // no authors behind it.
+    const authorIds = await requireAuthorIds(data.authorIds);
+
     const [row] = await db
       .insert(posts)
       .values({
-        authorId: session.user.id,
+        category: data.category ?? null,
         content: data.content,
         excerpt: data.excerpt ?? null,
         // A moderator's post is always a draft, whatever the form sent.
@@ -277,7 +351,9 @@ export const createPost = createServerFn({ method: "POST" })
       })
       .returning();
 
-    return { ...row, preview: resolvePreview(row) };
+    await writeAuthors(row.id, authorIds);
+
+    return withAuthors(row);
   });
 
 /**
@@ -309,6 +385,7 @@ export const updatePost = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<Post> => {
     const session = await getStaffSession();
     await requireWriteQuota(session.user.id);
+    const authorIds = await requireAuthorIds(data.authorIds);
 
     // A moderator editing a draft stays a draft, and cannot unpublish an
     // already-published post either, since that would be a publish decision.
@@ -319,6 +396,7 @@ export const updatePost = createServerFn({ method: "POST" })
     const [row] = await db
       .update(posts)
       .set({
+        category: data.category ?? null,
         content: data.content,
         excerpt: data.excerpt ?? null,
         published,
@@ -332,7 +410,9 @@ export const updatePost = createServerFn({ method: "POST" })
       throw new Error(POST_NOT_FOUND);
     }
 
-    return { ...row, preview: resolvePreview(row) };
+    await writeAuthors(row.id, authorIds);
+
+    return withAuthors(row);
   });
 
 export const deletePost = createServerFn({ method: "POST" })

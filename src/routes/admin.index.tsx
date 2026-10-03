@@ -11,6 +11,7 @@ import { object, optional, parse, picklist } from "valibot";
 import { AdminAccountDeletions } from "@/components/admin/admin-account-deletions";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { AdminPosts } from "@/components/admin/admin-posts";
+import { AdminReports } from "@/components/admin/admin-reports";
 import { AdminReviews } from "@/components/admin/admin-reviews";
 import { AdminSessions } from "@/components/admin/admin-sessions";
 import { AdminStorage } from "@/components/admin/admin-storage";
@@ -25,6 +26,7 @@ import {
   visibleTabsFor,
 } from "@/lib/admin-tabs";
 import { countPendingReviews } from "@/lib/project-moderation.functions";
+import { countOpenReports } from "@/lib/reports.functions";
 
 const adminSearchSchema = object({
   tab: optional(
@@ -32,6 +34,7 @@ const adminSearchSchema = object({
       "deletions",
       "notifications",
       "posts",
+      "reports",
       "reviews",
       "sessions",
       "storage",
@@ -44,16 +47,19 @@ type AdminTab = NonNullable<
   ReturnType<typeof parse<typeof adminSearchSchema>>["tab"]
 >;
 
-/** Two tabs carry a count badge; the rest are plain text. */
+/** Three tabs carry a count badge; the rest are plain text. */
 const tabLabel = (
   tab: AdminTab,
-  counts: { pending: number; unread: number }
+  counts: { open: number; pending: number; unread: number }
 ): ReactNode => {
   if (tab === "notifications") {
     return <NotificationsTabLabel unread={counts.unread} />;
   }
   if (tab === "reviews") {
     return <ReviewsTabLabel pending={counts.pending} />;
+  }
+  if (tab === "reports") {
+    return <ReportsTabLabel open={counts.open} />;
   }
   return ADMIN_TABS.find((entry) => entry.value === tab)?.label ?? tab;
 };
@@ -64,6 +70,17 @@ const fetchUnreadCount = async (): Promise<number | null> => {
     return await countUnreadAdminNotifications();
   } catch {
     // The badge is a convenience; the Notifications tab reports load errors.
+    return null;
+  }
+};
+
+/** Reports awaiting a decision, or null when it could not be read. */
+const fetchOpenReportCount = async (): Promise<number | null> => {
+  try {
+    return await countOpenReports();
+  } catch {
+    // Same reasoning as the other badges: this tab reports load errors, so a
+    // failed count must not break the page.
     return null;
   }
 };
@@ -120,6 +137,10 @@ const ReviewsTabLabel = ({ pending }: { pending: number }) => (
   <CountBadge count={pending} noun="Reviews" srSuffix="pending" />
 );
 
+const ReportsTabLabel = ({ open }: { open: number }) => (
+  <CountBadge count={open} noun="Reports" srSuffix="open" />
+);
+
 const AdminPage = () => {
   const navigate = useNavigate();
 
@@ -139,6 +160,7 @@ const AdminPage = () => {
   const { tab = "users" } = useSearch({ from: "/admin/" });
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingReviews, setPendingReviews] = useState(0);
+  const [openReports, setOpenReports] = useState(0);
 
   // A tab is hidden rather than disabled, so a moderator never sees a control
   // that would fail. Falls back to the first tab they *can* see, so a
@@ -154,12 +176,15 @@ const AdminPage = () => {
     const loadOnMount = async () => {
       // Only the badges this role can actually see are fetched; the others
       // would 403 and the count is a convenience either way.
-      const [unread, pending] = await Promise.all([
+      const [unread, pending, open] = await Promise.all([
         canSeeTab("notifications", role)
           ? fetchUnreadCount()
           : Promise.resolve(null),
         canSeeTab("reviews", role)
           ? fetchPendingReviewCount()
+          : Promise.resolve(null),
+        canSeeTab("reports", role)
+          ? fetchOpenReportCount()
           : Promise.resolve(null),
       ]);
       if (!isCurrent) {
@@ -170,6 +195,9 @@ const AdminPage = () => {
       }
       if (pending !== null) {
         setPendingReviews(pending);
+      }
+      if (open !== null) {
+        setOpenReports(open);
       }
     };
     void loadOnMount();
@@ -189,6 +217,13 @@ const AdminPage = () => {
     const pending = await fetchPendingReviewCount();
     if (pending !== null) {
       setPendingReviews(pending);
+    }
+  };
+
+  const refreshOpenReports = async () => {
+    const open = await fetchOpenReportCount();
+    if (open !== null) {
+      setOpenReports(open);
     }
   };
 
@@ -214,6 +249,7 @@ const AdminPage = () => {
           {visibleTabs.map((entry) => (
             <TabsTrigger key={entry.value} value={entry.value}>
               {tabLabel(entry.value, {
+                open: openReports,
                 pending: pendingReviews,
                 unread: unreadCount,
               })}
@@ -233,6 +269,9 @@ const AdminPage = () => {
             {entry.value === "deletions" ? <AdminAccountDeletions /> : null}
             {entry.value === "reviews" ? (
               <AdminReviews onDecided={refreshPendingReviews} />
+            ) : null}
+            {entry.value === "reports" ? (
+              <AdminReports onResolved={refreshOpenReports} />
             ) : null}
           </TabsContent>
         ))}

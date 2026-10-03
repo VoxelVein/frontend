@@ -10,8 +10,10 @@ import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/empty-state";
 import { MarkdownBody } from "@/components/markdown-body";
 import { ProjectCard } from "@/components/projects/project-card";
+import { ReportDialog } from "@/components/reports/report-dialog";
 import { StatCard } from "@/components/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 import { formatCount, formatDate } from "@/lib/format";
 import { toPreview } from "@/lib/posts";
 import { PROJECT_TYPE_LABELS, PROJECT_TYPE_PATHS } from "@/lib/projects";
@@ -135,6 +137,12 @@ const ProfileRoute = () => {
   const profile = useLoaderData({ from: "/u/$username" });
   const [selectedType, setSelectedType] = useState<ProjectType | null>(null);
 
+  // Compared on the normalised username, which is what a profile URL is keyed
+  // on, so casing cannot make someone look like a stranger to themselves. The
+  // session is already in the cache — the navbar reads it on every page.
+  const { data: session } = authClient.useSession();
+  const isOwnProfile = session?.user.username === profile.username;
+
   const { counts, totalDownloads, typeCounts, visible } = useMemo(() => {
     const nextCounts = {
       mod: 0,
@@ -143,6 +151,7 @@ const ProfileRoute = () => {
       resourcepack: 0,
       server: 0,
       shader: 0,
+      datapack: 0,
     } satisfies Record<ProjectType, number>;
     const nextTypeCounts: Partial<Record<ProjectType, number>> = {};
 
@@ -182,7 +191,7 @@ const ProfileRoute = () => {
         <div className="flex items-start gap-4 sm:gap-5">
           <ProfileAvatar image={profile.image} name={profile.displayUsername} />
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="text-foreground text-2xl font-bold tracking-tight text-balance sm:text-3xl">
               {profile.displayUsername}
             </h1>
@@ -203,6 +212,17 @@ const ProfileRoute = () => {
               <span>Joined {formatDate(profile.joinedAt)}</span>
             </p>
           </div>
+
+          {/* Reporting yourself is refused server-side too; hiding the control
+              here means nobody is offered an action that always fails. */}
+          <ReportDialog
+            reportedUsername={profile.username}
+            targetKind="user"
+            targetLabel={`@${profile.displayUsername}`}
+            unavailableReason={
+              isOwnProfile ? "This is your profile." : undefined
+            }
+          />
         </div>
 
         {profile.bio ? (

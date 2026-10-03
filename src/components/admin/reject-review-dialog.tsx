@@ -65,7 +65,12 @@ export const RejectReviewDialog = ({
       toast.success(`${review.name} was sent back to draft.`);
       close();
     } catch (submitError) {
-      setError(errorMessage(submitError, "Could not send the project back."));
+      setError(
+        errorMessage(
+          submitError,
+          "Could not send this project back to draft. Try again."
+        )
+      );
     }
     setIsSubmitting(false);
   };

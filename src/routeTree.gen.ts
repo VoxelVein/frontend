@@ -28,6 +28,8 @@ import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DatapacksIndexRouteImport } from './routes/datapacks.index'
+import { Route as DatapacksSlugRouteImport } from './routes/datapacks.$slug'
 import { Route as ModpacksIndexRouteImport } from './routes/modpacks.index'
 import { Route as ModpacksSlugRouteImport } from './routes/modpacks.$slug'
 import { Route as ModsIndexRouteImport } from './routes/mods.index'
@@ -49,6 +51,7 @@ import { Route as ApiImageImageIdRouteImport } from './routes/api/image.$imageId
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard.projects.index'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard.projects.$projectId'
 import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard.projects.new'
+import { Route as DatapacksSlugGalleryRouteImport } from './routes/datapacks.$slug.gallery'
 import { Route as ModpacksSlugGalleryRouteImport } from './routes/modpacks.$slug.gallery'
 import { Route as ModsSlugGalleryRouteImport } from './routes/mods.$slug.gallery'
 import { Route as PluginsSlugGalleryRouteImport } from './routes/plugins.$slug.gallery'
@@ -156,6 +159,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DatapacksIndexRoute = DatapacksIndexRouteImport.update({
+  id: '/datapacks/',
+  path: '/datapacks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DatapacksSlugRoute = DatapacksSlugRouteImport.update({
+  id: '/datapacks/$slug',
+  path: '/datapacks/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModpacksIndexRoute = ModpacksIndexRouteImport.update({
   id: '/modpacks/',
   path: '/modpacks/',
@@ -262,6 +275,11 @@ const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
   path: '/projects/new',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DatapacksSlugGalleryRoute = DatapacksSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => DatapacksSlugRoute,
+} as any)
 const ModpacksSlugGalleryRoute = ModpacksSlugGalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
@@ -339,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
   '/plugins/$slug': typeof PluginsSlugRouteWithChildren
@@ -349,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/datapacks/': typeof DatapacksIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
   '/plugins/': typeof PluginsIndexRoute
@@ -362,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/datapacks/$slug/gallery': typeof DatapacksSlugGalleryRoute
   '/modpacks/$slug/gallery': typeof ModpacksSlugGalleryRoute
   '/mods/$slug/gallery': typeof ModsSlugGalleryRoute
   '/plugins/$slug/gallery': typeof PluginsSlugGalleryRoute
@@ -389,6 +410,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
   '/plugins/$slug': typeof PluginsSlugRouteWithChildren
@@ -399,6 +421,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/datapacks': typeof DatapacksIndexRoute
   '/modpacks': typeof ModpacksIndexRoute
   '/mods': typeof ModsIndexRoute
   '/plugins': typeof PluginsIndexRoute
@@ -412,6 +435,7 @@ export interface FileRoutesByTo {
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/datapacks/$slug/gallery': typeof DatapacksSlugGalleryRoute
   '/modpacks/$slug/gallery': typeof ModpacksSlugGalleryRoute
   '/mods/$slug/gallery': typeof ModsSlugGalleryRoute
   '/plugins/$slug/gallery': typeof PluginsSlugGalleryRoute
@@ -443,6 +467,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
   '/plugins/$slug': typeof PluginsSlugRouteWithChildren
@@ -453,6 +478,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/datapacks/': typeof DatapacksIndexRoute
   '/modpacks/': typeof ModpacksIndexRoute
   '/mods/': typeof ModsIndexRoute
   '/plugins/': typeof PluginsIndexRoute
@@ -466,6 +492,7 @@ export interface FileRoutesById {
   '/api/image/$imageId': typeof ApiImageImageIdRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/datapacks/$slug/gallery': typeof DatapacksSlugGalleryRoute
   '/modpacks/$slug/gallery': typeof ModpacksSlugGalleryRoute
   '/mods/$slug/gallery': typeof ModsSlugGalleryRoute
   '/plugins/$slug/gallery': typeof PluginsSlugGalleryRoute
@@ -498,6 +525,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
@@ -508,6 +536,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/dashboard/'
+    | '/datapacks/'
     | '/modpacks/'
     | '/mods/'
     | '/plugins/'
@@ -521,6 +550,7 @@ export interface FileRouteTypes {
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/datapacks/$slug/gallery'
     | '/modpacks/$slug/gallery'
     | '/mods/$slug/gallery'
     | '/plugins/$slug/gallery'
@@ -548,6 +578,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
@@ -558,6 +589,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/dashboard'
+    | '/datapacks'
     | '/modpacks'
     | '/mods'
     | '/plugins'
@@ -571,6 +603,7 @@ export interface FileRouteTypes {
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/datapacks/$slug/gallery'
     | '/modpacks/$slug/gallery'
     | '/mods/$slug/gallery'
     | '/plugins/$slug/gallery'
@@ -601,6 +634,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
     | '/plugins/$slug'
@@ -611,6 +645,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/dashboard/'
+    | '/datapacks/'
     | '/modpacks/'
     | '/mods/'
     | '/plugins/'
@@ -624,6 +659,7 @@ export interface FileRouteTypes {
     | '/api/image/$imageId'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/datapacks/$slug/gallery'
     | '/modpacks/$slug/gallery'
     | '/mods/$slug/gallery'
     | '/plugins/$slug/gallery'
@@ -653,6 +689,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TermsOfUseRoute: typeof TermsOfUseRoute
   WelcomeRoute: typeof WelcomeRoute
+  DatapacksSlugRoute: typeof DatapacksSlugRouteWithChildren
   ModpacksSlugRoute: typeof ModpacksSlugRouteWithChildren
   ModsSlugRoute: typeof ModsSlugRouteWithChildren
   PluginsSlugRoute: typeof PluginsSlugRouteWithChildren
@@ -660,6 +697,7 @@ export interface RootRouteChildren {
   ServersSlugRoute: typeof ServersSlugRouteWithChildren
   ShadersSlugRoute: typeof ShadersSlugRouteWithChildren
   UUsernameRoute: typeof UUsernameRoute
+  DatapacksIndexRoute: typeof DatapacksIndexRoute
   ModpacksIndexRoute: typeof ModpacksIndexRoute
   ModsIndexRoute: typeof ModsIndexRoute
   PluginsIndexRoute: typeof PluginsIndexRoute
@@ -810,6 +848,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/datapacks/': {
+      id: '/datapacks/'
+      path: '/datapacks'
+      fullPath: '/datapacks/'
+      preLoaderRoute: typeof DatapacksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/datapacks/$slug': {
+      id: '/datapacks/$slug'
+      path: '/datapacks/$slug'
+      fullPath: '/datapacks/$slug'
+      preLoaderRoute: typeof DatapacksSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/modpacks/': {
       id: '/modpacks/'
       path: '/modpacks'
@@ -957,6 +1009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsNewRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/datapacks/$slug/gallery': {
+      id: '/datapacks/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/datapacks/$slug/gallery'
+      preLoaderRoute: typeof DatapacksSlugGalleryRouteImport
+      parentRoute: typeof DatapacksSlugRoute
+    }
     '/modpacks/$slug/gallery': {
       id: '/modpacks/$slug/gallery'
       path: '/gallery'
@@ -1093,6 +1152,18 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface DatapacksSlugRouteChildren {
+  DatapacksSlugGalleryRoute: typeof DatapacksSlugGalleryRoute
+}
+
+const DatapacksSlugRouteChildren: DatapacksSlugRouteChildren = {
+  DatapacksSlugGalleryRoute: DatapacksSlugGalleryRoute,
+}
+
+const DatapacksSlugRouteWithChildren = DatapacksSlugRoute._addFileChildren(
+  DatapacksSlugRouteChildren,
+)
+
 interface ModpacksSlugRouteChildren {
   ModpacksSlugGalleryRoute: typeof ModpacksSlugGalleryRoute
 }
@@ -1194,6 +1265,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TermsOfUseRoute: TermsOfUseRoute,
   WelcomeRoute: WelcomeRoute,
+  DatapacksSlugRoute: DatapacksSlugRouteWithChildren,
   ModpacksSlugRoute: ModpacksSlugRouteWithChildren,
   ModsSlugRoute: ModsSlugRouteWithChildren,
   PluginsSlugRoute: PluginsSlugRouteWithChildren,
@@ -1201,6 +1273,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServersSlugRoute: ServersSlugRouteWithChildren,
   ShadersSlugRoute: ShadersSlugRouteWithChildren,
   UUsernameRoute: UUsernameRoute,
+  DatapacksIndexRoute: DatapacksIndexRoute,
   ModpacksIndexRoute: ModpacksIndexRoute,
   ModsIndexRoute: ModsIndexRoute,
   PluginsIndexRoute: PluginsIndexRoute,

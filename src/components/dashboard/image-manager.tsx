@@ -182,7 +182,12 @@ const ImageManager = (props: ImageManagerProps) => {
           PNG, JPEG, WebP, or GIF, up to {formatMegabytes(IMAGE_MAX_BYTES)}.
           Larger images are shrunk in your browser before uploading, so the
           full-size original is never stored.
-          {!isIcon && atLimit ? ` Limit reached (${GALLERY_MAX_COUNT}).` : ""}
+          {/* Not "Limit reached (12)." — the bare number meant nothing next to
+              "PNG, JPEG, WebP…", and a disabled upload button with no stated
+              reason is the part users write in about. */}
+          {!isIcon && atLimit
+            ? ` You have all ${GALLERY_MAX_COUNT} gallery images. Remove one to add another.`
+            : ""}
         </span>
       </div>
     </div>

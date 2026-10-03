@@ -51,7 +51,14 @@ describe(formatDate, () => {
 describe(formatCategory, () => {
   it("title-cases a stored slug", () => {
     expect(formatCategory("skyblock")).toBe("Skyblock");
-    expect(formatCategory("resource-pack")).toBe("Resource pack");
+  });
+
+  it("capitalises every word of a multi-word slug", () => {
+    // Capitalising only the leading character rendered "Kitchen sink" and
+    // "World management", both of which are real categories.
+    expect(formatCategory("kitchen-sink")).toBe("Kitchen Sink");
+    expect(formatCategory("world-management")).toBe("World Management");
+    expect(formatCategory("world-generation")).toBe("World Generation");
   });
 
   it("uses the spelling the community uses for acronyms", () => {
@@ -73,6 +80,6 @@ describe(formatCategory, () => {
   });
 
   it("still renders a slug this build no longer lists", () => {
-    expect(formatCategory("removed-gamemode")).toBe("Removed gamemode");
+    expect(formatCategory("removed-gamemode")).toBe("Removed Gamemode");
   });
 });

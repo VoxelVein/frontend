@@ -2,7 +2,7 @@
 
 `/admin` is the whole back office: user management, account recovery,
 blog posts, storage usage, the notification inbox, and the publishing
-review queue. One panel, seven URL-driven tabs.
+review queue. One panel, eight URL-driven tabs.
 
 ## Routes
 
@@ -52,7 +52,7 @@ The tab comes from `?tab=`, validated with a Valibot `picklist`,
 defaulting to `users`:
 
 ```text
-/admin?tab=users|sessions|posts|storage|notifications|deletions|reviews
+/admin?tab=users|sessions|posts|storage|notifications|deletions|reviews|reports
 ```
 
 Better Auth's admin plugin provides the underlying primitives
@@ -95,16 +95,22 @@ ladder lacks a compile error rather than a grant to nobody.
 : Own projects only. No capabilities, no panel.
 
 **`moderator`** (rank 1)
-: `reviewProjects` and `viewAdminPanel`, and **nothing else**.
+: `reviewProjects`, `manageReports`, and `viewAdminPanel`, and
+  **nothing else**.
 
 **`admin`** (rank 2)
-: All eleven capabilities.
+: All twelve capabilities.
 
 A moderator's reach is deliberately narrow: they open the panel and work
-the review queue. Account and session handling is admin-only, so a
-moderator cannot list, ban, or delete an account — **including an
-admin's**. They also cannot read or write blog posts; `managePosts` is
-admin-only.
+the two moderation queues — Reviews and Reports. Account and session
+handling is admin-only, so a moderator cannot list, ban, or delete an
+account — **including an admin's**. They also cannot read or write blog
+posts; `managePosts` is admin-only.
+
+`manageReports` is deliberately its own capability rather than a fold-in
+to `manageUsers`. Resolving a report is triage; banning the account it
+concerns is a far heavier action that only an admin can take, and
+grouping the two would let a moderator reach the second by accident.
 
 If you are working from an older guide that gave moderators the account
 and post controls, that changed when the role was narrowed to these two
@@ -207,17 +213,18 @@ the first one they can.
 
 `resolveAdminTab` is total: it returns a real tab even for a role that
 can see none. That is not defensive padding. The panel used to index
-`visibleTabs[0]` for the fallback, and a moderator whose only tab is
-Reviews — or a session that has not resolved yet and therefore reads as
-`user` — made that `undefined.value` and crashed the panel. The policy is
-extracted to its own module so it can be tested without rendering it.
+`visibleTabs[0]` for the fallback, and a moderator whose tabs were
+Reviews alone — or a session that has not resolved yet and therefore
+reads as `user` — made that `undefined.value` and crashed the panel.
+The policy is extracted to its own module so it can be tested without
+rendering it.
 
-The Notifications and Reviews tabs carry unread and pending counts. Both
-are fetched client-side after mount and fail soft to `null`, because a
-badge must never be the reason the page fails to render — the tab itself
-is where the real error is reported. A failed count therefore renders as
-`0` until the panel loads. Only the badges a staff member's role can see
-are fetched, since the others would 403.
+The Notifications, Reviews, and Reports tabs carry unread, pending, and
+open counts. All are fetched client-side after mount and fail soft to
+`null`, because a badge must never be the reason the page fails to render
+— the tab itself is where the real error is reported. A failed count
+therefore renders as `0` until the panel loads. Only the badges a staff
+member's role can see are fetched, since the others would 403.
 
 ### Users
 
@@ -329,6 +336,9 @@ This replaced a shared `FormError` component that every form mounted
 above its fields.
 
 ## Related
+
+* [Reports](reports.md) — the Reports tab and what it
+  queues
 
 * [Projects and Files](projects.md)
 * [Blog](blog.md)

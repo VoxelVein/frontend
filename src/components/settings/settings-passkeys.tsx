@@ -60,7 +60,7 @@ const SettingsPasskeys = () => {
     setIsAdding(false);
 
     if (error) {
-      toast.error(error.message ?? "Could not add passkey.");
+      toast.error(error.message ?? "Could not add the passkey.");
       return;
     }
 
@@ -81,7 +81,7 @@ const SettingsPasskeys = () => {
     setPendingRemovalId(null);
 
     if (error) {
-      toast.error(error.message ?? "Could not remove passkey.");
+      toast.error(error.message ?? "Could not remove the passkey.");
       return;
     }
 
@@ -99,7 +99,8 @@ const SettingsPasskeys = () => {
             Passkeys
           </h2>
           <CardDescription>
-            Sign in securely with a passkey on this device.
+            Sign in with your fingerprint, face, or device PIN instead of a
+            password.
           </CardDescription>
         </CardHeader>
 
@@ -107,7 +108,9 @@ const SettingsPasskeys = () => {
           {listError ? (
             <Alert variant="destructive" className="mt-4">
               <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-                <span>{listError.message ?? "Could not load passkeys."}</span>
+                <span>
+                  {listError.message ?? "Could not load your passkeys."}
+                </span>
                 <Button
                   type="button"
                   variant="outline"
@@ -152,7 +155,7 @@ const SettingsPasskeys = () => {
                   Adding…
                 </>
               ) : (
-                "Add Passkey"
+                "Add passkey"
               )}
             </Button>
           </form>
@@ -195,8 +198,10 @@ const SettingsPasskeys = () => {
                         {passkey.name ?? "Passkey"}
                       </p>
                       <p className="text-muted-foreground truncate text-xs">
-                        {isSynced ? "Synced passkey" : "Device-bound passkey"} ·
-                        Added {formatDate(passkey.createdAt)}
+                        {isSynced
+                          ? "Synced across your devices"
+                          : "This device only"}{" "}
+                        · Added {formatDate(passkey.createdAt)}
                       </p>
                     </div>
 

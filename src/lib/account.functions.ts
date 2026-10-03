@@ -14,7 +14,7 @@ import {
 } from "valibot";
 
 import { db } from "@/db";
-import { accounts } from "@/db/schema";
+import { accounts, users } from "@/db/schema";
 import {
   AccountError,
   changeUsername as changeUsernameFor,
@@ -30,7 +30,10 @@ import type {
   UsernameCheck,
 } from "@/lib/account-lifecycle";
 import { auth } from "@/lib/auth";
+import { parseAvatarUrl } from "@/lib/avatar-url";
 import type { Session } from "@/lib/project-access";
+import { deleteObjects } from "@/lib/storage";
+import { removeAvatar } from "@/lib/storage-quota";
 import { normalizeUsername, USERNAME_MAX_LENGTH } from "@/lib/usernames";
 
 /** How recently the user must have signed in to delete their account. */
@@ -201,6 +204,55 @@ export const changeUsername = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<string> => {
     const session = await requireSession();
     return changeUsernameFor(session.user.id, data.username);
+  });
+
+// ---------------------------------------------------------------------------
+// Profile picture
+// ---------------------------------------------------------------------------
+
+const setAvatarUrlSchema = object({ url: string() });
+
+/**
+ * Points the account's profile picture at an external image.
+ *
+ * Writes `users.image` rather than a new column. That column is already the one
+ * every avatar surface reads, and Better Auth's `overrideUserInfoOnSignIn`
+ * defaults to false, so a later Google or GitHub sign-in will not overwrite the
+ * choice — which is the whole reason a second column was not needed.
+ *
+ * An empty field clears the picture, so the field can unset what it set.
+ *
+ * Setting an external URL supersedes any uploaded avatar, so the stored object
+ * and its `user_images` row are dropped here. Leaving them would charge the
+ * account storage quota for an object nothing references, and the only way to
+ * reclaim it would be the Remove button — which would also discard the URL the
+ * user just chose.
+ *
+ * Validation is `parseAvatarUrl` rather than a valibot schema so that the
+ * boundary deciding what gets stored can report the specific reason — a schema
+ * that only knows valid or not would collapse "that is not https" and "remove
+ * the password from that URL" into one message.
+ */
+export const setAvatarUrl = createServerFn({ method: "POST" })
+  .validator((data: { url: string }) => parse(setAvatarUrlSchema, data))
+  .handler(async ({ data }): Promise<void> => {
+    const session = await requireSession();
+    const parsed = parseAvatarUrl(data.url);
+    if (!parsed.ok) {
+      throw new AccountError(parsed.error);
+    }
+
+    await db
+      .update(users)
+      .set({ image: parsed.url })
+      .where(eq(users.id, session.user.id));
+
+    if (parsed.url !== null) {
+      const storageKey = await removeAvatar(session.user.id);
+      if (storageKey) {
+        await deleteObjects([storageKey]).catch(() => null);
+      }
+    }
   });
 
 // ---------------------------------------------------------------------------

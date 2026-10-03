@@ -135,7 +135,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
 
     if (loadError) {
       dispatch({
-        error: loadError.message ?? "Could not load sessions.",
+        error: loadError.message ?? "Could not load your signed-in devices.",
         type: "LOAD_ERROR",
       });
       return;
@@ -155,7 +155,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
       // A revoke is action feedback, so a toast. The *load* failure stays
       // inline: it has a retry button and leaves the list empty, which a
       // transient toast cannot convey.
-      toast.error(revokeError.message ?? "Could not revoke session.");
+      toast.error(revokeError.message ?? "Could not sign out that device.");
       return;
     }
 
@@ -168,7 +168,9 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
     setIsRevokingOther(false);
 
     if (revokeError) {
-      toast.error(revokeError.message ?? "Could not revoke other sessions.");
+      toast.error(
+        revokeError.message ?? "Could not sign out your other devices."
+      );
       return;
     }
 
@@ -193,8 +195,8 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
     content = (
       <EmptyState
         variant="inline"
-        title="No active sessions"
-        description="Devices signed in to your account will appear here."
+        title="No signed-in devices"
+        description="Any device you sign in from shows up here."
         icon={<IconDeviceDesktop size={20} aria-hidden="true" />}
       />
     );
@@ -242,7 +244,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
                   className="min-h-11 shrink-0"
                   onClick={() => handleRevoke(session.token)}
                 >
-                  Revoke
+                  Sign out
                 </Button>
               )}
             </li>
@@ -260,9 +262,12 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
             id="settings-sessions-heading"
             className="text-foreground text-lg font-semibold"
           >
-            Sessions
+            Signed-in devices
           </h2>
-          <CardDescription>Devices signed in to your account.</CardDescription>
+          <CardDescription>
+            Every device currently signed in to your account. Signing a device
+            out here ends that sign-in everywhere, not just in this browser.
+          </CardDescription>
           <CardAction>
             {sessions.length > 1 ? (
               <Button
@@ -279,7 +284,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
                     Signing out…
                   </>
                 ) : (
-                  "Sign Out Other Sessions"
+                  "Sign out other devices"
                 )}
               </Button>
             ) : null}

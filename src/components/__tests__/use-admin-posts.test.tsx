@@ -37,6 +37,8 @@ vi.mock("@/lib/posts.functions", () => ({
 const POLL_INTERVAL_MS = 15_000;
 
 const summary = (id: string, title: string): PostSummary => ({
+  authors: [],
+  category: null,
   createdAt: "2026-01-15T10:30:00.000Z",
   excerpt: null,
   id,
@@ -96,6 +98,8 @@ interface HeldRefresh {
 const heldRefresh: HeldRefresh = { resolve: () => {} };
 
 const draftHit: PostSummary = {
+  authors: [],
+  category: null,
   createdAt: "2026-02-01T09:00:00.000Z",
   excerpt: null,
   id: "draft-1",

@@ -164,7 +164,10 @@ const LoginPage = () => {
                 // current-password in password managers.
                 type="text"
                 autoComplete="username"
-                placeholder="you@example.com"
+                // Not "you@example.com": the label and the validator both accept
+                // a username, and a placeholder showing only an address led
+                // people to conclude their handle would not work here.
+                placeholder="you@example.com or your username"
                 helperText="Use your email address or username."
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
@@ -217,7 +220,7 @@ const LoginPage = () => {
                 Signing in…
               </>
             ) : (
-              "Sign In"
+              "Sign in"
             )}
           </Button>
         </form>

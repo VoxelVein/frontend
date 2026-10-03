@@ -14,6 +14,7 @@ import { confirmUsername, suggestUsername } from "@/lib/account.functions";
 import { authClient } from "@/lib/auth-client";
 import { getSession } from "@/lib/auth.functions";
 import { getSafeRedirect } from "@/lib/safe-redirect";
+import { USERNAME_HINT } from "@/lib/usernames";
 
 const DEFAULT_DESTINATION = "/dashboard";
 
@@ -103,7 +104,7 @@ const WelcomePage = () => {
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}
                 error={field.state.meta.errors[0]?.message}
-                helperText="3-30 characters. Letters, numbers, underscores, and periods."
+                helperText={USERNAME_HINT}
                 availability={availability}
                 required
               />

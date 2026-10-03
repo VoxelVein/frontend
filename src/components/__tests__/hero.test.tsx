@@ -3,6 +3,7 @@ import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Hero } from "@/components/hero";
+import { categoryLabelSentence } from "@/lib/categories";
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Router context is unavailable in unit tests; string path avoids strict factory type-checking against the router module
 vi.mock("@tanstack/react-router", async (importOriginal) => {
@@ -22,8 +23,14 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   };
 });
 
-const BROWSE_MODS = /browse mods/iu;
-const HEADING = /discover the best mods, plugins/iu;
+const BROWSE_PROJECTS = /browse projects/iu;
+// Built from the registry so the assertion tracks the category list instead of
+// freezing a copy of it — the old literal silently went stale when a category
+// was added or reordered.
+const HEADING = new RegExp(
+  `discover the best ${categoryLabelSentence()}`,
+  "iu"
+);
 
 describe(Hero, () => {
   // jsdom has no matchMedia; the headline animation checks reduced motion.
@@ -63,9 +70,9 @@ describe(Hero, () => {
 
     render(<Hero />);
 
-    const link = screen.getByRole("link", { name: BROWSE_MODS });
+    const link = screen.getByRole("link", { name: BROWSE_PROJECTS });
     expect(link.getAttribute("href")).toBe("/mods");
-    expect(screen.queryByRole("button", { name: BROWSE_MODS })).toBeNull();
+    expect(screen.queryByRole("button", { name: BROWSE_PROJECTS })).toBeNull();
     expect(consoleError).not.toHaveBeenCalled();
   });
 

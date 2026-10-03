@@ -67,6 +67,16 @@ export const isReservedUsername = (username: string): boolean =>
 
 export type UsernameProblem = "too-short" | "too-long" | "invalid" | "reserved";
 
+/**
+ * The rules, stated once, as helper text under a username input.
+ *
+ * The welcome flow and the profile settings form each typed their own copy of
+ * this, so the bounds and the character list had to be edited in two places and
+ * the wording had already drifted from the error messages below. Both now read
+ * from here, and the numbers come from the same constants the validator uses.
+ */
+export const USERNAME_HINT = `${USERNAME_MIN_LENGTH}-${USERNAME_MAX_LENGTH} characters. Letters, numbers, underscores, and periods.`;
+
 export const USERNAME_PROBLEM_MESSAGES = {
   invalid: "Use only letters, numbers, underscores, and periods.",
   reserved: "This username is reserved.",
