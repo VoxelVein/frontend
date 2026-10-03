@@ -130,14 +130,32 @@ which posts to `/api/users/me/avatar`. The bytes go through the same
 sniffing, filename regeneration, and quota gate as a project image — see
 [Hardening](../security/hardening.md).
 
-A picture can also come from **outside**: the same card has an "Image URL"
-field that calls `setAvatarUrl` in `account.functions.ts` and stores an
+A picture can also come from **outside**. The card presents the two as
+**tabs** — *Upload* and *From a URL* — because they are alternatives: a
+picture comes from exactly one of them. Stacking both forms gave the URL
+field the visual weight of a second primary action while leaving it
+unclear which one the card was asking about.
+
+The URL tab calls `setAvatarUrl` in `account.functions.ts` and stores an
 `https://` address the account already hosts. Nothing is fetched or
 proxied — the reader's browser loads it from that host directly — so the
 upload gates do not apply and `src/lib/avatar-url.ts` replaces them with a
-scheme allowlist. Emptying the field and saving removes the picture. The
-card states which of the two sources is in use, because the preview alone
-cannot show it.
+scheme allowlist. Emptying the field and saving removes the picture.
+
+It also **previews the address before it is saved**, and says so when the
+image fails to load. Without that, the only way to find out whether an
+address points at a usable picture is to save it, reload the page and look
+at the result — and the preview request carries no referrer, because it is
+a request to a third-party host made while the person is still deciding
+and should not tell that host which account page they are on.
+
+**Linking a URL works even when object storage is switched off**, since
+nothing is uploaded. The upload tab is the one that disables itself and
+explains why.
+
+Removing a picture is confirmed, and the confirmation says which of the
+two sources is being removed, because the consequences differ: a stored
+object is destroyed, while a third-party URL is merely unlinked.
 
 Four decisions worth knowing:
 
