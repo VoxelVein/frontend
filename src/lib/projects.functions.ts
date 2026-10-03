@@ -514,6 +514,13 @@ export const deleteProject = createServerFn({ method: "POST" })
 /**
  * Moderation: hides a project everywhere without deleting its data, so the
  * decision can be reviewed or reverted in the database.
+ *
+ * Stamps `takenDownAt` alongside the status, because the status alone cannot carry
+ * the fact. Once the project is live again — by a review decision, or by an
+ * admin reverting this in the database — `status` has moved on and the record
+ * that staff pulled this is gone. That record is what decides whether putting it
+ * back up goes straight out or waits for a moderator, so it has to outlive the
+ * status change.
  */
 export const removeProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
@@ -524,7 +531,7 @@ export const removeProject = createServerFn({ method: "POST" })
     }
     await db
       .update(projects)
-      .set({ status: "removed" })
+      .set({ status: "removed", takenDownAt: new Date() })
       .where(eq(projects.id, data.projectId));
   });
 

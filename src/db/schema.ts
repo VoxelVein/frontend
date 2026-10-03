@@ -251,6 +251,21 @@ export const projects = pgTable(
     // Admin-marked protected project: never deleted along with its owner's
     // account, it is kept without an owner instead.
     isProtected: boolean("is_protected").default(false).notNull(),
+    /**
+     * When staff last took this project down, if they ever did.
+     *
+     * The column exists because `status` alone cannot answer the question. A takedown
+     * sets the status to `removed`, and by the time the project is live again that
+     * fact has been overwritten by whatever came next — so without this there is no
+     * way to tell a project staff pulled from one the author simply unpublished, and
+     * the two need opposite treatment on the way back up.
+     *
+     * Cleared when staff approve a review, because an approval is a fresh, explicit
+     * decision that this project is fine. Left in place after an author unpublishes,
+     * which is the whole point: an owner withdrawing their own work says nothing
+     * about whether the content is acceptable.
+     */
+    takenDownAt: timestamp("taken_down_at"),
     // Null once the owner's account is deleted and the project was kept.
     ownerId: text("owner_id").references(() => users.id, {
       onDelete: "set null",

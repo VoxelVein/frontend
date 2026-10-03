@@ -1,0 +1,1 @@
+ALTER TABLE "projects" ADD COLUMN "taken_down_at" timestamp;

@@ -255,6 +255,42 @@ There is deliberately no `rejected` status. A rejection returns the project
 to `draft` and records why in `rejection_reason`, so the creator can fix it
 and resubmit instead of being parked in a terminal state.
 
+### When publishing skips the queue
+
+Publishing is not always a queue. `needsReview`
+(`src/lib/publication-rule.ts`) reads two stored timestamps and answers
+in one expression, so the policy can be read and tested without a
+database:
+
+* **Never published** (`published_at` is null) — queued. A first
+  publication has been judged by nobody.
+* **Published before, no takedown** — **goes straight back up.**
+* **Taken down by staff at some point** — queued, whatever its history
+  otherwise says.
+
+A project the owner unpublished goes straight back up. Withdrawing your
+own listing is not a moderation event, and making someone queue for
+review to undo a decision they just made would put the review step in
+charge of a self-service action.
+
+A project **staff took down** queues regardless of its history, because
+putting it back up is exactly what that judgement was for.
+
+`published_at` is preserved when the owner unpublishes, which is what
+makes "was live once" answerable at all. `taken_down_at` (added in
+`0021`) is what the status cannot carry: a takedown sets
+`status = 'removed'`, and by the time the project is live again that fact
+has been overwritten by whatever came next.
+
+`taken_down_at` is **cleared when staff approve**. An approval is a newer
+and stronger judgement than the takedown it replaces; leaving the flag
+set would make every later owner-initiated republish queue forever on the
+strength of a decision staff have already overturned.
+
+The publish button is labelled "Publish" rather than "Submit for review"
+because it does not know which of the two will happen, and the toast
+reports whichever did.
+
 ### Audit columns
 
 * `submitted_at` — set when review is requested, cleared by any decision.
@@ -262,6 +298,8 @@ and resubmit instead of being parked in a terminal state.
 * `reviewed_by` — the deciding admin, never cleared.
 * `rejection_reason` — set by a rejection, cleared on resubmission or
   approval.
+* `taken_down_at` — set by a staff takedown, cleared by a staff
+  approval, untouched by anything the owner does.
 
 `reviewed_by` is a soft reference: if the reviewing admin's account is
 deleted it becomes null rather than removing the review record.
