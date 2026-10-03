@@ -5,6 +5,7 @@ import { FilledPill } from "@/components/filled-pill";
 import { Reveal } from "@/components/reveal";
 import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
 import type { MinecraftCategory } from "@/lib/categories";
+import { staggerDelay } from "@/lib/reveal-stagger";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,7 +29,7 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
     <article
       className={cn(
         "border-border ease-smooth relative flex h-full flex-col rounded-lg border p-6",
-        "transition-transform duration-300 motion-reduce:transform-none motion-reduce:transition-none",
+        "transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none",
         available
           ? "group bg-card focus-within:border-foreground/20 hover:border-foreground/20 focus-within:-translate-y-0.5 hover:-translate-y-0.5"
           : "bg-muted/30"
@@ -109,7 +110,7 @@ const ExploreSection = () => (
       <ul className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MINECRAFT_CATEGORIES.map((category, index) => (
           <li className="h-full" key={category.href}>
-            <Reveal className="h-full" delay={index * 0.06}>
+            <Reveal className="h-full" delay={staggerDelay(index)}>
               <CategoryTile category={category} />
             </Reveal>
           </li>

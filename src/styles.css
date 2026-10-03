@@ -280,12 +280,20 @@
   }
 }
 
-/* Hero entrance: CSS animations load with the stylesheet, so the title is
-   visible immediately without waiting for the motion runtime. */
-@keyframes hero-fade-in {
+/* Hero entrance.
+
+   Keyframes rather than a transition, unlike the scroll reveal below, and
+   deliberately: this is above the fold, so it has to reach its resting state
+   from the stylesheet alone with no JavaScript and no hydration. A transition
+   would need a class flipped after mount, which means the title is either
+   invisible first or visible-then-jumping.
+
+   The curve is the project curve rather than the keyword `ease-out`, so the
+   title decelerates the same way the reveals and hover states below it do. */
+@keyframes hero-enter {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -293,34 +301,64 @@
   }
 }
 
-.animate-hero-fade-in {
-  animation: hero-fade-in 0.6s ease-out both;
+.animate-hero-enter {
+  animation: hero-enter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.animate-hero-fade-in-delay {
-  animation: hero-fade-in 0.5s ease-out 0.2s both;
+/* The call to action arrives a beat after the headline rather than with it, so
+   the eye is given the sentence before the button. 90ms is enough to read as
+   sequence and short enough not to delay the thing people came to click. */
+.animate-hero-enter-lag {
+  animation: hero-enter 460ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
 }
 
-/* ── Scroll-reveal fade-in (replaces motion useInView + m.div) ───────── */
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* ── Scroll reveal ────────────────────────────────────────────────────
 
-.animate-reveal-up {
+   A transition rather than keyframes, per docs/content/motion.md: the curve,
+   the distance and the duration arrive as custom properties so one definition
+   serves every reveal on a page. The curve is the project curve, so reveals and
+   hover states decelerate the same way.
+
+   Two escape hatches below matter more than they look. The resting state is
+   hidden, and both of these force it visible — without them, content is stranded
+   invisible whenever the observer cannot run. */
+.reveal {
+  --reveal-delay: 0ms;
+  --reveal-distance: 16px;
+  --reveal-duration: 500ms;
+
   opacity: 0;
-  animation: reveal-up 0.6s ease-out both;
-  animation-play-state: paused;
+  transform: translateY(var(--reveal-distance));
+  transition:
+    opacity var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+      var(--reveal-delay),
+    transform var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+      var(--reveal-delay);
 }
 
-.animate-reveal-up.is-visible {
-  animation-play-state: running;
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Asked for reduced motion: show the content, do not move it. The global
+   duration override below would shorten the transition to nothing but leave the
+   block sitting at opacity 0 until the observer fired, which is why this states
+   the resting state explicitly. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* No scripting means no observer, so nothing would ever set `is-visible`. */
+@media (scripting: none) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── Icon crossfade (replaces motion AnimatePresence + m.span) ───────── */

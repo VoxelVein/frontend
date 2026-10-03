@@ -41,24 +41,54 @@ bottom of the viewport before it counts as visible. The observer
 disconnects as soon as it fires, so scrolling back up never re-hides
 anything.
 
-The animation is CSS, not JS. `.animate-reveal-up` in `src/styles.css`
-sits at `opacity: 0` with `animation-play-state: paused`; adding
-`.is-visible` switches it to `running` and the keyframes do
-`translateY(20px)` to `0`.
+The animation is CSS, not JS, and it is a **transition** rather than
+keyframes — which is what the "reach for `EASE_OUT_CSS` first" rule below
+asks for. `.reveal` in `src/styles.css` sits at `opacity: 0` and
+`translateY(16px)`; adding `.is-visible` transitions both to their resting
+place over 500 ms on the project curve.
 
-The `delay` prop is in **seconds**, converted to an `animationDelay`, and
-is how lists stagger. Cap it: the dashboard passes
-`Math.min(index, 5) * 0.06` so a long list does not accumulate a delay
-the user has to sit through.
+The curve, distance and duration are read from custom properties
+(`--reveal-delay`, `--reveal-distance`, `--reveal-duration`), so one CSS
+definition serves every reveal on a page and a caller can tune a single
+block through props rather than through a new class per variant.
 
-### One caveat
+### Content is never stranded
 
-Because the resting state is `opacity: 0` and the animation is paused
-until the observer fires, **a `Reveal` block is invisible without
-JavaScript**. The app is server-rendered, so this is a progressive
-enhancement trade rather than a hydration bug. Keep `Reveal` for content
-that also appears elsewhere, and do not wrap a page's only copy of
-something in it.
+The resting state is hidden, and that is only safe because two rules in
+`styles.css` force it visible when the observer cannot run:
+
+* `@media (prefers-reduced-motion: reduce)` — content shown, not moved,
+  transition removed.
+* `@media (scripting: none)` — content shown with no JavaScript.
+
+An earlier version used a paused keyframe animation, which left every
+`Reveal` block **invisible without JavaScript** and invisible under reduced
+motion until the observer happened to fire. The global duration override
+that collapses transitions to `0.01ms` does not help on its own: it
+shortens the animation without moving the element off `opacity: 0`.
+
+### Staggering
+
+`delay` is in **seconds**. Use `staggerDelay(index)` from
+`src/lib/reveal-stagger.ts` rather than writing the arithmetic at a call
+site: it caps at four items, so an unbounded list cannot accumulate a
+delay nobody waits for. Every staggered grid on the landing page uses it,
+which is what makes the trending row, the category tiles and the news
+ledger feel like one page rather than three.
+
+## The landing page
+
+Four sections, one motion system:
+
+* `Hero` — keyframes, deliberately, because it is above the fold and has to
+  reach its resting state from the stylesheet alone with no JavaScript. The
+  headline lands, then the call to action 90 ms behind it, so the eye reads
+  the sentence before the button. Same curve as everything below it.
+* `TrendingProjects` — the heading reveals on its own, then the cards land in
+  sequence. One block for the whole section made five cards arrive as a slab.
+* `NewsSection` — the lead story leads, and the ledger entries stagger behind
+  it.
+* `ExploreSection` — heading, then the category tiles.
 
 ## Reduced motion
 
@@ -115,13 +145,18 @@ transition in this layer meets it:
 * `rectangle` theme transition — 400 ms
 * `pixel` theme transition — 600 ms
 * `circle` and `blinds` theme transitions — 700 ms
-* `.animate-reveal-up` — 600 ms
+* `.reveal` — 500 ms
 * `IconSwap` exit — 200 ms
 
-All the long ones are entrance or theme-change moments, where a slower
-curve reads as deliberate rather than laggy, and none of them is feedback
-on a click or a keystroke. Anything that does react to direct
-manipulation should stay under 400 ms.
+Hover and press feedback stays at 200 ms: the explore tiles, the project
+cards, the news ledger rows and the hero button all use the same figure, so
+pointing at the page moves at one speed regardless of which element is under
+the pointer.
+
+The longer ones are entrance or theme-change moments, where a slower curve
+reads as deliberate rather than laggy, and none of them is feedback on a click
+or a keystroke. Anything that does react to direct manipulation should stay
+under 400 ms.
 
 ## Adding to this
 
