@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 
+import { PostAuthors } from "@/components/blog/post-authors";
+import { PostCategoryBadge } from "@/components/blog/post-category";
 import { MICRO_LABEL_CLASS } from "@/lib/classes";
+import type { PostAuthor } from "@/lib/posts";
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -24,6 +27,8 @@ const toIsoDate = (value: Date | string): string | null => {
  * same component.
  */
 export interface PostCardData {
+  authors: PostAuthor[];
+  category: string | null;
   createdAt: Date | string;
   preview: string;
   slug: string;
@@ -43,6 +48,15 @@ interface PostCardProps {
   post: PostCardData;
 }
 
+/**
+ * One post in a listing: when it was written, what it is filed under, who wrote
+ * it, and what it says.
+ *
+ * Category and byline are part of the card rather than extra decoration because
+ * they are how a reader decides whether to open it: a security post in a
+ * changelog-shaped list is a different offer from a company announcement, and
+ * "three people wrote this" is worth knowing before committing to the read.
+ */
 const PostCard = ({ headingLevel = 2, post }: PostCardProps) => {
   const isoDate = toIsoDate(post.createdAt);
   const Heading = HEADING_TAGS[headingLevel];
@@ -61,15 +75,18 @@ const PostCard = ({ headingLevel = 2, post }: PostCardProps) => {
         <span className="sr-only">Read {post.title}</span>
       </Link>
 
-      {isoDate === null ? null : (
-        <p className={MICRO_LABEL_CLASS}>
-          <time dateTime={isoDate}>
-            {dateFormatter.format(new Date(isoDate))}
-          </time>
-        </p>
-      )}
+      <div className="flex items-center gap-2">
+        {isoDate === null ? null : (
+          <p className={MICRO_LABEL_CLASS}>
+            <time dateTime={isoDate}>
+              {dateFormatter.format(new Date(isoDate))}
+            </time>
+          </p>
+        )}
+        <PostCategoryBadge category={post.category} variant="subtle" />
+      </div>
 
-      <Heading className="text-foreground mt-2 text-lg font-semibold tracking-tight">
+      <Heading className="text-foreground mt-2 text-lg font-semibold tracking-tight text-balance">
         {post.title}
       </Heading>
 
@@ -78,6 +95,12 @@ const PostCard = ({ headingLevel = 2, post }: PostCardProps) => {
           {post.preview}
         </p>
       ) : null}
+
+      {/* Pushed to the bottom so a card with a short preview and one with a long
+          one still line their bylines up across a grid row. */}
+      <div className="mt-auto pt-4">
+        <PostAuthors authors={post.authors} compact linked={false} />
+      </div>
     </article>
   );
 };

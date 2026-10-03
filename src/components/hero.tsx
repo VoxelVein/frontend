@@ -4,16 +4,22 @@ import { Link } from "@tanstack/react-router";
 import { RotatingText } from "@/components/motion/rotating-text";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
-const PROJECT_TYPES = [
-  "Mods",
-  "Plugins",
-  "Modpacks",
-  "Datapacks",
-  "Resource Packs",
-  "Shaders",
-] as const;
+/**
+ * The types the rotating headline cycles through, read from the category
+ * registry rather than typed out here.
+ *
+ * A hardcoded list drifted once already: it advertised `Datapacks`, which is
+ * not a project type and has no browse route, while omitting `Servers`, which
+ * is one of the six live categories a visitor most wants to find. Deriving the
+ * list from `MINECRAFT_CATEGORIES` makes that class of drift impossible.
+ */
+const PROJECT_TYPES = MINECRAFT_CATEGORIES.map((category) => category.label);
+
+/** "mods, plugins, modpacks, resource packs, shaders, and servers". */
+const TYPE_SENTENCE = categoryLabelSentence();
 
 const Hero = () => {
   const reduceMotion = usePrefersReducedMotion();
@@ -24,10 +30,7 @@ const Hero = () => {
         <h1 className="text-foreground mb-6 text-4xl font-bold tracking-tight text-balance sm:mb-8 sm:text-5xl lg:text-6xl">
           {/* The rotation is decorative; screen readers get one stable
               sentence instead of an announcement every two seconds. */}
-          <span className="sr-only">
-            Discover the best mods, plugins, modpacks, datapacks, resource
-            packs, and shaders
-          </span>
+          <span className="sr-only">Discover the best {TYPE_SENTENCE}</span>
           <span
             aria-hidden="true"
             className="flex flex-col items-center gap-3 sm:gap-4"
@@ -43,8 +46,7 @@ const Hero = () => {
         </h1>
 
         <p className="text-muted-foreground mx-auto mb-10 max-w-2xl text-lg leading-relaxed sm:mb-12 sm:text-xl">
-          Discover mods, modpacks, resource packs, shaders, plugins, and more
-          from the Minecraft community.
+          {`Find, follow, and share ${TYPE_SENTENCE} from the Minecraft community.`}
         </p>
 
         <div className="animate-hero-fade-in-delay flex items-center justify-center">
@@ -55,7 +57,7 @@ const Hero = () => {
               "ease-smooth min-h-12 gap-2 px-6 text-base transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
             )}
           >
-            <span>Browse Mods</span>
+            <span>Browse projects</span>
             <IconArrowRight size={18} />
           </Link>
         </div>

@@ -89,6 +89,11 @@ export const CAPABILITY_MINIMUM = {
   manageNotifications: "admin",
   managePosts: "admin",
   manageProtectedProjects: "admin",
+  // Triage, not policy. A moderator already reviews projects, and a report is
+  // the same judgement arriving from a member rather than from a queue. Kept
+  // separate from `manageUsers` so resolving a report is never the same
+  // permission as banning someone, which is a far heavier action.
+  manageReports: "moderator",
   manageSessions: "admin",
   manageStorage: "admin",
   manageUsers: "admin",
@@ -114,6 +119,7 @@ export const ALL_CAPABILITIES = [
   "manageNotifications",
   "managePosts",
   "manageProtectedProjects",
+  "manageReports",
   "manageSessions",
   "manageStorage",
   "manageUsers",

@@ -104,6 +104,62 @@ allow-list, not a sanitiser that parses arbitrary URLs. It is sound for
 the on-site destinations it is given, and it has unit tests covering
 each branch.
 
+## Post bodies are sanitized
+
+A post body is author-written HTML as well as Markdown, and it reaches
+the browser through `dangerouslySetInnerHTML`. Three things keep that from
+being a cross-site scripting hole, and all three are load-bearing.
+
+**It is sanitized before it is rendered, not when it is saved.**
+`src/lib/sanitize.ts` walks the parsed Markdown tree and sanitizes the
+`value` of every `html` and `inlineHtml` node, then hands the
+already-cleaned document to the renderer. Sanitizing the rendered markup
+instead would strip the class names on code blocks and the ids the
+renderer adds for footnote links. Render-time sanitizing also means posts
+written before this existed are covered, and the admin preview is
+protected by the same code as the public page — there is no second path
+to get wrong.
+
+**The allowlist is deny-by-default.** `ALLOWED_TAGS` and `ALLOWED_ATTR`
+name everything permitted; nothing is allowed because it was not
+explicitly blocked. `FORBID_TAGS` and `FORBID_ATTR` repeat the critical
+exclusions so the guarantee is auditable in one place rather than
+inferred from the absence of an entry. All `aria-*` attributes are off
+(`ALLOW_ARIA_ATTR: false`), as are `data-*`, `srcset`, and `style`.
+
+**`inlineHtml` is handled explicitly.** The renderer has separate
+injection sites for block `html`, inline `inlineHtml`, and a syntax
+highlighter. A sanitizer that only knew the first would leave every piece
+of inline author HTML in the document unsanitized — which in practice is
+most of the HTML anyone writes. The tree also has four child collections,
+not one: `children`, `items`, `header`, and `rows`. Table cells live in
+`header` and `rows`, so a walk that only recurses through `children`
+never reaches them.
+
+URLs get two independent checks, because a Markdown link is never an HTML
+node and so never reaches `sanitizeHtml`:
+
+* `sanitizeHtml` handles URLs inside embedded HTML;
+* `markdownUrlTransform` handles `[a](b)` and `![a](b)` at parse time.
+
+Both reject `javascript:` however it is spelled — mixed case, leading
+whitespace, or with control characters injected into the scheme, which
+browsers strip before resolving it. `data:` URLs are allowed on `img`
+only, restricted to base64 raster types (`avif`, `gif`, `jpeg`, `jpg`,
+`png`, `webp`); `data:image/svg+xml` is rejected, because SVG is a
+document format that can carry script.
+
+`target` is stripped rather than allowed, since permitting it without a
+global DOMPurify hook to add `rel="noopener"` would open links in a new
+tab with a handle on `window.opener`.
+
+The test suite asserts against the rendered DOM, not against HTML
+strings. A string can satisfy a "no `<script`" check while still yielding
+a live element once the browser parses it; asking the DOM what it actually
+built cannot be fooled that way. `sanitize.test.ts` pins the sanitizer's
+output and `markdown-body.test.tsx` pins the rendered result, including
+that the legitimate markup a post is actually made of survives.
+
 ## Upload gates
 
 Two layers, and both live on the server.
@@ -160,6 +216,49 @@ avatar too would leave the byline's picture suddenly broken.
 Better Auth's existing avatar field, so the navbar, the account menu, and
 the public profile all pick the upload up with no per-surface change — and
 there is only one copy of the URL rather than one per component.
+
+#### External picture URLs
+
+An account can also point its picture at an image it hosts elsewhere, via
+`setAvatarUrl` in `account.functions.ts`. That path is written to the same
+`users.image` column rather than a new one, so every avatar surface reads
+it without a per-surface change. It is not clobbered by a later Google or
+GitHub sign-in: Better Auth's `overrideUserInfoOnSignIn` defaults to
+`false`, so provider data is only used when the user record is created.
+
+An external URL skips every upload gate above, because there are no bytes
+to sniff — nothing is fetched, stored, or proxied, and the image is loaded
+straight from the third party by the reader's browser. What replaces those
+gates is `src/lib/avatar-url.ts`:
+
+* **`https` only.** `http:` would be blocked as mixed content on an HTTPS
+  site anyway, so accepting it would store a value that never renders and
+  would send the reader's IP address to a third party in plaintext.
+* **No other scheme.** `javascript:` and `data:` cannot execute from an
+  `<img src>`, but a `data:` blob would let arbitrary bytes be pinned into
+  every avatar surface on the site.
+* **No credentials in the authority.** `https://user:pass@host/` leaks
+  into logs, referrers, and anywhere the URL is rendered as text.
+* **Not a bare origin**, which is almost always a truncated paste.
+
+The server function re-parses the value rather than trusting its own
+validator, so the boundary that decides what is stored reports the specific
+reason. An empty field clears the picture rather than failing, so the field
+can unset what it set.
+
+`isSafeAvatarSrc` is the render-time half. Every `Avatar` — including the
+ones in post bylines, which show a value the viewer did not choose — passes
+through it, and anything that is neither an `/api/avatar/...` path nor an
+`https:` URL renders as initials instead. That is not the control that
+stops script; the allowlist above is. It exists so a value that reached
+the column by some other route, such as an OAuth provider profile, renders
+as a picture or as initials and never as a scheme nobody intended to allow.
+
+Setting an external URL supersedes any uploaded avatar, so the stored
+object and its `user_images` row are deleted in the same call. Leaving
+them would charge the account quota for an object nothing references, and
+the only way to reclaim it would be Remove — which would also discard the
+URL just chosen.
 
 ### Filenames
 
@@ -278,6 +377,7 @@ successful call closes it again, so recovery needs no restart.
 
 ## Related
 
+* [Blog](../content/blog.md) — author-written HTML, and what it may contain
 * [Resilience](../development/resilience.md) — chunk recovery, download
   counting, and connection caps
 * [Docker deployment](../deployment/docker.md) — the Valkey service and

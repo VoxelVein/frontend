@@ -30,6 +30,7 @@ const EXPECTED = {
     "manageNotifications",
     "managePosts",
     "manageProtectedProjects",
+    "manageReports",
     "manageSessions",
     "manageStorage",
     "manageUsers",
@@ -37,7 +38,7 @@ const EXPECTED = {
     "reviewProjects",
     "viewAdminPanel",
   ],
-  moderator: ["reviewProjects", "viewAdminPanel"],
+  moderator: ["manageReports", "reviewProjects", "viewAdminPanel"],
   user: [],
 } as const satisfies Record<string, readonly Capability[]>;
 

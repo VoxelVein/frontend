@@ -48,6 +48,7 @@ import {
   hasLoaders,
   LOADER_LABELS,
   LOADERS_BY_TYPE,
+  PROJECT_TYPE_DESCRIPTIONS,
   PROJECT_TYPE_LABELS,
   PROJECT_TYPE_PATHS,
 } from "@/lib/projects";
@@ -78,10 +79,20 @@ interface LiveModEvent {
   data: LiveModEventData;
 }
 
+/**
+ * Banner copy for a live stream event.
+ *
+ * Deliberately type-neutral. The stream is a single global feed that every
+ * browse page subscribes to, and the webhook payload carries only `id` and
+ * `name` — no project type. The labels previously said "New mod added", so a
+ * shader publish announced itself as a mod on the Shaders page, next to a
+ * "Refresh results" button that would not show it. Naming the object "project"
+ * is what the payload actually supports; the surrounding page supplies the type.
+ */
 const LIVE_EVENT_LABELS = {
-  "mod.created": "New mod added",
-  "mod.deleted": "Mod removed",
-  "mod.updated": "Mod updated",
+  "mod.created": "New project added",
+  "mod.deleted": "Project removed",
+  "mod.updated": "Project updated",
 } as const satisfies Record<LiveModEvent["event"], string>;
 
 const SORT_OPTIONS = [
@@ -562,20 +573,6 @@ const Results = ({
   </>
 );
 
-const PAGE_DESCRIPTIONS = {
-  mod: "Discover performance, technology, adventure, and more. Search Minecraft mods.",
-  modpack:
-    "Play curated collections of mods, from lightweight packs to kitchen-sink adventures.",
-  plugin:
-    "Find administration, economy, protection, and minigame plugins for Minecraft servers.",
-  resourcepack:
-    "Change how Minecraft looks and sounds with textures, models, and audio packs.",
-  server:
-    "Find a Minecraft server to join, from survival and creative to minigames and modded worlds.",
-  shader:
-    "Add realistic lighting, shadows, and atmosphere to Minecraft with shader packs.",
-} as const satisfies Record<ProjectType, string>;
-
 interface ProjectBrowserProps extends ProjectBrowserData {
   type: ProjectType;
 }
@@ -768,7 +765,7 @@ export const ProjectBrowser = ({
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
       <PageHeader
         title={PROJECT_TYPE_LABELS[type].plural}
-        description={PAGE_DESCRIPTIONS[type]}
+        description={PROJECT_TYPE_DESCRIPTIONS[type]}
       />
 
       <SearchBar query={query} onQueryChange={setQuery} type={type} />

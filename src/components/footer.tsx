@@ -19,6 +19,7 @@ const PROJECT_LINKS: readonly FooterLink[] = [
   { available: true, href: "/resource-packs", label: "Resource Packs" },
   { available: true, href: "/shaders", label: "Shaders" },
   { available: true, href: "/servers", label: "Servers" },
+  { available: true, href: "/datapacks", label: "Datapacks" },
 ];
 
 const RESOURCE_LINKS: readonly FooterLink[] = [
@@ -163,9 +164,6 @@ const Footer = () => (
           </Link>
           <Link to="/terms" className={LINK_CLASS}>
             Terms
-          </Link>
-          <Link to="/terms-of-use" className={LINK_CLASS}>
-            Terms of Use
           </Link>
           <Link to="/disclaimer" className={LINK_CLASS}>
             Disclaimer

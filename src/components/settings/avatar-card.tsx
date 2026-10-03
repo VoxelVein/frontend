@@ -1,7 +1,8 @@
-import { IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconLink, IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { FormField } from "@/components/form-field";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,9 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { authClient } from "@/lib/auth-client";
+import { useRefreshSession } from "@/hooks/use-refresh-session";
+import { setAvatarUrl } from "@/lib/account.functions";
+import { isExternalAvatarSrc, parseAvatarUrl } from "@/lib/avatar-url";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes } from "@/lib/format";
 import { IMAGE_MAX_BYTES } from "@/lib/image-limits";
@@ -26,8 +29,16 @@ interface AvatarCardProps {
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
 
+const URL_HELPER =
+  "An https:// address of an image you already host. Leave it empty and save to remove your picture.";
+
 /**
- * Upload or remove the account's avatar.
+ * Upload, link, or remove the account's profile picture.
+ *
+ * Two sources, one field. `users.image` is either a path this site serves or an
+ * `https:` URL somewhere else, and whichever is stored is what every avatar
+ * surface reads — so the card states which one is in use rather than letting the
+ * preview imply it.
  *
  * The file never leaves the device at full size: `uploadAvatar` resizes it with
  * the `icon` kind first, so a phone photo is scaled before it is sent rather
@@ -38,8 +49,13 @@ const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
  * surface reads. One source of truth beats a second copy in this component.
  */
 const AvatarCard = ({ image, name }: AvatarCardProps) => {
+  const refreshSession = useRefreshSession();
   const [isBusy, setIsBusy] = useState(false);
+  const [url, setUrl] = useState("");
+  const [urlError, setUrlError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const isExternal = isExternalAvatarSrc(image);
 
   // `catch` rather than a rejection handler, and no `finally`: the React
   // compiler cannot lower a finalizer clause, and clearing the flag on each
@@ -56,9 +72,11 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
       return;
     }
 
-    // Refetch so the navbar, the account menu, and the public profile all pick
-    // up the new `users.image` without this component caching a second copy.
-    await authClient.getSession({ fetchOptions: { cache: "no-store" } });
+    // Notifies the cached session rather than fetching it again: the navbar,
+    // the account menu, and the public profile all read `users.image` through
+    // `useSession`, and a plain `getSession()` call left them showing the old
+    // picture until the page was reloaded.
+    await refreshSession();
     setIsBusy(false);
   };
 
@@ -71,6 +89,26 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
   const handleRemove = async () => {
     await withBusy(async () => {
       await deleteAvatar();
+    });
+  };
+
+  const handleSaveUrl = async () => {
+    // Validated here as well as on the server so the field reports the reason
+    // next to the input, rather than the server's error arriving as a toast with
+    // no indication of which field was wrong.
+    const parsed = parseAvatarUrl(url);
+    if (!parsed.ok) {
+      setUrlError(parsed.error);
+      return;
+    }
+
+    setUrlError(null);
+    await withBusy(async () => {
+      await setAvatarUrl({ data: { url } });
+      // Cleared on success only: the field is a command, not a mirror of the
+      // stored value, and leaving a stale URL in it invites a second save of
+      // something already applied.
+      setUrl("");
     });
   };
 
@@ -100,6 +138,9 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
                 decoding="async"
                 height={64}
                 loading="lazy"
+                // The picture may be hosted elsewhere, and a referrer would tell
+                // that host which account page a visitor was reading.
+                referrerPolicy="no-referrer"
                 src={image}
                 width={64}
               />
@@ -163,6 +204,65 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
               ) : null}
             </div>
           </div>
+
+          {/* Stated rather than left to the preview to imply: the two sources
+              are indistinguishable once rendered. */}
+          {image ? (
+            <p className="text-muted-foreground mt-3 text-sm">
+              {isExternal
+                ? "Hosted on another site. Everyone who sees your profile loads it from there."
+                : "Stored on VoxelVein."}
+            </p>
+          ) : null}
+
+          <form
+            className="mt-5 grid gap-3 border-t pt-5"
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void handleSaveUrl();
+            }}
+          >
+            <FormField
+              autoComplete="url"
+              disabled={isBusy}
+              error={urlError ?? undefined}
+              helperText={URL_HELPER}
+              id="avatar-url"
+              inputMode="url"
+              label="Image URL"
+              onChange={(event) => {
+                setUrl(event.target.value);
+                if (urlError) {
+                  setUrlError(null);
+                }
+              }}
+              placeholder="https://example.com/avatar.png"
+              spellCheck={false}
+              type="url"
+              value={url}
+            />
+
+            <Button
+              className="min-h-11 w-full sm:w-auto sm:px-6"
+              disabled={isBusy}
+              type="submit"
+              variant="outline"
+            >
+              {isBusy ? (
+                <>
+                  <Spinner className="mr-1" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <IconLink size={16} aria-hidden="true" />
+                  Use image URL
+                </>
+              )}
+            </Button>
+          </form>
 
           <Alert className="mt-4">
             <AlertDescription>

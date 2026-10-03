@@ -45,8 +45,11 @@ const DeletionsTable = ({
           <th scope="col" className="px-4 py-3 font-medium">
             Requested
           </th>
+          {/* Not "Deleted on": the column holds `purgeAt`, a date 14 days in the
+              future. Past tense on a row that has not happened yet reads as a
+              bug to anyone triaging this list. */}
           <th scope="col" className="px-4 py-3 font-medium">
-            Deleted on
+            Permanently deleted
           </th>
           <th scope="col" className="px-4 py-3 font-medium">
             Projects
@@ -198,7 +201,7 @@ export const AdminAccountDeletions = () => {
       <EmptyState
         variant="inline"
         title="No accounts scheduled for deletion"
-        description="Accounts that users delete appear here until they are permanently removed."
+        description="An account appears here once a user requests deletion, and stays until we permanently delete it 14 days later."
         icon={<IconUserX size={20} aria-hidden="true" />}
       />
     );
@@ -226,8 +229,8 @@ export const AdminAccountDeletions = () => {
             Account deletions
           </h2>
           <CardDescription>
-            Deleted accounts are permanently removed 14 days after the request
-            unless you restore them.
+            We permanently delete an account 14 days after the user requests it,
+            unless you restore the account first.
           </CardDescription>
           <CardAction>
             <Button

@@ -3,6 +3,10 @@ import { IconLock } from "@tabler/icons-react";
 import type { DeletionContext } from "@/components/settings/danger/deletion-flow";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
+import {
+  PROTECTED_PROJECT_LABEL,
+  PROTECTED_PROJECT_LABEL_PLURAL,
+} from "@/lib/projects";
 
 interface ConsequencesStepProps {
   context: DeletionContext;
@@ -73,7 +77,9 @@ export const ConsequencesStep = ({
                         {project.name}
                       </p>
                       <p className="text-muted-foreground text-sm">
-                        Kept, marked as a large project by the VoxelVein team
+                        Kept. The VoxelVein team has marked it as a{" "}
+                        {PROTECTED_PROJECT_LABEL.toLowerCase()}, so it stays
+                        published without an owner.
                       </p>
                     </div>
                   </li>
@@ -115,8 +121,7 @@ export const ConsequencesStep = ({
           </ul>
           {hasProtected ? (
             <p className="text-muted-foreground text-sm">
-              Large projects are always kept, and the VoxelVein team is notified
-              so they can look after them.
+              {`${PROTECTED_PROJECT_LABEL_PLURAL} are always kept, and the VoxelVein team is notified so they can look after them.`}
             </p>
           ) : null}
         </div>

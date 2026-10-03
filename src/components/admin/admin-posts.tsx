@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 import { useAdminPosts } from "@/components/admin/use-admin-posts";
 import type { AdminPostRow } from "@/components/admin/use-admin-posts";
+import { PostCategoryBadge } from "@/components/blog/post-category";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,8 @@ import {
 } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { PostSummary } from "@/lib/posts";
+import type { PostAuthor, PostSummary } from "@/lib/posts";
+import { formatAuthorNames } from "@/lib/posts";
 import { relativeTime } from "@/lib/relative-time";
 
 /**
@@ -46,6 +48,26 @@ const StatusBadge = ({ published }: { published: boolean }) => (
   </span>
 );
 
+/**
+ * Who wrote a post, for an admin scanning the list.
+ *
+ * Names only, no avatars: this is a dense list read at a glance, and a row of
+ * overlapping circles on every entry costs more horizontal space than the
+ * information is worth. The picker on the edit form is where the pictures
+ * belong.
+ */
+const PostAuthorNames = ({ authors }: { authors: PostAuthor[] }) => {
+  if (authors.length === 0) {
+    return null;
+  }
+
+  return (
+    <span className="text-muted-foreground truncate text-xs">
+      {formatAuthorNames(authors)}
+    </span>
+  );
+};
+
 const PostRow = ({
   isMutating,
   loadedAt,
@@ -64,6 +86,7 @@ const PostRow = ({
           {post.title}
         </p>
         <StatusBadge published={post.published} />
+        <PostCategoryBadge category={post.category} variant="subtle" />
       </div>
 
       {post.preview ? (
@@ -74,9 +97,12 @@ const PostRow = ({
 
       {/* Relative time, because "updated 3 days ago" is what an admin is
           actually judging freshness by. */}
-      <p className="text-muted-foreground mt-1 truncate text-xs">
-        /blog/{post.slug} · Updated {relativeTime(post.updatedAt, loadedAt)}
-      </p>
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs">
+        <span className="text-muted-foreground truncate">
+          /blog/{post.slug} · Updated {relativeTime(post.updatedAt, loadedAt)}
+        </span>
+        <PostAuthorNames authors={post.authors} />
+      </div>
     </div>
 
     <div className="flex shrink-0 items-center gap-2">
@@ -161,7 +187,7 @@ const AdminPosts = () => {
       <EmptyState
         variant="inline"
         title="No posts yet"
-        description="Create your first blog post to get started."
+        description="Nothing has been published to the blog yet. Write the first post and it appears on the site's blog and news section."
         icon={<IconFileText size={20} aria-hidden="true" />}
       />
     );

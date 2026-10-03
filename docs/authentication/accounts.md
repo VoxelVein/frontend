@@ -94,11 +94,11 @@ What happens next depends on the account's history:
 
 A scheduled account is banned (`banReason = "pending-deletion"`) and
 signed out everywhere. Projects chosen for deletion are hidden at once.
-For each large project, admins get an entry in the **Notifications**
+For each protected project, admins get an entry in the **Notifications**
 tab of the admin panel.
 
 Within the 14 days, the user can contact support. An admin restores the
-account from **Admin → Deletions**, which unbans it and brings the
+account from **Admin → Account deletions**, which unbans it and brings the
 hidden projects back. Unbanning from the Users tab does not cancel the
 deletion.
 
@@ -130,13 +130,34 @@ which posts to `/api/users/me/avatar`. The bytes go through the same
 sniffing, filename regeneration, and quota gate as a project image — see
 [Hardening](../security/hardening.md).
 
-Three decisions worth knowing:
+A picture can also come from **outside**: the same card has an "Image URL"
+field that calls `setAvatarUrl` in `account.functions.ts` and stores an
+`https://` address the account already hosts. Nothing is fetched or
+proxied — the reader's browser loads it from that host directly — so the
+upload gates do not apply and `src/lib/avatar-url.ts` replaces them with a
+scheme allowlist. Emptying the field and saving removes the picture. The
+card states which of the two sources is in use, because the preview alone
+cannot show it.
 
-`users.image` holds the **URL**, `/api/avatar/<id>`
+Four decisions worth knowing:
+
+`users.image` holds the **URL**, `/api/avatar/<id>` or the external one
 : That is Better Auth's own avatar field, which the navbar, the account
   menu, and the public profile already read. Writing it there means an
   upload appears everywhere at once, and there is exactly one copy of the
-  URL rather than one per component.
+  URL rather than one per component. The same column serves both sources,
+  so no read site had to learn about a second field.
+
+A social sign-in does not overwrite a chosen URL
+: Better Auth's `overrideUserInfoOnSignIn` defaults to `false`, so provider
+  profile data is only applied when the user record is created. That is why
+  an external URL can live in `users.image` without a second column to keep
+  it authoritative.
+
+Uploaded avatars are deleted when an external URL is set
+: The two are mutually exclusive, so the superseded object and its
+  `user_images` row are dropped in the same call. Keeping them would charge
+  the account quota for an object nothing references.
 
 A separate `user_images` table, not a key on `users`
 : Replacing an avatar has to delete the object it replaced, which needs
@@ -217,11 +238,19 @@ to the author's profile, except when the owner is gone — then
 `authorUsername` is null and the name stays plain text rather than linking
 to a page that 404s.
 
-## Large projects
+## Protected projects
 
-Admins mark a project as large on its page (`projects.is_protected`,
-labelled "Mark as large project"). Large projects are never deleted with
-their owner's account, and owners cannot choose to delete them that way.
+Admins protect a project on its page (`projects.is_protected`, the
+"Protect from owner deletion" button). A protected project is never deleted
+with its owner's account, and owners cannot choose to delete them that way.
+
+The user-facing name is **protected project**, defined once as
+`PROTECTED_PROJECT_LABEL` in `src/lib/projects.ts`. It was previously called a
+"large project" in the deletion wizard and a "protected project" in the admin
+notification about the same event — two names for one thing, neither defined
+anywhere a user could read. "Protected" is also the honest word: it names
+exactly what happens without implying a download threshold that nothing
+enforces.
 
 ## Roles
 

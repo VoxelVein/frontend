@@ -231,7 +231,7 @@ export const Route = createRootRoute({
       </p>
       <Button render={<Link to="/" />} className="mt-8 min-h-11 px-6">
         <IconHome size={16} aria-hidden="true" />
-        Back to Home
+        Back to homepage
       </Button>
     </div>
   ),

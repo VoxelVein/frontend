@@ -235,14 +235,14 @@ const BanAction = ({
 }: BanActionProps) => {
   if (isPendingDeletion) {
     // Unbanning would let the user sign in while the purge stays scheduled,
-    // so point to the Deletions tab, where restoring cancels both.
+    // so point to the Account deletions tab, where restoring cancels both.
     return (
       <Link
         to="/admin"
         search={{ tab: "deletions" }}
         className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
       >
-        Manage in Deletions
+        Manage in Account deletions
         <span className="sr-only">: {user.name}</span>
       </Link>
     );
@@ -294,12 +294,15 @@ const BanAction = ({
 const SELF_ACTION_HINT = "Manage your own account in Settings.";
 
 /**
- * Why a control is inert because of the target's rank rather than your own.
+ * Why a control is inert because of the target's role rather than your own.
  *
  * Worth distinguishing from the self case: an inert control on your own row is
  * expected, and one on a colleague's reads as a bug until you know the ladder.
+ * "Role" rather than "rank", because that is what the ladder is called
+ * everywhere else on this screen.
  */
-const RANK_ACTION_HINT = "You cannot act on an account above your rank.";
+const RANK_ACTION_HINT =
+  "Your role cannot manage an account with a higher role than yours.";
 
 interface AdminUserRowProps {
   isMutating: boolean;
@@ -501,7 +504,9 @@ const AdminUsersDialogs = ({
       }}
       title="Change role"
       description={
-        pendingRole ? `Set ${pendingRole.role} as the role for this user?` : ""
+        pendingRole
+          ? `Change this user's role to ${ROLE_LABELS[pendingRole.role]}?`
+          : ""
       }
       confirmLabel="Change role"
       // A routine privilege change, not a destructive one: it must not render
@@ -669,7 +674,7 @@ const AdminUsers = () => {
 
     if (roleError) {
       dispatch({
-        error: roleError.message ?? "Could not change role.",
+        error: roleError.message ?? "Could not change this user's role.",
         type: "ACTION_ERROR",
       });
       return;
@@ -690,7 +695,7 @@ const AdminUsers = () => {
 
     if (banError) {
       dispatch({
-        error: banError.message ?? "Could not ban user.",
+        error: banError.message ?? "Could not ban this user.",
         type: "ACTION_ERROR",
       });
       return;
@@ -710,7 +715,7 @@ const AdminUsers = () => {
 
     if (unbanError) {
       dispatch({
-        error: unbanError.message ?? "Could not unban user.",
+        error: unbanError.message ?? "Could not unban this user.",
         type: "ACTION_ERROR",
       });
       return;
@@ -731,7 +736,7 @@ const AdminUsers = () => {
 
     if (removeError) {
       dispatch({
-        error: removeError.message ?? "Could not remove user.",
+        error: removeError.message ?? "Could not delete this user.",
         type: "ACTION_ERROR",
       });
       return;

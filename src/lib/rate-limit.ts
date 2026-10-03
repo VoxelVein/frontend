@@ -60,6 +60,13 @@ export const RATE_LIMITS = {
   upload: { limit: 20, windowMs: 60_000 },
   /** Anything that writes content: posts, projects, reviews. */
   write: { limit: 30, windowMs: 60_000 },
+  /**
+   * Filing a report. Deliberately the tightest bucket on the site and the only
+   * one measured in hours: a report is a queue a human has to work through, so
+   * flooding it is the abuse, not just an inconvenience. Five an hour is far
+   * above what a member reporting a genuine problem needs.
+   */
+  report: { limit: 5, windowMs: 3_600_000 },
 } as const satisfies Record<string, RateLimit>;
 
 /**

@@ -86,8 +86,8 @@ const KindRow = ({
 
 const NoLimit = () => (
   <p className="text-muted-foreground text-sm">
-    No storage limit is set, so uploads are refused only when the bucket itself
-    rejects them. Set <code>STORAGE_QUOTA_BYTES</code> to cap it.
+    No storage limit is set, so an upload only fails if the storage bucket
+    itself rejects it. Set <code>STORAGE_QUOTA_BYTES</code> to cap usage.
   </p>
 );
 
@@ -133,7 +133,7 @@ const UsageSummary = ({ usage }: { usage: StorageUsage }) => {
               of {formatBytes(quotaBytes)} used ({percent}%)
             </>
           ) : (
-            <>stored, with no limit configured</>
+            <>stored so far. No limit is set.</>
           )}
         </p>
       </div>
@@ -252,10 +252,11 @@ export const AdminStorage = () => {
                 id="storage-heading"
                 className="text-foreground text-lg font-semibold"
               >
-                Object storage
+                Storage used
               </h2>
               <p className="text-muted-foreground text-sm">
-                Everything in the bucket, and how close it is to the limit.
+                Everything the site keeps in its storage bucket, and how close
+                it is to the limit.
               </p>
             </div>
             <Button

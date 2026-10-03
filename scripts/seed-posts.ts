@@ -12,7 +12,7 @@
 import { eq, inArray } from "drizzle-orm";
 
 import { db, pool } from "../src/db/index.ts";
-import { posts, users } from "../src/db/schema.ts";
+import { postAuthors, posts, users } from "../src/db/schema.ts";
 import { DEMO_POSTS } from "./fixtures/demo-posts.ts";
 import type { DemoPost } from "./fixtures/demo-posts.ts";
 
@@ -37,15 +37,25 @@ const seedPost = async (demo: DemoPost, authorId: string, now: Date) => {
   // rather than three posts sharing one timestamp.
   const createdAt = new Date(now.getTime() - demo.daysAgo * DAY_IN_MS);
 
-  await db.insert(posts).values({
-    authorId,
-    content: demo.content,
-    createdAt,
-    excerpt: demo.excerpt,
-    published: true,
-    slug: demo.slug,
-    title: demo.title,
-    updatedAt: createdAt,
+  const [row] = await db
+    .insert(posts)
+    .values({
+      content: demo.content,
+      createdAt,
+      excerpt: demo.excerpt,
+      published: true,
+      slug: demo.slug,
+      title: demo.title,
+      updatedAt: createdAt,
+    })
+    .returning({ id: posts.id });
+
+  // Authorship is a separate table, so a seeded post needs its byline written
+  // too — without this it would render with no author at all.
+  await db.insert(postAuthors).values({
+    position: 0,
+    postId: row.id,
+    userId: authorId,
   });
 };
 

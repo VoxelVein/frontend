@@ -106,7 +106,7 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
             className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <IconShield size={16} stroke={1.8} />
-            Admin Panel
+            Admin panel
           </DropdownMenuItem>
         ) : null}
 
@@ -117,7 +117,7 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
           className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring focus-visible:ring-destructive/50 data-highlighted:bg-destructive/10 data-highlighted:text-destructive flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           <IconLogout size={16} stroke={1.8} />
-          Sign Out
+          Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

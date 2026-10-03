@@ -534,7 +534,7 @@ const protectedSchema = object({
 });
 
 /**
- * Moderation: marks a large project that must survive its owner deleting
+ * Moderation: marks a protected project that must survive its owner deleting
  * their account. Owners cannot choose to delete a protected project.
  */
 export const setProjectProtected = createServerFn({ method: "POST" })

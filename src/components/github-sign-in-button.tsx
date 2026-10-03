@@ -38,7 +38,10 @@ const GitHubSignInButtonContent = () => {
 
     if (signInError) {
       setIsPending(false);
-      setError(signInError.message ?? "Could not sign in with GitHub.");
+      setError(
+        signInError.message ??
+          "Could not sign you in with GitHub. Check your connection and try again."
+      );
     }
   };
 

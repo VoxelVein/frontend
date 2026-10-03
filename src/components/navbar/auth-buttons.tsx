@@ -35,7 +35,7 @@ const AuthSignIn = ({ variant }: { variant: "desktop" | "mobile" }) => (
       variant === "desktop" ? "min-h-10 px-4" : "mt-3 min-h-11 w-full"
     )}
   >
-    Sign In
+    Sign in
   </Link>
 );
 
@@ -76,7 +76,7 @@ const MobileUserCard = ({
       className="min-h-11"
       onClick={onSignOut}
     >
-      Sign Out
+      Sign out
     </Button>
   </div>
 );

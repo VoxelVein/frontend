@@ -1,5 +1,6 @@
 import {
   IconBox,
+  IconDatabase,
   IconPackages,
   IconPalette,
   IconPhoto,
@@ -16,8 +17,13 @@ interface MinecraftCategory {
    */
   available: boolean;
   /**
-   * Shown inline in the navbar from `lg`. The rest wait for `xl` and sit in
-   * the navbar's "More" menu until then, so every category stays reachable.
+   * Whether this section gets a flat navbar link or shares the "Browse" menu.
+   *
+   * Only the two destinations most visitors arrive for are flat. Every other
+   * section renders the same `ProjectBrowser` component with a different type,
+   * so listing all of them as text links said seven near-identical things and
+   * crowded out the rest of the bar. The menu keeps all of them reachable and
+   * adds each description, which a flat link has nowhere to put.
    */
   alwaysInline: boolean;
   description: string;
@@ -45,7 +51,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   },
   {
     available: true,
-    alwaysInline: true,
+    alwaysInline: false,
     description: "Discover curated collections of mods for every playstyle.",
     href: "/modpacks",
     icon: IconPackages,
@@ -83,7 +89,39 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
     icon: IconWorld,
     label: "Servers",
   },
+  {
+    available: true,
+    alwaysInline: false,
+    description:
+      "Add dimensions, biomes, loot tables, and recipes to your world.",
+    href: "/datapacks",
+    icon: IconDatabase,
+    label: "Datapacks",
+  },
 ];
+
+/**
+ * Every category label as one lower-cased prose list.
+ *
+ * "mods, plugins, modpacks, resource packs, shaders, and servers". The hero
+ * and the explore section both need this sentence, and both previously carried
+ * their own copy — which is how the hero came to advertise a `Datapack` type
+ * that does not exist while leaving out `Servers`. Deriving both from here
+ * means a category can only be added in one place.
+ */
+export const categoryLabelSentence = (): string => {
+  const labels = MINECRAFT_CATEGORIES.map((category) =>
+    category.label.toLowerCase()
+  );
+  const last = labels.at(-1);
+  if (last === undefined) {
+    // An emptied registry degrades the sentence instead of crashing a render.
+    return "";
+  }
+  const head = labels.slice(0, -1).join(", ");
+  // One category is just its own name; two or more read as an Oxford list.
+  return head === "" ? last : `${head}, and ${last}`;
+};
 
 export { MINECRAFT_CATEGORIES };
 export type { MinecraftCategory };

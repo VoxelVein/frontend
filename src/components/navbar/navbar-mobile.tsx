@@ -69,31 +69,11 @@ const NavbarMobileMenu = ({
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
           <nav aria-label="Content navigation" className="flex flex-col">
+            {/* Projects first, matching the desktop bar's reading order. The
+                drawer lists every section flat regardless of which ones get a
+                flat link on desktop, since there is room for them and a nested
+                menu would only add a tap. */}
             <p className="text-muted-foreground mb-2 px-3 py-2 text-xs font-semibold tracking-wider uppercase">
-              Content
-            </p>
-
-            {CONTENT_LINKS.map((link) => {
-              const isActive = !!matchRoute({ to: link.href });
-
-              return (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  preload="intent"
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={onClose}
-                  className={cn(
-                    mobileLinkClassName,
-                    isActive && "bg-muted text-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-
-            <p className="text-muted-foreground mt-4 mb-2 px-3 py-2 text-xs font-semibold tracking-wider uppercase">
               Projects
             </p>
 
@@ -113,6 +93,30 @@ const NavbarMobileMenu = ({
                   )}
                 >
                   {item.label}
+                </Link>
+              );
+            })}
+
+            <p className="text-muted-foreground mt-4 mb-2 px-3 py-2 text-xs font-semibold tracking-wider uppercase">
+              Content
+            </p>
+
+            {CONTENT_LINKS.map((link) => {
+              const isActive = !!matchRoute({ to: link.href });
+
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  preload="intent"
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={onClose}
+                  className={cn(
+                    mobileLinkClassName,
+                    isActive && "bg-muted text-foreground"
+                  )}
+                >
+                  {link.label}
                 </Link>
               );
             })}

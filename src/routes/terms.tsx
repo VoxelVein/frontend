@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LegalPage } from "@/components/legal/legal-page";
 
@@ -7,7 +7,17 @@ const TermsPage = () => (
     title="Terms of Service"
     updated="September 11, 2026"
     intro={
-      <>These Terms of Service govern your use of the VoxelVein platform.</>
+      <>
+        These Terms of Service govern your use of the VoxelVein platform. They
+        are the only terms that apply to the site &mdash; the{" "}
+        <Link
+          to="/disclaimer"
+          className="text-primary underline underline-offset-4"
+        >
+          disclaimer
+        </Link>{" "}
+        adds two notes that are worth reading separately.
+      </>
     }
     sections={[
       {
@@ -84,6 +94,26 @@ const TermsPage = () => (
             To the maximum extent permitted by law, VoxelVein shall not be
             liable for indirect, incidental, or consequential damages arising
             from your use of the platform.
+          </p>
+        ),
+      },
+      {
+        heading: "Third-Party Links",
+        body: (
+          <p>
+            The platform links to external websites. We do not control them and
+            are not responsible for their content or practices.
+          </p>
+        ),
+      },
+      {
+        heading: "Not Affiliated with Mojang or Microsoft",
+        body: (
+          <p>
+            VoxelVein is an independent, community-driven project. It is not
+            affiliated with, endorsed by, or sponsored by Mojang Studios or
+            Microsoft. &ldquo;Minecraft&rdquo; is a trademark of Mojang
+            Synergies AB.
           </p>
         ),
       },

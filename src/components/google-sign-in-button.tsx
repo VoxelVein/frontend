@@ -51,7 +51,10 @@ const GoogleSignInButtonContent = () => {
     setIsPending(false);
 
     if (signInError) {
-      setError(signInError.message ?? "Could not sign in with Google.");
+      setError(
+        signInError.message ??
+          "Could not sign you in with Google. Check your connection and try again."
+      );
       return;
     }
 

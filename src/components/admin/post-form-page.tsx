@@ -1,25 +1,41 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useForm, useStore } from "@tanstack/react-form";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { safeParse } from "valibot";
 
+import { PostAuthorPicker } from "@/components/admin/post-author-picker";
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { errorMessage } from "@/lib/form-errors";
 import {
+  postCategorySchema,
   postContentSchema,
   postSlugSchema,
   postTitleSchema,
+  POST_CATEGORIES,
   slugify,
 } from "@/lib/posts";
 import type { Post, PostInput } from "@/lib/posts";
-import { createPost, updatePost } from "@/lib/posts.functions";
+import {
+  createPost,
+  listSelectableAuthors,
+  updatePost,
+} from "@/lib/posts.functions";
 
 interface PostFormPageProps {
   /** The post being edited, or null when composing a new one. */
@@ -27,6 +43,98 @@ interface PostFormPageProps {
   /** Shown while the editor loads the post it was asked to edit. */
   isLoading?: boolean;
 }
+
+/** The editor's own field values, before they become a validated write. */
+interface PostFormValues {
+  authorIds: string[];
+  category: string;
+  content: string;
+  excerpt: string;
+  published: boolean;
+  slug: string;
+  title: string;
+}
+
+/**
+ * Turns the editor's values into a validated write and sends it.
+ *
+ * Out of the component because the component is already rendering seven fields
+ * and a live preview; a submit handler nested in it makes both harder to read
+ * than either is alone.
+ */
+const submitPost = async (
+  values: PostFormValues,
+  post: Post | null
+): Promise<void> => {
+  // Re-checked against the registry rather than cast: the select can only
+  // produce a known slug, but a stored category from before a rename is not
+  // guaranteed to be one, and an unknown value must not reach the write path as
+  // if it were valid. An unrecognised value saves as "no category".
+  const category = safeParse(postCategorySchema, values.category || null);
+
+  const input: PostInput = {
+    authorIds: values.authorIds,
+    category: category.success ? category.output : null,
+    content: values.content,
+    excerpt: values.excerpt || undefined,
+    published: values.published,
+    slug: values.slug,
+    title: values.title,
+  };
+
+  try {
+    await (post
+      ? updatePost({ data: { ...input, id: post.id } })
+      : createPost({ data: input }));
+  } catch (saveError) {
+    // The form keeps its values so the draft is not lost, and the reason is a
+    // toast: this page has no inline error block to put it in.
+    toast.error(errorMessage(saveError, "Could not save the post."));
+    return;
+  }
+
+  toast.success(post ? "Post updated." : "Post created.");
+
+  // A full navigation rather than a router link: the list is refetched on
+  // arrival, so the post just written shows up instead of a stale copy.
+  window.location.assign("/admin?tab=posts");
+};
+
+/**
+ * The editor's starting values.
+ *
+ * An existing post starts from what is stored. A new one starts blank apart
+ * from the author, which is seeded once the author list resolves — see
+ * `PostFormPage`. Nothing else here can be derived, so it is a plain read of the
+ * post rather than a branch per field inside the component.
+ */
+const defaultValuesFor = (post: Post | null): PostFormValues => ({
+  authorIds: post?.authors.map((author) => author.id) ?? [],
+  category: post?.category ?? "",
+  content: post?.content ?? "",
+  excerpt: post?.excerpt ?? "",
+  published: post?.published ?? false,
+  slug: post?.slug ?? "",
+  title: post?.title ?? "",
+});
+
+/**
+ * Placeholder shown while the editor waits for the post it was asked to edit.
+ *
+ * `aria-busy` on the region rather than a spinner: the shape of the page is what
+ * is loading, and mirroring it stops the content jumping into place.
+ */
+const EditorSkeleton = () => (
+  <div
+    aria-busy="true"
+    className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
+  >
+    <Skeleton className="h-11 w-36" />
+    <Skeleton className="mt-6 h-9 w-72 max-w-full" />
+    <Skeleton className="mt-3 h-5 w-96 max-w-full" />
+    <Skeleton className="mt-8 h-72 w-full rounded-xl" />
+  </div>
+);
 
 /**
  * The post editor, as a page rather than a dialog.
@@ -39,58 +147,48 @@ interface PostFormPageProps {
  */
 const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
   const slugTouchedRef = useRef(false);
+  const { data: selectableAuthors } = useQuery({
+    queryKey: ["selectable-post-authors"],
+    queryFn: () => listSelectableAuthors(),
+  });
 
   const form = useForm({
-    defaultValues: {
-      content: post?.content ?? "",
-      excerpt: post?.excerpt ?? "",
-      published: post?.published ?? false,
-      slug: post?.slug ?? "",
-      title: post?.title ?? "",
-    },
+    defaultValues: defaultValuesFor(post),
     onSubmit: async ({ value }) => {
-      const input: PostInput = {
-        content: value.content,
-        excerpt: value.excerpt || undefined,
-        published: value.published,
-        slug: value.slug,
-        title: value.title,
-      };
-
-      try {
-        await (post
-          ? updatePost({ data: { ...input, id: post.id } })
-          : createPost({ data: input }));
-      } catch (saveError) {
-        // The form keeps its values so the draft is not lost, and the reason is
-        // a toast: this page has no inline error block to put it in.
-        toast.error(errorMessage(saveError, "Could not save the post."));
-        return;
-      }
-
-      toast.success(post ? "Post updated." : "Post created.");
-
-      // A full navigation rather than a router link: the list is refetched on
-      // arrival, so the post just written shows up instead of a stale copy.
-      window.location.assign("/admin?tab=posts");
+      await submitPost(value, post);
     },
   });
+
+  // A new post is credited to the person writing it, so the common case is
+  // already right and adding a co-author is a tick rather than a setup step.
+  //
+  // Seeded in an effect rather than in `defaultValuesFor` because the author list
+  // is fetched, and the editor renders before it arrives — a default computed
+  // then would always be empty. Guarded by a ref so it cannot overwrite an
+  // author the editor picked or unticked in the meantime, and skipped entirely
+  // for an existing post, whose byline is already decided.
+  const seededAuthorRef = useRef(false);
+  const currentUserId = selectableAuthors?.find(
+    (author) => author.isCurrentUser
+  )?.id;
+
+  useEffect(() => {
+    if (seededAuthorRef.current || post || !currentUserId) {
+      return;
+    }
+
+    seededAuthorRef.current = true;
+
+    if (form.state.values.authorIds.length === 0) {
+      form.setFieldValue("authorIds", [currentUserId]);
+    }
+  }, [currentUserId, form, post]);
 
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
   const submitLabel = post ? "Save changes" : "Create post";
 
   if (isLoading) {
-    return (
-      <div
-        aria-busy="true"
-        className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
-      >
-        <Skeleton className="h-11 w-36" />
-        <Skeleton className="mt-6 h-9 w-72 max-w-full" />
-        <Skeleton className="mt-3 h-5 w-96 max-w-full" />
-        <Skeleton className="mt-8 h-72 w-full rounded-xl" />
-      </div>
-    );
+    return <EditorSkeleton />;
   }
 
   return (
@@ -143,7 +241,7 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
             {({ state, handleChange, handleBlur }) => (
               <FormField
                 id="post-slug"
-                label="Slug"
+                label="URL slug"
                 value={state.value}
                 onChange={(event) => {
                   slugTouchedRef.current = true;
@@ -151,7 +249,7 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
                 }}
                 onBlur={handleBlur}
                 error={state.meta.errors[0]?.message}
-                helperText="Auto-generated from the title. You can edit it."
+                helperText="The last part of the post's address. Auto-generated from the title, and you can edit it."
                 required
               />
             )}
@@ -167,6 +265,54 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
                 onChange={(event) => handleChange(event.target.value)}
                 onBlur={handleBlur}
                 helperText="Short summary shown on the blog listing."
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="category">
+            {({ state, handleChange }) => (
+              <div className="grid gap-1.5">
+                <label
+                  className="text-foreground text-sm font-medium"
+                  htmlFor="post-category"
+                  id="post-category-label"
+                >
+                  Category
+                </label>
+                <Select
+                  onValueChange={(value) => handleChange(value ?? "")}
+                  value={state.value}
+                >
+                  <SelectTrigger
+                    aria-labelledby="post-category-label"
+                    className="min-h-11 w-full"
+                    id="post-category"
+                  >
+                    <SelectValue placeholder="No category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {POST_CATEGORIES.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-xs">
+                  Optional. Shown in the breadcrumb above the post title, and
+                  used to group the blog listing.
+                </p>
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="authorIds">
+            {({ state, handleChange }) => (
+              <PostAuthorPicker
+                authors={selectableAuthors ?? []}
+                isLoading={selectableAuthors === undefined}
+                onChange={handleChange}
+                selectedIds={state.value}
               />
             )}
           </form.Field>

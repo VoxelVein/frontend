@@ -106,25 +106,17 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
             preload="intent"
             to="/mods"
           >
-            <span>Browse all</span>
+            <span>Browse projects</span>
             <IconArrowRight aria-hidden size={18} />
           </Link>
         </div>
 
         {projects.length === 0 ? (
           <EmptyState
-            action={
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "min-h-11"
-                )}
-                to="/mods"
-              >
-                Browse mods
-              </Link>
-            }
-            description="Once projects are published, the most popular ones show up here."
+            // No action here: the section header already carries a link to
+            // /mods directly above, and this state used to render a second one
+            // labelled "Browse mods" — two buttons, two names, one destination.
+            description="Once projects are published, the most popular ones show up here. In the meantime, browse everything on the site."
             icon={<IconFlame aria-hidden size={24} />}
             title="Nothing trending yet"
             variant="inline"

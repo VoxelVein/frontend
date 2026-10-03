@@ -11,6 +11,7 @@ import {
 import type { InferOutput } from "valibot";
 
 import { db } from "@/db";
+import { resolveAuthors } from "@/lib/post-authors";
 import { resolvePreview } from "@/lib/posts";
 import type { PostSummary } from "@/lib/posts";
 import { matchPost, rankPost, toTextQuery } from "@/lib/search/text";
@@ -32,8 +33,9 @@ export interface PostSearchResult {
   query: string;
 }
 
-/** One hit as `jsonb_agg` renders it. `excerpt` is nullable in the schema. */
+/** One hit as `jsonb_agg` renders it. `category` and `excerpt` are nullable. */
 const postHitSchema = object({
+  category: nullable(string()),
   content: string(),
   createdAt: string(),
   excerpt: nullable(string()),
@@ -51,12 +53,15 @@ const postSearchRowSchema = object({
   hits: array(postHitSchema),
 });
 
-const toSummaries = (hits: PostHit[]): PostSummary[] =>
-  // `content` is dropped from the result: it is read only to derive the teaser,
-  // and shipping every matching body to the browser would defeat the point of
-  // searching on it.
-  hits.map(({ content, ...hit }) => ({
+const toSummaries = async (hits: PostHit[]): Promise<PostSummary[]> => {
+  // One batched byline query for the whole page of hits, for the same reason the
+  // listing batches it: a hit renders an avatar per post, so without this it
+  // would be fifty queries for one search.
+  const authorsByPost = await resolveAuthors(hits.map((hit) => hit.id));
+
+  return hits.map(({ content, ...hit }) => ({
     ...hit,
+    authors: authorsByPost.get(hit.id) ?? [],
     // `to_jsonb` renders a `timestamp` with no zone and no milliseconds, which
     // would then parse as local time and show the wrong day. Re-serialising
     // through `Date` pins it to UTC.
@@ -64,6 +69,7 @@ const toSummaries = (hits: PostHit[]): PostSummary[] =>
     updatedAt: new Date(hit.updatedAt).toISOString(),
     preview: resolvePreview({ content, excerpt: hit.excerpt }),
   }));
+};
 
 /**
  * Searches blog posts in Postgres.
@@ -82,6 +88,7 @@ export const searchPostsInDatabase = async ({
   const result = await db.execute(sql`
     with matched as (
       select
+        posts.category,
         posts.content,
         posts.created_at as "createdAt",
         posts.excerpt,
@@ -125,7 +132,7 @@ export const searchPostsInDatabase = async ({
 
   return {
     estimatedTotalHits: parsed.output.estimatedTotalHits,
-    hits: toSummaries(parsed.output.hits),
+    hits: await toSummaries(parsed.output.hits),
     query: q,
   };
 };

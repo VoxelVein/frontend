@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { usePostSearch } from "@/hooks/use-post-search";
-import type { PostSummary } from "@/lib/posts";
+import type { PostAuthor, PostSummary } from "@/lib/posts";
 import {
   deletePost,
   listPosts,
@@ -100,6 +100,8 @@ const toMessage = (cause: unknown, fallback: string) => {
  * render through the same row.
  */
 export interface AdminPostRow {
+  authors: PostAuthor[];
+  category: string | null;
   createdAt: Date | string;
   excerpt: string | null;
   id: string;

@@ -2,6 +2,8 @@ import { IconArrowRight, IconNews } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
+import { PostAuthors } from "@/components/blog/post-authors";
+import { PostCategoryBadge } from "@/components/blog/post-category";
 import { EmptyState } from "@/components/empty-state";
 import { Reveal } from "@/components/reveal";
 import { buttonVariants } from "@/components/ui/button-variants";
@@ -67,7 +69,10 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
         <span className="sr-only">Read {post.title}</span>
       </Link>
 
-      <NewsDate value={post.createdAt} />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <NewsDate value={post.createdAt} />
+        <PostCategoryBadge category={post.category} variant="subtle" />
+      </div>
       <h3 className="text-foreground mt-2 max-w-prose text-xl font-semibold tracking-tight text-balance sm:text-2xl">
         {post.title}
       </h3>
@@ -76,6 +81,9 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
           {post.preview}
         </p>
       ) : null}
+      <div className="mt-4">
+        <PostAuthors authors={post.authors} compact linked={false} />
+      </div>
     </article>
   </li>
 );
@@ -104,6 +112,13 @@ const LedgerPost = ({ post }: { post: PostSummary }) => (
           <h3 className="text-foreground text-base font-semibold tracking-tight text-balance">
             {post.title}
           </h3>
+          {/* Category and byline on one line, under the title: at ledger width
+              they are the only way to tell a security advisory apart from a
+              company announcement without opening it. */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <PostCategoryBadge category={post.category} variant="subtle" />
+            <PostAuthors authors={post.authors} compact linked={false} />
+          </div>
           {post.preview ? (
             <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-6">
               {post.preview}
@@ -171,17 +186,9 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
 
         {lead === undefined ? (
           <EmptyState
-            action={
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "min-h-11"
-                )}
-                to="/blog"
-              >
-                Visit the blog
-              </Link>
-            }
+            // No action: the header link above already goes to /blog. This
+            // state used to render a second one reading "Visit the blog", so an
+            // empty section offered the same destination under two names.
             description="Once the team publishes an update, the newest posts show up here."
             icon={<IconNews aria-hidden size={24} />}
             title="No posts yet"

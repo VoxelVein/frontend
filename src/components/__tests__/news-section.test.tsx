@@ -42,6 +42,8 @@ const makePost = (
   slug: string,
   day: string
 ): PostSummary => ({
+  authors: [],
+  category: null,
   createdAt: `2026-01-${day}T10:30:00.000Z`,
   excerpt: null,
   id,
@@ -179,5 +181,57 @@ describe(NewsSection, () => {
 
     expect(screen.getByText("No posts yet")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
+  });
+
+  it("files each post under its category", () => {
+    renderSection([
+      { ...POSTS[0], category: "changelog" },
+      { ...POSTS[1], category: "engineering" },
+    ]);
+
+    expect(screen.getByText("Changelog")).toBeInTheDocument();
+    expect(screen.getByText("Engineering")).toBeInTheDocument();
+  });
+
+  it("names the authors of the lead story", () => {
+    renderSection([
+      {
+        ...POSTS[0],
+        authors: [
+          { id: "a1", image: null, name: "Hedi Zandi", username: "hedi" },
+          { id: "a2", image: null, name: "Ben Sabic", username: "ben" },
+        ],
+      },
+    ]);
+
+    expect(screen.getByText("Hedi Zandi, Ben Sabic")).toBeInTheDocument();
+  });
+
+  it("shows no profile links, because each entry is already one big link", () => {
+    renderSection([
+      {
+        ...POSTS[0],
+        authors: [
+          { id: "a1", image: null, name: "Hedi Zandi", username: "hedi" },
+        ],
+      },
+    ]);
+
+    // The entry's own link is stretched over the whole row, so an author link
+    // underneath it would be unreachable and would read as a link in a link.
+    // Scoped to the list: the section header's own "All posts" link is outside
+    // it and unaffected.
+    const list = screen.getByRole("list", { name: /latest blog posts/iu });
+
+    expect(within(list).getAllByRole("link")).toHaveLength(1);
+  });
+
+  it("shows neither chip nor byline for an uncategorised, unattributed post", () => {
+    renderSection([POSTS[0]]);
+
+    expect(
+      screen.queryByRole("list", { name: "Authors" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/uncategorised/iu)).not.toBeInTheDocument();
   });
 });

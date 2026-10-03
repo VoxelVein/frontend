@@ -227,7 +227,9 @@ describe("AdminUsers role visibility", () => {
 
     // No rank warning: an equal rank is not above yours.
     expect(
-      screen.queryByText("You cannot act on an account above your rank.")
+      screen.queryByText(
+        "Your role cannot manage an account with a higher role than yours."
+      )
     ).not.toBeInTheDocument();
   });
 
@@ -246,7 +248,9 @@ describe("AdminUsers role visibility", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("You cannot act on an account above your rank.")
+        screen.getByText(
+          "Your role cannot manage an account with a higher role than yours."
+        )
       ).toBeInTheDocument();
     });
 

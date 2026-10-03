@@ -28,8 +28,13 @@ const CookiesPage = () => (
         body: (
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Session cookie: issued by Better Auth to keep you signed in. This
-              is a strictly necessary cookie.
+              {/* Not "issued by Better Auth": that is the name of the library
+                  in our stack, and a cookie policy is not the place to hand a
+                  visitor a dependency's brand. What matters to them is what the
+                  cookie does and why it cannot be switched off. */}
+              Session cookie: keeps you signed in. We set it as soon as you sign
+              in and clear it when you sign out, and it cannot be turned off
+              without losing access to your account.
             </li>
             <li>
               Consent preference: stored in your browser to remember whether you
@@ -57,8 +62,8 @@ const CookiesPage = () => (
         heading: "Changes to This Policy",
         body: (
           <p>
-            We may update this Cookie Policy from time to time. Material changes
-            will be announced on the platform.
+            We may update this Cookie Policy from time to time. If a change
+            affects what we store or why, we will post a notice on VoxelVein.
           </p>
         ),
       },

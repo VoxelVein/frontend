@@ -131,7 +131,7 @@ describe("SettingsDangerZone account deletion", () => {
       screen.queryByRole("group", { name: "Big Worlds" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/Kept, marked as a large project by the VoxelVein team/u)
+      screen.getByText(/marked it as a protected project/u)
     ).toBeInTheDocument();
     expect(screen.getAllByRole("radio")).toHaveLength(2);
   });

@@ -42,13 +42,19 @@ const CATEGORY_LABELS = new Map([
  * A stored category slug -> the label to show: "skyblock" -> "Skyblock".
  *
  * Every category is lowercase and dashed, so anything outside the acronym map
- * is just title-cased with its dashes read as spaces. An unknown slug still
+ * is just title-cased word by word. Every word is capitalised, not only the
+ * first: capitalising the slug's leading character alone rendered
+ * "kitchen-sink" as "Kitchen sink" and "world-management" as
+ * "World management", both of which are real categories. An unknown slug still
  * produces something readable, since a project can carry a category this build
  * no longer lists.
  */
 export const formatCategory = (value: string): string =>
   CATEGORY_LABELS.get(value) ??
-  value.charAt(0).toUpperCase() + value.slice(1).replaceAll("-", " ");
+  value
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
 /** ISO timestamp -> "Aug 14, 2026" (UTC, so server and client agree). */
 export const formatDate = (value: string): string =>

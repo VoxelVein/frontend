@@ -79,7 +79,7 @@ const MyProjectsPage = () => {
 
         {canUpload ? null : (
           <div className="mt-8">
-            <VerificationNotice />
+            <VerificationNotice email={session.user.email} />
           </div>
         )}
 

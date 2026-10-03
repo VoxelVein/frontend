@@ -47,6 +47,11 @@ vi.mock("@/lib/user-profiles.functions", () => ({
   getPublicProfile: vi.fn<() => Promise<null>>(),
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The report dialog posts to a server function, which reaches the database at import time; this suite is about rendering, so it is stubbed
+vi.mock("@/lib/reports.functions", () => ({
+  createReport: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
+}));
+
 interface HeadResult {
   meta: { content?: string; name?: string; title?: string }[];
 }

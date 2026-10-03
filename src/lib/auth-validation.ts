@@ -1,8 +1,7 @@
+import { getUsernameProblem, USERNAME_PROBLEM_MESSAGES } from "@/lib/usernames";
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 const MIN_PASSWORD_LENGTH = 8;
-const MIN_USERNAME_LENGTH = 3;
-const MAX_USERNAME_LENGTH = 30;
-const USERNAME_PATTERN = /^[a-zA-Z0-9_.]+$/u;
 
 interface LoginFieldErrors {
   email?: string;
@@ -81,15 +80,19 @@ const validateProfileInput = (
     errors.name = "Name is required.";
   }
 
-  if (!username.trim()) {
+  if (username.trim()) {
+    // Delegates to the shared checker rather than restating the rules. This
+    // module previously kept its own copies of the length bounds, the pattern,
+    // and the wording, so the profile form said "3-30 characters. Letters,
+    // numbers, underscores, and periods." while this said "3-30 characters"
+    // and "Use letters, numbers, underscores, or periods." — three sentences
+    // for one rule, and the one on screen was not this one.
+    const problem = getUsernameProblem(username);
+    if (problem) {
+      errors.username = USERNAME_PROBLEM_MESSAGES[problem];
+    }
+  } else {
     errors.username = "Username is required.";
-  } else if (
-    username.length < MIN_USERNAME_LENGTH ||
-    username.length > MAX_USERNAME_LENGTH
-  ) {
-    errors.username = `Username must be ${MIN_USERNAME_LENGTH}-${MAX_USERNAME_LENGTH} characters.`;
-  } else if (!USERNAME_PATTERN.test(username)) {
-    errors.username = "Use letters, numbers, underscores, or periods.";
   }
 
   return errors;

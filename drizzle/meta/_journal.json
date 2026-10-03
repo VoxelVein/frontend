@@ -127,6 +127,20 @@
       "when": 1790957049609,
       "tag": "0017_add_user_images",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791023400358,
+      "tag": "0018_blog_post_authors_and_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791031815736,
+      "tag": "0019_reports",
+      "breakpoints": true
     }
   ]
 }

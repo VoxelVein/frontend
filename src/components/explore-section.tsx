@@ -3,11 +3,18 @@ import { Link } from "@tanstack/react-router";
 
 import { FilledPill } from "@/components/filled-pill";
 import { Reveal } from "@/components/reveal";
-import { MINECRAFT_CATEGORIES } from "@/lib/categories";
+import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
 import type { MinecraftCategory } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
-/** Marks a category whose browse route does not exist yet. */
+/**
+ * Marks a category whose browse route does not exist yet.
+ *
+ * Nothing is currently unavailable — every entry in `MINECRAFT_CATEGORIES` has
+ * `available: true` — so the badge is dormant. It stays because the registry
+ * carries the flag as part of its contract, and a category added with
+ * `available: false` should read as "Soon" without a second edit here.
+ */
 const SoonBadge = () => (
   <span className="border-border text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium">
     Soon
@@ -95,8 +102,7 @@ const ExploreSection = () => (
         </h2>
 
         <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8">
-          Six ways into the community&apos;s work. Jump into the categories that
-          are live today, and watch the rest land.
+          {`${MINECRAFT_CATEGORIES.length} ways into the community's work. Browse ${categoryLabelSentence()}.`}
         </p>
       </Reveal>
 

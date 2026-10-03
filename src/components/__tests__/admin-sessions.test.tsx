@@ -120,7 +120,7 @@ const selectUser = async (name: string) => {
  * the click alone does not commit the reducer.
  */
 const clickRevoke = async () => {
-  fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
+  fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
   await settle();
 };
 
@@ -145,7 +145,7 @@ describe(AdminSessions, () => {
 
     // A user id is a UUID, so the panel must name the person rather than show
     // a raw value anywhere.
-    const panel = screen.getByRole("region", { name: "Sessions" });
+    const panel = screen.getByRole("region", { name: "Signed-in devices" });
     expect(panel).toHaveTextContent("Alice");
     expect(panel).toHaveTextContent("alice@example.com");
     expect(panel).not.toHaveTextContent(ALICE.id);
@@ -165,9 +165,9 @@ describe(AdminSessions, () => {
 
     await selectUser("AliceC");
 
-    expect(screen.getByRole("region", { name: "Sessions" })).toHaveTextContent(
-      "@AliceC"
-    );
+    expect(
+      screen.getByRole("region", { name: "Signed-in devices" })
+    ).toHaveTextContent("@AliceC");
   });
 
   it("falls back to the plain username when no display name was chosen", async () => {
@@ -181,9 +181,9 @@ describe(AdminSessions, () => {
 
     await selectUser("alicec");
 
-    expect(screen.getByRole("region", { name: "Sessions" })).toHaveTextContent(
-      "@alicec"
-    );
+    expect(
+      screen.getByRole("region", { name: "Signed-in devices" })
+    ).toHaveTextContent("@alicec");
   });
 
   it("omits the handle for an account that never chose one", async () => {
@@ -197,7 +197,7 @@ describe(AdminSessions, () => {
 
     await selectUser("Alice");
 
-    const panel = screen.getByRole("region", { name: "Sessions" });
+    const panel = screen.getByRole("region", { name: "Signed-in devices" });
     expect(panel).toHaveTextContent("alice@example.com");
     // The handle marker is "(@", because the email's own "@" would match otherwise.
     expect(panel).not.toHaveTextContent("(@");
@@ -214,7 +214,7 @@ describe(AdminSessions, () => {
     render(<AdminSessions />);
     await settle();
 
-    fireEvent.change(screen.getByLabelText("Search users by name"), {
+    fireEvent.change(screen.getByLabelText("Find a user"), {
       target: { value: "Ali" },
     });
 

@@ -23,6 +23,16 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 });
 
 const post = {
+  authors: [
+    { id: "author-1", image: null, name: "Hedi Zandi", username: "hedi" },
+    {
+      id: "author-2",
+      image: "https://cdn.example.com/ben.png",
+      name: "Ben Sabic",
+      username: "ben",
+    },
+  ],
+  category: "engineering",
   createdAt: "2026-01-15T10:30:00.000Z",
   preview: "A short teaser derived from the body.",
   slug: "hello-world",
@@ -72,5 +82,46 @@ describe(PostCard, () => {
     render(<PostCard post={{ ...post, preview: "" }} />);
 
     expect(screen.getByText("Hello world")).toBeInTheDocument();
+  });
+
+  it("shows the category as a readable label, not the stored slug", () => {
+    render(<PostCard post={post} />);
+
+    expect(screen.getByText("Engineering")).toBeInTheDocument();
+    expect(screen.queryByText("engineering")).not.toBeInTheDocument();
+  });
+
+  it("shows no category chip when the post is uncategorised", () => {
+    // Half the archive is uncategorised by design; a chip reading
+    // "Uncategorised" on every second card would say less than its absence.
+    render(<PostCard post={{ ...post, category: null }} />);
+
+    expect(screen.getByText("Hello world")).toBeInTheDocument();
+    expect(screen.queryByText(/uncategorised/iu)).not.toBeInTheDocument();
+  });
+
+  it("names every author in one byline", () => {
+    render(<PostCard post={post} />);
+
+    expect(screen.getByText("Hedi Zandi, Ben Sabic")).toBeInTheDocument();
+  });
+
+  it("keeps author names out of the tab order so the card stays one link", () => {
+    // The card's link is stretched over the whole tile, so a profile link
+    // underneath it could not be reached by pointer and would read as a link
+    // nested inside a link. The names stay, the links go.
+    render(<PostCard post={post} />);
+
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByText("Hedi Zandi, Ben Sabic")).toBeInTheDocument();
+  });
+
+  it("omits the byline entirely for a post with no recorded author", () => {
+    render(<PostCard post={{ ...post, authors: [] }} />);
+
+    expect(screen.getByText("Hello world")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("list", { name: "Authors" })
+    ).not.toBeInTheDocument();
   });
 });

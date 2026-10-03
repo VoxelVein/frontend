@@ -13,12 +13,18 @@ import type { Capability } from "@/lib/roles";
 
 export const ADMIN_TABS = [
   { label: "Users", value: "users" },
-  { label: "Sessions", value: "sessions" },
+  // "Devices" and "Account deletions" rather than the bare "Sessions" and
+  // "Deletions": a tab label is all an admin sees before clicking, and neither
+  // noun said what it was about. These match the headings inside each panel.
+  { label: "Devices", value: "sessions" },
   { label: "Posts", value: "posts" },
   { label: "Storage", value: "storage" },
   { label: "Notifications", value: "notifications" },
-  { label: "Deletions", value: "deletions" },
+  { label: "Account deletions", value: "deletions" },
   { label: "Reviews", value: "reviews" },
+  // After Reviews: both are moderation queues, so they sit together rather than
+  // stranding the newest one next to Storage.
+  { label: "Reports", value: "reports" },
 ] as const;
 
 export type AdminTab = (typeof ADMIN_TABS)[number]["value"];
@@ -28,6 +34,7 @@ export const TAB_CAPABILITY = {
   deletions: "manageDeletions",
   notifications: "manageNotifications",
   posts: "managePosts",
+  reports: "manageReports",
   reviews: "reviewProjects",
   sessions: "manageSessions",
   storage: "manageStorage",

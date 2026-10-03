@@ -60,13 +60,29 @@ const files = [
   ...ROOT_FILES.filter((file) => exists(file)),
 ];
 
+/**
+ * Blanks out inline code spans, keeping their length so offsets still line up.
+ *
+ * A document that explains Markdown has to write things like `[a](b)`. Without
+ * this, the link pattern matches that example and reports it as a broken link to
+ * a file called `b` — a false positive that would otherwise force such
+ * documentation to be written less precisely.
+ *
+ * Fenced blocks are handled by the same substitution, since a fence is just a
+ * run of backticks longer than the span markers around it.
+ */
+const withoutCode = (text: string): string =>
+  text.replaceAll(/(?<fence>`+)(?:[^`]|(?!\k<fence>)`)*\k<fence>/gu, (span) =>
+    " ".repeat(span.length)
+  );
+
 const broken: string[] = [];
 
 for (const file of files) {
   const text = readFileSync(file, "utf-8");
   const dir = path.dirname(file);
 
-  for (const match of text.matchAll(
+  for (const match of withoutCode(text).matchAll(
     /\[[^\]]*\]\(\s*(?<target>[^)\s]+)\s*\)/gu
   )) {
     const link = match.groups?.target?.trim() ?? "";

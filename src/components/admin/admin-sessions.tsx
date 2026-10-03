@@ -262,7 +262,7 @@ const SessionRow = ({
         disabled={isRevoking}
         onClick={() => onRevoke(session.token)}
       >
-        Revoke
+        Sign out
       </Button>
     </div>
   );
@@ -365,7 +365,7 @@ const AdminSessions = () => {
 
     if (loadError) {
       dispatch({
-        error: loadError.message ?? "Could not load sessions.",
+        error: loadError.message ?? "Could not load this user's devices.",
         type: "LOAD_ERROR",
         userId,
       });
@@ -405,7 +405,7 @@ const AdminSessions = () => {
 
     if (revokeError) {
       dispatch({
-        error: revokeError.message ?? "Could not revoke session.",
+        error: revokeError.message ?? "Could not sign out that device.",
         type: "REVOKE_ERROR",
         userId: selectedUserId,
       });
@@ -413,7 +413,7 @@ const AdminSessions = () => {
     }
 
     dispatch({ token, type: "REVOKE_SUCCESS" });
-    toast.success("Session revoked.");
+    toast.success("Signed that device out.");
   };
 
   /**
@@ -432,7 +432,7 @@ const AdminSessions = () => {
 
     if (revokeError) {
       dispatch({
-        error: revokeError.message ?? "Could not revoke sessions.",
+        error: revokeError.message ?? "Could not sign out every device.",
         type: "REVOKE_ERROR",
         userId: selectedUserId,
       });
@@ -440,7 +440,7 @@ const AdminSessions = () => {
     }
 
     dispatch({ type: "REVOKE_ALL_SUCCESS" });
-    toast.success("All sessions revoked.");
+    toast.success("Signed this user out everywhere.");
   };
 
   const selectedUser = usersState.users.find(
@@ -464,7 +464,7 @@ const AdminSessions = () => {
       <EmptyState
         variant="inline"
         title="Search for a user"
-        description="Start typing a name to find the account, then pick them to inspect their sessions."
+        description="Start typing a name to find the account, then pick them to see every device they are signed in on."
         icon={<IconUserSearch size={20} aria-hidden="true" />}
       />
     );
@@ -479,8 +479,8 @@ const AdminSessions = () => {
     content = (
       <EmptyState
         variant="inline"
-        title="No active sessions"
-        description="This user has no active sessions right now."
+        title="No signed-in devices"
+        description="This user is not signed in on any device right now."
         icon={<IconDeviceDesktop size={20} aria-hidden="true" />}
       />
     );
@@ -488,7 +488,7 @@ const AdminSessions = () => {
     content = (
       <div ref={parentRef} className="mt-4 max-h-[32rem] overflow-auto">
         <ul
-          aria-label="Sessions"
+          aria-label="Signed-in devices"
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
             position: "relative",
@@ -532,12 +532,12 @@ const AdminSessions = () => {
               id="admin-sessions-heading"
               className="text-foreground text-lg font-semibold"
             >
-              Sessions
+              Signed-in devices
             </h2>
             <CardDescription>
               {selectedUser
-                ? `${userLabel(selectedUser)} — ${sessionCount} active ${countLabel}.`
-                : "Search for a user, then review or revoke their sessions."}
+                ? `${userLabel(selectedUser)} — signed in on ${sessionCount} ${countLabel}.`
+                : "Search for a user, then review or sign them out of their devices."}
             </CardDescription>
           </div>
 
@@ -553,7 +553,7 @@ const AdminSessions = () => {
                   void handleRevokeAll();
                 }}
               >
-                Revoke all
+                Sign out all devices
               </Button>
             </CardAction>
           ) : null}
@@ -568,8 +568,8 @@ const AdminSessions = () => {
             <input
               type="search"
               value={searchTerm}
-              aria-label="Search users by name"
-              placeholder="Search users by name…"
+              aria-label="Find a user"
+              placeholder="Find a user by name, handle, or email…"
               className="border-border bg-background focus-visible:ring-ring focus-visible:ring-ring/50 h-11 w-full rounded-lg border pr-10 pl-9 text-sm focus-visible:ring-3 focus-visible:outline-none"
               onChange={(event) => {
                 setSearchTerm(event.target.value);
@@ -638,8 +638,8 @@ const AdminSessions = () => {
             <div className="border-border mt-6 border-t pt-2">
               <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                 <IconClock aria-hidden="true" size={13} />
-                Expiry is when the session stops working on its own. Revoking
-                ends it immediately.
+                A device expires on its own when its expiry passes. Signing out
+                ends it right away.
               </div>
               {content}
             </div>

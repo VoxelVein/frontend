@@ -21,6 +21,7 @@ import {
 } from "@/lib/admin-accounts.functions";
 import type { AdminNotification } from "@/lib/admin-accounts.functions";
 import { errorMessage } from "@/lib/form-errors";
+import { PROTECTED_PROJECT_LABEL } from "@/lib/projects";
 import { relativeTime } from "@/lib/relative-time";
 
 const absoluteFormatter = new Intl.DateTimeFormat(undefined, {
@@ -175,7 +176,9 @@ export const AdminNotifications = ({
       }));
       onReadStateChange?.();
     } catch (error) {
-      toast.error(errorMessage(error, "Could not mark notification as read."));
+      toast.error(
+        errorMessage(error, "Could not mark the notification as read.")
+      );
     }
     setIsMutating(false);
   };
@@ -220,7 +223,7 @@ export const AdminNotifications = ({
       <EmptyState
         variant="inline"
         title="No notifications"
-        description="You will be notified here when a large project loses its owner."
+        description={`You will be notified here when a ${PROTECTED_PROJECT_LABEL.toLowerCase()} loses its owner.`}
         icon={<IconBell size={20} aria-hidden="true" />}
       />
     );
