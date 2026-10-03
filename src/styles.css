@@ -93,10 +93,21 @@
 
      Chroma is a constant 0.002 on hue 70, enough for the greys to read as
      warm paper rather than dead grey, faint enough to stay white. Raising it
-     toward 0.004 turns the background visibly cream, which is why it is
-     kept this low. Every text pairing below stays above WCAG AA: the
-     tightest is muted-foreground on muted at 10.8:1. */
-  --background: oklch(0.9779 0.002 70);
+     toward 0.004 turns a *surface* visibly cream, which is why the ladder is
+     kept this low.
+
+     The background is the exception and no longer follows that rule: it is the
+     specified #F8F8FF, stored as the OKLCH value that round-trips to it. That
+     puts it on hue 286 at chroma 0.0093 — cool and visibly tinted, where the
+     ladder below is warm and nearly neutral. The two no longer share a hue, so
+     a `bg-muted` or `bg-card` surface reads faintly warm against the page.
+     That is the intended look rather than a rounding error, but it does mean
+     the next person to tune a surface should tune it against the background
+     that is actually there and not against the old hue 70 assumption.
+
+     Every text pairing stays above WCAG AA, and all of them improve slightly:
+     the tightest is muted-foreground at 6.63:1. */
+  --background: oklch(0.9811 0.0093 286.2277);
   --foreground: oklch(0.2178 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2393 0 0);
@@ -158,7 +169,7 @@
 
 .dark {
   /* Obsidian: deep volcanic glass with red brand accent */
-  --background: oklch(0.1398 0 0);
+  --background: oklch(0.101 0.0084 165.234);
   --foreground: oklch(0.985 0.0041 91.4457);
   --card: oklch(0.1776 0 0);
   --card-foreground: oklch(0.985 0.0041 91.4457);
