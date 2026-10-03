@@ -26,11 +26,60 @@ values, so re-check them afterwards:
   `oklch(0.6122 0.2313 22.6077)`
 * `--destructive` — light `oklch(0.55 0.17 40)`, dark
   `oklch(0.7 0.19 40)`
+* `--background` — light `oklch(0.9811 0.0093 286.2277)`, which is
+  exactly `#F8F8FF`; dark `oklch(0.101 0.0084 165.234)`, exactly
+  `#020403`
 
 The brand red is a crimson (hue ≈ 23). Destructive actions and errors
 use a distinct orange-red (hue 40) and a solid button fill so they do
 not blend in with regular primary buttons. Both pass WCAG AA as text on
 the page background and with their `-foreground` color on top.
+
+Both backgrounds are specified hexes, so both are stored as the OKLCH
+value that round-trips to them rather than as raw hexes — every token in
+the file is OKLCH, and a lone `#F8F8FF` or `#020403` would be the only
+thing a reader could not check by eye. Deriving one is a mechanical
+conversion: `sRGB → linear → XYZ → OKLab → OKLCH`, then back to confirm
+it lands on the same eight-bit triple.
+
+### The light background is off-ladder on purpose
+
+The light neutral ladder — `--secondary`, `--muted`, `--border` — is a
+constant chroma `0.002` on hue 70, so it reads as warm paper. The
+background is deliberately **not** part of that ladder: at hue 286 and
+chroma `0.0093` it is cool and visibly tinted, four and a half times the
+ladder's chroma.
+
+The visible consequence is that `bg-muted`, `bg-secondary`, and `bg-card`
+sit faintly warm against the cool page. That is the intended look, but
+it means a future change to any of those should be judged against the
+background that is actually there rather than against the old hue 70
+assumption. Every text pairing still passes WCAG AA, and all of them
+improved slightly with this background: the tightest is
+`--muted-foreground` at 6.63:1.
+
+### Surfaces above the background are not scaled with it
+
+Changing `--background` alone leaves `--card`, `--popover`, `--muted`,
+and `--border` where they were, so they sit at a different distance from
+the page than before. Darkening the background *increases* their
+contrast against it, which is the direction that helps, and the text
+tokens all improved: `--foreground` from 19.08:1 to 19.70:1,
+`--muted-foreground` from 6.99:1 to 7.22:1, `--primary` from 4.72:1 to
+4.87:1.
+
+`--border` is the one token worth naming. It sits at 1.29:1 against the
+background, below the 3:1 WCAG 1.4.11 asks of a boundary that is the only
+thing identifying a control. That is pre-existing (it was 1.25:1 before)
+and this change marginally improves rather than causes it, but it is a
+real gap: inputs and unlabelled controls in dark mode rely on a border
+that is very nearly invisible. Raise `--border`/`--input` toward
+`oklch(0.32 0 0)` if that is addressed.
+
+`--sidebar` mirrors `--background` in both themes, and in dark mode still
+holds the old `oklch(0.1398 0 0)`. It is currently referenced by no
+component, so nothing renders differently — but it is defined and would
+not match the page if a sidebar is ever built from it.
 
 ## What the theme changes
 
