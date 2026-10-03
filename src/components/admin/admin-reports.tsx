@@ -42,8 +42,8 @@ const describeQueue = (openCount: number): string => {
  */
 const describeResolution = (resolution: ReportResolution): string =>
   resolution === "dismissed"
-    ? "This closes the report without any action being taken. The reporter is not notified either way."
-    : "This closes the report and records that it was actioned. The reporter is not notified either way.";
+    ? "This closes the report without any action being taken. The reporter is told it was dismissed."
+    : "This closes the report and records that it was actioned. The reporter is told the outcome.";
 
 interface ListState {
   error: string | null;

@@ -5,7 +5,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { object, parse, picklist, pipe, string, uuid } from "valibot";
 
 import { db } from "@/db";
-import { projects, reports, users } from "@/db/schema";
+import { projects, reports, userNotifications, users } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import {
@@ -259,19 +259,46 @@ interface ResolutionInput {
   resolution: ReportResolution;
 }
 
-/** Marks a report actioned or dismissed. */
+/**
+ * Marks a report actioned or dismissed, and tells the reporter.
+ *
+ * The notification is written in the same call as the update, so a report
+ * cannot end up closed with nobody told. It carries no project: a report is
+ * about a project or an account, and the reporter's own project would be an
+ * unrelated thing to link them to. The row is read in place and leads nowhere,
+ * which is honest — there is no page showing "your report" to send them to.
+ *
+ * A reporter whose account has been deleted is skipped, since `reporterId` is
+ * null and the row would have nobody to show.
+ */
 export const resolveReport = createServerFn({ method: "POST" })
   .validator((data: ResolutionInput) => parse(resolutionSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await requireModerator();
     const resolution: ReportResolution = data.resolution;
 
-    await db
+    const [closed] = await db
       .update(reports)
       .set({
         resolvedAt: new Date(),
         resolvedById: session.user.id,
         status: resolution,
       })
-      .where(eq(reports.id, data.id));
+      .where(eq(reports.id, data.id))
+      .returning({ reporterId: reports.reporterId });
+
+    if (!closed?.reporterId) {
+      return;
+    }
+
+    const actioned = resolution === "resolved";
+    await db.insert(userNotifications).values({
+      message: actioned
+        ? "A moderator looked at what you reported and dealt with it. Thanks for telling us."
+        : "A moderator looked at what you reported and did not agree it was a problem. Thanks anyway.",
+      projectId: null,
+      title: actioned ? "Report actioned" : "Report dismissed",
+      type: actioned ? "report-resolved" : "report-dismissed",
+      userId: closed.reporterId,
+    });
   });

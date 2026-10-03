@@ -111,7 +111,19 @@ announce and to click. A failure is reported *inside* the dialog rather
 than in the panel behind it, since a message the modal has just hidden
 from view is not a message.
 
-The reporter is not notified either way.
+The reporter is told the outcome, by a notification written in the same call
+that closes the report, so a report cannot end up resolved with nobody aware.
+The distinction carries into the wording: a dismissal says a moderator looked
+and did not agree, rather than silently vanishing, because "nothing happened"
+and "we decided this was fine" are different answers to whether reporting is
+worth anything.
+
+That notification has no project attached, and so no link. A report is about a
+project or an account, and the reporter's own project would be an unrelated
+thing to send them to; the row is read in place. That is why
+`user_notifications.project_id` became nullable in `0020` — it was `NOT NULL`
+before, which meant the only way to notify a reporter at all was to attach the
+notification to some arbitrary project.
 
 ## Permissions
 
@@ -132,6 +144,7 @@ The reporter is not notified either way.
 
 ## Related
 
+* [Notifications](notifications.md) — where a report outcome is announced
 * [Admin Panel](admin-panel.md) — the tab and the capability
 * [Projects](projects.md)
 * [Hardening](../security/hardening.md#rate-limits)
