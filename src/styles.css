@@ -84,6 +84,28 @@
 }
 
 :root {
+  /* The project easing curve, in one place.
+     `EASE_OUT_CSS` in src/lib/ease.ts is the JavaScript-side copy of this value;
+     keep the two in step. Strong deceleration, so anything that moves reads as
+     arriving rather than sliding. */
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Every overlay — dialog, alert dialog, dropdown, select, cookie banner —
+     animates through tw-animate-css, which reads its curve from `--tw-ease` and
+     its duration from `--tw-duration`.
+
+     That library ships a default curve of its own (cubic-bezier(.32,.72,0,1)),
+     so overlays were decelerating differently from every other transition on the
+     site. Stating the curve here makes them agree, and it is declared after the
+     import so it wins.
+
+     Worth knowing when editing one of those components: an `ease-*` utility on
+     the animated element overrides this, because tw-animate redefines those
+     utilities to write `--tw-ease` rather than `transition-timing-function`. So
+     `ease-smooth` on a keyframe animation does work — it just is not reaching
+     the animation through the property its name suggests. */
+  --tw-ease: var(--motion-ease);
+
   /* Light: clean with the crimson brand accent
 
      The brand is the specified #DC143C, stored as the OKLCH value that
@@ -302,14 +324,14 @@
 }
 
 .animate-hero-enter {
-  animation: hero-enter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: hero-enter 520ms var(--motion-ease) both;
 }
 
 /* The call to action arrives a beat after the headline rather than with it, so
    the eye is given the sentence before the button. 90ms is enough to read as
    sequence and short enough not to delay the thing people came to click. */
 .animate-hero-enter-lag {
-  animation: hero-enter 460ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+  animation: hero-enter 460ms var(--motion-ease) 90ms both;
 }
 
 /* ── Scroll reveal ────────────────────────────────────────────────────
@@ -330,10 +352,8 @@
   opacity: 0;
   transform: translateY(var(--reveal-distance));
   transition:
-    opacity var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
-      var(--reveal-delay),
-    transform var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
-      var(--reveal-delay);
+    opacity var(--reveal-duration) var(--motion-ease) var(--reveal-delay),
+    transform var(--reveal-duration) var(--motion-ease) var(--reveal-delay);
 }
 
 .reveal.is-visible {

@@ -32,7 +32,7 @@ const ProjectGalleryPage = ({
     <Link
       to={`${PROJECT_TYPE_PATHS[type]}/$slug`}
       params={{ slug }}
-      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
+      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
     >
       <IconArrowLeft size={16} aria-hidden="true" />
       Back to {projectName}

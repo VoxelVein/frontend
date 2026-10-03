@@ -104,6 +104,34 @@ transition to `0.01ms` and forces `scroll-behavior: auto` under
   `getServerSnapshot` returns `false`, meaning the server assumes motion
   is allowed and the client corrects it after hydration.
 
+## Overlays
+
+Dialogs, alert dialogs, dropdowns, selects, comboboxes and the cookie banner
+are not hand-written: they animate through `tw-animate-css`, imported at the
+top of `src/styles.css`. That library takes its curve from `--tw-ease` and its
+duration from `--tw-duration`.
+
+It ships a default curve of `cubic-bezier(.32,.72,0,1)`, which is not the
+project curve, so `--tw-ease` is set on `:root` to `--motion-ease`. Declaring
+it after the import is what makes it win.
+
+Two traps in that library, both of which have been live here:
+
+* **`animate-none` compiles to `animation: none !important`.** The dropdown and
+  select popups carried it *alongside* `data-open:animate-in`, on the same
+  element. The important flag won, so both menus had an animation written on
+  them that could never run and appeared instantly. A behavioural test cannot
+  catch this — the menu still opens, closes and traps focus — which is why
+  `overlay-motion.test.tsx` asserts on the class list.
+* **`ease-*` utilities write `--tw-ease`, not `transition-timing-function`.**
+  That is a tw-animate override of Tailwind's own utilities, so on a keyframe
+  animation `ease-smooth` does take effect — just not through the property its
+  name suggests.
+
+Menu items highlight on `data-highlighted` (Base UI) and transition at
+150 ms. Without that they snapped, which is the most-noticed interaction in a
+dropdown: the highlight jumping between items as the pointer moves.
+
 ## Components
 
 Four live in `src/components/motion/`.

@@ -194,7 +194,7 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
       <Link
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring focus-visible:ring-ring/50 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium focus-visible:ring-3 focus-visible:outline-none"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring focus-visible:ring-ring/50 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors duration-150 focus-visible:ring-3 focus-visible:outline-none"
         to="/admin"
         search={{ tab: "posts" }}
       >

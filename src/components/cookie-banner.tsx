@@ -41,7 +41,7 @@ const CookieBanner = () => {
       aria-label="Cookie consent"
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4"
     >
-      <div className="border-border bg-background/95 animate-in fade-in slide-in-from-bottom-2 ease-smooth pointer-events-auto mx-auto max-w-3xl rounded-xl border p-4 duration-300 motion-reduce:animate-none sm:p-5">
+      <div className="border-border bg-background/95 animate-in fade-in slide-in-from-bottom-2 pointer-events-auto mx-auto max-w-3xl rounded-xl border p-4 duration-300 motion-reduce:animate-none sm:p-5">
         <p className="text-foreground text-sm leading-6">
           We use cookies to keep you signed in and remember your preferences. By
           continuing, you agree to our use of cookies.{" "}

@@ -108,7 +108,7 @@ const ComboboxItem = ({
   <ComboboxPrimitive.Item
     data-slot="combobox-item"
     className={cn(
-      "data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex min-h-11 cursor-default items-center gap-2 rounded-md py-1 pr-8 pl-2 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50",
+      "data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex min-h-11 cursor-default items-center gap-2 rounded-md py-1 pr-8 pl-2 text-sm transition-colors duration-150 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50",
       className
     )}
     {...props}

@@ -140,7 +140,7 @@ const ReportDialog = ({
               {REPORT_REASONS.map((option) => (
                 <label
                   key={option.value}
-                  className="hover:bg-muted/60 flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm"
+                  className="hover:bg-muted/60 focus-within:bg-muted/60 flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-150"
                 >
                   <input
                     type="radio"
