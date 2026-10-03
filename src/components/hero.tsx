@@ -26,7 +26,7 @@ const Hero = () => {
 
   return (
     <section className="px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-20 lg:px-8 lg:pt-36 lg:pb-24">
-      <div className="animate-hero-fade-in mx-auto max-w-4xl text-center">
+      <div className="animate-hero-enter mx-auto max-w-4xl text-center">
         <h1 className="text-foreground mb-6 text-4xl font-bold tracking-tight text-balance sm:mb-8 sm:text-5xl lg:text-6xl">
           {/* The rotation is decorative; screen readers get one stable
               sentence instead of an announcement every two seconds. */}
@@ -49,7 +49,7 @@ const Hero = () => {
           {`Find, follow, and share ${TYPE_SENTENCE} from the Minecraft community.`}
         </p>
 
-        <div className="animate-hero-fade-in-delay flex items-center justify-center">
+        <div className="animate-hero-enter-lag flex items-center justify-center">
           <Link
             to="/mods"
             className={cn(

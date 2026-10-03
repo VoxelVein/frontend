@@ -8,6 +8,7 @@ import { TrendingProjectCard } from "@/components/projects/trending-project-card
 import { Reveal } from "@/components/reveal";
 import { buttonVariants } from "@/components/ui/button-variants";
 import type { ProjectDocument } from "@/lib/projects";
+import { staggerDelay } from "@/lib/reveal-stagger";
 import {
   getTrendingProjects,
   TRENDING_REFRESH_MS,
@@ -55,7 +56,12 @@ const TrendingGrid = ({ projects }: { projects: ProjectDocument[] }) => (
   >
     {projects.map((project, index) => (
       <li key={project.id}>
-        <TrendingProjectCard project={project} rank={index + 1} />
+        {/* Per-card rather than one block for the whole section: the row reads
+            as items landing in sequence, which is what a "top five" list is.
+            One reveal for the lot makes them appear as a single slab. */}
+        <Reveal delay={staggerDelay(index)}>
+          <TrendingProjectCard project={project} rank={index + 1} />
+        </Reveal>
       </li>
     ))}
   </ol>
@@ -76,40 +82,43 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
       className="px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
       id="trending"
     >
-      {/* One reveal for the whole section, so the heading and the cards
-          arrive together instead of the heading leading on its own. */}
-      <Reveal className="mx-auto max-w-7xl">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-muted-foreground mb-2 inline-flex items-center gap-1.5 text-sm font-medium">
-              <IconFlame aria-hidden size={16} />
-              Popular right now
-            </p>
+      <div className="mx-auto max-w-7xl">
+        {/* The heading lands first and the cards follow it, rather than one
+            block revealing together — a title that arrives with its list gives
+            the eye nowhere to start. */}
+        <Reveal>
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-muted-foreground mb-2 inline-flex items-center gap-1.5 text-sm font-medium">
+                <IconFlame aria-hidden size={16} />
+                Popular right now
+              </p>
 
-            <h2
-              className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
-              id="trending-heading"
+              <h2
+                className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
+                id="trending-heading"
+              >
+                Trending projects
+              </h2>
+
+              <p className="text-muted-foreground mt-2 max-w-prose text-sm sm:text-base">
+                Popular projects with recent releases, updated every minute.
+              </p>
+            </div>
+
+            <Link
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "hidden min-h-12 shrink-0 sm:inline-flex"
+              )}
+              preload="intent"
+              to="/mods"
             >
-              Trending projects
-            </h2>
-
-            <p className="text-muted-foreground mt-2 max-w-prose text-sm sm:text-base">
-              Popular projects with recent releases, updated every minute.
-            </p>
+              <span>Browse projects</span>
+              <IconArrowRight aria-hidden size={18} />
+            </Link>
           </div>
-
-          <Link
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "hidden min-h-12 shrink-0 sm:inline-flex"
-            )}
-            preload="intent"
-            to="/mods"
-          >
-            <span>Browse projects</span>
-            <IconArrowRight aria-hidden size={18} />
-          </Link>
-        </div>
+        </Reveal>
 
         {projects.length === 0 ? (
           <EmptyState
@@ -124,7 +133,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
         ) : (
           <TrendingGrid projects={projects} />
         )}
-      </Reveal>
+      </div>
     </section>
   );
 };

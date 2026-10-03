@@ -9,6 +9,7 @@ import { Reveal } from "@/components/reveal";
 import { buttonVariants } from "@/components/ui/button-variants";
 import type { PostSummary } from "@/lib/posts";
 import { getLatestPosts, POSTS_REFRESH_MS } from "@/lib/posts.functions";
+import { staggerDelay } from "@/lib/reveal-stagger";
 import { cn } from "@/lib/utils";
 
 interface NewsSectionProps {
@@ -89,51 +90,55 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
 );
 
 /** One dated line in the ledger, below the lead story. */
+/**
+ * One ledger entry.
+ *
+ * Renders the row only, not a list item: the call site owns the `<li>` so the
+ * reveal can wrap the entry without nesting one list item inside another.
+ */
 const LedgerPost = ({ post }: { post: PostSummary }) => (
-  <li>
-    <article className="group relative py-5 transition-colors duration-200 motion-reduce:transition-none">
-      <Link
-        className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-lg focus-visible:ring-3 focus-visible:outline-none"
-        params={{ slug: post.slug }}
-        preload="intent"
-        to="/blog/$slug"
-      >
-        <span className="sr-only">Read {post.title}</span>
-      </Link>
+  <article className="group relative py-5 transition-colors duration-200 motion-reduce:transition-none">
+    <Link
+      className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-lg focus-visible:ring-3 focus-visible:outline-none"
+      params={{ slug: post.slug }}
+      preload="intent"
+      to="/blog/$slug"
+    >
+      <span className="sr-only">Read {post.title}</span>
+    </Link>
 
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
-        {/* A fixed date column is what makes this read as a ledger rather than
+    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
+      {/* A fixed date column is what makes this read as a ledger rather than
             another list of cards. */}
-        <div className="shrink-0 sm:w-32">
-          <NewsDate value={post.createdAt} />
-        </div>
+      <div className="shrink-0 sm:w-32">
+        <NewsDate value={post.createdAt} />
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <h3 className="text-foreground text-base font-semibold tracking-tight text-balance">
-            {post.title}
-          </h3>
-          {/* Category and byline on one line, under the title: at ledger width
+      <div className="min-w-0 flex-1">
+        <h3 className="text-foreground text-base font-semibold tracking-tight text-balance">
+          {post.title}
+        </h3>
+        {/* Category and byline on one line, under the title: at ledger width
               they are the only way to tell a security advisory apart from a
               company announcement without opening it. */}
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <PostCategoryBadge category={post.category} variant="subtle" />
-            <PostAuthors authors={post.authors} compact linked={false} />
-          </div>
-          {post.preview ? (
-            <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-6">
-              {post.preview}
-            </p>
-          ) : null}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <PostCategoryBadge category={post.category} variant="subtle" />
+          <PostAuthors authors={post.authors} compact linked={false} />
         </div>
-
-        <IconArrowRight
-          aria-hidden
-          className="text-muted-foreground hidden shrink-0 self-center transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none sm:block"
-          size={16}
-        />
+        {post.preview ? (
+          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-6">
+            {post.preview}
+          </p>
+        ) : null}
       </div>
-    </article>
-  </li>
+
+      <IconArrowRight
+        aria-hidden
+        className="text-muted-foreground hidden shrink-0 self-center transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none sm:block"
+        size={16}
+      />
+    </div>
+  </article>
 );
 
 const NewsSection = ({ initialPosts }: NewsSectionProps) => {
@@ -204,8 +209,15 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
                 <hr className="border-border/70 border-t" />
               </li>
             ) : null}
-            {rest.map((post) => (
-              <LedgerPost key={post.id} post={post} />
+            {/* Staggered like the trending row above it, so the two grids on the
+                page behave the same way. Capped: the ledger is unbounded, and an
+                uncapped delay would leave the last entry waiting seconds. */}
+            {rest.map((post, index) => (
+              <li key={post.id}>
+                <Reveal delay={staggerDelay(index)}>
+                  <LedgerPost post={post} />
+                </Reveal>
+              </li>
             ))}
           </ol>
         )}
