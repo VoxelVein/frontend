@@ -22,18 +22,30 @@ The current theme is a custom VoxelVein red palette maintained directly
 in `src/styles.css`. Re-applying a tweakcn theme overwrites these
 values, so re-check them afterwards:
 
-* `--primary` — light `oklch(0.56 0.2185 22.6077)`, dark
-  `oklch(0.6122 0.2313 22.6077)`
+* `--primary` — the specified `#DC143C`, stored as light
+  `oklch(0.5712 0.2219 20.0874)` and dark `oklch(0.605 0.2219 20.0874)`
 * `--destructive` — light `oklch(0.55 0.17 40)`, dark
   `oklch(0.7 0.19 40)`
 * `--background` — light `oklch(0.9811 0.0093 286.2277)`, which is
   exactly `#F8F8FF`; dark `oklch(0.101 0.0084 165.234)`, exactly
   `#020403`
 
-The brand red is a crimson (hue ≈ 23). Destructive actions and errors
-use a distinct orange-red (hue 40) and a solid button fill so they do
-not blend in with regular primary buttons. Both pass WCAG AA as text on
-the page background and with their `-foreground` color on top.
+The brand is a crimson at hue ≈ 20, driving `--primary`, `--ring`,
+`--chart-1`, `--sidebar-primary` and `--accent` together so nothing can
+drift out of agreement with the button colour.
+
+**The dark theme is lighter than the light one, and has to be.** The dark
+background is near-black, so the light theme's `#DC143C` sits at 4.12:1
+and fails WCAG AA as text. Dark uses lightness `0.605` instead, which
+clears it at 4.74:1. One brand colour with two lightnesses is the
+alternative to a dark theme whose brand stops being readable; a single
+value across both themes does not work here.
+
+Destructive actions and errors stay a distinct orange-red (hue 40,
+twenty degrees away) with a solid button fill, so a destructive action
+does not blend in with every other brand surface. Both the brand and the
+destructive colour pass AA as text on the page background and with their
+`-foreground` colour on top.
 
 Both backgrounds are specified hexes, so both are stored as the OKLCH
 value that round-trips to them rather than as raw hexes — every token in

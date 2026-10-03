@@ -7,6 +7,7 @@ import { CheckboxGroup } from "@/components/dashboard/checkbox-group";
 import { GameVersionPicker } from "@/components/dashboard/game-version-picker";
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
+import { StorageGated } from "@/components/storage-gated";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useStorageAvailable } from "@/hooks/use-storage-available";
 import {
   errorMessage,
   NO_FIELD_ERRORS,
@@ -31,6 +33,10 @@ import {
 } from "@/lib/projects";
 import type { ProjectType, ReleaseChannel } from "@/lib/projects";
 import { createVersion, deleteVersion } from "@/lib/projects.functions";
+import {
+  STORAGE_UNAVAILABLE_REASON,
+  storageUnavailableNote,
+} from "@/lib/storage-availability";
 import { uploadVersionFile } from "@/lib/upload-client";
 import {
   ALLOWED_EXTENSIONS_BY_TYPE,
@@ -61,6 +67,8 @@ export const VersionForm = ({
   const [changelog, setChangelog] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
+  const { isAvailable: isStorageAvailable } = useStorageAvailable();
+
   const [progress, setProgress] = useState<number | null>(null);
   const [fileInputKey, setFileInputKey] = useState(0);
 
@@ -71,6 +79,17 @@ export const VersionForm = ({
     ...extensions,
     ...new Set(extensions.map((extension) => contentTypeFor(extension))),
   ].join(",");
+
+  // Three states, not a nested ternary: unavailable outranks the chosen file,
+  // because a reader who cannot upload needs the reason rather than the name of
+  // a file they will never be able to send.
+  let fileHelper = `A ${extensionList} file, up to 100 MB.`;
+  if (file) {
+    fileHelper = `${file.name} · ${formatBytes(file.size)}`;
+  }
+  if (!isStorageAvailable) {
+    fileHelper = storageUnavailableNote("Creating a version");
+  }
 
   const reset = () => {
     setVersionNumber("");
@@ -214,11 +233,8 @@ export const VersionForm = ({
         accept={accept}
         onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         error={errors.get("file")}
-        helperText={
-          file
-            ? `${file.name} · ${formatBytes(file.size)}`
-            : `A ${extensionList} file, up to 100 MB.`
-        }
+        disabled={!isStorageAvailable}
+        helperText={fileHelper}
         className="file:text-foreground py-2 file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
         required
       />
@@ -242,10 +258,22 @@ export const VersionForm = ({
         </div>
       )}
 
-      <div>
-        <Button type="submit" className="min-h-11" disabled={pending}>
-          {pending ? "Uploading…" : "Create version"}
-        </Button>
+      <div className="grid gap-2">
+        {/* Creating a version is an upload, so it needs the file server. Gated
+            on its own rather than only on the field above: the button is what
+            people reach for, and a dimmed one that still submits is worse than
+            an honest one. */}
+        <StorageGated reason={STORAGE_UNAVAILABLE_REASON}>
+          {({ isAvailable }) => (
+            <Button
+              type="submit"
+              className="min-h-11"
+              disabled={pending || !isAvailable}
+            >
+              {pending ? "Uploading…" : "Create version"}
+            </Button>
+          )}
+        </StorageGated>
       </div>
     </form>
   );

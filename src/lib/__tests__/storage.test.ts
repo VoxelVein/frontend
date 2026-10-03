@@ -8,8 +8,10 @@ import {
   deleteObjects,
   getDownloadUrl,
   STORAGE_ERROR,
+  STORAGE_UNREACHABLE_MESSAGE,
   StorageError,
   uploadStream,
+  withStorageErrors,
 } from "@/lib/storage";
 import type { StorageConfig } from "@/lib/storage";
 
@@ -134,6 +136,103 @@ describe("uploadStream with a per-upload limit", () => {
     await expect(upload).rejects.toStrictEqual(
       expect.objectContaining({ code: STORAGE_ERROR.fileTooLarge })
     );
+  });
+});
+
+/** An Error with a chosen `name`, which is all the classifier looks at. */
+const named = (name: string): Error =>
+  Object.assign(new Error("boom"), { name });
+
+describe(withStorageErrors, () => {
+  it("passes a success through untouched", async () => {
+    await expect(withStorageErrors(() => Promise.resolve("ok"))).resolves.toBe(
+      "ok"
+    );
+  });
+
+  it("reports a refused connection as an unreachable endpoint", async () => {
+    const failure = withStorageErrors(() => {
+      throw named("ECONNREFUSED");
+    });
+
+    await expect(failure).rejects.toMatchObject({
+      code: STORAGE_ERROR.unreachable,
+      message: STORAGE_UNREACHABLE_MESSAGE,
+    });
+  });
+
+  it("recognises the names the network stack and the SDK both use", async () => {
+    const names = [
+      "ECONNRESET",
+      "ENOTFOUND",
+      "ETIMEDOUT",
+      "EHOSTUNREACH",
+      "ConnectTimeoutError",
+      "RequestTimeout",
+      "SlowDown",
+      "TimeoutError",
+    ];
+
+    await Promise.all(
+      names.map((name) =>
+        expect(
+          withStorageErrors(() => {
+            throw named(name);
+          })
+        ).rejects.toMatchObject({ code: STORAGE_ERROR.unreachable })
+      )
+    );
+  });
+
+  it("looks one level down, because the SDK wraps the real cause", async () => {
+    // Without this, every connection failure arrives wrapped and would be
+    // reported as a generic server error instead.
+    const failure = withStorageErrors(() => {
+      throw Object.assign(new Error("failed"), {
+        cause: named("ECONNREFUSED"),
+      });
+    });
+
+    await expect(failure).rejects.toMatchObject({
+      code: STORAGE_ERROR.unreachable,
+    });
+  });
+
+  it("does not relabel a misconfiguration as an outage", async () => {
+    // The distinction is the whole point: telling a reader to report a missing
+    // variable sends them chasing a fault that does not exist.
+    const failure = withStorageErrors(() => {
+      throw new StorageError(STORAGE_ERROR.notConfigured, "no variables");
+    });
+
+    await expect(failure).rejects.toMatchObject({
+      code: STORAGE_ERROR.notConfigured,
+    });
+  });
+
+  it("leaves an unrelated failure alone", async () => {
+    // A permissions error is the operator's problem with a specific object, and
+    // relabelling it "unreachable" would send the reader off reporting an
+    // outage that is not happening.
+    const failure = withStorageErrors(() => {
+      throw new StorageError(STORAGE_ERROR.fileTooLarge, "too big");
+    });
+
+    await expect(failure).rejects.toMatchObject({
+      code: STORAGE_ERROR.fileTooLarge,
+    });
+  });
+
+  it("passes a thrown value that is not an Error straight through", async () => {
+    const notAnError = { reason: "thrown by something that is not an Error" };
+
+    // Nothing here is an error, so there is nothing to classify. Relabelling it
+    // as "unreachable" would be a guess.
+    await expect(
+      withStorageErrors(() => {
+        throw notAnError;
+      })
+    ).rejects.toBe(notAnError);
   });
 });
 

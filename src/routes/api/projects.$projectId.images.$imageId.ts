@@ -11,12 +11,9 @@ import {
   requireUploader,
 } from "@/lib/project-access";
 import { deleteObjects } from "@/lib/storage";
+import { errorResponse } from "@/lib/storage-http";
 
-import {
-  errorResponse,
-  isSameOrigin,
-  notFound,
-} from "./projects.$projectId.images";
+import { isSameOrigin, notFound } from "./projects.$projectId.images";
 
 const uuidSchema = pipe(string(), uuid());
 

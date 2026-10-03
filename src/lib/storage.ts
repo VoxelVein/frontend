@@ -59,6 +59,15 @@ export const STORAGE_ERROR = {
   fileTooLarge: "file-too-large",
   notConfigured: "not-configured",
   quotaExceeded: "quota-exceeded",
+  /**
+   * Configured, but the endpoint did not answer.
+   *
+   * Distinct from `notConfigured` because the two need different words: one is
+   * "nobody set this up" and the other is "it is set up and it is broken",
+   * which is the more alarming of the two and the one worth asking a reader to
+   * report.
+   */
+  unreachable: "unreachable",
 } as const;
 
 export type StorageErrorCode =
@@ -73,6 +82,86 @@ export class StorageError extends Error {
     this.code = code;
   }
 }
+
+/** What the reader is told when the endpoint did not answer. */
+export const STORAGE_UNREACHABLE_MESSAGE =
+  "Could not reach the file server. This is a server problem, not yours — please report it.";
+
+/**
+ * Connection codes the AWS SDK and Node surface when a request never completes.
+ *
+ * A DNS failure, a refused connection, a reset mid-transfer, or a timeout all
+ * mean the same thing to a reader: the storage endpoint did not answer. They
+ * arrive as strings on an opaque `Error`, so they are matched by name.
+ */
+const CONNECTION_ERROR_NAMES = new Set([
+  "AbortError",
+  "ConnectionError",
+  "ConnectTimeoutError",
+  "EAI_AGAIN",
+  "ECONNABORTED",
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "EHOSTDOWN",
+  "EHOSTUNREACH",
+  // A name that does not resolve is the endpoint being unreachable, which is
+  // exactly what a mistyped STORAGE_ENDPOINT produces — a very easy mistake to
+  // make, and one this list used to miss.
+  "ENOTFOUND",
+  "ENETUNREACH",
+  "EPIPE",
+  "ETIMEDOUT",
+  "NetworkingError",
+  "RequestTimeout",
+  "RequestTimeoutError",
+  "SlowDown",
+  "TimeoutError",
+]);
+
+/** Whether an error name is one the network stack or the SDK uses for "no answer". */
+const isConnectionName = (name: string): boolean =>
+  CONNECTION_ERROR_NAMES.has(name);
+
+/**
+ * Runs a storage call, reporting an unreachable endpoint as such.
+ *
+ * Without this the SDK's own error reaches the API route, which answers 503
+ * with a generic "storage is unavailable" — true, but it loses the difference
+ * between "misconfigured" and "broken", which is the difference between a
+ * message that reassures the reader and one that asks them to report something.
+ */
+/** The error every unreachable endpoint turns into. */
+const unreachable = (): StorageError =>
+  new StorageError(STORAGE_ERROR.unreachable, STORAGE_UNREACHABLE_MESSAGE);
+
+export const withStorageErrors = async <T>(
+  operation: () => Promise<T>
+): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error) {
+    // Inline rather than behind a classifier taking `unknown`: a `catch` really
+    // does receive anything, and narrowing it is the point of being here.
+    //
+    // A StorageError is already classified, and re-labelling a misconfiguration
+    // as an outage would send a reader to report a mistake that is not a fault.
+    if (error instanceof StorageError) {
+      throw error;
+    }
+    if (error instanceof Error) {
+      if (isConnectionName(error.name)) {
+        throw unreachable();
+      }
+      // The SDK wraps the underlying cause, so the useful name can be a level
+      // down.
+      const { cause } = error;
+      if (cause instanceof Error && isConnectionName(cause.name)) {
+        throw unreachable();
+      }
+    }
+    throw error;
+  }
+};
 
 export const loadStorageConfig = (): StorageConfig => {
   const {
@@ -164,13 +253,15 @@ export const deleteObjects = async (
   for (let start = 0; start < keys.length; start += DELETE_BATCH_SIZE) {
     batches.push(keys.slice(start, start + DELETE_BATCH_SIZE));
   }
-  await Promise.all(
-    batches.map((batch) =>
-      client.send(
-        new DeleteObjectsCommand({
-          Bucket: config.bucket,
-          Delete: { Objects: batch.map((Key) => ({ Key })), Quiet: true },
-        })
+  await withStorageErrors(() =>
+    Promise.all(
+      batches.map((batch) =>
+        client.send(
+          new DeleteObjectsCommand({
+            Bucket: config.bucket,
+            Delete: { Objects: batch.map((Key) => ({ Key })), Quiet: true },
+          })
+        )
       )
     )
   );
@@ -215,9 +306,11 @@ export const uploadStream = async (
   });
 
   try {
-    await upload.done();
+    await withStorageErrors(() => upload.done());
   } catch (error) {
     await upload.abort().catch(() => null);
+    // Best-effort cleanup of a partial object; its own failure is irrelevant
+    // next to the one already on its way out.
     await deleteObjects([input.key], config, client).catch(() => null);
     throw error;
   }
@@ -244,8 +337,8 @@ export const getObjectBytes = async (
   contentLength: number | null;
   etag: string | null;
 }> => {
-  const response = await client.send(
-    new GetObjectCommand({ Bucket: config.bucket, Key: key })
+  const response = await withStorageErrors(() =>
+    client.send(new GetObjectCommand({ Bucket: config.bucket, Key: key }))
   );
   if (!response.Body) {
     throw new StorageError(

@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AvatarCard } from "@/components/settings/avatar-card";
@@ -17,6 +19,7 @@ const {
   invalidateMock,
   notifyMock,
   setAvatarUrlMock,
+  storageConfiguredMock,
   toastDismissMock,
   toastErrorMock,
   uploadAvatarMock,
@@ -25,6 +28,7 @@ const {
   invalidateMock: vi.fn<() => Promise<void>>(),
   notifyMock: vi.fn<(signal: string) => void>(),
   setAvatarUrlMock: vi.fn<(opts: { data: { url: string } }) => Promise<void>>(),
+  storageConfiguredMock: vi.fn<() => Promise<boolean>>(),
   toastDismissMock: vi.fn<() => void>(),
   toastErrorMock: vi.fn<(message: string) => void>(),
   uploadAvatarMock:
@@ -44,6 +48,12 @@ vi.mock("@/lib/account.functions", () => ({
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Uploads go over the network to the avatar route; stubbing the client keeps this suite on the card's own behaviour
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The card gates its upload control on this server function, which reaches env.config at import time; string paths avoid strict factory type-checking
+vi.mock("@/lib/storage.functions", () => ({
+  storageIsConfigured: storageConfiguredMock,
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Uploads go over the network to the avatar route; stubbing the client keeps this suite on the card's own behaviour
 vi.mock(import("@/lib/upload-client"), () => ({
   deleteAvatar: deleteAvatarMock,
   uploadAvatar: uploadAvatarMock,
@@ -58,6 +68,22 @@ vi.mock("@/lib/auth-client", () => ({
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: invalidateMock }),
 }));
+
+/**
+ * The card gates its upload control on a query, so every render needs a client.
+ * A fresh one per render keeps the availability answer from leaking between
+ * tests.
+ */
+const renderCard = (props: { image: string | null; name: string }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+
+  return render(<AvatarCard {...props} />, { wrapper: Wrapper });
+};
 
 const field = () => screen.getByLabelText("Image URL");
 const saveButton = () =>
@@ -83,6 +109,9 @@ describe(AvatarCard, () => {
   beforeEach(() => {
     deleteAvatarMock.mockReset().mockResolvedValue();
     setAvatarUrlMock.mockReset().mockResolvedValue();
+    // Configured, so the upload control behaves as it does in production and
+    // these tests stay about the picture rather than about the gate.
+    storageConfiguredMock.mockReset().mockResolvedValue(true);
     toastDismissMock.mockReset();
     toastErrorMock.mockReset();
     uploadAvatarMock.mockReset().mockResolvedValue({
@@ -95,14 +124,14 @@ describe(AvatarCard, () => {
   });
 
   it("offers an image URL field with a visible label", () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
 
     expect(field()).toBeInTheDocument();
     expect(saveButton()).toBeInTheDocument();
   });
 
   it("saves an https URL", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("https://cdn.example.com/me.png");
     submit();
 
@@ -114,7 +143,7 @@ describe(AvatarCard, () => {
   });
 
   it("refuses a plain http URL before it reaches the server", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("http://cdn.example.com/me.png");
     submit();
 
@@ -127,7 +156,7 @@ describe(AvatarCard, () => {
   });
 
   it("refuses a javascript: URL", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("javascript:alert(1)");
     submit();
 
@@ -138,7 +167,7 @@ describe(AvatarCard, () => {
   });
 
   it("marks the field invalid and points at the error", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("nonsense");
     submit();
 
@@ -149,7 +178,7 @@ describe(AvatarCard, () => {
   });
 
   it("clears the error as soon as the value is edited again", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("nonsense");
     submit();
     await expect(errorMessage()).resolves.toBeInTheDocument();
@@ -161,7 +190,7 @@ describe(AvatarCard, () => {
   });
 
   it("lets the picture be cleared by saving an empty field", async () => {
-    render(<AvatarCard image="https://cdn.example.com/me.png" name="Ada" />);
+    renderCard({ image: "https://cdn.example.com/me.png", name: "Ada" });
     submit();
 
     await waitFor(() => {
@@ -171,7 +200,7 @@ describe(AvatarCard, () => {
 
   it("reports a server failure and keeps the typed URL", async () => {
     setAvatarUrlMock.mockRejectedValue(new Error("Could not save."));
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("https://cdn.example.com/me.png");
     submit();
 
@@ -184,19 +213,20 @@ describe(AvatarCard, () => {
   });
 
   it("says where a picture is hosted, since the preview cannot show it", () => {
-    const { unmount } = render(
-      <AvatarCard image="https://cdn.example.com/me.png" name="Ada" />
-    );
+    const { unmount } = renderCard({
+      image: "https://cdn.example.com/me.png",
+      name: "Ada",
+    });
 
     expect(screen.getByText(/hosted on another site/iu)).toBeInTheDocument();
     unmount();
 
-    render(<AvatarCard image="/api/avatar/2f1c-uuid" name="Ada" />);
+    renderCard({ image: "/api/avatar/2f1c-uuid", name: "Ada" });
     expect(screen.getByText(/stored on voxelvein/iu)).toBeInTheDocument();
   });
 
   it("says nothing about hosting when there is no picture", () => {
-    render(<AvatarCard image={null} name="Ada" />);
+    renderCard({ image: null, name: "Ada" });
 
     expect(
       screen.queryByText(/hosted on another site/iu)
@@ -205,9 +235,10 @@ describe(AvatarCard, () => {
   });
 
   it("sends no referrer with the preview, so the host learns no page URL", () => {
-    const { container } = render(
-      <AvatarCard image="https://cdn.example.com/me.png" name="Ada" />
-    );
+    const { container } = renderCard({
+      image: "https://cdn.example.com/me.png",
+      name: "Ada",
+    });
 
     expect(container.querySelector("img")).toHaveAttribute(
       "referrerpolicy",
@@ -216,21 +247,21 @@ describe(AvatarCard, () => {
   });
 
   it("offers no Remove button until there is a picture", () => {
-    const { unmount } = render(<AvatarCard image={null} name="Ada" />);
+    const { unmount } = renderCard({ image: null, name: "Ada" });
 
     expect(
       screen.queryByRole("button", { name: /remove/iu })
     ).not.toBeInTheDocument();
     unmount();
 
-    render(<AvatarCard image="/api/avatar/2f1c-uuid" name="Ada" />);
+    renderCard({ image: "/api/avatar/2f1c-uuid", name: "Ada" });
     expect(
       screen.getByRole("button", { name: /remove/iu })
     ).toBeInTheDocument();
   });
 
   it("invalidates the cached session so the navbar repaints without a reload", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("https://cdn.example.com/me.png");
     submit();
 
@@ -244,7 +275,7 @@ describe(AvatarCard, () => {
   });
 
   it("still clears the field after a successful save", async () => {
-    render(<AvatarCard image={null} name="Hedi Zandi" />);
+    renderCard({ image: null, name: "Hedi Zandi" });
     typeUrl("https://cdn.example.com/me.png");
     submit();
 

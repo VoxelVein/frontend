@@ -31,3 +31,29 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
     };
   }
 );
+
+/**
+ * Whether object storage is configured on this deployment.
+ *
+ * Read through a server function rather than from the client env, because
+ * `env.config.ts` throws when it is imported in a browser bundle — the storage
+ * secrets have no business in one, and the question is about the *server's*
+ * configuration, not the browser's.
+ *
+ * Reports a boolean rather than throwing. This runs on ordinary page loads to
+ * decide whether upload controls are usable, and a function that threw for the
+ * normal "storage is off" case would force every caller into a try/catch to
+ * tell "off" apart from "broken".
+ */
+export const storageIsConfigured = createServerFn({
+  method: "GET",
+}).handler((): boolean => {
+  try {
+    loadStorageConfig();
+    return true;
+  } catch {
+    // Every failure here is a misconfiguration as far as the UI is concerned:
+    // the upload controls must stay disabled either way.
+    return false;
+  }
+});

@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { FormField } from "@/components/form-field";
+import { StorageGated } from "@/components/storage-gated";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +14,16 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useRefreshSession } from "@/hooks/use-refresh-session";
+import { useStorageAvailable } from "@/hooks/use-storage-available";
 import { setAvatarUrl } from "@/lib/account.functions";
 import { isExternalAvatarSrc, parseAvatarUrl } from "@/lib/avatar-url";
-import { errorMessage } from "@/lib/form-errors";
 import { formatBytes } from "@/lib/format";
 import { IMAGE_MAX_BYTES } from "@/lib/image-limits";
+import {
+  STORAGE_UNAVAILABLE_REASON,
+  storageFailureMessage,
+  storageUnavailableNote,
+} from "@/lib/storage-availability";
 import { deleteAvatar, uploadAvatar } from "@/lib/upload-client";
 
 interface AvatarCardProps {
@@ -50,6 +56,7 @@ const URL_HELPER =
  */
 const AvatarCard = ({ image, name }: AvatarCardProps) => {
   const refreshSession = useRefreshSession();
+  const { isAvailable: isStorageAvailable } = useStorageAvailable();
   const [isBusy, setIsBusy] = useState(false);
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -67,7 +74,9 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
     try {
       await action();
     } catch (actionError) {
-      toast.error(errorMessage(actionError, "The avatar could not be saved."));
+      toast.error(
+        storageFailureMessage(actionError, "The avatar could not be saved.")
+      );
       setIsBusy(false);
       return;
     }
@@ -170,24 +179,32 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
                   }
                 }}
               />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isBusy}
-                onClick={() => inputRef.current?.click()}
-              >
-                {isBusy ? (
-                  <>
-                    <Spinner className="mr-1" />
-                    Saving…
-                  </>
-                ) : (
-                  <>
-                    <IconUpload size={16} aria-hidden="true" />
-                    {image ? "Replace" : "Upload"}
-                  </>
+
+              {/* Gated on object storage: without it there is nowhere to put the
+                  bytes, so the control is disabled and says so rather than
+                  failing after the reader has picked a file. */}
+              <StorageGated reason={STORAGE_UNAVAILABLE_REASON}>
+                {({ isAvailable }) => (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isBusy || !isAvailable}
+                    onClick={() => inputRef.current?.click()}
+                  >
+                    {isBusy ? (
+                      <>
+                        <Spinner className="mr-1" />
+                        Saving…
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload size={16} aria-hidden="true" />
+                        {image ? "Replace" : "Upload"}
+                      </>
+                    )}
+                  </Button>
                 )}
-              </Button>
+              </StorageGated>
 
               {image ? (
                 <Button
@@ -204,6 +221,15 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
               ) : null}
             </div>
           </div>
+
+          {/* The tooltip is a pointer affordance; this is where the reason
+              actually has to live, because a tooltip is unreachable by keyboard
+              and absent on touch. */}
+          {isStorageAvailable ? null : (
+            <p className="text-muted-foreground mt-3 text-sm">
+              {storageUnavailableNote("Uploads")}
+            </p>
+          )}
 
           {/* Stated rather than left to the preview to imply: the two sources
               are indistinguishable once rendered. */}

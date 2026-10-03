@@ -1,6 +1,7 @@
 import type { ProjectImageKind } from "@/db/schema";
 import { resizeImageForUpload } from "@/lib/image-resize";
 import type { ProjectFileView } from "@/lib/projects";
+import { StorageRequestError } from "@/lib/storage-availability";
 import { contentTypeFor } from "@/lib/upload-validation";
 
 const UNSAFE_FILENAME_CHARACTERS = /[^A-Za-z0-9._+-]+/gu;
@@ -36,27 +37,42 @@ const CONTENT_TYPE_HEADER = "content-type";
 /** Shared by all three uploads, since they fail the same way. */
 const UPLOAD_FAILED_MESSAGE = "The upload failed. Check your connection.";
 
-const readError = (request: XMLHttpRequest): string => {
-  try {
-    // SAFETY: the upload route always answers errors with { error: string }.
-    const body = JSON.parse(request.responseText) as { error?: string };
-    if (body.error) {
-      return body.error;
-    }
-  } catch {
-    // Fall through to the generic message below.
+const toFailure = (
+  body: { code?: string; error?: string },
+  status: number
+): Error => {
+  if (body.code) {
+    return new StorageRequestError(
+      body.code,
+      body.error ?? UPLOAD_FAILED_MESSAGE
+    );
   }
-  return `The upload failed (${request.status}).`;
+  return new Error(body.error ?? `The upload failed (${status}).`);
+};
+
+const readError = (request: XMLHttpRequest): Error => {
+  try {
+    // SAFETY: the upload routes always answer errors with { error } and,
+    // for a storage failure, the `code` alongside it.
+    return toFailure(
+      JSON.parse(request.responseText) as { code?: string; error?: string },
+      request.status
+    );
+  } catch {
+    return new Error(`The upload failed (${request.status}).`);
+  }
 };
 
 /** Same contract as `readError`, for routes that answer with fetch. */
-const readErrorLike = async (response: Response): Promise<string> => {
+const readErrorLike = async (response: Response): Promise<Error> => {
   try {
-    // SAFETY: the delete route always answers errors with { error: string }.
-    const body = (await response.json()) as { error?: string };
-    return body.error || `The request failed (${response.status}).`;
+    // SAFETY: the delete routes always answer errors with { error }.
+    return toFailure(
+      (await response.json()) as { code?: string; error?: string },
+      response.status
+    );
   } catch {
-    return `The request failed (${response.status}).`;
+    return new Error(`The request failed (${response.status}).`);
   }
 };
 
@@ -90,7 +106,7 @@ export const uploadVersionFile = ({
         resolve(JSON.parse(request.responseText) as ProjectFileView);
         return;
       }
-      reject(new Error(readError(request)));
+      reject(readError(request));
     });
     request.addEventListener("error", () =>
       reject(new Error(UPLOAD_FAILED_MESSAGE))
@@ -137,7 +153,7 @@ export const uploadProjectImage = async ({
         resolve(JSON.parse(request.responseText) as UploadedProjectImage);
         return;
       }
-      reject(new Error(readError(request)));
+      reject(readError(request));
     });
     request.addEventListener("error", () =>
       reject(new Error(UPLOAD_FAILED_MESSAGE))
@@ -189,7 +205,7 @@ export const uploadAvatar = async ({
         resolve(JSON.parse(request.responseText) as UploadedAvatar);
         return;
       }
-      reject(new Error(readError(request)));
+      reject(readError(request));
     });
     request.addEventListener("error", () =>
       reject(new Error(UPLOAD_FAILED_MESSAGE))
@@ -202,7 +218,7 @@ export const uploadAvatar = async ({
 export const deleteAvatar = async (): Promise<void> => {
   const response = await fetch("/api/users/me/avatar", { method: "DELETE" });
   if (!response.ok) {
-    throw new Error(await readErrorLike(response));
+    throw await readErrorLike(response);
   }
 };
 
@@ -215,6 +231,6 @@ export const deleteProjectImage = async (
     method: "DELETE",
   });
   if (!response.ok) {
-    throw new Error(await readErrorLike(response));
+    throw await readErrorLike(response);
   }
 };

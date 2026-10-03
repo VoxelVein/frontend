@@ -3,11 +3,18 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ProjectImage } from "@/components/projects/project-image";
+import { StorageGated } from "@/components/storage-gated";
 import { Button } from "@/components/ui/button";
 import { PROJECT_IMAGE_KIND } from "@/db/schema";
+import { useStorageAvailable } from "@/hooks/use-storage-available";
 import { errorMessage } from "@/lib/form-errors";
 import { GALLERY_MAX_COUNT, IMAGE_MAX_BYTES } from "@/lib/image-limits";
 import type { ProjectImageView } from "@/lib/project-images";
+import {
+  STORAGE_UNAVAILABLE_REASON,
+  storageFailureMessage,
+  storageUnavailableNote,
+} from "@/lib/storage-availability";
 import { deleteProjectImage, uploadProjectImage } from "@/lib/upload-client";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
@@ -45,6 +52,7 @@ const ImageManager = (props: ImageManagerProps) => {
   const { kind, onChange, projectId, projectName } = props;
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const { isAvailable: isStorageAvailable } = useStorageAvailable();
 
   const isIcon = kind === PROJECT_IMAGE_KIND.icon;
 
@@ -75,7 +83,7 @@ const ImageManager = (props: ImageManagerProps) => {
       }
     } catch (uploadError) {
       toast.error(
-        errorMessage(uploadError, "The image could not be uploaded.")
+        storageFailureMessage(uploadError, "The image could not be uploaded.")
       );
     }
     setBusy(false);
@@ -169,15 +177,22 @@ const ImageManager = (props: ImageManagerProps) => {
             }
           }}
         />
-        <Button
-          type="button"
-          variant="outline"
-          disabled={busy || atLimit}
-          onClick={() => inputRef.current?.click()}
-        >
-          <IconUpload size={16} aria-hidden="true" />
-          {uploadLabel}
-        </Button>
+        {/* Gated on object storage; without it there is nowhere to put the
+            bytes, so the control is disabled rather than failing after the
+            reader has picked a file. */}
+        <StorageGated reason={STORAGE_UNAVAILABLE_REASON}>
+          {({ isAvailable }) => (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || atLimit || !isAvailable}
+              onClick={() => inputRef.current?.click()}
+            >
+              <IconUpload size={16} aria-hidden="true" />
+              {uploadLabel}
+            </Button>
+          )}
+        </StorageGated>
         <span className="text-muted-foreground text-xs">
           PNG, JPEG, WebP, or GIF, up to {formatMegabytes(IMAGE_MAX_BYTES)}.
           Larger images are shrunk in your browser before uploading, so the
@@ -188,6 +203,9 @@ const ImageManager = (props: ImageManagerProps) => {
           {!isIcon && atLimit
             ? ` You have all ${GALLERY_MAX_COUNT} gallery images. Remove one to add another.`
             : ""}
+          {/* The tooltip is a pointer affordance; this is where the reason has
+              to live for anyone not using a mouse. */}
+          {isStorageAvailable ? "" : ` ${storageUnavailableNote("Uploads")}`}
         </span>
       </div>
     </div>

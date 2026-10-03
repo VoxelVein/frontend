@@ -25,10 +25,10 @@ import {
 import {
   deleteObjects,
   loadStorageConfig,
-  STORAGE_ERROR,
   StorageError,
   uploadStream,
 } from "@/lib/storage";
+import { errorResponse, storageErrorResponse } from "@/lib/storage-http";
 import {
   getRemainingBytes,
   getProjectImageKeys,
@@ -47,22 +47,7 @@ const uuidSchema = pipe(string(), uuid());
 const HEADER_BYTES = 64;
 
 // 507 Insufficient Storage: the site-wide quota is full, not this image.
-const HTTP_INSUFFICIENT_STORAGE = 507;
-
-const errorResponse = (status: number, message: string) =>
-  Response.json({ error: message }, { status });
-
 const notFound = () => errorResponse(404, "Image not found.");
-
-const storageErrorResponse = (error: StorageError): Response => {
-  if (error.code === STORAGE_ERROR.fileTooLarge) {
-    return errorResponse(413, error.message);
-  }
-  if (error.code === STORAGE_ERROR.quotaExceeded) {
-    return errorResponse(HTTP_INSUFFICIENT_STORAGE, error.message);
-  }
-  return errorResponse(503, "Image storage is unavailable.");
-};
 
 // Browsers always send Origin on PUT; reject cross-site uploads outright
 // instead of relying only on the session cookie's SameSite setting.
@@ -221,7 +206,7 @@ const handle = async (request: Request, projectId: string) => {
       );
     }
     if (error instanceof StorageError) {
-      return storageErrorResponse(error);
+      return storageErrorResponse(error, "image");
     }
     console.error("Image upload failed", error);
     return errorResponse(500, "The image upload failed. Try again.");
@@ -243,4 +228,4 @@ export const Route = createFileRoute("/api/projects/$projectId/images")({
   },
 });
 
-export { errorResponse, isSameOrigin, notFound };
+export { isSameOrigin, notFound };

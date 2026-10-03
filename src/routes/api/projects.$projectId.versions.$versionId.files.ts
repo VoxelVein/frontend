@@ -23,6 +23,7 @@ import {
   StorageError,
   uploadStream,
 } from "@/lib/storage";
+import { errorResponse, storageErrorResponse } from "@/lib/storage-http";
 import {
   DuplicateFilenameError,
   getRemainingBytes,
@@ -42,22 +43,7 @@ import env from "../../../env.config";
 const ZIP_MAGIC_LENGTH = 4;
 const uuidSchema = pipe(string(), uuid());
 
-const errorResponse = (status: number, message: string) =>
-  Response.json({ error: message }, { status });
-
 // 507 Insufficient Storage: the site-wide quota is full, not this file.
-const HTTP_INSUFFICIENT_STORAGE = 507;
-
-const storageErrorResponse = (error: StorageError): Response => {
-  if (error.code === STORAGE_ERROR.fileTooLarge) {
-    return errorResponse(413, error.message);
-  }
-  if (error.code === STORAGE_ERROR.quotaExceeded) {
-    return errorResponse(HTTP_INSUFFICIENT_STORAGE, error.message);
-  }
-  return errorResponse(503, "File storage is unavailable.");
-};
-
 /**
  * Streams the upload. When the stream stops because it ran into the space
  * left in the quota (rather than the per-file limit), report the quota.
@@ -245,7 +231,7 @@ export const Route = createFileRoute(
             );
           }
           if (error instanceof StorageError) {
-            return storageErrorResponse(error);
+            return storageErrorResponse(error, "file");
           }
           if (error instanceof DuplicateFilenameError) {
             return errorResponse(409, error.message);
