@@ -13,10 +13,13 @@ import {
   projectIdSchema,
   rejectReview,
   rejectionSchema,
-  submitForReview,
+  requestPublication,
   withdrawReview,
 } from "@/lib/project-moderation";
-import type { PendingReview } from "@/lib/project-moderation";
+import type {
+  PendingReview,
+  PublicationOutcome,
+} from "@/lib/project-moderation";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import {
   consumeServerLimit,
@@ -94,18 +97,27 @@ export const rejectProject = createServerFn({ method: "POST" })
   });
 
 /**
- * Asks an admin to publish a draft.
+ * Publishes a draft, or asks an admin to.
  *
- * The project does not become public here. It moves to `pending` and waits,
- * which is the whole point of the review step.
+ * Which one happens is decided by `requestPublication`: a project the owner
+ * unpublished goes straight back up, because withdrawing your own listing is not
+ * a moderation event and should not cost a review to undo. A project staff took
+ * down goes into the queue, because putting it back up is the thing that
+ * judgement is for.
+ *
+ * The outcome comes back so the owner can be told the truth — "published" and
+ * "submitted for review" are different news, and reporting the second for the
+ * first would leave them waiting for a decision that already happened.
  */
 export const submitProjectForReview = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
-  .handler(async ({ data }): Promise<void> => {
+  // Returns where the project ended up, because the two outcomes are different
+  // news for the owner: one is live now, the other is a queue they will wait in.
+  .handler(async ({ data }): Promise<PublicationOutcome> => {
     const session = await getOwner();
     await requireReviewQuota(session);
     await requireEditableProject(session, data.projectId);
-    await submitForReview(data.projectId);
+    return requestPublication(data.projectId);
   });
 
 /**

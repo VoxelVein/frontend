@@ -6,6 +6,7 @@ import { ProjectLink } from "@/components/projects/project-link";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { errorMessage } from "@/lib/form-errors";
+import type { PublicationOutcome } from "@/lib/project-moderation";
 import {
   submitProjectForReview,
   unpublishProject,
@@ -30,8 +31,9 @@ import { cn } from "@/lib/utils";
  */
 const VISIBILITY = {
   draft: {
-    action: "Submit for review",
-    description: "Only you and admins can see this project.",
+    action: "Publish",
+    description:
+      "Only you and admins can see this project. One you have published before goes live straight away; anything else waits for an admin.",
   },
   pending: {
     action: "Withdraw request",
@@ -77,10 +79,25 @@ const RejectionNotice = ({ reason }: { reason: string }) => (
  * Named rather than inferred so the click handler never passes an `unknown`
  * around, and so the button label and the call it makes are declared together.
  */
-interface Transition {
-  run: () => Promise<void>;
-  success: string;
-}
+/**
+ * Discriminated rather than one shape with an optional field, because the
+ * publish transition reports *which* of two different things happened and the
+ * others report nothing at all — and a `run` typed as "maybe a value" would push
+ * that uncertainty onto every caller.
+ */
+type Transition =
+  | {
+      kind: "plain";
+      run: () => Promise<void>;
+      success: string;
+    }
+  | {
+      kind: "publish";
+      run: () => Promise<PublicationOutcome>;
+      success: string;
+      /** Said when the project went straight back up rather than into the queue. */
+      successWhenPublished: string;
+    };
 
 const missingForReview = (isServer: boolean) =>
   isServer
@@ -112,20 +129,26 @@ export const PublishPanel = ({
         // Nothing to publish without a file, so no transition is offered.
         return isReady
           ? {
+              kind: "publish",
               run: () =>
                 submitProjectForReview({ data: { projectId: project.id } }),
               success: "Submitted for review",
+              // Said rather than "submitted", because telling someone to wait
+              // for a review that did not happen is worse than saying nothing.
+              successWhenPublished: "Published",
             }
           : null;
       }
       case "pending": {
         return {
+          kind: "plain",
           run: () => withdrawProjectReview({ data: { projectId: project.id } }),
           success: "Moved back to drafts",
         };
       }
       case "published": {
         return {
+          kind: "plain",
           run: () => unpublishProject({ data: { projectId: project.id } }),
           success: "Moved back to drafts",
         };
@@ -143,9 +166,17 @@ export const PublishPanel = ({
     setError(null);
     setIsPending(true);
     try {
-      await action.run();
+      let message = action.success;
+      if (action.kind === "publish") {
+        message =
+          (await action.run()) === "published"
+            ? action.successWhenPublished
+            : action.success;
+      } else {
+        await action.run();
+      }
       await onChange();
-      toast.success(action.success);
+      toast.success(message);
     } catch (actionError) {
       setError(errorMessage(actionError, "Could not change visibility."));
     }

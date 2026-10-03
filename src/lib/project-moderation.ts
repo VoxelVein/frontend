@@ -11,6 +11,7 @@ import {
 } from "@/db/schema";
 import { DELETED_USER_LABEL } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
+import { needsReview } from "@/lib/publication-rule";
 
 /**
  * Why a review action could not be completed.
@@ -189,7 +190,82 @@ export const hasServerDetails = async (projectId: string): Promise<boolean> => {
   return row !== undefined;
 };
 
-export const submitForReview = async (projectId: string): Promise<void> => {
+/**
+ * Puts a previously-published project straight back up.
+ *
+ * Guarded on `draft` in the `where` clause for the same reason `approveReview`
+ * is: two clicks cannot both succeed, because only the update that changed a row
+ * reports back.
+ *
+ * `publishedAt` is stamped exactly as an approval stamps it — on a first
+ * publication, preserved on a republish — so the two paths cannot disagree about
+ * a project's original date.
+ *
+ * `takenDownAt` is left alone deliberately. Reaching this function already means
+ * it was null, and clearing it here would be a no-op that reads as though it
+ * mattered.
+ *
+ * No notification is written. Nobody approved anything, so telling the owner "an
+ * admin approved it" would be false, and they are watching it happen.
+ */
+const publishWithoutReview = async (projectId: string): Promise<void> => {
+  const now = new Date();
+
+  const [updated] = await db
+    .update(projects)
+    .set({
+      publishedAt: sql`coalesce(${projects.publishedAt}, ${now})`,
+      rejectionReason: null,
+      reviewedAt: now,
+      reviewedBy: null,
+      status: "published",
+      submittedAt: null,
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.status, "draft")))
+    .returning({ id: projects.id });
+
+  if (!updated) {
+    throw new ModerationError(MODERATION_ERROR.notPending);
+  }
+};
+
+/**
+ * The rule, with the row read first.
+ *
+ * `publicationNeedsReview` is the policy and is tested on its own; this only
+ * fetches what it needs. A missing row reads as needing review, because the
+ * caller is about to be told the project is not in a publishable state anyway.
+ */
+const publicationNeedsReview = async (projectId: string): Promise<boolean> => {
+  const [row] = await db
+    .select({
+      publishedAt: projects.publishedAt,
+      takenDownAt: projects.takenDownAt,
+    })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+
+  return needsReview(row ?? { publishedAt: null, takenDownAt: null });
+};
+
+/** Where a request to publish ended up. */
+export type PublicationOutcome = "pending" | "published";
+
+/**
+ * Puts a draft back in front of the public, or into the review queue.
+ *
+ * Which of the two is decided here rather than by the caller, so every entry
+ * point — the dashboard, anything added later — gets the same answer and the
+ * rule lives in one place.
+ *
+ * The immediate path stamps `publishedAt` exactly as an approval does: on a first
+ * publication, and preserved on a republish, so a project that was live once
+ * keeps its original date.
+ */
+export const requestPublication = async (
+  projectId: string
+): Promise<PublicationOutcome> => {
   const [project] = await db
     .select({ type: projects.type })
     .from(projects)
@@ -202,6 +278,11 @@ export const submitForReview = async (projectId: string): Promise<void> => {
     }
   } else if (!(await hasVersion(projectId))) {
     throw new ModerationError(MODERATION_ERROR.noFiles);
+  }
+
+  if (!(await publicationNeedsReview(projectId))) {
+    await publishWithoutReview(projectId);
+    return "published";
   }
 
   const [updated] = await db
@@ -217,6 +298,8 @@ export const submitForReview = async (projectId: string): Promise<void> => {
   if (!updated) {
     throw new ModerationError(MODERATION_ERROR.notPending);
   }
+
+  return "pending";
 };
 
 /**
@@ -265,6 +348,12 @@ export const approveReview = async (
         reviewedBy: adminId,
         status: "published",
         submittedAt: null,
+        // Cleared on approval: a moderator has just looked at this and decided
+        // it is fine, which is a newer and stronger judgement than the takedown
+        // it replaces. Leaving it set would make every later owner-initiated
+        // republish queue for review forever, on the strength of a decision
+        // staff have already overturned.
+        takenDownAt: null,
       })
       .where(and(eq(projects.id, projectId), eq(projects.status, "pending")))
       .returning({ name: projects.name, ownerId: projects.ownerId });
