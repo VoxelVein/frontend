@@ -666,6 +666,13 @@ export const projectVersionsRelations = relations(
  * reads. A row here belongs to a single account and is deleted with it, and
  * with the project it refers to, because a notification pointing at a
  * deleted project has nothing left to say.
+ *
+ * `project_id` is nullable because not every notification is about the
+ * reader's own project: the outcome of a report they filed is about the
+ * report, and has no project to link to. Those rows carry no destination and
+ * are read in place. It was NOT NULL before report outcomes existed, which
+ * meant the only way to notify a reporter was to attach the notification to
+ * some arbitrary project — a link to somewhere unrelated.
  */
 export const userNotifications = pgTable(
   "user_notifications",
@@ -673,9 +680,9 @@ export const userNotifications = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     message: text("message").notNull(),
-    projectId: uuid("project_id")
-      .references(() => projects.id, { onDelete: "cascade" })
-      .notNull(),
+    projectId: uuid("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
     readAt: timestamp("read_at"),
     title: text("title").notNull(),
     type: text("type").$type<UserNotificationType>().notNull(),

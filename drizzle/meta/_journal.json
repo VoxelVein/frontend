@@ -141,6 +141,13 @@
       "when": 1791031815736,
       "tag": "0019_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791051544081,
+      "tag": "0020_notifications_remake",
+      "breakpoints": true
     }
   ]
 }

@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { and, count, desc, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { object, parse, pipe, string, uuid } from "valibot";
 
 import { db } from "@/db";
-import { userNotifications } from "@/db/schema";
+import { projects, userNotifications } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import type { UserNotificationType } from "@/lib/notifications";
 import type { Session } from "@/lib/project-access";
@@ -33,23 +33,47 @@ export interface UserNotification {
   isRead: boolean;
   message: string;
   /**
-   * The project this is about. The column is NOT NULL with a cascading delete,
-   * so the row disappears along with the project and a notification can never
-   * point at something that no longer exists.
+   * The project this is about, when it is about one. Null for a report outcome,
+   * which has no project to point at. Cascading delete means a row about a
+   * deleted project goes with it rather than dangling.
    */
-  projectId: string;
+  projectId: string | null;
+  /** The project's name, so a row is identifiable without opening it. */
+  projectName: string | null;
+  /**
+   * Where the row leads, or null when it leads nowhere. A report outcome is the
+   * whole message; inventing a destination for it would send the reader
+   * somewhere with nothing to show.
+   */
+  projectSlug: string | null;
   title: string;
   type: UserNotificationType;
 }
 
-const toNotification = (
-  row: typeof userNotifications.$inferSelect
-): UserNotification => ({
+/**
+ * The row as the dropdown renders it.
+ *
+ * The project is joined in rather than fetched per row: a notification that says
+ * "needs changes" without naming the project makes the reader open each one to
+ * find out which, which is the opposite of a summary.
+ */
+/** The joined projection `listUserNotifications` selects. */
+type NotificationRow = Pick<
+  typeof userNotifications.$inferSelect,
+  "createdAt" | "id" | "message" | "projectId" | "readAt" | "title" | "type"
+> & {
+  projectName: string | null;
+  projectSlug: string | null;
+};
+
+const toNotification = (row: NotificationRow): UserNotification => ({
   createdAt: row.createdAt.toISOString(),
   id: row.id,
   isRead: row.readAt !== null,
   message: row.message,
   projectId: row.projectId,
+  projectName: row.projectName,
+  projectSlug: row.projectSlug,
   title: row.title,
   type: row.type,
 });
@@ -60,8 +84,19 @@ export const listUserNotifications = createServerFn({
 }).handler(async (): Promise<UserNotification[]> => {
   const session = await requireUser();
   const rows = await db
-    .select()
+    .select({
+      createdAt: userNotifications.createdAt,
+      id: userNotifications.id,
+      message: userNotifications.message,
+      projectId: userNotifications.projectId,
+      projectName: projects.name,
+      projectSlug: projects.slug,
+      readAt: userNotifications.readAt,
+      title: userNotifications.title,
+      type: userNotifications.type,
+    })
     .from(userNotifications)
+    .leftJoin(projects, eq(projects.id, userNotifications.projectId))
     .where(eq(userNotifications.userId, session.user.id))
     .orderBy(desc(userNotifications.createdAt))
     .limit(NOTIFICATION_LIMIT);
@@ -121,4 +156,45 @@ export const markAllUserNotificationsRead = createServerFn({
         isNull(userNotifications.readAt)
       )
     );
+});
+
+/**
+ * Removes a notification from the list entirely.
+ *
+ * Separate from marking it read, and the reason is that a read notification
+ * that stays forever is how a list becomes something nobody opens: "mark all as
+ * read" clears the badge and leaves the same rows in place, so the next visit
+ * looks identical to the one before. Dismissing is the only way the list gets
+ * shorter, and without it the list silently fills to its 50-row cap and stops
+ * showing anything new.
+ */
+export const dismissUserNotification = createServerFn({ method: "POST" })
+  .validator((data: { notificationId: string }) =>
+    parse(notificationIdSchema, data)
+  )
+  .handler(async ({ data }): Promise<void> => {
+    const session = await requireUser();
+    await db
+      .delete(userNotifications)
+      .where(
+        and(
+          eq(userNotifications.id, data.notificationId),
+          eq(userNotifications.userId, session.user.id)
+        )
+      );
+  });
+
+/** Removes every notification the account has already read. */
+export const dismissReadUserNotifications = createServerFn({
+  method: "POST",
+}).handler(async (): Promise<void> => {
+  const session = await requireUser();
+  await db.delete(userNotifications).where(
+    and(
+      eq(userNotifications.userId, session.user.id),
+      // Only read ones: clearing an unread row would discard it before the
+      // reader has had a chance to see it, which is not what "tidy up" means.
+      isNotNull(userNotifications.readAt)
+    )
+  );
 });
