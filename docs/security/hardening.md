@@ -260,6 +260,38 @@ them would charge the account quota for an object nothing references, and
 the only way to reclaim it would be Remove — which would also discard the
 URL just chosen.
 
+### A file server that is missing, or down
+
+Two failures that are both somebody else's fault, and which must not be
+reported the same way.
+
+**Not configured.** `loadStorageConfig` throws
+`STORAGE_ERROR.notConfigured` when any `STORAGE_*` variable is missing.
+The UI reads this through `storageIsConfigured` and greys out every
+control that needs storage, with a tooltip and visible helper text saying
+the admins have not configured it. The control is genuinely `disabled`
+rather than dimmed: a dimmed button that still submits is worse than an
+honest one, because the reader finds out it is broken by trying.
+
+**Configured but unreachable.** `withStorageErrors` wraps every call that
+talks to the endpoint and turns a connection failure into
+`STORAGE_ERROR.unreachable`, matching on the error names Node and the AWS
+SDK use — including `ENOTFOUND`, which is what a mistyped
+`STORAGE_ENDPOINT` produces. A `StorageError` is never relabelled, so a
+misconfiguration cannot be reported as an outage.
+
+The API routes answer both with a machine-readable `code` alongside the
+message. That is what lets the client choose its own wording instead of
+string-matching "could not reach", which would quietly stop working the
+moment somebody reworded the message — leaving the reader with a generic
+failure and no prompt to report anything.
+
+The client's own availability check **fails open**: a failed check leaves
+the controls enabled and lets the action be sent. A cached `false` never
+expires, so failing closed would mean one flaky request permanently greys
+out uploads on a site whose storage is fine. The server refusing the
+action, and saying why, is the better outcome.
+
 ### Filenames
 
 `src/lib/upload-validation.ts` gates arbitrary uploads with

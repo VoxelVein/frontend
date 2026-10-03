@@ -13,10 +13,10 @@ import {
 import {
   deleteObjects,
   loadStorageConfig,
-  STORAGE_ERROR,
   StorageError,
   uploadStream,
 } from "@/lib/storage";
+import { errorResponse, storageErrorResponse } from "@/lib/storage-http";
 import {
   getRemainingBytes,
   insertAvatarWithinQuota,
@@ -45,21 +45,6 @@ import env from "../../../env.config";
 // The same reasoning as the project image route: large enough for every
 // dimension reader in `readImage`.
 const HEADER_BYTES = 64;
-
-const HTTP_INSUFFICIENT_STORAGE = 507;
-
-const errorResponse = (status: number, message: string) =>
-  Response.json({ error: message }, { status });
-
-const storageErrorResponse = (error: StorageError): Response => {
-  if (error.code === STORAGE_ERROR.fileTooLarge) {
-    return errorResponse(413, error.message);
-  }
-  if (error.code === STORAGE_ERROR.quotaExceeded) {
-    return errorResponse(HTTP_INSUFFICIENT_STORAGE, error.message);
-  }
-  return errorResponse(503, "Avatar storage is unavailable.");
-};
 
 // Browsers send Origin on PUT; reject cross-site uploads rather than relying
 // only on the session cookie's SameSite setting.
@@ -195,7 +180,7 @@ const asResponse = async (action: () => Promise<Response>) => {
     return await action();
   } catch (error) {
     if (error instanceof StorageError) {
-      return storageErrorResponse(error);
+      return storageErrorResponse(error, "avatar");
     }
     console.error("Avatar change failed", error);
     return errorResponse(500, "The avatar could not be saved. Try again.");

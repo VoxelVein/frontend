@@ -15,6 +15,7 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import appCss from "../styles.css?url";
 
@@ -40,17 +41,21 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
       <HeadContent />
     </head>
     <body>
-      <ThemeProvider storageKey="voxelvein-theme" defaultTheme="system">
-        <a
-          href="#main-content"
-          className="focus:ring-ring focus:bg-background sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:outline-none"
-        >
-          Skip to content
-        </a>
-        <Navbar />
-        <main id="main-content">{children}</main>
-        <Footer />
-      </ThemeProvider>
+      {/* Wraps the document rather than each tooltip, so the open delay and the
+          one-at-a-time policy are decided once for the whole app. */}
+      <TooltipProvider>
+        <ThemeProvider storageKey="voxelvein-theme" defaultTheme="system">
+          <a
+            href="#main-content"
+            className="focus:ring-ring focus:bg-background sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:outline-none"
+          >
+            Skip to content
+          </a>
+          <Navbar />
+          <main id="main-content">{children}</main>
+          <Footer />
+        </ThemeProvider>
+      </TooltipProvider>
       <CookieBanner />
       <Toaster richColors position="bottom-right" />
       <TanStackDevtools

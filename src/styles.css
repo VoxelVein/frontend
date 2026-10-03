@@ -84,7 +84,16 @@
 }
 
 :root {
-  /* Light: clean with red brand accent
+  /* Light: clean with the crimson brand accent
+
+     The brand is the specified #DC143C, stored as the OKLCH value that
+     round-trips to it. One hue drives --primary, --ring, --chart-1,
+     --sidebar-primary and --accent, so nothing can drift out of agreement with
+     the button colour.
+
+     --destructive stays a separate orange-red (hue 40, twenty degrees away).
+     Errors must not be the same red as every other brand surface, or a
+     destructive action stops reading as one.
 
      The neutrals are a deliberately spaced ladder rather than a cluster of
      near-identical whites. Measured in 8-bit sRGB the steps are 255 / 241 /
@@ -113,19 +122,19 @@
   --card-foreground: oklch(0.2393 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2393 0 0);
-  --primary: oklch(0.56 0.2185 22.6077);
+  --primary: oklch(0.5712 0.2219 20.0874);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9542 0.002 70);
   --secondary-foreground: oklch(0.2178 0 0);
   --muted: oklch(0.9263 0.002 70);
   --muted-foreground: oklch(0.464 0 0);
-  --accent: oklch(0.9542 0.022 22.6077);
+  --accent: oklch(0.9542 0.022 20.0874);
   --accent-foreground: oklch(0.2178 0 0);
   --destructive: oklch(0.55 0.17 40);
   --border: oklch(0.8801 0.002 70);
   --input: oklch(0.8801 0.002 70);
-  --ring: oklch(0.56 0.2185 22.6077);
-  --chart-1: oklch(0.56 0.2185 22.6077);
+  --ring: oklch(0.5712 0.2219 20.0874);
+  --chart-1: oklch(0.5712 0.2219 20.0874);
   --chart-2: oklch(0.449 0.0405 250.0452);
   --chart-3: oklch(0.4999 0.0802 180.1312);
   --chart-4: oklch(0.8494 0.0104 58.1918);
@@ -133,7 +142,7 @@
   --radius: 1.4rem;
   --sidebar: oklch(0.9779 0.002 70);
   --sidebar-foreground: oklch(0.2178 0 0);
-  --sidebar-primary: oklch(0.56 0.2185 22.6077);
+  --sidebar-primary: oklch(0.5712 0.2219 20.0874);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.9542 0.02 22.6077);
   --sidebar-accent-foreground: oklch(0.2178 0 0);
@@ -168,15 +177,21 @@
 }
 
 .dark {
-  /* Obsidian: deep volcanic glass with red brand accent */
+  /* Obsidian: deep volcanic glass with the crimson brand accent
+
+     Same hue and chroma as light, lightness raised to 0.605. The dark
+     background is near-black, so the light theme's 0.5712 lands at 4.12:1 and
+     fails AA as text; 0.605 clears it at 4.74:1. One brand colour, two
+     lightnesses — the alternative is a dark theme whose brand stops being
+     readable. */
   --background: oklch(0.101 0.0084 165.234);
   --foreground: oklch(0.985 0.0041 91.4457);
   --card: oklch(0.1776 0 0);
   --card-foreground: oklch(0.985 0.0041 91.4457);
   --popover: oklch(0.1822 0 0);
   --popover-foreground: oklch(0.985 0.0041 91.4457);
-  --primary: oklch(0.6122 0.2313 22.6077);
-  --primary-foreground: oklch(0.1398 0 0);
+  --primary: oklch(0.605 0.2219 20.0874);
+  --primary-foreground: oklch(0.101 0.0084 165.234);
   --secondary: oklch(0.2221 0 0);
   --secondary-foreground: oklch(0.9851 0 0);
   --muted: oklch(0.2221 0 0);
@@ -186,15 +201,15 @@
   --destructive: oklch(0.7 0.19 40);
   --border: oklch(0.252 0 0);
   --input: oklch(0.252 0 0);
-  --ring: oklch(0.6122 0.2313 22.6077);
-  --chart-1: oklch(0.6122 0.2313 22.6077);
+  --ring: oklch(0.605 0.2219 20.0874);
+  --chart-1: oklch(0.605 0.2219 20.0874);
   --chart-2: oklch(0.5799 0.0496 249.6959);
   --chart-3: oklch(0.6001 0.0802 180.0405);
   --chart-4: oklch(0.8494 0.0104 58.1918);
   --chart-5: oklch(0.699 0.0505 250.4634);
   --sidebar: oklch(0.1398 0 0);
   --sidebar-foreground: oklch(0.8514 0 0);
-  --sidebar-primary: oklch(0.6122 0.2313 22.6077);
+  --sidebar-primary: oklch(0.605 0.2219 20.0874);
   --sidebar-primary-foreground: oklch(0.1398 0 0);
   --sidebar-accent: oklch(0.2002 0 0);
   --sidebar-accent-foreground: oklch(0.6122 0.2313 22.6077);
