@@ -123,6 +123,32 @@ shown on a public profile page at `/u/<username>`. The rules live in
 `src/lib/bio.ts`; the lookup is `src/lib/user-profiles.ts`, wrapped by
 `getPublicProfile` in `src/lib/user-profiles.functions.ts`.
 
+### The bio editor
+
+Edited in **Settings → Profile** by `settings-profile.tsx` and rendered on
+the public profile through `MarkdownBody`.
+
+The field **previews itself**, through the same `MarkdownBody` and the same
+`markdown-body` typography wrapper the profile uses. This is the point: the
+field shows `**bold**` and a raw URL, the profile shows a bold run and a link,
+and without a preview the only way to find out which you got was to save,
+navigate, and look. The preview trails the typing by 300 ms, because it
+parses and sanitises Markdown on every change and that is far more work per
+keystroke than the field itself. The panel renders even when the bio is
+empty, so it does not appear and disappear as the field is filled and
+cleared.
+
+The helper **counts down the remaining characters** against the 500 cap. The
+cap is enforced on change, so the error appears the moment it is passed, but
+an error only says "too long" after the fact.
+
+**Save is inert until the form is edited**, and a hint says when there are
+changes waiting. A permanently live button invites a click that reports
+success without having changed anything. After a successful save the form is
+rebased onto what was *stored* rather than what was *typed* — the name is
+trimmed and the bio normalised on the way in, so rebasing on the typed values
+would leave the form still looking edited.
+
 ### Avatars
 
 Uploaded in **Settings → Profile** by `src/components/settings/avatar-card.tsx`,

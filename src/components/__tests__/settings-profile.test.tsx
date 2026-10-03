@@ -218,6 +218,11 @@ describe(SettingsProfile, () => {
     });
     renderProfile(baseUser);
 
+    // Something to save first: Save is inert until the form is edited, so a
+    // refusal can only happen after a change.
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "Ada L" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
     // A refused save is action feedback. Client-side field validation stays
@@ -233,6 +238,85 @@ describe(SettingsProfile, () => {
     expect(screen.getByText(/Markdown is supported/u)).toHaveTextContent(
       "Shown on your public profile."
     );
+  });
+
+  it("previews the bio as Markdown rather than leaving the reader to guess", async () => {
+    renderProfile(baseUser);
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "I make **mods**." },
+    });
+
+    // The field shows asterisks; the profile shows bold. Without a preview the
+    // only way to know which you got was to save and go and look.
+    await expect(
+      screen.findByText("mods", { selector: "strong" })
+    ).resolves.toBeInTheDocument();
+  });
+
+  it("shows the bio preview panel even when there is nothing to preview", () => {
+    renderProfile(baseUser);
+
+    // Otherwise the panel appears and disappears as the field is filled and
+    // cleared, which reads as a glitch.
+    expect(screen.getByText("Preview")).toBeInTheDocument();
+    expect(screen.getByText(/your bio will appear here/iu)).toBeInTheDocument();
+  });
+
+  it("counts the characters left against the bio's cap", () => {
+    renderProfile(baseUser);
+
+    expect(screen.getByText(/500 characters left/u)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "abcde" },
+    });
+
+    expect(screen.getByText(/495 characters left/u)).toBeInTheDocument();
+  });
+
+  it("keeps Save inert until something has actually changed", () => {
+    renderProfile(baseUser);
+
+    // A button that is always live invites a click that reports success without
+    // having changed anything.
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "Ada Lovelace" },
+    });
+
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
+  });
+
+  it("says when there are changes waiting to be saved", () => {
+    renderProfile(baseUser);
+
+    expect(screen.queryByText(/unsaved changes/iu)).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "Ada Lovelace" },
+    });
+
+    expect(screen.getByText(/unsaved changes/iu)).toBeInTheDocument();
+  });
+
+  it("clears the unsaved state once the save lands", async () => {
+    renderProfile(baseUser);
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "  Ada Lovelace  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Save Changes" })
+      ).toBeDisabled();
+    });
+
+    // Rebased onto what was stored rather than what was typed: the name is
+    // trimmed on the way in, so without that the form would still look edited.
+    expect(screen.queryByText(/unsaved changes/iu)).toBeNull();
   });
 
   it("locks the username during the cooldown and says until when", () => {

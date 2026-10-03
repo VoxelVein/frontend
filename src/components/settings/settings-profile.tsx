@@ -1,9 +1,11 @@
 import { useForm, useStore } from "@tanstack/react-form";
+import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { toast } from "sonner";
 import { check, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
 import { FormTextarea } from "@/components/form-textarea";
+import { MarkdownBody } from "@/components/markdown-body";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,7 +45,64 @@ const nameSchema = pipe(
   check((value) => value.trim().length > 0, "Name is required.")
 );
 
-const BIO_HELPER = `Markdown is supported. Up to ${BIO_MAX_LENGTH} characters. Shown on your public profile.`;
+/**
+ * How long typing settles before the preview re-renders.
+ *
+ * The preview parses and sanitises Markdown on every change, which is far more
+ * work per keystroke than the field itself. Waiting a third of a second keeps
+ * typing smooth and the preview still feels live.
+ */
+const BIO_PREVIEW_DEBOUNCE_MS = 300;
+
+const BIO_HELPER = "Markdown is supported. Shown on your public profile.";
+
+/**
+ * The bio field's helper, with the remaining characters counted in.
+ *
+ * The cap is a hard 500 enforced on change, so the error appears the moment it
+ * is passed — but an error only says "too long" after the fact. The count says
+ * how close the limit is while there is still room to act on it.
+ */
+const bioHelper = (value: string): string => {
+  const remaining = BIO_MAX_LENGTH - value.length;
+
+  if (remaining < 0) {
+    return `${BIO_HELPER} ${Math.abs(remaining)} characters over the limit.`;
+  }
+
+  return `${BIO_HELPER} ${remaining} characters left.`;
+};
+
+/**
+ * The bio as it will appear on the public profile.
+ *
+ * Rendered through the same `MarkdownBody` the profile uses, with the same
+ * typography wrapper, because the alternative is guessing. The field shows
+ * `**bold**` and a raw URL; the profile shows a bold run and a link, and the
+ * only way to know which you got was to save and go and look.
+ *
+ * Rendered even when the field is empty, so the panel does not appear and
+ * disappear as the field is filled and cleared.
+ */
+const BioPreview = ({ bio }: { bio: string }) => (
+  <div className="grid gap-2">
+    <p className="text-foreground text-sm font-medium">Preview</p>
+    <div className="border-border bg-muted/30 min-h-24 rounded-lg border p-4">
+      {bio.trim().length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          Your bio will appear here. A sentence or two about what you work on is
+          plenty.
+        </p>
+      ) : (
+        // The same class the profile wraps the bio in, so the preview and the
+        // page are not merely similar but identical.
+        <div className="markdown-body max-w-prose">
+          <MarkdownBody>{bio}</MarkdownBody>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 const USERNAME_CHANGE_NOTE =
   "After changing, you can't change it again for 14 days. Your old username keeps working for sign-in for 14 days.";
@@ -73,6 +132,14 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
         return;
       }
       toast.success("Profile updated.");
+      // Rebased onto what was *stored*, not what was typed: the name is trimmed
+      // and the bio normalised on the way in, so resetting to the raw values
+      // would clear the dirty flag while leaving whitespace in the field that
+      // the server no longer has.
+      form.reset({
+        bio: normalizeBio(value.bio) ?? "",
+        name: value.name.trim(),
+      });
       await refreshSession();
     },
     onSubmitInvalid: () => {
@@ -81,6 +148,13 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   });
 
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
+  const isDirty = useStore(form.store, (state) => state.isDirty);
+  const bio = useStore(form.store, (state) => state.values.bio);
+  // The preview re-parses and re-sanitises Markdown on every change, which is far
+  // more work per keystroke than the field itself, so it trails the typing.
+  const [debouncedBio] = useDebouncedValue(bio, {
+    wait: BIO_PREVIEW_DEBOUNCE_MS,
+  });
 
   return (
     <section aria-labelledby="settings-profile-heading">
@@ -138,16 +212,19 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
               }}
             >
               {(field) => (
-                <FormTextarea
-                  id="profile-bio"
-                  label="Bio (Markdown)"
-                  rows={4}
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors[0]?.message}
-                  helperText={BIO_HELPER}
-                />
+                <>
+                  <FormTextarea
+                    id="profile-bio"
+                    label="Bio (Markdown)"
+                    rows={4}
+                    value={field.state.value}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    onBlur={field.handleBlur}
+                    error={field.state.meta.errors[0]?.message}
+                    helperText={bioHelper(field.state.value)}
+                  />
+                  <BioPreview bio={debouncedBio} />
+                </>
               )}
             </form.Field>
 
@@ -162,14 +239,27 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
               helperText="Contact support to change the address on your account."
             />
 
-            <Button
-              type="submit"
-              variant="default"
-              className="mt-1 min-h-11 w-full sm:w-auto sm:px-6"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Saving…" : "Save Changes"}
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="submit"
+                variant="default"
+                className="min-h-11 w-full sm:w-auto sm:px-6"
+                // Disabled with nothing to save: a button that is always live
+                // invites a click that reports success without having changed
+                // anything.
+                disabled={isSubmitting || !isDirty}
+              >
+                {isSubmitting ? "Saving…" : "Save Changes"}
+              </Button>
+
+              {/* Said rather than signalled by the disabled button alone, which
+                  tells a keyboard user nothing about why. */}
+              {isDirty ? (
+                <p className="text-muted-foreground text-sm">
+                  You have unsaved changes.
+                </p>
+              ) : null}
+            </div>
           </form>
         </CardContent>
       </Card>
