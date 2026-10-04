@@ -54,7 +54,8 @@ server/
   lib/              Event registry and async queue
   routes/           health, SSE events, webhooks
 drizzle/            Generated SQL migrations
-scripts/            Seeding, Garage init, bundle check, version sync
+scripts/            Seeding, Garage init, bundle check and analysis,
+                    version sync
 docs/               Guides (this documentation)
 ```
 

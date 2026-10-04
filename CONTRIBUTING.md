@@ -107,9 +107,15 @@ The project uses **Ultracite** (on Oxlint + Oxfmt) for code quality and
 `ultracite fix` automatically and re-stages your files, so expect
 reformatting at commit time.
 
-`pnpm check:bundle` enforces a 700 kB raw / 250 kB gzipped budget on the
+`pnpm check:bundle` enforces a 780 kB raw / 250 kB gzipped budget on the
 main chunk, so a large new dependency fails CI rather than shipping
-silently.
+silently. Gzip is the figure worth defending, since it is what a reader
+downloads; the raw limit is a looser regression guard and moves when a
+feature legitimately lands.
+
+When it fails, `pnpm analyze:bundle` says where the bytes went rather than
+leaving you to guess from the minified output. See
+[Commands Reference](docs/development/commands.md#finding-out-where-the-bytes-went).
 
 ## Accessibility
 

@@ -6,22 +6,55 @@ you would otherwise type.
 
 ## Development
 
-| Command             | Description                                  |
-| ------------------- | -------------------------------------------- |
-| `pnpm dev`          | Start the whole dev environment (app + API)  |
-| `pnpm dev:all`      | Same thing; `dev` delegates here             |
-| `pnpm dev:web`      | Start only the Vite app (port 3000)          |
-| `pnpm dev:api`      | Start the ElysiaJS API server (watch)        |
-| `pnpm start:api`    | Start the API server (no watch)              |
-| `pnpm send:webhook` | Send a test mod webhook to the API           |
-| `pnpm build`        | Build the production bundle                  |
-| `pnpm preview`      | Preview the production build                 |
-| `pnpm start`        | Run the built Nitro server from `.output/`   |
-| `pnpm check:bundle` | Check the main chunk against the size budget |
+| Command               | Description                                  |
+| --------------------- | -------------------------------------------- |
+| `pnpm dev`            | Start the whole dev environment (app + API)  |
+| `pnpm dev:all`        | Same thing; `dev` delegates here             |
+| `pnpm dev:web`        | Start only the Vite app (port 3000)          |
+| `pnpm dev:api`        | Start the ElysiaJS API server (watch)        |
+| `pnpm start:api`      | Start the API server (no watch)              |
+| `pnpm send:webhook`   | Send a test mod webhook to the API           |
+| `pnpm build`          | Build the production bundle                  |
+| `pnpm preview`        | Preview the production build                 |
+| `pnpm start`          | Run the built Nitro server from `.output/`   |
+| `pnpm check:bundle`   | Check the main chunk against the size budget |
+| `pnpm analyze:bundle` | Attributes the entry chunk to packages       |
 
 `pnpm check:bundle` builds first; pass `--no-build` to reuse an existing
-build. The budget is 700 kB raw and 250 kB gzipped for the largest
+build. The budget is 780 kB raw and 250 kB gzipped for the largest
 `index-*.js`.
+
+### Which number is the budget
+
+Gzip is the figure that tracks what a reader downloads, and it is the one
+worth defending. Raw minified bytes count characters no reader ever
+receives, so the raw limit is a loose regression guard rather than a
+performance target.
+
+It has been raised twice: 700 kB to 720 kB for project icons and gallery
+images, then 720 kB to 780 kB for the Markdown sanitiser. DOMPurify is the
+price of letting post bodies contain HTML, which is a deliberate feature
+rather than a dependency that crept in.
+
+A raise is a decision with a reason attached, so it goes in the comment
+above `RAW_LIMIT_BYTES` in `scripts/check-bundle-size.ts`. That comment is
+the record of why the number is what it is.
+
+### Finding out where the bytes went
+
+`pnpm analyze:bundle` is the companion to a failing `check:bundle`. It
+rebuilds with `BUNDLE_SOURCEMAP=1`, reads the entry chunk's sourcemap, and
+attributes every byte back to a source module and then to a package,
+printing the top twenty packages and the top fifteen files.
+
+Fingerprinting the built chunk for library names instead is guesswork.
+Minified names do not survive, and a chunk can contain a library without
+its name appearing anywhere in it — which is how 33 kB of Drizzle's column
+builders sat unnoticed in the client bundle, retained by the client stubs
+of server functions. The sourcemap is the only honest answer.
+
+It rebuilds from scratch and roughly doubles build output, so it is a
+command to run on demand rather than part of the gate.
 
 ## Quality
 

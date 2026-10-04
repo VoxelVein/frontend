@@ -218,18 +218,19 @@ pnpm dev:api    # API server on http://localhost:3002
 
 ### Development
 
-| Command             | Description                                   |
-| ------------------- | --------------------------------------------- |
-| `pnpm dev`          | Starts the whole dev environment (app + API)  |
-| `pnpm dev:web`      | Starts only the Vite app (port 3000)          |
-| `pnpm dev:api`      | Starts the ElysiaJS API server (watch)        |
-| `pnpm dev:all`      | Runs the app and API server together          |
-| `pnpm start:api`    | Starts the API server (no watch)              |
-| `pnpm send:webhook` | Sends a test mod webhook to the API           |
-| `pnpm build`        | Builds the production bundle                  |
-| `pnpm preview`      | Previews the production build                 |
-| `pnpm start`        | Starts the built Nitro server from `.output/` |
-| `pnpm check:bundle` | Checks the main chunk against the size budget |
+| Command               | Description                                   |
+| --------------------- | --------------------------------------------- |
+| `pnpm dev`            | Starts the whole dev environment (app + API)  |
+| `pnpm dev:web`        | Starts only the Vite app (port 3000)          |
+| `pnpm dev:api`        | Starts the ElysiaJS API server (watch)        |
+| `pnpm dev:all`        | Runs the app and API server together          |
+| `pnpm start:api`      | Starts the API server (no watch)              |
+| `pnpm send:webhook`   | Sends a test mod webhook to the API           |
+| `pnpm build`          | Builds the production bundle                  |
+| `pnpm preview`        | Previews the production build                 |
+| `pnpm start`          | Starts the built Nitro server from `.output/` |
+| `pnpm check:bundle`   | Checks the main chunk against the size budget |
+| `pnpm analyze:bundle` | Attributes the entry chunk to packages        |
 
 ### Quality
 
