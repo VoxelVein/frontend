@@ -87,8 +87,8 @@ const Footer = () => (
             </span>
           </Link>
           <p className="text-muted-foreground mt-3 max-w-xs text-sm">
-            The free, open-source platform for discovering, managing, and
-            sharing Minecraft content.
+            The free, open-source platform for finding, downloading, and sharing
+            Minecraft content.
           </p>
           <div className="mt-4 flex items-center gap-2">
             {SOCIAL_LINKS.map((social) => (

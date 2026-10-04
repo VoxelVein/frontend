@@ -13,13 +13,24 @@ import { cn } from "@/lib/utils";
  *
  * A hardcoded list drifted once already: it advertised `Datapacks`, which is
  * not a project type and has no browse route, while omitting `Servers`, which
- * is one of the six live categories a visitor most wants to find. Deriving the
+ * is one of the live categories a visitor most wants to find. Deriving the
  * list from `MINECRAFT_CATEGORIES` makes that class of drift impossible.
  */
 const PROJECT_TYPES = MINECRAFT_CATEGORIES.map((category) => category.label);
 
-/** "mods, plugins, modpacks, resource packs, shaders, and servers". */
+/** "mods, plugins, modpacks, resource packs, shaders, servers, and datapacks". */
 const TYPE_SENTENCE = categoryLabelSentence();
+
+/**
+ * The fixed half of the headline, which the rotating category completes.
+ *
+ * "Find your next" is deliberately the visitor's half of the sentence rather
+ * than the site's: it says what the reader is here to do, and it survives every
+ * category the rotation can land on. The subhead below it no longer repeats
+ * this list — two seven-item lists inside one screen read as a wall of text
+ * and buried the actual promise.
+ */
+const HEADLINE_PREFIX = "Find your next";
 
 const Hero = () => {
   const reduceMotion = usePrefersReducedMotion();
@@ -30,12 +41,14 @@ const Hero = () => {
         <h1 className="text-foreground mb-6 text-4xl font-bold tracking-tight text-balance sm:mb-8 sm:text-5xl lg:text-6xl">
           {/* The rotation is decorative; screen readers get one stable
               sentence instead of an announcement every two seconds. */}
-          <span className="sr-only">Discover the best {TYPE_SENTENCE}</span>
+          <span className="sr-only">
+            {`${HEADLINE_PREFIX} ${TYPE_SENTENCE}`}
+          </span>
           <span
             aria-hidden="true"
             className="flex flex-col items-center gap-3 sm:gap-4"
           >
-            <span>Discover the best</span>
+            <span>{HEADLINE_PREFIX}</span>
             <RotatingText
               texts={PROJECT_TYPES}
               paused={reduceMotion}
@@ -46,19 +59,35 @@ const Hero = () => {
         </h1>
 
         <p className="text-muted-foreground mx-auto mb-10 max-w-2xl text-lg leading-relaxed sm:mb-12 sm:text-xl">
-          {`Find, follow, and share ${TYPE_SENTENCE} from the Minecraft community.`}
+          Every kind of Minecraft project in one place — published by the people
+          who build it, free and open source, forever.
         </p>
 
-        <div className="animate-hero-enter-lag flex items-center justify-center">
+        {/* Two calls to action, not one. The old hero offered browsing only, so
+            half the audience — the people who make these things — had no way in
+            from here even though publishing is the other half of the site's
+            job. Stacked on mobile, side by side from `sm` up. */}
+        <div className="animate-hero-enter-lag flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
             to="/mods"
             className={cn(
               buttonVariants({ size: "lg", variant: "default" }),
               "ease-smooth min-h-12 gap-2 px-6 text-base transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
             )}
+            preload="intent"
           >
             <span>Browse projects</span>
             <IconArrowRight size={18} />
+          </Link>
+          <Link
+            to="/signup"
+            className={cn(
+              buttonVariants({ size: "lg", variant: "outline" }),
+              "ease-smooth min-h-12 px-6 text-base transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
+            )}
+            preload="intent"
+          >
+            Join free
           </Link>
         </div>
       </div>

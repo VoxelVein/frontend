@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 
 import { FilledPill } from "@/components/filled-pill";
 import { Reveal } from "@/components/reveal";
-import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
+import { MINECRAFT_CATEGORIES } from "@/lib/categories";
 import type { MinecraftCategory } from "@/lib/categories";
 import { staggerDelay } from "@/lib/reveal-stagger";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ const ExploreSection = () => (
         </h2>
 
         <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8">
-          {`${MINECRAFT_CATEGORIES.length} ways into the community's work. Browse ${categoryLabelSentence()}.`}
+          {`${MINECRAFT_CATEGORIES.length} ways into the community's work — pick one and start digging.`}
         </p>
       </Reveal>
 

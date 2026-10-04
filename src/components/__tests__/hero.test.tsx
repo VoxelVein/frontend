@@ -27,8 +27,9 @@ const BROWSE_PROJECTS = /browse projects/iu;
 // Built from the registry so the assertion tracks the category list instead of
 // freezing a copy of it — the old literal silently went stale when a category
 // was added or reordered.
+const HEADLINE_PREFIX = "find your next";
 const HEADING = new RegExp(
-  `discover the best ${categoryLabelSentence()}`,
+  `${HEADLINE_PREFIX} ${categoryLabelSentence()}`,
   "iu"
 );
 
@@ -82,5 +83,32 @@ describe(Hero, () => {
     expect(
       screen.getByRole("heading", { level: 1, name: HEADING })
     ).toBeInTheDocument();
+  });
+
+  it("offers the join call to action alongside the browse one", () => {
+    render(<Hero />);
+
+    // The hero used to link browsing only, leaving anyone who came to publish
+    // with no way in. Both destinations are real routes, so neither button is
+    // a placeholder.
+    expect(
+      screen.getByRole("link", { name: /join free/iu }).getAttribute("href")
+    ).toBe("/signup");
+    expect(
+      screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
+    ).toBe("/mods");
+  });
+
+  it("prints the category list once, for screen readers only", () => {
+    const { container } = render(<Hero />);
+
+    // The list belongs to the sr-only sentence and nowhere else. The subhead
+    // used to repeat it in full, which put two seven-item lists one hero apart
+    // and read as a wall of text. Counted rather than negated because
+    // jsdom does not apply `sr-only`, so `textContent` still sees the hidden
+    // copy and a `not.toContain` would fail on the sentence that is meant to
+    // be there.
+    const list = categoryLabelSentence();
+    expect(container.textContent?.split(list).length ?? 0).toBe(2);
   });
 });

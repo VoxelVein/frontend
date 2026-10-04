@@ -114,7 +114,10 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
               preload="intent"
               to="/mods"
             >
-              <span>Browse projects</span>
+              {/* Not "Browse projects": the hero already carries that label on
+                  the same destination one screen up, and two buttons saying
+                  the same thing make a visitor wonder what differs. */}
+              <span>All projects</span>
               <IconArrowRight aria-hidden size={18} />
             </Link>
           </div>

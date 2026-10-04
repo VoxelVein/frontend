@@ -21,8 +21,13 @@ import appCss from "../styles.css?url";
 
 const SITE_NAME = "VoxelVein";
 const SITE_TITLE = "VoxelVein | Free & Open-Source Minecraft Mod Platform";
+// The list matched the hero's own copy rather than the category registry, and
+// had already drifted: it omitted datapacks. This description is the one string
+// a visitor reads without ever loading the page, so it leads with the promise
+// and names the breadth instead of enumerating seven nouns a search result
+// truncates anyway.
 const SITE_DESCRIPTION =
-  "Discover, install, and share Minecraft mods, resource packs, modpacks, shaders, plugins, and servers. Free and open source, forever.";
+  "Find, download, and share Minecraft mods, plugins, modpacks, resource packs, shaders, datapacks, and servers. Free and open source, forever.";
 
 // Absolute origin, no trailing slash. Read from import.meta.env rather than
 // env.config so the value is inlined at build time and available during SSR
