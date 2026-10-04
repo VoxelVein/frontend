@@ -18,3 +18,19 @@
  */
 export const MICRO_LABEL_CLASS =
   "text-muted-foreground text-xs font-medium tracking-wide uppercase";
+
+/**
+ * A short factual value as a rounded chip: a Minecraft version, a mod loader, a
+ * server platform.
+ *
+ * Used by the server page's supported-versions list and the download page's
+ * compatibility list. Both answer the same question — "is this compatible with
+ * what I have?" — by asking the reader to match a short string against something
+ * on their own machine, so the two must render identically or one of them reads
+ * as a different kind of fact.
+ *
+ * Monospaced because these are values copied into a launcher or typed into a
+ * server address field, not prose.
+ */
+export const PILL_CLASS =
+  "border-border bg-muted text-foreground inline-flex items-center rounded-full border px-3 py-1 font-mono text-sm";

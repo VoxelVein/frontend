@@ -1,4 +1,3 @@
-import { IconArrowRight } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
 import { FilledPill } from "@/components/filled-pill";
@@ -22,16 +21,36 @@ const SoonBadge = () => (
   </span>
 );
 
+/**
+ * One category, as a single target.
+ *
+ * Three changes from the tile this replaces:
+ *
+ * **No "Browse →" footer.** The whole tile is already one link, so the footer
+ * said the same thing twice on every card and gave each one a dead strip at the
+ * bottom. The affordance is now the icon, which fills with the accent colour on
+ * hover, plus the title taking the accent — the same treatment the browse page's
+ * cards use.
+ *
+ * **A larger icon tile.** At `size-12` the glyph was smaller than the title
+ * beside it and the card read as a heading with a decoration. `size-14` makes it
+ * the thing you land on first, which is right: it is the only thing that
+ * distinguishes one category card from another at a glance.
+ *
+ * **A lighter hover.** Only the border and the contents move; the card no longer
+ * lifts, because seven cards lifting together is a lot of motion for a grid of
+ * navigation rather than content.
+ */
 const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
   const { available, description, href, icon: Icon, label } = category;
 
   return (
     <article
       className={cn(
-        "border-border ease-smooth relative flex h-full flex-col rounded-lg border p-6",
-        "transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none",
+        "border-border ease-smooth relative flex h-full flex-col rounded-xl border p-6",
+        "transition-colors duration-200 motion-reduce:transition-none",
         available
-          ? "group bg-card focus-within:border-foreground/20 hover:border-foreground/20 focus-within:-translate-y-0.5 hover:-translate-y-0.5"
+          ? "group bg-card hover:border-primary/30 focus-within:border-primary/30"
           : "bg-muted/30"
       )}
     >
@@ -40,7 +59,7 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
           staying a real link for keyboard and screen reader users. */}
       {available ? (
         <Link
-          className="focus-visible:ring-ring absolute inset-0 z-10 rounded-2xl focus-visible:ring-2 focus-visible:outline-none"
+          className="focus-visible:ring-ring absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
           preload="intent"
           to={href}
         >
@@ -50,37 +69,27 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
 
       <div
         className={cn(
-          "flex size-12 shrink-0 items-center justify-center rounded-xl",
+          "flex size-14 shrink-0 items-center justify-center rounded-xl",
+          "transition-colors duration-200 motion-reduce:transition-none",
           available
-            ? "bg-primary/10 text-primary"
+            ? "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground group-focus-within:bg-primary group-focus-within:text-primary-foreground"
             : "bg-muted text-muted-foreground"
         )}
       >
-        <Icon aria-hidden="true" size={24} stroke={1.8} />
+        <Icon aria-hidden="true" size={26} stroke={1.7} />
       </div>
 
-      <h3 className="mt-5 mb-2 text-lg font-semibold tracking-tight">
+      <h3 className="text-foreground group-hover:text-primary mt-5 mb-2 text-lg font-semibold tracking-tight transition-colors duration-200 motion-reduce:transition-none">
         {label}
       </h3>
 
       <p className="text-muted-foreground text-sm leading-6">{description}</p>
 
-      {/* `mt-auto` pins the footer to the bottom so the tiles line up across
-          the row regardless of description length. */}
-      <div className="mt-6 flex min-h-11 items-center pt-2 text-sm font-medium">
-        {available ? (
-          <>
-            <span className="text-primary group-hover:underline">Browse</span>
-            <IconArrowRight
-              aria-hidden="true"
-              className="text-primary ease-smooth ml-1.5 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
-              size={16}
-            />
-          </>
-        ) : (
+      {available ? null : (
+        <div className="mt-5">
           <SoonBadge />
-        )}
-      </div>
+        </div>
+      )}
     </article>
   );
 };

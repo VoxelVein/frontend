@@ -39,12 +39,18 @@ interface MinecraftCategory {
  * explore section, so a category's route or availability can never drift
  * between them. Keep the list in navbar order: the navbar and the explore
  * grid both render it in sequence.
+ *
+ * The `description` copy is also shared, which is why all seven read as one set:
+ * they sit next to each other in the explore grid and in the navbar's Browse
+ * menu, so a mixture of registers ("Stunning visual effects for your world"
+ * beside "Enhance Minecraft with new features, mechanics, and content") reads as
+ * seven unrelated sentences rather than one list. All noun phrases, all short.
  */
 const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: true,
-    description: "Enhance Minecraft with new features, mechanics, and content.",
+    description: "New features, mechanics, and content.",
     href: "/mods",
     icon: IconBox,
     label: "Mods",
@@ -52,7 +58,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: false,
-    description: "Discover curated collections of mods for every playstyle.",
+    description: "Curated collections of mods, ready to play.",
     href: "/modpacks",
     icon: IconPackages,
     label: "Modpacks",
@@ -60,7 +66,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: true,
-    description: "Extend your Minecraft server with powerful plugins.",
+    description: "Powerful tools for your own server.",
     href: "/plugins",
     icon: IconServer,
     label: "Plugins",
@@ -68,7 +74,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: false,
-    description: "Change the look and feel of your Minecraft experience.",
+    description: "New textures, sounds, and interface.",
     href: "/resource-packs",
     icon: IconPhoto,
     label: "Resource Packs",
@@ -76,7 +82,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: false,
-    description: "Stunning visual effects for your world.",
+    description: "Lighting and visual effects for your world.",
     href: "/shaders",
     icon: IconPalette,
     label: "Shaders",
@@ -84,7 +90,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: false,
-    description: "Communities and worlds to play in with others.",
+    description: "Communities and worlds to play in.",
     href: "/servers",
     icon: IconWorld,
     label: "Servers",
@@ -92,8 +98,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
   {
     available: true,
     alwaysInline: false,
-    description:
-      "Add dimensions, biomes, loot tables, and recipes to your world.",
+    description: "Dimensions, biomes, loot, and recipes.",
     href: "/datapacks",
     icon: IconDatabase,
     label: "Datapacks",

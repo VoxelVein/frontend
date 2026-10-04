@@ -92,6 +92,30 @@ describe(ExploreSection, () => {
     expect(screen.getAllByRole("link")).toHaveLength(AVAILABLE_LINKS.length);
   });
 
+  it("repeats no call to action now the tile is the link", () => {
+    render(<ExploreSection />);
+
+    // Seven cards each saying "Browse →" said the same thing eight times, and
+    // gave every card a dead strip at the bottom. The tile is one link whose
+    // accessible name already says where it goes.
+    expect(screen.queryAllByText("Browse")).toHaveLength(0);
+    expect(screen.queryAllByRole("link")).toHaveLength(
+      MINECRAFT_CATEGORIES.filter((category) => category.available).length
+    );
+  });
+
+  it("gives every category a description of comparable length", () => {
+    // The descriptions sit side by side in this grid and again in the navbar's
+    // Browse menu. When one ran to ten words and another to four they read as
+    // seven unrelated sentences rather than one list, so the copy is checked
+    // here rather than trusted.
+    const lengths = MINECRAFT_CATEGORIES.map(
+      (category) => category.description.split(" ").length
+    );
+
+    expect(Math.max(...lengths) - Math.min(...lengths)).toBeLessThanOrEqual(3);
+  });
+
   it("marks categories without a route as coming soon instead of linking them", () => {
     render(<ExploreSection />);
 

@@ -30,6 +30,37 @@ lives in one place, `src/lib/categories.ts`, and drives the navbar menu,
 the navbar overflow menu, the footer, and the home page's explore grid, so
 a category can never be advertised in one place and missing in another.
 
+### The detail pages are two components, not one
+
+The seven detail routes split into two components, because the types do not
+share a subject. Six of them are downloads and render `ProjectDetail`; a
+server is a place you go, not a file you fetch, and renders `ServerDetail`.
+
+Both share one layout: a sidebar on the left from `lg` up, and the
+long-form content beside it. Each sidebar answers the same two questions
+in the same order — *can I use this*, then *how do I get it* — and each
+leads the DOM, so the priority holds on mobile and for a screen reader
+alike rather than depending on where the sidebar happens to sit.
+
+| Type                 | Sidebar                                     |
+| -------------------- | ------------------------------------------- |
+| the six downloadable | newest version and file, then compatibility |
+| `server`             | address, versions, then client requirements |
+
+The download used to be the last section on the page, below the
+description and the gallery, and the join address below the stats, the
+summary, and the description. In both cases the one thing a visitor came
+for was the last thing on screen. The full version history stays in the
+main column — it does not fit in a card — under the title *Version
+history*, since the sidebar now shows the current version and two
+sections called *Versions* read as a duplicate.
+
+`hasLoaders(type)` decides whether the compatibility card shows a loader
+block at all. Resource packs and datapacks have no such axis, so the card
+drops it rather than printing an empty one. The heading reuses
+`LOADER_LABELS`, so a Paper plugin reads *Platforms* and a mod reads
+*Loaders* — the same words the publish form and the browse filter use.
+
 ## Subcategories
 
 Content types and subcategories are two different things, and both are often
@@ -397,20 +428,16 @@ when nothing is linked. The Servers page filters on it. Because it is
 computed at query time, unpublishing a linked mod changes the server's
 requirement right away.
 
-A server's public page is its own component
-(`src/components/projects/server-detail.tsx`), not a variant of the download
-page, because a server has no files and its subject is an address rather than a
-version. The page is two columns from `lg` up: a join panel holding the address
-with its copy button, the supported versions, and the client requirements, then
-the description, gallery, and tags. Below `lg` it is one column with the panel
-first. The address leads the page in DOM order on every breakpoint, so it is
-also first for a screen reader.
+A server's public page is its own component, and it shares the two-column
+layout described under [Pages](#pages): a sidebar with the join address and
+its copy button, the supported versions, and the client requirements, then
+the description, gallery, and tags.
 
 Client content is split into required and recommended rather than one flat
-list, because the two are not the same kind of instruction: skipping a required
-mod means the connection is refused, skipping a recommended one costs fidelity.
-An unpublished link renders as plain text, since a link to it would 404 for
-everyone but the server's owner.
+list, because the two are not the same kind of instruction: skipping a
+required mod means the connection is refused, skipping a recommended one
+costs fidelity. An unpublished link renders as plain text, since a link to
+it would 404 for everyone but the server's owner.
 
 ## Search
 
