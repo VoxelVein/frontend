@@ -397,9 +397,20 @@ when nothing is linked. The Servers page filters on it. Because it is
 computed at query time, unpublishing a linked mod changes the server's
 requirement right away.
 
-A server's public page shows the join address with a copy button, the
-linked content split into required and recommended, and the client
-requirement derived from those links.
+A server's public page is its own component
+(`src/components/projects/server-detail.tsx`), not a variant of the download
+page, because a server has no files and its subject is an address rather than a
+version. The page is two columns from `lg` up: a join panel holding the address
+with its copy button, the supported versions, and the client requirements, then
+the description, gallery, and tags. Below `lg` it is one column with the panel
+first. The address leads the page in DOM order on every breakpoint, so it is
+also first for a screen reader.
+
+Client content is split into required and recommended rather than one flat
+list, because the two are not the same kind of instruction: skipping a required
+mod means the connection is refused, skipping a recommended one costs fidelity.
+An unpublished link renders as plain text, since a link to it would 404 for
+everyone but the server's owner.
 
 ## Search
 

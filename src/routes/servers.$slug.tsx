@@ -1,10 +1,8 @@
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
-import {
-  ProjectDetail,
-  ProjectDetailSkeleton,
-  ProjectNotFound,
-} from "@/components/projects/project-detail";
+import { ProjectNotFound } from "@/components/projects/project-detail";
+import { ServerDetail } from "@/components/projects/server-detail";
+import { ServerDetailSkeleton } from "@/components/projects/server-detail-skeleton";
 import { getProject } from "@/lib/projects.functions";
 
 const ServerDetailPage = () => {
@@ -12,7 +10,7 @@ const ServerDetailPage = () => {
   if (!project) {
     return <ProjectNotFound type="server" />;
   }
-  return <ProjectDetail project={project} />;
+  return <ServerDetail project={project} />;
 };
 
 export const Route = createFileRoute("/servers/$slug")({
@@ -36,5 +34,5 @@ export const Route = createFileRoute("/servers/$slug")({
     ],
   }),
   component: ServerDetailPage,
-  pendingComponent: ProjectDetailSkeleton,
+  pendingComponent: ServerDetailSkeleton,
 });
