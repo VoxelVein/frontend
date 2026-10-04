@@ -1,4 +1,4 @@
-import type { ProjectImageKind } from "@/db/schema";
+import type { ProjectImageKind } from "@/lib/projects";
 
 /**
  * Longest edge, in pixels, that each kind of image is stored at.

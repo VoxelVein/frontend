@@ -2,7 +2,7 @@ import { asc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { projectImages } from "@/db/schema";
-import type { ProjectImageKind } from "@/db/schema";
+import type { ProjectImageKind } from "@/lib/projects";
 
 /** The public URL a stored image is served from. */
 export const imageUrl = (id: string): string => `/api/image/${id}`;

@@ -1,6 +1,5 @@
-import type { ProjectImageKind } from "@/db/schema";
 import { resizeImageForUpload } from "@/lib/image-resize";
-import type { ProjectFileView } from "@/lib/projects";
+import type { ProjectImageKind, ProjectFileView } from "@/lib/projects";
 import { StorageRequestError } from "@/lib/storage-availability";
 import { contentTypeFor } from "@/lib/upload-validation";
 

@@ -29,6 +29,12 @@ const config = defineConfig({
     viteReact(),
   ],
   resolve: { tsconfigPaths: true },
+  build: {
+    // Off by default: a sourcemap roughly doubles the build's output. Set
+    // BUNDLE_SOURCEMAP=1 when running `pnpm analyze:bundle`, which needs it to
+    // attribute entry-chunk bytes to their sources.
+    sourcemap: process.env.BUNDLE_SOURCEMAP === "1",
+  },
   server: {
     // PORT is the single "where do I listen" variable, shared with the Nitro
     // production server. Local `pnpm dev` falls back to 3000; the Docker

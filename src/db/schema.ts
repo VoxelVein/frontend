@@ -15,6 +15,7 @@ import {
 
 import type { UserNotificationType } from "../lib/notifications";
 import type {
+  ProjectImageKind,
   ProjectStatus,
   ProjectType,
   ReleaseChannel,
@@ -432,14 +433,6 @@ export const projectFiles = pgTable(
     index("project_files_sha1_idx").on(table.sha1),
   ]
 );
-
-export const PROJECT_IMAGE_KIND = {
-  gallery: "gallery",
-  icon: "icon",
-} as const;
-
-export type ProjectImageKind =
-  (typeof PROJECT_IMAGE_KIND)[keyof typeof PROJECT_IMAGE_KIND];
 
 /**
  * A project's icon and gallery images, stored in object storage.

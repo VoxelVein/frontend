@@ -3,8 +3,7 @@ import { and, count, eq } from "drizzle-orm";
 import { safeParse, string, uuid, pipe } from "valibot";
 
 import { db } from "@/db";
-import { PROJECT_IMAGE_KIND, projectImages } from "@/db/schema";
-import type { ProjectImageKind } from "@/db/schema";
+import { projectImages } from "@/db/schema";
 import {
   GALLERY_MAX_COUNT,
   IMAGE_MAX_BYTES,
@@ -17,6 +16,8 @@ import {
   requireEditableProject,
   requireUploader,
 } from "@/lib/project-access";
+import type { ProjectImageKind } from "@/lib/projects";
+import { PROJECT_IMAGE_KIND } from "@/lib/projects";
 import {
   consumeRateLimit,
   rateLimitedResponse,

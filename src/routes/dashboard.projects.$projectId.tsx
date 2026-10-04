@@ -24,11 +24,11 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PROJECT_IMAGE_KIND } from "@/db/schema";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import type { ProjectImagesView } from "@/lib/project-images";
 import {
+  PROJECT_IMAGE_KIND,
   hasVersions,
   PROJECT_STATUS_LABELS,
   PROJECT_TYPE_LABELS,

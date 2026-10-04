@@ -1,5 +1,6 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { check, pipe, string } from "valibot";
 
@@ -25,6 +26,7 @@ import { BIO_MAX_LENGTH, bioSchema, normalizeBio } from "@/lib/bio";
 import { errorMessage } from "@/lib/form-errors";
 import { formatDate } from "@/lib/format";
 import { getNextUsernameChange, USERNAME_HINT } from "@/lib/usernames";
+import { cn } from "@/lib/utils";
 
 interface SettingsProfileUser {
   name: string;
@@ -109,8 +111,26 @@ const USERNAME_CHANGE_NOTE =
 
 const USERNAME_NOTE_ID = "profile-username-note";
 
-const DisplayNameCard = ({ user }: SettingsProfileProps) => {
+const DisplayNameForm = ({ user }: SettingsProfileProps) => {
   const refreshSession = useRefreshSession();
+
+  /**
+   * What is actually stored, derived from the session rather than remembered.
+   *
+   * This started as local state updated on save, and that was wrong twice over:
+   * a saved local baseline and the `user` prop are two answers to one question,
+   * so they drift the moment `refreshSession` re-renders the card with fresh
+   * session data. The field would then be reset to what the server reports while
+   * the baseline still held what was typed, and the form would claim unsaved
+   * changes forever.
+   *
+   * Reading the baseline off the session removes the possibility: there is only
+   * ever one answer, and it is the server's.
+   */
+  const saved = {
+    bio: normalizeBio(user.bio ?? ""),
+    name: user.name,
+  };
 
   // Fields are initialized from the session user and become the source of
   // truth; TanStack Form only re-syncs defaultValues while the form is
@@ -132,10 +152,10 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
         return;
       }
       toast.success("Profile updated.");
-      // Rebased onto what was *stored*, not what was typed: the name is trimmed
-      // and the bio normalised on the way in, so resetting to the raw values
-      // would clear the dirty flag while leaving whitespace in the field that
-      // the server no longer has.
+      // Rebased onto what was stored rather than what was typed, so the fields
+      // show what the server has instead of the whitespace it trimmed away.
+      // The dirty comparison reads its baseline off the refreshed session, so
+      // this is about the text on screen rather than about the flag.
       form.reset({
         bio: normalizeBio(value.bio) ?? "",
         name: value.name.trim(),
@@ -148,8 +168,9 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   });
 
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
-  const isDirty = useStore(form.store, (state) => state.isDirty);
   const bio = useStore(form.store, (state) => state.values.bio);
+  const name = useStore(form.store, (state) => state.values.name);
+  const isDirty = normalizeBio(bio) !== saved.bio || name.trim() !== saved.name;
   // The preview re-parses and re-sanitises Markdown on every change, which is far
   // more work per keystroke than the field itself, so it trails the typing.
   const [debouncedBio] = useDebouncedValue(bio, {
@@ -157,117 +178,108 @@ const DisplayNameCard = ({ user }: SettingsProfileProps) => {
   });
 
   return (
-    <section aria-labelledby="settings-profile-heading">
-      <Card>
-        <CardHeader>
-          {/* A real h2, not CardTitle: the primitive renders a div, and the
-              heading hierarchy must survive. */}
-          <h2
-            id="settings-profile-heading"
-            className="text-foreground text-lg font-semibold"
-          >
-            Profile
-          </h2>
-          <CardDescription>Update your display name and bio.</CardDescription>
-        </CardHeader>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
+      noValidate
+      aria-busy={isSubmitting}
+      className="mt-4 grid gap-4"
+    >
+      <form.Field
+        name="name"
+        validators={{
+          onChange: nameSchema,
+          onSubmit: nameSchema,
+        }}
+      >
+        {(field) => (
+          <FormField
+            id="profile-name"
+            label="Display name"
+            type="text"
+            autoComplete="name"
+            value={field.state.value}
+            onChange={(event) => field.handleChange(event.target.value)}
+            onBlur={field.handleBlur}
+            error={field.state.meta.errors[0]?.message}
+            required
+          />
+        )}
+      </form.Field>
 
-        <CardContent>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-            noValidate
-            aria-busy={isSubmitting}
-            className="mt-4 grid gap-4"
-          >
-            <form.Field
-              name="name"
-              validators={{
-                onChange: nameSchema,
-                onSubmit: nameSchema,
-              }}
-            >
-              {(field) => (
-                <FormField
-                  id="profile-name"
-                  label="Display name"
-                  type="text"
-                  autoComplete="name"
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors[0]?.message}
-                  required
-                />
-              )}
-            </form.Field>
-
-            <form.Field
-              name="bio"
-              validators={{
-                onChange: bioSchema,
-                onSubmit: bioSchema,
-              }}
-            >
-              {(field) => (
-                <>
-                  <FormTextarea
-                    id="profile-bio"
-                    label="Bio (Markdown)"
-                    rows={4}
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    onBlur={field.handleBlur}
-                    error={field.state.meta.errors[0]?.message}
-                    helperText={bioHelper(field.state.value)}
-                  />
-                  <BioPreview bio={debouncedBio} />
-                </>
-              )}
-            </form.Field>
-
-            {/* Read-only rather than a styled <p>: a real field keeps its label
-                association and is announced as a field the user cannot change. */}
-            <FormField
-              id="profile-email"
-              label="Email"
-              type="email"
-              value={user.email ?? ""}
-              readOnly
-              helperText="Contact support to change the address on your account."
+      <form.Field
+        name="bio"
+        validators={{
+          onChange: bioSchema,
+          onSubmit: bioSchema,
+        }}
+      >
+        {(field) => (
+          <>
+            <FormTextarea
+              id="profile-bio"
+              label="Bio (Markdown)"
+              rows={4}
+              value={field.state.value}
+              onChange={(event) => field.handleChange(event.target.value)}
+              onBlur={field.handleBlur}
+              error={field.state.meta.errors[0]?.message}
+              helperText={bioHelper(field.state.value)}
             />
+            <BioPreview bio={debouncedBio} />
+          </>
+        )}
+      </form.Field>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="submit"
-                variant="default"
-                className="min-h-11 w-full sm:w-auto sm:px-6"
-                // Disabled with nothing to save: a button that is always live
-                // invites a click that reports success without having changed
-                // anything.
-                disabled={isSubmitting || !isDirty}
-              >
-                {isSubmitting ? "Saving…" : "Save Changes"}
-              </Button>
+      {/* Read-only rather than a styled <p>: a real field keeps its label
+                association and is announced as a field the user cannot change. */}
+      <FormField
+        id="profile-email"
+        label="Email"
+        type="email"
+        value={user.email ?? ""}
+        readOnly
+        helperText="Contact support to change the address on your account."
+      />
 
-              {/* Said rather than signalled by the disabled button alone, which
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="submit"
+          variant="default"
+          className="min-h-11 w-full sm:w-auto sm:px-6"
+          // Disabled with nothing to save: a button that is always live
+          // invites a click that reports success without having changed
+          // anything.
+          disabled={isSubmitting || !isDirty}
+        >
+          {isSubmitting ? "Saving…" : "Save Changes"}
+        </Button>
+
+        {/* Said rather than signalled by the disabled button alone, which
                   tells a keyboard user nothing about why. */}
-              {isDirty ? (
-                <p className="text-muted-foreground text-sm">
-                  You have unsaved changes.
-                </p>
-              ) : null}
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </section>
+        {isDirty ? (
+          <p className="text-muted-foreground text-sm">
+            You have unsaved changes.
+          </p>
+        ) : null}
+      </div>
+    </form>
   );
 };
 
-const UsernameCard = ({ user }: SettingsProfileProps) => {
+/**
+ * The username field and the one action that saves it.
+ *
+ * Kept as its own form even though it shares the card: a username change goes
+ * through `confirmUsername`/`changeUsername`, which enforce the cooldown, the
+ * reservations and the history rules that `updateUser` knows nothing about.
+ * One Save button across both would have to pick a path, and the honest answer
+ * is that these are two different changes with two different consequences.
+ */
+const UsernameForm = ({ user }: SettingsProfileProps) => {
   const refreshSession = useRefreshSession();
 
   const currentUsername = user.displayUsername ?? user.username ?? null;
@@ -317,93 +329,145 @@ const UsernameCard = ({ user }: SettingsProfileProps) => {
     : null;
 
   return (
-    <section aria-labelledby="settings-username-heading">
-      <Card>
-        <CardHeader>
-          <h2
-            id="settings-username-heading"
-            className="text-foreground text-lg font-semibold"
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
+      noValidate
+      aria-busy={isSubmitting}
+      className="mt-4 grid gap-4"
+    >
+      <form.Field
+        name="username"
+        validators={{
+          onChange: usernameSchema,
+          onSubmit: usernameSchema,
+        }}
+      >
+        {(field) => (
+          <UsernameField
+            id="profile-username"
+            label="Username"
+            autoComplete="username"
+            value={field.state.value}
+            onChange={(event) => field.handleChange(event.target.value)}
+            onBlur={field.handleBlur}
+            error={field.state.meta.errors[0]?.message}
+            helperText={lockedMessage ?? USERNAME_HINT}
+            availability={availability}
+            disabled={isLocked}
+            required
+          />
+        )}
+      </form.Field>
+
+      {isLocked ? null : (
+        <>
+          {isFirstChoice ? null : (
+            <p id={USERNAME_NOTE_ID} className="text-muted-foreground text-sm">
+              {USERNAME_CHANGE_NOTE}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            variant="default"
+            className="mt-1 min-h-11 w-full sm:w-auto sm:px-6"
+            aria-describedby={isFirstChoice ? undefined : USERNAME_NOTE_ID}
+            disabled={isSubmitting}
           >
-            Username
-          </h2>
-          <CardDescription>
-            {currentUsername
-              ? `Your username is ${currentUsername}. It is shown on your projects and works for sign-in.`
-              : "Choose a username. It is shown on your projects and works for sign-in."}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-            noValidate
-            aria-busy={isSubmitting}
-            className="mt-4 grid gap-4"
-          >
-            <form.Field
-              name="username"
-              validators={{
-                onChange: usernameSchema,
-                onSubmit: usernameSchema,
-              }}
-            >
-              {(field) => (
-                <UsernameField
-                  id="profile-username"
-                  label="Username"
-                  autoComplete="username"
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors[0]?.message}
-                  helperText={lockedMessage ?? USERNAME_HINT}
-                  availability={availability}
-                  disabled={isLocked}
-                  required
-                />
-              )}
-            </form.Field>
-
-            {isLocked ? null : (
-              <>
-                {isFirstChoice ? null : (
-                  <p
-                    id={USERNAME_NOTE_ID}
-                    className="text-muted-foreground text-sm"
-                  >
-                    {USERNAME_CHANGE_NOTE}
-                  </p>
-                )}
-
-                <Button
-                  type="submit"
-                  variant="default"
-                  className="mt-1 min-h-11 w-full sm:w-auto sm:px-6"
-                  aria-describedby={
-                    isFirstChoice ? undefined : USERNAME_NOTE_ID
-                  }
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Saving…" : "Change username"}
-                </Button>
-              </>
-            )}
-          </form>
-        </CardContent>
-      </Card>
-    </section>
+            {isSubmitting ? "Saving…" : "Change username"}
+          </Button>
+        </>
+      )}
+    </form>
   );
 };
 
+/** A titled group inside the card, so the heading hierarchy does not skip. */
+const ProfileGroup = ({
+  children,
+  description,
+  divided = false,
+  heading,
+  id,
+}: {
+  children: ReactNode;
+  description?: ReactNode;
+  /** A rule above the group, so two groups read as two without two cards. */
+  divided?: boolean;
+  heading: string;
+  id: string;
+}) => (
+  <section
+    aria-labelledby={id}
+    className={cn("grid gap-4", divided && "border-t pt-8")}
+  >
+    <div className="grid gap-1">
+      <h3 className="text-foreground text-sm font-semibold" id={id}>
+        {heading}
+      </h3>
+      {description ? (
+        <p className="text-muted-foreground text-sm">{description}</p>
+      ) : null}
+    </div>
+    {children}
+  </section>
+);
+
+/**
+ * Display name, bio, email and username, in one card.
+ *
+ * One card rather than two, because they are one thing a person is doing:
+ * describing themselves. Splitting them sent the username — which appears
+ * beside their name on every project and every byline — off to its own screen
+ * to be dealt with separately.
+ */
 const SettingsProfile = ({ user }: SettingsProfileProps) => (
-  <div className="grid gap-6">
-    <DisplayNameCard user={user} />
-    <UsernameCard user={user} />
-  </div>
+  <section aria-labelledby="settings-profile-heading">
+    <Card>
+      <CardHeader>
+        {/* A real h2, not CardTitle: the primitive renders a div, and the
+            heading hierarchy must survive. */}
+        <h2
+          className="text-foreground text-lg font-semibold"
+          id="settings-profile-heading"
+        >
+          Profile
+        </h2>
+        <CardDescription>
+          How you appear across the site, and the name people sign in with.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        <div className="grid gap-8">
+          <ProfileGroup
+            heading="Details"
+            id="settings-profile-details"
+            description="Your display name and bio appear on your public profile."
+          >
+            <DisplayNameForm user={user} />
+          </ProfileGroup>
+
+          <ProfileGroup
+            divided
+            heading="Username"
+            id="settings-profile-username"
+            description={
+              (user.displayUsername ?? user.username)
+                ? `Your username is ${user.displayUsername ?? user.username}. It is shown on your projects and works for sign-in.`
+                : "Choose a username. It is shown on your projects and works for sign-in."
+            }
+          >
+            <UsernameForm user={user} />
+          </ProfileGroup>
+        </div>
+      </CardContent>
+    </Card>
+  </section>
 );
 
 export { SettingsProfile };

@@ -43,6 +43,24 @@ export const PROJECT_TYPES = [
   "datapack",
   "server",
 ] as const;
+/**
+ * The two kinds of image a project can have.
+ *
+ * Lives here rather than beside the table in `db/schema.ts` because it is plain
+ * vocabulary, not a column definition. `schema.ts` reaches into drizzle's column
+ * builders at runtime, so a client component importing one constant from there
+ * pulled the whole table module — and about 33 kB of query builder — into the
+ * browser bundle. The type is what `schema.ts` needs for its column, and a type
+ * import costs nothing.
+ */
+export const PROJECT_IMAGE_KIND = {
+  gallery: "gallery",
+  icon: "icon",
+} as const;
+
+export type ProjectImageKind =
+  (typeof PROJECT_IMAGE_KIND)[keyof typeof PROJECT_IMAGE_KIND];
+
 export type ProjectType = (typeof PROJECT_TYPES)[number];
 
 /**

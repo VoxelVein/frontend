@@ -5,11 +5,11 @@ import { toast } from "sonner";
 import { ProjectImage } from "@/components/projects/project-image";
 import { StorageGated } from "@/components/storage-gated";
 import { Button } from "@/components/ui/button";
-import { PROJECT_IMAGE_KIND } from "@/db/schema";
 import { useStorageAvailable } from "@/hooks/use-storage-available";
 import { errorMessage } from "@/lib/form-errors";
 import { GALLERY_MAX_COUNT, IMAGE_MAX_BYTES } from "@/lib/image-limits";
 import type { ProjectImageView } from "@/lib/project-images";
+import { PROJECT_IMAGE_KIND } from "@/lib/projects";
 import {
   STORAGE_UNAVAILABLE_REASON,
   storageFailureMessage,

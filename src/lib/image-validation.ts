@@ -1,4 +1,4 @@
-import type { ProjectImageKind } from "@/db/schema";
+import type { ProjectImageKind } from "@/lib/projects";
 
 /**
  * Per-image ceiling. Generous, because originals are stored exactly as

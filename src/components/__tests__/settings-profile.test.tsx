@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -79,7 +85,18 @@ const renderProfile = (user: Parameters<typeof SettingsProfile>[0]["user"]) => {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return render(<SettingsProfile user={user} />, { wrapper });
+  const view = render(<SettingsProfile user={user} />, { wrapper });
+
+  // Re-delivers the card with a new session, which is what `refreshSession`
+  // causes in the app once a save lands.
+  const rerenderAs = (next: typeof user) =>
+    view.rerender(
+      <QueryClientProvider client={queryClient}>
+        <SettingsProfile user={next} />
+      </QueryClientProvider>
+    );
+
+  return { ...view, rerenderAs };
 };
 
 const baseUser = {
@@ -301,22 +318,110 @@ describe(SettingsProfile, () => {
     expect(screen.getByText(/unsaved changes/iu)).toBeInTheDocument();
   });
 
-  it("clears the unsaved state once the save lands", async () => {
-    renderProfile(baseUser);
+  it("clears the unsaved state once the session reports the saved values", async () => {
+    const { rerenderAs } = renderProfile(baseUser);
     fireEvent.change(screen.getByLabelText("Display name"), {
       target: { value: "  Ada Lovelace  " },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => {
+      expect(updateUserMock).toHaveBeenCalledWith({
+        bio: null,
+        name: "Ada Lovelace",
+      });
+    });
+
+    // The baseline is read off the session, so the dirty state clears only once
+    // the session reports what was stored — which is what refreshSession causes
+    // in the app.
+    rerenderAs({ ...baseUser, name: "Ada Lovelace" });
+
+    await waitFor(() => {
       expect(
         screen.getByRole("button", { name: "Save Changes" })
       ).toBeDisabled();
     });
-
-    // Rebased onto what was stored rather than what was typed: the name is
-    // trimmed on the way in, so without that the form would still look edited.
     expect(screen.queryByText(/unsaved changes/iu)).toBeNull();
+  });
+
+  it("forgets an edit that was typed and then taken back", () => {
+    renderProfile(baseUser);
+    const name = screen.getByLabelText("Display name");
+
+    fireEvent.change(name, { target: { value: "Stevea" } });
+    expect(screen.getByText(/unsaved changes/iu)).toBeInTheDocument();
+
+    // The form library's own `isDirty` is a sticky flag, set on the first
+    // keystroke and only ever cleared by `reset`, so it would still claim a
+    // change here. This compares the value, which is back where it started.
+    fireEvent.change(name, { target: { value: "Steve" } });
+
+    expect(screen.queryByText(/unsaved changes/iu)).toBeNull();
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDisabled();
+  });
+
+  it("does not count whitespace-only edits as unsaved changes", () => {
+    renderProfile(baseUser);
+    const name = screen.getByLabelText("Display name");
+
+    fireEvent.change(name, { target: { value: "Steve  " } });
+
+    // Saving would store exactly what is already there, so reporting a pending
+    // change would be a false alarm with nothing behind it.
+    expect(screen.queryByText(/unsaved changes/iu)).toBeNull();
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDisabled();
+  });
+
+  it("counts a bio change as unsaved", () => {
+    renderProfile(baseUser);
+
+    fireEvent.change(screen.getByLabelText("Bio (Markdown)"), {
+      target: { value: "I make mods." },
+    });
+
+    expect(screen.getByText(/unsaved changes/iu)).toBeInTheDocument();
+  });
+
+  it("keeps the username in the same card as the details", () => {
+    renderProfile(baseUser);
+
+    // One card, because it is one thing a person is doing: describing
+    // themselves. The username appears beside their name on every project.
+    const card = screen.getByRole("region", { name: "Profile" });
+
+    expect(
+      within(card).getByRole("textbox", { name: /display name/iu })
+    ).toBeTruthy();
+    expect(within(card).getByRole("textbox", { name: /bio/iu })).toBeTruthy();
+    expect(
+      within(card).getByRole("textbox", { name: /username/iu })
+    ).toBeTruthy();
+  });
+
+  it("keeps the two groups' headings in order under one card heading", () => {
+    renderProfile(baseUser);
+
+    // A merged card still has to describe its parts, and an h3 under an h2 keeps
+    // the hierarchy from skipping a level.
+    const heading = screen.getByRole("heading", { name: "Profile" });
+    expect(heading.tagName).toBe("H2");
+
+    for (const name of ["Details", "Username"]) {
+      expect(screen.getByRole("heading", { level: 3, name })).toBeTruthy();
+    }
+  });
+
+  it("keeps two separate save actions, because they are two changes", () => {
+    renderProfile(baseUser);
+
+    // A username change goes through its own server functions, which enforce the
+    // cooldown and the reservations. One button across both would have to choose
+    // a path, and these are different changes with different consequences.
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Change username" })
+    ).toBeTruthy();
   });
 
   it("locks the username during the cooldown and says until when", () => {
