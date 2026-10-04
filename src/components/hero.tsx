@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { RotatingText } from "@/components/motion/rotating-text";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { authClient } from "@/lib/auth-client";
 import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
@@ -32,8 +33,50 @@ const TYPE_SENTENCE = categoryLabelSentence();
  */
 const HEADLINE_PREFIX = "Find your next";
 
+/**
+ * The hero's second call to action, which follows the reader's sign-in state.
+ *
+ * Signed out it opens registration. Signed in it opens the dashboard they would
+ * publish from, because "Join free" is nonsense to someone who already has an
+ * account and dead-ends their intent to make something.
+ *
+ * While the session is still loading it renders nothing rather than guessing.
+ * The signed-out button is a real link, so rendering it first would show "Join
+ * free" to a signed-in visitor and then swap it out — the same trade the
+ * navbar's AuthSkeleton makes, minus the skeleton's visual noise here because
+ * the browse button already holds the row.
+ */
+const SecondaryCta = ({
+  isPending,
+  isSignedIn,
+}: {
+  isPending: boolean;
+  isSignedIn: boolean;
+}) => {
+  if (isPending) {
+    return null;
+  }
+
+  return (
+    <Link
+      className={cn(
+        buttonVariants({ size: "lg", variant: "outline" }),
+        "ease-smooth min-h-12 px-6 text-base transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
+      )}
+      preload="intent"
+      to={isSignedIn ? "/dashboard/projects" : "/signup"}
+    >
+      {isSignedIn ? "Your projects" : "Join free"}
+    </Link>
+  );
+};
+
 const Hero = () => {
   const reduceMotion = usePrefersReducedMotion();
+  // Read live rather than from loader data: signing in or out elsewhere and
+  // then landing here must not show the other state. This is the same nanostore
+  // the navbar subscribes to, so both repaint from one fetch.
+  const { data: session, isPending } = authClient.useSession();
 
   return (
     <section className="px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-20 lg:px-8 lg:pt-36 lg:pb-24">
@@ -66,7 +109,10 @@ const Hero = () => {
         {/* Two calls to action, not one. The old hero offered browsing only, so
             half the audience — the people who make these things — had no way in
             from here even though publishing is the other half of the site's
-            job. Stacked on mobile, side by side from `sm` up. */}
+            job. The second one follows the reader: signed out it opens
+            registration, signed in it opens the dashboard they'd publish from.
+            "Join free" would be nonsense to someone who is already a member.
+            Stacked on mobile, side by side from `sm` up. */}
         <div className="animate-hero-enter-lag flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
             to="/mods"
@@ -79,16 +125,11 @@ const Hero = () => {
             <span>Browse projects</span>
             <IconArrowRight size={18} />
           </Link>
-          <Link
-            to="/signup"
-            className={cn(
-              buttonVariants({ size: "lg", variant: "outline" }),
-              "ease-smooth min-h-12 px-6 text-base transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
-            )}
-            preload="intent"
-          >
-            Join free
-          </Link>
+          {/* `Boolean(session)` rather than `session !== null`: Better Auth types
+            `data` as `Session | null`, but the navbar already types its own
+            prop as also accepting `undefined`, and a truthiness check covers
+            both. A strict null compare would read `undefined` as signed in. */}
+          <SecondaryCta isPending={isPending} isSignedIn={Boolean(session)} />
         </div>
       </div>
     </section>

@@ -5,6 +5,35 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hero } from "@/components/hero";
 import { categoryLabelSentence } from "@/lib/categories";
 
+interface SessionStub {
+  data: { user: { id: string } } | null;
+  isPending: boolean;
+}
+
+const { useSessionMock } = vi.hoisted(() => ({
+  useSessionMock: vi.fn<() => SessionStub>(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The session comes from Better Auth over the network; a stub picks the signed-in state per test
+vi.mock("@/lib/auth-client", () => ({
+  authClient: { useSession: useSessionMock },
+}));
+
+const signIn = () => {
+  useSessionMock.mockReturnValue({
+    data: { user: { id: "user-alice" } },
+    isPending: false,
+  });
+};
+
+const signOut = () => {
+  useSessionMock.mockReturnValue({ data: null, isPending: false });
+};
+
+const pendingSession = () => {
+  useSessionMock.mockReturnValue({ data: null, isPending: true });
+};
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Router context is unavailable in unit tests; string path avoids strict factory type-checking against the router module
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
@@ -36,6 +65,10 @@ const HEADING = new RegExp(
 describe(Hero, () => {
   // jsdom has no matchMedia; the headline animation checks reduced motion.
   beforeEach(() => {
+    // Signed out is the default so every test that does not care about the
+    // session still renders a complete hero.
+    useSessionMock.mockReset();
+    signOut();
     vi.stubGlobal(
       "matchMedia",
       vi.fn<
@@ -94,6 +127,37 @@ describe(Hero, () => {
     expect(
       screen.getByRole("link", { name: /join free/iu }).getAttribute("href")
     ).toBe("/signup");
+    expect(
+      screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
+    ).toBe("/mods");
+  });
+
+  it("swaps the join call to action for the dashboard once signed in", () => {
+    signIn();
+    render(<Hero />);
+
+    // "Join free" to someone who already has an account is the bug this
+    // guards: a dead-end call to action on the landing page.
+    expect(
+      screen.getByRole("link", { name: /your projects/iu }).getAttribute("href")
+    ).toBe("/dashboard/projects");
+    expect(screen.queryByRole("link", { name: /join free/iu })).toBeNull();
+    // The browse half is unchanged: signing in does not change what a visitor
+    // came to look at.
+    expect(
+      screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
+    ).toBe("/mods");
+  });
+
+  it("shows neither call to action label before the session resolves", () => {
+    pendingSession();
+    render(<Hero />);
+
+    // Guessing signed-out would flash "Join free" at someone who is signed in.
+    // The slot is empty until the answer is real, and the browse link is
+    // already there to hold the row.
+    expect(screen.queryByRole("link", { name: /join free/iu })).toBeNull();
+    expect(screen.queryByRole("link", { name: /your projects/iu })).toBeNull();
     expect(
       screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
     ).toBe("/mods");
