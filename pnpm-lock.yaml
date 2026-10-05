@@ -49,8 +49,8 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.1(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
       '@tanstack/markdown':
-        specifier: ^0.0.15
-        version: 0.0.15(react@19.3.0)
+        specifier: ^1.0.0
+        version: 1.0.0(react@19.3.0)
       '@tanstack/react-devtools':
         specifier: latest
         version: 0.10.13(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(csstype@3.2.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(solid-js@1.9.15)
@@ -2432,8 +2432,8 @@ packages:
     resolution: {integrity: sha512-utTS5L2OkeYUzXGohL1Z8sefu1GLNOJcxe8Hd6iIdc/Xo1K1nDB2JEp4iSFhvYh33xKC9V91TxrS8qfrpoKobQ==}
     engines: {node: '>=20.19'}
 
-  '@tanstack/markdown@0.0.15':
-    resolution: {integrity: sha512-8hZFgCxGzYcBogffndvOm/prhdDt8nATQ4jzd9b0ziU0j4ofW/5guC1sknO2JyBNSXPgeLrrdXlJA8sbb1zw8w==}
+  '@tanstack/markdown@1.0.0':
+    resolution: {integrity: sha512-zE07RepFMbSQlHdnE82twgiVOKy50rP6a/X9UPOOBt8Z8x9lzaPvGpn2zioCnjXMvNt/IQkW5sSalXQ25C/FKw==}
     peerDependencies:
       octane: '>=0.1.12'
       react: '>=18'
@@ -8337,7 +8337,7 @@ snapshots:
 
   '@tanstack/history@1.162.4': {}
 
-  '@tanstack/markdown@0.0.15(react@19.3.0)':
+  '@tanstack/markdown@1.0.0(react@19.3.0)':
     optionalDependencies:
       react: 19.3.0
 
