@@ -116,4 +116,27 @@ describe(getNextUsernameChange, () => {
 
     expect(getNextUsernameChange(changedAt, NOW)).toBeNull();
   });
+
+  it("locks right up to the last millisecond of the cooldown", () => {
+    // The boundary the other two tests straddle but never sit on. The guard is
+    // `next > now`, so one millisecond before the end is still locked, the end
+    // itself is free, and after it is free. An off-by-one here would either
+    // lock someone out for a millisecond or let them rename one early, which
+    // is the difference between the stated rule and a different one.
+    const changedAt = new Date(NOW.getTime() - USERNAME_CHANGE_COOLDOWN_MS);
+    const oneMsEarly = new Date(NOW.getTime() - 1);
+
+    expect(getNextUsernameChange(changedAt, oneMsEarly)).toStrictEqual(NOW);
+    expect(getNextUsernameChange(changedAt, NOW)).toBeNull();
+    expect(
+      getNextUsernameChange(changedAt, new Date(NOW.getTime() + 1))
+    ).toBeNull();
+  });
+
+  it("does not read a malformed timestamp as a live cooldown", () => {
+    // `new Date("not a date").getTime()` is NaN, so `next` is an Invalid Date
+    // and every comparison against it is false. That yields null — the account
+    // is treated as renameable — rather than a thrown error on a settings page.
+    expect(getNextUsernameChange("not a date", NOW)).toBeNull();
+  });
 });
