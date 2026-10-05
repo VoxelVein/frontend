@@ -12,7 +12,6 @@ for the longer-term plan.
 
 ## Content
 
-* [ ] Project icons and gallery images in object storage
 * [ ] Unpic integration once real content images exist
 * [ ] Email verification for password accounts (blocks uploads for
       non-social sign-ups)
@@ -37,20 +36,28 @@ for the longer-term plan.
 
 ## Quality
 
-* [ ] Route-level tests for `/admin`, `/settings`, and `/dashboard`
+* [ ] Route-level tests for `/admin`, `/settings`, and `/dashboard`. Four
+      route shells are covered in `src/__tests__/`; these three are not.
+      Settings' tab policy is tested on its own in `settings-tabs.test.ts`,
+      so what is missing there is the shell, not the logic.
 * [ ] `admin.tsx` fetches badge counts client-side in a `useEffect` while
       every other route uses a loader
-* [ ] `settings.tsx` `resolveTab` has a subtle three-way interaction
-      (`tab`, legacy `passkeys` alias, `confirm=delete`) with no test
+* [ ] None of the five hooks in `src/hooks/` have a test:
+      `use-post-search`, `use-username-availability`, `use-storage-available`,
+      `use-refresh-session`, `use-prefers-reduced-motion`. `use-post-search`
+      is in the `coverage.include` list despite having no test importing it.
+* [ ] Drop `posts.author_id`. Nullable and unwritten since `0018`, and the
+      follow-up is already spelled out in `docs/content/blog.md`. It cannot
+      go in the next release: migrations apply when the new code merges while
+      the previous deploy is still inserting into the column, so this needs a
+      release where no live instance still writes it.
 * [ ] `ProjectBrowser` is exempted from the complexity lint at ~800 lines;
       worth splitting search state from filters
 
 ## Planned
 
-* [ ] Improve RBAC — more roles than "User" and "Admin"
 * [ ] Per-route Open Graph tags and a sitemap
 * [ ] `/status` and `/changelog` pages (the footer reserves the slots)
-* [ ] Project reporting and abuse reports
 * [ ] Creator analytics
 
 ## Completed
@@ -80,6 +87,23 @@ for the longer-term plan.
       `/api/image/$imageId`
 * [x] Role ladder (`user` / `moderator` / `admin`) replacing 21 ad-hoc
       `role === "admin"` checks and four duplicated guard helpers
+* [x] Project reporting with a closed reason list and a moderator inbox
+      (`resolved` and `dismissed` kept apart)
+* [x] Indexes on the seven foreign keys that had none. Postgres never creates
+      these, so deleting a project was scanning every notification and report
+      ever filed about it. `foreign-key-indexes.test.ts` now fails on any new
+      one, in either direction — unindexed key, or an index left behind by a
+      dropped column
+* [x] Settings tab resolution extracted to `src/lib/settings-tabs.ts` and
+      tested — the `tab` / legacy `passkeys` / `confirm=delete` interaction,
+      plus the case where a tab and `confirm` disagree
+* [x] Account deletion wizard: reducer, `sessionStorage` handshake, and the
+      return-from-re-authentication resume
+* [x] Search wildcard escaping. The `ILIKE` branches escaped nothing: written
+      with single backslashes inside a tagged template, all four `replace`
+      arguments collapsed, so `100%` matched every row containing "100" and
+      `light_bearer` matched `lightxbearer`, while a query containing a
+      backslash matched nothing at all
 
 ## Known limitations
 
