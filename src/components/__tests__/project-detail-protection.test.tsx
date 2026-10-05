@@ -102,7 +102,7 @@ describe(ProjectDetail, () => {
     await expect(
       screen.findByRole("button", { name: "Stop protecting this project" })
     ).resolves.toBeTruthy();
-    expect(screen.getByText("Protected project")).toBeTruthy();
+    expect(screen.getByText("Protected project")).toBeInTheDocument();
   });
 
   it("tells admins when the project is scheduled for deletion", () => {

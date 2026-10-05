@@ -102,11 +102,13 @@ describe(PublishPanel, () => {
   it("offers one control that publishes, and says the two ways it can end", () => {
     render(<PublishPanel onChange={onChange} project={project()} />);
 
-    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Visibility" })
+    ).toBeInTheDocument();
     // Labelled by what it does, not by which route it takes. Whether it queues
     // is the server's decision from stored state, and this panel cannot know
     // which it will be — so it must not promise either in the label.
-    expect(screen.getByRole("button", { name: "Publish" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
     expect(
       screen.getByText(
         /one you have published before goes live straight away/iu
@@ -172,7 +174,9 @@ describe(PublishPanel, () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Visibility" })
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/stays hidden from the site until they approve it/u)
     ).toBeTruthy();
@@ -195,7 +199,9 @@ describe(PublishPanel, () => {
     expect(
       screen.getByRole("heading", { name: "An admin asked for changes" })
     ).toBeTruthy();
-    expect(screen.getByText("Description mentions a dead API.")).toBeTruthy();
+    expect(
+      screen.getByText("Description mentions a dead API.")
+    ).toBeInTheDocument();
   });
 
   it("hides the rejection reason once the project is published", () => {
@@ -210,7 +216,9 @@ describe(PublishPanel, () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Visibility" })
+    ).toBeInTheDocument();
     expect(screen.queryByText("Description mentions a dead API.")).toBeNull();
   });
 
@@ -244,7 +252,9 @@ describe(PublishPanel, () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Visibility" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Visibility" })
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Publish" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Unpublish" })).toBeNull();
   });

@@ -408,7 +408,9 @@ describe(SettingsProfile, () => {
     expect(heading.tagName).toBe("H2");
 
     for (const name of ["Details", "Username"]) {
-      expect(screen.getByRole("heading", { level: 3, name })).toBeTruthy();
+      expect(
+        screen.getByRole("heading", { level: 3, name })
+      ).toBeInTheDocument();
     }
   });
 
@@ -418,7 +420,9 @@ describe(SettingsProfile, () => {
     // A username change goes through its own server functions, which enforce the
     // cooldown and the reservations. One button across both would have to choose
     // a path, and these are different changes with different consequences.
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Save Changes" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Change username" })
     ).toBeTruthy();

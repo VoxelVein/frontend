@@ -132,7 +132,7 @@ describe(NotificationsBody, () => {
   it("renders the header without the missing group context error", () => {
     openMenu({ items: null, unread: 0 });
 
-    expect(screen.getByText("Notifications")).toBeTruthy();
+    expect(screen.getByText("Notifications")).toBeInTheDocument();
   });
 
   it("does not claim an empty inbox while the first load is in flight", () => {
@@ -149,7 +149,7 @@ describe(NotificationsBody, () => {
   it("says so when the inbox really is empty", () => {
     openMenu({ items: [], unread: 0 });
 
-    expect(screen.getByText("Nothing here yet")).toBeTruthy();
+    expect(screen.getByText("Nothing here yet")).toBeInTheDocument();
   });
 
   it("explains an empty inbox in the reader's terms", () => {
@@ -177,8 +177,8 @@ describe(NotificationsBody, () => {
   it("lists notifications and announces which one is unread", () => {
     openMenu({ items: [APPROVED, NEEDS_WORK], unread: 1 });
 
-    expect(screen.getByText("Project approved")).toBeTruthy();
-    expect(screen.getByText("Project needs changes")).toBeTruthy();
+    expect(screen.getByText("Project approved")).toBeInTheDocument();
+    expect(screen.getByText("Project needs changes")).toBeInTheDocument();
     // The dot is decorative, so the unread state reaches the screen reader
     // through this marker, and only the unread row carries it.
     expect(screen.getAllByText("Unread:")).toHaveLength(1);
@@ -187,13 +187,13 @@ describe(NotificationsBody, () => {
   it("shows how many are unread in the header", () => {
     openMenu({ items: [APPROVED], unread: 3 });
 
-    expect(screen.getByText("3 unread")).toBeTruthy();
+    expect(screen.getByText("3 unread")).toBeInTheDocument();
   });
 
   it("names the project on the row, so it is identifiable without opening it", () => {
     openMenu({ items: [APPROVED], unread: 1 });
 
-    expect(screen.getByText("Sodium")).toBeTruthy();
+    expect(screen.getByText("Sodium")).toBeInTheDocument();
   });
 
   it("shows a relative time rather than a date to do arithmetic on", () => {
@@ -205,7 +205,7 @@ describe(NotificationsBody, () => {
 
     // The question a reader has is "is this new?", which a date only answers by
     // making them compare it to today themselves.
-    expect(screen.getByText(/minutes? ago/iu)).toBeTruthy();
+    expect(screen.getByText(/minutes? ago/iu)).toBeInTheDocument();
     // The absolute date stays available rather than being thrown away.
     expect(
       screen.getByText(/minutes? ago/iu).getAttribute("title")
@@ -225,8 +225,8 @@ describe(NotificationsBody, () => {
       unread: 1,
     });
 
-    expect(screen.getByText("Today")).toBeTruthy();
-    expect(screen.getByText("Earlier")).toBeTruthy();
+    expect(screen.getByText("Today")).toBeInTheDocument();
+    expect(screen.getByText("Earlier")).toBeInTheDocument();
   });
 
   it("calls last night yesterday, not the day before", () => {
@@ -235,7 +235,7 @@ describe(NotificationsBody, () => {
     const lastNight = new Date(NOW - 20 * HOUR).toISOString();
     openMenu({ items: [{ ...APPROVED, createdAt: lastNight }], unread: 1 });
 
-    expect(screen.getByText("Yesterday")).toBeTruthy();
+    expect(screen.getByText("Yesterday")).toBeInTheDocument();
   });
 
   it("offers mark all as read only while something is unread", () => {
@@ -243,7 +243,7 @@ describe(NotificationsBody, () => {
     expect(screen.queryByText("Mark all as read")).toBeNull();
 
     openMenu({ items: [APPROVED], unread: 1 });
-    expect(screen.getByText("Mark all as read")).toBeTruthy();
+    expect(screen.getByText("Mark all as read")).toBeInTheDocument();
   });
 
   it("offers a mark-as-read button only on unread notifications", () => {
@@ -315,7 +315,7 @@ describe(NotificationsBody, () => {
 
     // A control that leads nowhere is worse than no control, and the message is
     // the whole notification.
-    expect(screen.getByText("Report actioned")).toBeTruthy();
+    expect(screen.getByText("Report actioned")).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /Report actioned/iu })
     ).toBeNull();

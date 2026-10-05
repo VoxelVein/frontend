@@ -71,10 +71,12 @@ describe("SignupPage", () => {
   it("renders the name, email, and password fields", () => {
     render(<SignupPage />);
 
-    expect(screen.getByLabelText("Name")).toBeTruthy();
-    expect(screen.getByLabelText("Email")).toBeTruthy();
-    expect(screen.getByLabelText("Password")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Create account" })).toBeTruthy();
+    expect(screen.getByLabelText("Name")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Create account" })
+    ).toBeInTheDocument();
   });
 
   it("shows validation errors for empty fields", async () => {
@@ -83,8 +85,8 @@ describe("SignupPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await expect(screen.findByText("Name is required.")).resolves.toBeTruthy();
-    expect(screen.getByText("Email is required.")).toBeTruthy();
-    expect(screen.getByText("Password is required.")).toBeTruthy();
+    expect(screen.getByText("Email is required.")).toBeInTheDocument();
+    expect(screen.getByText("Password is required.")).toBeInTheDocument();
     expect(signUpEmail).not.toHaveBeenCalled();
   });
 

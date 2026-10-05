@@ -43,6 +43,6 @@ describe("required field marker", () => {
 
     // The marker sits outside <label> on purpose: inside it, the field would
     // announce as "Name star". The required state comes from the attribute.
-    expect(screen.getByLabelText("Name")).toBeTruthy();
+    expect(screen.getByLabelText("Name")).toBeInTheDocument();
   });
 });

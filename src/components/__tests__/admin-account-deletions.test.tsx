@@ -57,8 +57,8 @@ describe(AdminAccountDeletions, () => {
     await expect(
       screen.findByRole("rowheader", { name: /Alice/u })
     ).resolves.toBeTruthy();
-    expect(screen.getByText("2 to delete")).toBeTruthy();
-    expect(screen.getByText("1 kept")).toBeTruthy();
+    expect(screen.getByText("2 to delete")).toBeInTheDocument();
+    expect(screen.getByText("1 kept")).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole("button", { name: /Restore account.*Alice/u })

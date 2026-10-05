@@ -105,9 +105,9 @@ describe("LoginPage", () => {
   it("renders the combined identifier and password fields", () => {
     render(<LoginPage />);
 
-    expect(screen.getByLabelText(IDENTIFIER_LABEL)).toBeTruthy();
-    expect(screen.getByLabelText("Password")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeTruthy();
+    expect(screen.getByLabelText(IDENTIFIER_LABEL)).toBeInTheDocument();
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 
   it("offers no username/email toggle to switch between", () => {
@@ -126,7 +126,7 @@ describe("LoginPage", () => {
     await expect(
       screen.findByText("Email or username is required.")
     ).resolves.toBeTruthy();
-    expect(screen.getByText("Password is required.")).toBeTruthy();
+    expect(screen.getByText("Password is required.")).toBeInTheDocument();
     expect(signInEmail).not.toHaveBeenCalled();
     expect(signInUsername).not.toHaveBeenCalled();
   });

@@ -161,9 +161,9 @@ describe(ProjectBrowser, () => {
 
     render(<ModsPage />);
 
-    expect(screen.getByRole("heading", { name: "Mods" })).toBeTruthy();
-    expect(screen.getByTestId("mod-card-sodium")).toBeTruthy();
-    expect(screen.getByText("1 mod found")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Mods" })).toBeInTheDocument();
+    expect(screen.getByTestId("mod-card-sodium")).toBeInTheDocument();
+    expect(screen.getByText("1 mod found")).toBeInTheDocument();
     expect(searchModsMock).not.toHaveBeenCalled();
   });
 
@@ -187,7 +187,7 @@ describe(ProjectBrowser, () => {
 
     resolveSearch(responseFixture([modFixture]));
     await waitFor(() => {
-      expect(screen.getByTestId("mod-card-sodium")).toBeTruthy();
+      expect(screen.queryByTestId("mod-card-sodium")).toBeInTheDocument();
     });
   });
 
@@ -199,7 +199,7 @@ describe(ProjectBrowser, () => {
     await selectCategory("performance");
 
     await waitFor(() => {
-      expect(screen.getByText("No mods found")).toBeTruthy();
+      expect(screen.queryByText("No mods found")).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
@@ -225,7 +225,7 @@ describe(ProjectBrowser, () => {
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
     await waitFor(() => {
-      expect(screen.getByTestId("mod-card-sodium")).toBeTruthy();
+      expect(screen.queryByTestId("mod-card-sodium")).toBeInTheDocument();
     });
   });
 
@@ -294,7 +294,7 @@ describe(ProjectBrowser, () => {
     await selectCategory("performance");
 
     await waitFor(() => {
-      expect(screen.getByTestId("mod-card-sodium")).toBeTruthy();
+      expect(screen.queryByTestId("mod-card-sodium")).toBeInTheDocument();
     });
     expect(searchModsMock).not.toHaveBeenCalled();
   });
@@ -304,8 +304,10 @@ describe(ProjectBrowser, () => {
 
     render(<ProjectBrowser type="plugin" initial={null} initialError={null} />);
 
-    expect(screen.getByRole("heading", { name: "Plugins" })).toBeTruthy();
-    expect(screen.getByLabelText("Platform")).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Plugins" })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Platform")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Search plugins"), {
       target: { value: "claims" },

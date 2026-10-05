@@ -67,9 +67,9 @@ describe(AdminReviews, () => {
     render(<AdminReviews onDecided={onDecided} />);
 
     await expect(screen.findByText("Sodium")).resolves.toBeTruthy();
-    expect(screen.getByText(/Makes the game go faster/u)).toBeTruthy();
-    expect(screen.getByText(/3 versions/u)).toBeTruthy();
-    expect(screen.getByText(/by Alice/u)).toBeTruthy();
+    expect(screen.getByText(/Makes the game go faster/u)).toBeInTheDocument();
+    expect(screen.getByText(/3 versions/u)).toBeInTheDocument();
+    expect(screen.getByText(/by Alice/u)).toBeInTheDocument();
   });
 
   it("publishes only after the approval is confirmed", async () => {

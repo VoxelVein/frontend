@@ -8,19 +8,20 @@ describe(Spinner, () => {
     render(<Spinner />);
 
     const spinner = screen.getByRole("status");
-    expect(spinner).toBeTruthy();
     expect(spinner.getAttribute("aria-busy")).toBe("true");
   });
 
   it("uses the provided label as the accessible name", () => {
     render(<Spinner label="Saving changes" />);
 
-    expect(screen.getByRole("status", { name: "Saving changes" })).toBeTruthy();
+    expect(
+      screen.getByRole("status", { name: "Saving changes" })
+    ).toBeInTheDocument();
   });
 
   it("defaults to a Loading label", () => {
     render(<Spinner />);
 
-    expect(screen.getByRole("status", { name: "Loading" })).toBeTruthy();
+    expect(screen.getByRole("status", { name: "Loading" })).toBeInTheDocument();
   });
 });

@@ -49,9 +49,11 @@ describe("project description preview", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
 
-    expect(screen.getByText("Description preview")).toBeTruthy();
+    expect(screen.getByText("Description preview")).toBeInTheDocument();
     // Rendered Markdown, not the raw source, which is the point of the preview.
-    expect(screen.getByRole("heading", { name: "Heading" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Heading" })
+    ).toBeInTheDocument();
     expect(screen.getByText("bold").tagName).toBe("STRONG");
   });
 
@@ -88,7 +90,7 @@ describe("project description preview", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
 
-    expect(screen.getByText("Nothing to preview yet.")).toBeTruthy();
+    expect(screen.getByText("Nothing to preview yet.")).toBeInTheDocument();
   });
 
   it("points aria-controls at the element it toggles", () => {

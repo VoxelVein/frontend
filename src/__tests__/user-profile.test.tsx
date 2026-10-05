@@ -134,7 +134,7 @@ describe("the profile page", () => {
 
     render(<ProfilePage />);
 
-    expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     expect(
       screen.queryByText("I make mods that make Minecraft run faster.")
     ).toBeNull();
@@ -152,7 +152,7 @@ describe("the profile page", () => {
     expect(
       screen.getByTestId("project-11111111-1111-4111-8111-111111111111")
     ).toBeTruthy();
-    expect(screen.getByTestId("project-other")).toBeTruthy();
+    expect(screen.getByTestId("project-other")).toBeInTheDocument();
   });
 
   it("explains the empty state when the user has no public projects", () => {
@@ -160,7 +160,7 @@ describe("the profile page", () => {
 
     render(<ProfilePage />);
 
-    expect(screen.getByText("No public projects yet")).toBeTruthy();
+    expect(screen.getByText("No public projects yet")).toBeInTheDocument();
   });
 
   it("shows the name and join date alongside the heading", () => {
@@ -168,8 +168,8 @@ describe("the profile page", () => {
 
     render(<ProfilePage />);
 
-    expect(screen.getByText(/Ada Lovelace/u)).toBeTruthy();
-    expect(screen.getByText(/Joined/u)).toBeTruthy();
+    expect(screen.getByText(/Ada Lovelace/u)).toBeInTheDocument();
+    expect(screen.getByText(/Joined/u)).toBeInTheDocument();
   });
 
   it("describes the page with the bio stripped to plain text", () => {

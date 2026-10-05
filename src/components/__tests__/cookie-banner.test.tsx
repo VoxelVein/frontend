@@ -21,9 +21,11 @@ describe(CookieBanner, () => {
   it("renders when no consent has been stored", () => {
     render(<CookieBanner />);
 
-    expect(screen.getByRole("region", { name: "Cookie consent" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Accept" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Decline" })).toBeTruthy();
+    expect(
+      screen.getByRole("region", { name: "Cookie consent" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
   });
 
   it("does not render when consent has been accepted", () => {
