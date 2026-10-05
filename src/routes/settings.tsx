@@ -5,7 +5,6 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { useCallback } from "react";
-import { object, optional, parse, picklist } from "valibot";
 
 import { AvatarCard } from "@/components/settings/avatar-card";
 import { ChangePasswordCard } from "@/components/settings/change-password-card";
@@ -16,29 +15,12 @@ import { SettingsSessions } from "@/components/settings/settings-sessions";
 import { SettingsSignInMethods } from "@/components/settings/settings-sign-in-methods";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getSession } from "@/lib/auth.functions";
-
-const settingsSearchSchema = object({
-  confirm: optional(picklist(["delete"])),
-  // "passkeys" is the former name of the "security" tab; old links still work.
-  tab: optional(
-    picklist(["profile", "security", "passkeys", "sessions", "danger"])
-  ),
-});
-
-const parseSettingsSearch = (search: Record<string, string | undefined>) =>
-  parse(settingsSearchSchema, search);
-
-type SettingsSearch = ReturnType<typeof parseSettingsSearch>;
-
-const resolveTab = ({ confirm, tab }: SettingsSearch) => {
-  if (tab === "passkeys") {
-    return "security";
-  }
-  if (tab) {
-    return tab;
-  }
-  return confirm === "delete" ? "danger" : "profile";
-};
+import {
+  DELETE_CONFIRM,
+  parseSettingsSearch,
+  resolveTab,
+  SETTINGS_TABS,
+} from "@/lib/settings-tabs";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -74,10 +56,11 @@ const SettingsPage = () => {
         className="mt-8"
       >
         <TabsList aria-label="Settings sections">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="danger">Danger Zone</TabsTrigger>
+          {SETTINGS_TABS.map(({ label, value }) => (
+            <TabsTrigger key={value} value={value}>
+              {label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="profile">
@@ -106,7 +89,7 @@ const SettingsPage = () => {
 
         <TabsContent value="danger">
           <SettingsDangerZone
-            resumeDeletion={search.confirm === "delete"}
+            resumeDeletion={search.confirm === DELETE_CONFIRM}
             onResumeHandled={handleResumeHandled}
           />
         </TabsContent>
