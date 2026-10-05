@@ -23,9 +23,10 @@ const storeIsReachable = await (async () => {
   }
 })();
 
-const describeWhenDown = storeIsReachable ? describe.skip : describe;
-
-describeWhenDown("when Valkey is unreachable", () => {
+// `describe.skipIf` reads the condition directly instead of resolving a
+// `describe` alias first. An alias hides the suite from static analysis, which
+// is what made `vitest(consistent-test-it)` misread the `it` calls inside it.
+describe.skipIf(storeIsReachable)("when Valkey is unreachable", () => {
   it("allows the request", async () => {
     // Failing open is deliberate. A limiter that takes the site down when its
     // store is down is a worse outage than the abuse it prevents, so the

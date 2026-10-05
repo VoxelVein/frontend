@@ -29,6 +29,17 @@ const RESOURCE_LINKS: readonly FooterLink[] = [
   { available: false, href: "/changelog", label: "Changelog" },
 ];
 
+/**
+ * Read once at module load rather than during render.
+ *
+ * `new Date()` inside the component made render impure, and impure render is
+ * how SSR hydration mismatches start: the server stamps its year into the
+ * HTML and the client re-renders with its own, and the two disagree for any
+ * request that crosses midnight or a New Year between the two. Module scope
+ * gives one value per process, so both sides agree.
+ */
+const COPYRIGHT_YEAR = new Date().getFullYear();
+
 const COMPANY_LINKS: readonly FooterLink[] = [
   { available: false, href: "/about", label: "About" },
   { available: true, href: "/blog", label: "Blog" },
@@ -150,7 +161,7 @@ const Footer = () => (
       {/* Bottom bar */}
       <div className="border-border mt-8 flex flex-col items-center justify-between gap-4 border-t pt-6 sm:flex-row">
         <p className="text-muted-foreground text-sm">
-          © {new Date().getFullYear()} VoxelVein. All rights reserved.
+          © {COPYRIGHT_YEAR} VoxelVein. All rights reserved.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-end">
           <Link to="/legal" className={LINK_CLASS}>

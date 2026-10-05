@@ -11,9 +11,11 @@ import { consumeRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
  * ordinary suite does not need a server running.
  */
 const URL = process.env.VALKEY_TEST_URL;
-const describeWithValkey = URL ? describe : describe.skip;
 
-describeWithValkey("consumeRateLimit", () => {
+// `describe.runIf` reads the condition directly instead of resolving a
+// `describe` alias first. An alias hides the suite from static analysis, which
+// is what made `vitest(consistent-test-it)` misread the `it` calls inside it.
+describe.runIf(Boolean(URL))("consumeRateLimit against a real Valkey", () => {
   beforeAll(() => {
     // The client reads the URL lazily on its first connect, so pointing it at
     // the scratch instance here is early enough.

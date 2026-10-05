@@ -1,6 +1,21 @@
 import { getUsernameProblem, USERNAME_PROBLEM_MESSAGES } from "@/lib/usernames";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+/**
+ * A deliberately loose address check: enough structure to catch a typo, not
+ * enough to reject an address that really works.
+ *
+ * Every part is bounded because this runs on whatever arrives at the sign-in
+ * and sign-up forms, and neither input caps its length. The unbounded form,
+ * `[^\s@]+@[^\s@]+\.[^\s@]+$`, is quadratic on a long string with no `@` in
+ * it: the engine retries each start position and rescans the rest of the
+ * input every time. The bounds below are the RFC 5321 ones — a 64-octet
+ * local part and 63-octet domain labels — so the cost is linear and the
+ * accepted set barely moves.
+ *
+ * Kept in step by hand with the copies in `login.tsx` and `signup.tsx`, which
+ * validate on the client before the request is made.
+ */
+const EMAIL_PATTERN = /^[^\s@]{1,64}@(?:[^\s@.]{1,63}\.)+[^\s@.]{1,63}$/u;
 const MIN_PASSWORD_LENGTH = 8;
 
 interface LoginFieldErrors {

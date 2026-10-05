@@ -23,7 +23,10 @@ import {
   turnstileFetchOptions,
 } from "@/lib/turnstile-client";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+// Client-side twin of the pattern in `@/lib/auth-validation`, so the field can
+// report a typo before the request goes out. Bounded for the same reason: see
+// the comment there.
+const EMAIL_PATTERN = /^[^\s@]{1,64}@(?:[^\s@.]{1,63}\.)+[^\s@.]{1,63}$/u;
 const MIN_PASSWORD_LENGTH = 8;
 const MISSING_VERIFICATION_MESSAGE =
   "Complete the human verification check before creating your account.";
