@@ -51,7 +51,7 @@
     "@lonik/themer": "^0.5.4",
     "@tabler/icons-react": "^3.48.0",
     "@tailwindcss/vite": "^4.3.3",
-    "@tanstack/markdown": "^0.0.15",
+    "@tanstack/markdown": "^1.0.0",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-pacer": "^0.23.0",
