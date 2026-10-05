@@ -73,9 +73,13 @@ convention from `0004` onward is **descriptive**:
 0007_drop_account_issuer.sql
 ```
 
-Rename to `00NN_snake_case_intent.sql`. The snapshot keeps the original
-index internally — renaming the SQL file is safe, don't rename inside
-`meta/`.
+Rename to `00NN_snake_case_intent.sql`. **You must also set that
+entry's `tag` in `drizzle/meta/_journal.json` to the new name.** The
+migrator resolves the SQL file by `tag`, so a renamed `.sql` with an
+unchanged tag makes `drizzle-kit migrate` exit 1 with no error message
+at all — the spinner overwrites the real error, so it reads like a
+silent skip and the migration never applies. Leave the snapshot file
+alone: `00NN_snapshot.json` is named by index, not by tag.
 
 ### 4. Read the generated SQL — always
 
@@ -84,7 +88,11 @@ destructive statement you did not intend. Check specifically for:
 
 - **Drops.** Does it drop a column, table, or index you didn't mean to?
 - **Cascade.** A dropped FK with `CASCADE` deletes dependent rows.
-- **Missing indexes** on new foreign keys.
+- **Missing indexes** on new foreign keys. Postgres never creates these,
+  so the schema has to. `src/db/__tests__/foreign-key-indexes.test.ts`
+  fails on any FK column that leads no index, so `pnpm test` catches it —
+  but that only helps if the index is missing from the schema, not just
+  from the generated SQL.
 - **Type changes** that rewrite the whole table (`ALTER COLUMN TYPE`
   without a `USING` clause usually fails; a widening `varchar` is
   usually safe).

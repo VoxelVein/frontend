@@ -35,7 +35,9 @@ after the highest existing one — for example `drizzle/0016_my_change.sql`.
 Name the file yourself to something readable; Drizzle's generated names
 (`0016_wise_hopper.sql`) are fine to keep, but this repository's recent
 migrations use descriptive names like `0014_add_user_bio.sql` because
-they describe intent that the schema alone does not.
+they describe intent that the schema alone does not. Renaming means
+changing the journal's `tag` too — see
+[Renaming a migration file](#renaming-a-migration-file).
 
 ## Apply a migration
 
@@ -55,7 +57,10 @@ API services only start after it exits successfully. See
 Always review the generated SQL before applying it. Check that:
 
 * New tables have the expected columns and constraints.
-* Indexes are created for foreign keys.
+* Every new foreign key leads an index. Postgres will not do this for
+  you, and it will not complain either — see
+  [Index every foreign key](#index-every-foreign-key).
+* Nothing was dropped that you did not mean to drop.
 * The migration matches the intent of the schema change.
 
 ## Schema
@@ -77,7 +82,10 @@ Better Auth tables:
 
 Application tables:
 
-* `posts` — blog posts, published or draft
+* `posts` — blog posts, published or draft, with a category
+* `post_authors` — co-authors per post, ordered by `position`. Replaced
+  `posts.author_id`, which is deprecated but still present; see
+  [Blog](../content/blog.md)
 * `projects` — all six project types, with a `draft` / `pending` /
   `published` / `removed` lifecycle, review audit columns, download
   counters, tags, `is_protected`, and `pending_deletion`
@@ -91,6 +99,11 @@ Application tables:
   port, and supported game versions
 * `project_server_links` — the content a server links to, each marked
   required or recommended
+* `project_images` — a project's icon and gallery images, with a partial
+  unique index allowing at most one icon per project
+* `user_images` — a user's avatar, one row per account
+* `reports` — member reports against a project or a user, with a
+  `resolved` / `dismissed` outcome
 * `admin_notifications` — the shared admin inbox
 * `user_notifications` — per-user notifications, such as the result of a
   publishing review
@@ -186,6 +199,57 @@ written by hand, and several do this alongside their DDL:
 | `0015_add_project_servers.sql` | Servers and server links |
 | `0016_add_project_images.sql` | `project_images`, one icon per project |
 | `0017_add_user_images.sql` | `user_images`, one avatar per account |
+| `0018_blog_post_authors_and_categories.sql` | `post_authors` |
+| `0019_reports.sql` | `reports` |
+| `0020_notifications_remake.sql` | Rebuilds `user_notifications` |
+| `0021_project_takedown.sql` | Project takedown audit columns |
+| `0022_index_foreign_keys.sql` | Indexes seven unindexed foreign keys |
+
+## Index every foreign key
+
+Postgres does not create an index for a foreign key. Writing the
+`.references()` clause costs nothing, and then every delete of a parent
+row has to scan the whole child table to find rows to check or cascade.
+
+Seven columns were in that state: `admin_notifications.project_id`,
+`admin_notifications.user_id`, `projects.reviewed_by`,
+`reports.project_id`, `reports.reported_user_id`,
+`reports.resolved_by_id`, and `user_notifications.project_id`.
+`0022_index_foreign_keys.sql` added them. The two that mattered most were
+`user_notifications.project_id` and `reports.project_id`, both
+`on delete cascade` — deleting one project was a sequential scan of every
+notification and report ever filed about it.
+
+`src/db/__tests__/foreign-key-indexes.test.ts` enforces this. It reads
+the tables out of the schema module's own exports, so a table added later
+is covered without editing the test, and it fails on:
+
+* a foreign key column that leads no index. **Leading** is the test: a
+  composite index only answers lookups from the left, so
+  `(user_id, read_at)` covers `user_id` and `(read_at, user_id)` does not.
+  Primary keys count, in both spellings — table-level
+  `primaryKey({ columns })` and column-level `.primaryKey()`.
+* an index leading on a column that no longer exists. That one is not free
+  either: it is written on every insert and read by nothing.
+
+## Renaming a migration file
+
+`drizzle/meta/_journal.json` stores a `tag` for each migration, and the
+migrator resolves the SQL file by that tag. Renaming `0022_foo.sql`
+without updating `tag` to `0022_bar` leaves the journal pointing at a
+file that does not exist, and `drizzle-kit migrate` **exits 1 with no
+error message** — the spinner overwrites whatever it would have printed,
+so it looks like a silent skip.
+
+Change both together:
+
+```bash
+git mv drizzle/0022_freezing_bloodstrike.sql drizzle/0022_index_foreign_keys.sql
+# then set that entry's "tag" in drizzle/meta/_journal.json
+```
+
+Leave the snapshot file alone: `0022_snapshot.json` is named by index,
+not by tag.
 
 ## Related
 
