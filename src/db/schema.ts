@@ -313,6 +313,11 @@ export const projects = pgTable(
     // listMyProjects filters on `owner_id` and orders by `updated_at`
     // descending. The ownerId index alone cannot supply that sort.
     index("projects_ownerId_updatedAt_idx").on(table.ownerId, table.updatedAt),
+    // `reviewed_by` is set null when the reviewing admin's account is deleted.
+    // Without this, deleting an account that has ever reviewed anything
+    // sequential-scans `projects`. See the foreign-key index rule in
+    // docs/database/migrations.md.
+    index("projects_reviewedBy_idx").on(table.reviewedBy),
   ]
 );
 
@@ -375,7 +380,13 @@ export const adminNotifications = pgTable(
       onDelete: "set null",
     }),
   },
-  (table) => [index("admin_notifications_readAt_idx").on(table.readAt)]
+  (table) => [
+    index("admin_notifications_readAt_idx").on(table.readAt),
+    // Both foreign keys are `set null` on delete, so removing a user or a
+    // project scans this table unless the column is indexed.
+    index("admin_notifications_userId_idx").on(table.userId),
+    index("admin_notifications_projectId_idx").on(table.projectId),
+  ]
 );
 
 export const projectVersions = pgTable(
@@ -434,17 +445,6 @@ export const projectFiles = pgTable(
   ]
 );
 
-/**
- * A project's icon and gallery images, stored in object storage.
- *
- * One table for both kinds rather than an icon column plus a gallery table,
- * so quota accounting and deletion are uniform. A project has at most one
- * icon, enforced by the partial unique index below.
- *
- * Distinct from `project_files`, which holds the downloadable archives a
- * version ships. Images are never served as downloads and never counted as
- * project downloads.
- */
 /**
  * A user's uploaded avatar.
  *
@@ -538,6 +538,14 @@ export const reports = pgTable(
     index("reports_status_createdAt_idx").on(table.status, table.createdAt),
     // "Has this account already reported this?" and the abuse trail per reporter.
     index("reports_reporterId_idx").on(table.reporterId),
+    // `alreadyReported` filters on the subject, not the reporter, so it is the
+    // other half of that question that needs an index. `project_id` also
+    // cascades, which makes this the index a project delete relies on.
+    index("reports_reportedUserId_idx").on(table.reportedUserId),
+    index("reports_projectId_idx").on(table.projectId),
+    // `set null` when a moderator's account is deleted: the resolution stands,
+    // the name goes with the account.
+    index("reports_resolvedById_idx").on(table.resolvedById),
     check(
       "reports_one_target_check",
       sql`(
@@ -549,6 +557,17 @@ export const reports = pgTable(
   ]
 );
 
+/**
+ * A project's icon and gallery images, stored in object storage.
+ *
+ * One table for both kinds rather than an icon column plus a gallery table,
+ * so quota accounting and deletion are uniform. A project has at most one
+ * icon, enforced by the partial unique index below.
+ *
+ * Distinct from `project_files`, which holds the downloadable archives a
+ * version ships. Images are never served as downloads and never counted as
+ * project downloads.
+ */
 export const projectImages = pgTable(
   "project_images",
   {
@@ -710,6 +729,9 @@ export const userNotifications = pgTable(
       table.userId,
       table.createdAt
     ),
+    // Cascades on project delete. Without this, removing a project
+    // sequential-scans every notification ever sent about it.
+    index("user_notifications_projectId_idx").on(table.projectId),
   ]
 );
 

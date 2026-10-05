@@ -155,6 +155,13 @@
       "when": 1791055382928,
       "tag": "0021_project_takedown",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791224780063,
+      "tag": "0022_index_foreign_keys",
+      "breakpoints": true
     }
   ]
 }
