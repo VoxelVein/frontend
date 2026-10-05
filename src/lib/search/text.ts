@@ -70,9 +70,19 @@ export const toTextQuery = (value: string): SQL =>
  * pattern that matches every row, and searching for `light_bearer` would match
  * `lightxbearer`. The values are still bound parameters, so this is about
  * honouring what the visitor literally typed, not about injection.
+ *
+ * Every backslash below is doubled, and that is load-bearing rather than
+ * stylistic. This is a tagged template, so `'\''` and `'\%'` are JavaScript
+ * escape sequences that evaluate to `'` and `%`: written singly, all four
+ * replacements collapse into no-ops and the pattern ships unescaped. The
+ * backslash is escaped before the two wildcards, because otherwise it would
+ * double-escape the ones added for them.
+ *
+ * `search-index.test.ts` asserts the rendered SQL, since the failure this
+ * guards produces correct-looking queries rather than an error.
  */
 const escapeWildcards = (value: SQL): SQL =>
-  sql`replace(replace(replace(${value}, '\', '\\'), '%', '\%'), '_', '\_')`;
+  sql`replace(replace(replace(${value}, '\\', '\\\\'), '%', '\\%'), '_', '\\_')`;
 
 /**
  * Matches a project on full-text relevance, fuzzily, or by substring.
