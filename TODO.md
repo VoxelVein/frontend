@@ -20,19 +20,8 @@ for the longer-term plan.
 
 ## Bugs and inconsistencies
 
-* [ ] `Hero` advertises "Datapacks" in its rotating text, but there is no
-      `datapack` project type, route, or category
-* [ ] `project-browser-loader.ts` error copy still says "the search
-      service" and suggests `pnpm dev:all`; search is in Postgres
-* [ ] `/blog/$slug` returns a soft 404 (HTTP 200) while `/u/$username`
-      returns a real one for the same class of miss
-* [ ] `explore-section.tsx` copy says "watch the rest land" although all
-      six categories are live
-* [ ] `src/components/ui/separator.tsx` is unused
 * [ ] No `og:image`; `twitter:card` is `summary` rather than
       `summary_large_image`
-* [ ] `og:url` and the Twitter tags are static, with no per-route values
-      on project or blog pages
 
 ## Quality
 
@@ -56,7 +45,7 @@ for the longer-term plan.
 
 ## Planned
 
-* [ ] Per-route Open Graph tags and a sitemap
+* [ ] A sitemap
 * [ ] `/status` and `/changelog` pages (the footer reserves the slots)
 * [ ] Creator analytics
 
@@ -104,6 +93,24 @@ for the longer-term plan.
       arguments collapsed, so `100%` matched every row containing "100" and
       `light_bearer` matched `lightxbearer`, while a query containing a
       backslash matched nothing at all
+* [x] Hero and explore copy: the datapack mention and "watch the rest land"
+      are gone, since all six categories are live
+* [x] `project-browser-loader.ts` error copy names the failing connection
+      (`econnrefused` → database, fetch failures → app server) instead of a
+      lost "search service"
+* [x] `/blog/$slug` returns a real 404 via `notFound()`; the tailored
+      "Post not found" view moved to a route-level `notFoundComponent`
+* [x] Deleted the unused `src/components/ui/separator.tsx`
+* [x] Per-route `og:url` and Twitter tags via `socialMeta` in
+      `src/lib/site.ts` on every project, gallery, browse, blog, and profile
+      route
+* [x] News section redesigned around cards: the lead story spans the row,
+      older posts sit beside it, and the lead's summary is clipped at 75
+      characters
+* [x] Admin "New post" and "Edit" shortcuts on the reader-facing blog pages,
+      gated on `managePosts`
+* [x] Avatar ring now hugs a square box: the avatar root is block-level, so
+      the ring no longer stretches into an ellipse inside a text line box
 
 ## Known limitations
 
