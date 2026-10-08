@@ -5,6 +5,7 @@ import {
   ProjectGalleryPageSkeleton,
 } from "@/components/projects/project-gallery-page";
 import { galleryLoader } from "@/lib/project-gallery.functions";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const GalleryPage = () => {
   const project = useLoaderData({ from: "/servers/$slug/gallery" });
@@ -20,13 +21,20 @@ const GalleryPage = () => {
 
 export const Route = createFileRoute("/servers/$slug/gallery")({
   loader: ({ params }) => galleryLoader("server", params.slug),
-  head: ({ loaderData }) => ({
+  head: ({ loaderData, match }) => ({
     meta: [
       {
         title: loaderData
           ? `${loaderData.name} gallery | VoxelVein`
           : "Gallery not found | VoxelVein",
       },
+      ...socialMeta({
+        description: loaderData?.summary ?? SITE_DESCRIPTION,
+        path: match.pathname,
+        title: loaderData
+          ? `${loaderData.name} gallery | VoxelVein`
+          : "Gallery not found | VoxelVein",
+      }),
     ],
   }),
   component: GalleryPage,

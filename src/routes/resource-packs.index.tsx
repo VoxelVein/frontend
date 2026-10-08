@@ -5,6 +5,7 @@ import {
   ProjectBrowserSkeleton,
 } from "@/components/projects/project-browser";
 import { loadProjectBrowser } from "@/lib/project-browser-loader";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ResourcePacksPage = () => {
   const data = useLoaderData({ from: "/resource-packs/" });
@@ -13,7 +14,16 @@ const ResourcePacksPage = () => {
 
 export const Route = createFileRoute("/resource-packs/")({
   loader: () => loadProjectBrowser("resourcepack"),
-  head: () => ({ meta: [{ title: "Resource Packs | VoxelVein" }] }),
+  head: ({ match }) => ({
+    meta: [
+      { title: "Resource Packs | VoxelVein" },
+      ...socialMeta({
+        description: SITE_DESCRIPTION,
+        path: match.pathname,
+        title: "Resource Packs | VoxelVein",
+      }),
+    ],
+  }),
   component: ResourcePacksPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

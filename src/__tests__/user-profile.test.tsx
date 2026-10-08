@@ -62,10 +62,12 @@ if (!ProfilePage) {
 }
 
 // SAFETY: The real head callback takes a full route-match object, but it reads
-// only loaderData. Narrowing to that one field keeps the test off TanStack's
-// match types without weakening what the assertions check.
+// only loaderData and the current pathname. Narrowing to those two fields keeps
+// the test off TanStack's match types without weakening what the assertions
+// check.
 const head = Route.options.head as (args: {
   loaderData?: PublicProfile;
+  match: { pathname: string };
 }) => HeadResult;
 
 const project = (
@@ -175,6 +177,7 @@ describe("the profile page", () => {
   it("describes the page with the bio stripped to plain text", () => {
     const result = head({
       loaderData: profile({ bio: "I make **fast** mods." }),
+      match: { pathname: "/u/ada-lovelace" },
     });
 
     // Markdown syntax must not reach a meta description, which is text.
@@ -185,7 +188,10 @@ describe("the profile page", () => {
   });
 
   it("leaves out the meta description when there is no bio", () => {
-    const result = head({ loaderData: profile({ bio: null }) });
+    const result = head({
+      loaderData: profile({ bio: null }),
+      match: { pathname: "/u/ada-lovelace" },
+    });
 
     expect(result.meta).not.toContainEqual(
       expect.objectContaining({ name: "description" })

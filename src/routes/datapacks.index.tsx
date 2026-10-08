@@ -5,6 +5,7 @@ import {
   ProjectBrowserSkeleton,
 } from "@/components/projects/project-browser";
 import { loadProjectBrowser } from "@/lib/project-browser-loader";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const DatapacksPage = () => {
   const data = useLoaderData({ from: "/datapacks/" });
@@ -13,7 +14,16 @@ const DatapacksPage = () => {
 
 export const Route = createFileRoute("/datapacks/")({
   loader: () => loadProjectBrowser("datapack"),
-  head: () => ({ meta: [{ title: "Datapacks | VoxelVein" }] }),
+  head: ({ match }) => ({
+    meta: [
+      { title: "Datapacks | VoxelVein" },
+      ...socialMeta({
+        description: SITE_DESCRIPTION,
+        path: match.pathname,
+        title: "Datapacks | VoxelVein",
+      }),
+    ],
+  }),
   component: DatapacksPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

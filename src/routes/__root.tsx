@@ -16,29 +16,9 @@ import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 import appCss from "../styles.css?url";
-
-const SITE_NAME = "VoxelVein";
-const SITE_TITLE = "VoxelVein | Free & Open-Source Minecraft Mod Platform";
-// The list matched the hero's own copy rather than the category registry, and
-// had already drifted: it omitted datapacks. This description is the one string
-// a visitor reads without ever loading the page, so it leads with the promise
-// and names the breadth instead of enumerating seven nouns a search result
-// truncates anyway.
-const SITE_DESCRIPTION =
-  "Find, download, and share Minecraft mods, plugins, modpacks, resource packs, shaders, datapacks, and servers. Free and open source, forever.";
-
-// Absolute origin, no trailing slash. Read from import.meta.env rather than
-// env.config so the value is inlined at build time and available during SSR
-// and client navigation alike; a wrong host here would ship bad social
-// previews, so VITE_SITE_URL must be set for real deployments.
-// SAFETY: Vite exposes VITE_* vars as `any`; narrowing to string | undefined
-// matches the runtime value (string when set, undefined when absent).
-const SITE_URL = (
-  (import.meta.env.VITE_SITE_URL as string | undefined) ??
-  "http://localhost:3000"
-).replace(/\/$/u, "");
 
 const RootDocument = ({ children }: { children: ReactNode }) => (
   <html lang="en" suppressHydrationWarning>

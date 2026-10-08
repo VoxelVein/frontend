@@ -5,6 +5,7 @@ import {
   ProjectBrowserSkeleton,
 } from "@/components/projects/project-browser";
 import { loadProjectBrowser } from "@/lib/project-browser-loader";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ModpacksPage = () => {
   const data = useLoaderData({ from: "/modpacks/" });
@@ -13,7 +14,16 @@ const ModpacksPage = () => {
 
 export const Route = createFileRoute("/modpacks/")({
   loader: () => loadProjectBrowser("modpack"),
-  head: () => ({ meta: [{ title: "Modpacks | VoxelVein" }] }),
+  head: ({ match }) => ({
+    meta: [
+      { title: "Modpacks | VoxelVein" },
+      ...socialMeta({
+        description: SITE_DESCRIPTION,
+        path: match.pathname,
+        title: "Modpacks | VoxelVein",
+      }),
+    ],
+  }),
   component: ModpacksPage,
   pendingComponent: ProjectBrowserSkeleton,
 });

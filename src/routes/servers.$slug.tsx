@@ -4,6 +4,7 @@ import { ProjectNotFound } from "@/components/projects/project-detail";
 import { ServerDetail } from "@/components/projects/server-detail";
 import { ServerDetailSkeleton } from "@/components/projects/server-detail-skeleton";
 import { getProject } from "@/lib/projects.functions";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ServerDetailPage = () => {
   const project = useLoaderData({ from: "/servers/$slug" });
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/servers/$slug")({
     // A slug belongs to one project type; other types are not found here.
     return project?.type === "server" ? project : null;
   },
-  head: ({ loaderData }) => ({
+  head: ({ loaderData, match }) => ({
     meta: [
       {
         title: loaderData
@@ -31,6 +32,13 @@ export const Route = createFileRoute("/servers/$slug")({
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]
         : []),
+      ...socialMeta({
+        description: loaderData?.summary ?? SITE_DESCRIPTION,
+        path: match.pathname,
+        title: loaderData
+          ? `${loaderData.name} | VoxelVein`
+          : "Server not found | VoxelVein",
+      }),
     ],
   }),
   component: ServerDetailPage,

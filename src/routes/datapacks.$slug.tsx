@@ -6,6 +6,7 @@ import {
   ProjectNotFound,
 } from "@/components/projects/project-detail";
 import { getProject } from "@/lib/projects.functions";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const DatapackDetailPage = () => {
   const project = useLoaderData({ from: "/datapacks/$slug" });
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/datapacks/$slug")({
     // A slug belongs to one project type; other types are not found here.
     return project?.type === "datapack" ? project : null;
   },
-  head: ({ loaderData }) => ({
+  head: ({ loaderData, match }) => ({
     meta: [
       {
         title: loaderData
@@ -33,6 +34,13 @@ export const Route = createFileRoute("/datapacks/$slug")({
       ...(loaderData
         ? [{ content: loaderData.summary, name: "description" }]
         : []),
+      ...socialMeta({
+        description: loaderData?.summary ?? SITE_DESCRIPTION,
+        path: match.pathname,
+        title: loaderData
+          ? `${loaderData.name} | VoxelVein`
+          : "Datapack not found | VoxelVein",
+      }),
     ],
   }),
   component: DatapackDetailPage,

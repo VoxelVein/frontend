@@ -18,6 +18,7 @@ import { formatCount, formatDate } from "@/lib/format";
 import { toPreview } from "@/lib/posts";
 import { PROJECT_TYPE_LABELS, PROJECT_TYPE_PATHS } from "@/lib/projects";
 import type { ProjectDocument, ProjectType } from "@/lib/projects";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 import { getPublicProfile } from "@/lib/user-profiles.functions";
 import type { PublicProfile } from "@/lib/user-profiles.functions";
 import { cn } from "@/lib/utils";
@@ -329,7 +330,7 @@ export const Route = createFileRoute("/u/$username")({
     }
     return profile;
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, match }) => {
     const bio = loaderData?.bio;
     return {
       meta: [
@@ -337,6 +338,12 @@ export const Route = createFileRoute("/u/$username")({
         // Markdown stripped to plain text, because a meta description is text
         // and rendering it would put tags in the search result.
         ...(bio ? [{ name: "description", content: toPreview(bio, 160) }] : []),
+        ...socialMeta({
+          description: bio ? toPreview(bio, 160) : SITE_DESCRIPTION,
+          path: match.pathname,
+          title: `${loaderData?.displayUsername ?? "Profile"} | VoxelVein`,
+          type: "profile",
+        }),
       ],
     };
   },
