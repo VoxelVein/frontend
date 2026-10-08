@@ -213,7 +213,14 @@ const stripInlineSyntax = (text: string): string =>
     .replaceAll(EMPHASIS_UNDERSCORE, "$<lead>$<text>")
     .replaceAll(EMPHASIS_ASTERISK, "$<text>");
 
-const truncate = (text: string, maxLength: number): string => {
+/**
+ * Clips plain text to a maximum length, breaking on a word boundary when one
+ * is reasonably close to the limit.
+ *
+ * The trailing ellipsis is a marker and is appended on top, so the returned
+ * string may be one character longer than `maxLength`.
+ */
+export const truncate = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) {
     return text;
   }

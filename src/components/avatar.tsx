@@ -61,7 +61,13 @@ const Avatar = ({
 }: AvatarProps) => (
   <span
     className={cn(
-      "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full",
+      // Block-level (not inline-flex): an inline-flex avatar sits on the text
+      // baseline of any surrounding line box, whose descender space then grows
+      // the avatar's container taller than wide. A ring or outline wrapped
+      // around that container becomes an ellipse that dips below the picture.
+      // As a block flex container the avatar never participates in a line box,
+      // so its box stays exactly square.
+      "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full",
       AVATAR_SIZE[size],
       className
     )}

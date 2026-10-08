@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/empty-state";
 import { Reveal } from "@/components/reveal";
 import { buttonVariants } from "@/components/ui/button-variants";
 import type { PostSummary } from "@/lib/posts";
+import { truncate } from "@/lib/posts";
 import { getLatestPosts, POSTS_REFRESH_MS } from "@/lib/posts.functions";
 import { staggerDelay } from "@/lib/reveal-stagger";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,13 @@ interface NewsSectionProps {
   /** Server-rendered list, so the section never flashes empty. */
   initialPosts: PostSummary[];
 }
+
+/**
+ * The lead story's summary is deliberately short: a headline card that already
+ * shows the date, category and byline reads best when the excerpt stays a
+ * teaser, and the full preview belongs on the post page.
+ */
+const MAX_LEAD_PREVIEW_CHARS = 75;
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   day: "numeric",
@@ -50,15 +58,37 @@ const NewsDate = ({ value }: { value: Date | string }) => {
 };
 
 /**
+ * The decorative "Read more" cue at the end of a card.
+ *
+ * It is aria-hidden because every card is already a real link whose accessible
+ * name includes the post title; the text would only repeat it.
+ */
+const ReadMore = ({ className }: { className?: string }) => (
+  <span
+    aria-hidden="true"
+    className={cn(
+      "text-primary inline-flex shrink-0 items-center gap-1 text-sm font-medium",
+      className
+    )}
+  >
+    Read more
+    <IconArrowRight
+      aria-hidden
+      className="transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none"
+      size={16}
+    />
+  </span>
+);
+
+/**
  * The newest post, given the room a lead story actually needs.
  *
- * It is a separate component from the ledger rows because it is a different
- * shape, not a bigger version of the same one: the preview is allowed to run to
- * full length here and to a single clamped line down below.
+ * The whole card responds to the pointer: the border warms on hover, and a
+ * press scales the card down a hair so the click is felt as well as seen.
  */
 const LeadPost = ({ post }: { post: PostSummary }) => (
-  <li>
-    <article className="border-border bg-card focus-within:border-foreground/30 relative rounded-2xl border p-6 transition-colors duration-200 motion-reduce:transition-none sm:p-7">
+  <li className="sm:col-span-2">
+    <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative rounded-2xl border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-7">
       {/* The whole card is the target, but it stays a real link so it is
           reachable by keyboard and announced with the post it leads to. */}
       <Link
@@ -79,27 +109,27 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
       </h3>
       {post.preview ? (
         <p className="text-muted-foreground mt-3 max-w-prose text-sm leading-6 sm:text-base">
-          {post.preview}
+          {truncate(post.preview, MAX_LEAD_PREVIEW_CHARS)}
         </p>
       ) : null}
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <PostAuthors authors={post.authors} compact linked={false} />
+        <ReadMore />
       </div>
     </article>
   </li>
 );
 
-/** One dated line in the ledger, below the lead story. */
 /**
- * One ledger entry.
+ * One older post, as a compact card.
  *
- * Renders the row only, not a list item: the call site owns the `<li>` so the
+ * Renders the card only, not a list item: the call site owns the `<li>` so the
  * reveal can wrap the entry without nesting one list item inside another.
  */
-const LedgerPost = ({ post }: { post: PostSummary }) => (
-  <article className="group relative py-5 transition-colors duration-200 motion-reduce:transition-none">
+const OlderPost = ({ post }: { post: PostSummary }) => (
+  <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative flex h-full flex-col rounded-xl border p-5 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
     <Link
-      className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-lg focus-visible:ring-3 focus-visible:outline-none"
+      className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
       params={{ slug: post.slug }}
       preload="intent"
       to="/blog/$slug"
@@ -107,36 +137,21 @@ const LedgerPost = ({ post }: { post: PostSummary }) => (
       <span className="sr-only">Read {post.title}</span>
     </Link>
 
-    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
-      {/* A fixed date column is what makes this read as a ledger rather than
-            another list of cards. */}
-      <div className="shrink-0 sm:w-32">
-        <NewsDate value={post.createdAt} />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <h3 className="text-foreground text-base font-semibold tracking-tight text-balance">
-          {post.title}
-        </h3>
-        {/* Category and byline on one line, under the title: at ledger width
-              they are the only way to tell a security advisory apart from a
-              company announcement without opening it. */}
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <PostCategoryBadge category={post.category} variant="subtle" />
-          <PostAuthors authors={post.authors} compact linked={false} />
-        </div>
-        {post.preview ? (
-          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-6">
-            {post.preview}
-          </p>
-        ) : null}
-      </div>
-
-      <IconArrowRight
-        aria-hidden
-        className="text-muted-foreground hidden shrink-0 self-center transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none sm:block"
-        size={16}
-      />
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <NewsDate value={post.createdAt} />
+      <PostCategoryBadge category={post.category} variant="subtle" />
+    </div>
+    <h3 className="text-foreground mt-2 text-base font-semibold tracking-tight text-balance">
+      {post.title}
+    </h3>
+    {post.preview ? (
+      <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-6">
+        {post.preview}
+      </p>
+    ) : null}
+    <div className="mt-4 flex items-center justify-between gap-x-4 gap-y-3">
+      <PostAuthors authors={post.authors} compact linked={false} />
+      <ReadMore />
     </div>
   </article>
 );
@@ -200,22 +215,21 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
             variant="inline"
           />
         ) : (
-          <ol aria-label="Latest blog posts" className="mt-8">
+          // One grid for all three entries: the lead spans the full width and
+          // the two older posts sit side by side under it, which gives the
+          // section a clear hierarchy rather than one big card plus a list.
+          <ol
+            aria-label="Latest blog posts"
+            className="mt-8 grid gap-4 sm:grid-cols-2"
+          >
             <LeadPost post={lead} />
-            {rest.length > 0 ? (
-              <li aria-hidden className="mt-2">
-                {/* The rule divides the two kinds of entry, so it is decoration
-                    rather than a list item and is hidden from the count. */}
-                <hr className="border-border/70 border-t" />
-              </li>
-            ) : null}
-            {/* Staggered like the trending row above it, so the two grids on the
-                page behave the same way. Capped: the ledger is unbounded, and an
+            {/* Staggered like the trending row above it, so the grids on the
+                page behave the same way. Capped: the grid is unbounded, and an
                 uncapped delay would leave the last entry waiting seconds. */}
             {rest.map((post, index) => (
-              <li key={post.id}>
-                <Reveal delay={staggerDelay(index)}>
-                  <LedgerPost post={post} />
+              <li key={post.id} className="flex">
+                <Reveal className="h-full flex-1" delay={staggerDelay(index)}>
+                  <OlderPost post={post} />
                 </Reveal>
               </li>
             ))}

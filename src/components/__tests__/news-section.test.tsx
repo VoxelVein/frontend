@@ -161,19 +161,36 @@ describe(NewsSection, () => {
     }
   });
 
-  it("separates the lead story from the ledger with one decorative rule", () => {
+  it("renders the older posts as cards rather than ledger rows", () => {
     renderSection(POSTS);
 
-    // Only between the two kinds of entry, so one rule for three posts.
-    expect(screen.getAllByRole("separator", { hidden: true })).toHaveLength(1);
-  });
-
-  it("omits the rule when the lead story is the only post", () => {
-    renderSection([POSTS[0]]);
-
+    // The ledger's decorative rule is gone: every post is a card now, and the
+    // separation between them comes from the grid gap, not a hairline.
     expect(
       screen.queryByRole("separator", { hidden: true })
     ).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(POSTS.length);
+  });
+
+  it("clips the lead story's summary at 75 characters", () => {
+    const longPreview = "A very long summary. ".repeat(10);
+    renderSection([{ ...POSTS[0], preview: longPreview }, POSTS[1], POSTS[2]]);
+
+    const lead = screen
+      .getByRole("heading", { level: 3, name: "Sodium is here" })
+      .closest("article");
+    expect(lead).toBeInTheDocument();
+
+    // SAFETY: `closest` can miss; the toBeInTheDocument assertion directly
+    // above guards that, and `within` needs an Element to bound the query.
+    const previewText = within(lead as HTMLElement).getByText(
+      (content, element) =>
+        element?.tagName === "P" && content.startsWith("A very long summary")
+    );
+    // truncate() keeps the summary under the cap and marks the cut with the
+    // ellipsis, so a long body still reads as a teaser.
+    expect(previewText.textContent).toMatch(/…$/u);
+    expect((previewText.textContent ?? "").length).toBeLessThanOrEqual(76);
   });
 
   it("shows the empty state until something is published", () => {
