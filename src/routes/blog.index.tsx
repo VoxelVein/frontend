@@ -1,5 +1,5 @@
-import { IconFileText, IconSearchOff } from "@tabler/icons-react";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { IconFileText, IconPlus, IconSearchOff } from "@tabler/icons-react";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -7,7 +7,9 @@ import { PostCard } from "@/components/blog/post-card";
 import { PostCategoryFilter } from "@/components/blog/post-category-filter";
 import { PostSearchBar } from "@/components/blog/post-search-bar";
 import { PageHeader } from "@/components/page-header";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCanManagePosts } from "@/hooks/use-can-manage-posts";
 import { usePostSearch } from "@/hooks/use-post-search";
 import type { PostSummary } from "@/lib/posts";
 import {
@@ -15,6 +17,8 @@ import {
   postSearchAvailable,
   searchPosts,
 } from "@/lib/posts.functions";
+import { socialMeta } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/blog/";
 
@@ -102,6 +106,10 @@ const Notice = ({
 
 const BlogPage = () => {
   const { posts, searchAvailable } = useLoaderData({ from: ROUTE_ID });
+  // Admin only: the route context the admin pages rely on is not set here, and
+  // this is a reader page, so the session is read client-side the same way the
+  // hero does. The server still guards /admin/posts/new behind its own check.
+  const canManagePosts = useCanManagePosts();
   const { hits, isActive, isAvailable, isSearching, onQueryChange, query } =
     usePostSearch({
       availability: searchAvailable,
@@ -176,6 +184,20 @@ const BlogPage = () => {
       <PageHeader
         title="Blog"
         description="News, updates, and guides from the VoxelVein team."
+        action={
+          canManagePosts ? (
+            <Link
+              className={cn(
+                buttonVariants({ variant: "default", size: "sm" }),
+                "min-h-11"
+              )}
+              to="/admin/posts/new"
+            >
+              <IconPlus aria-hidden size={16} />
+              New post
+            </Link>
+          ) : undefined
+        }
       />
 
       {isAvailable ? (
@@ -232,8 +254,15 @@ export const Route = createFileRoute("/blog/")({
 
     return { posts, searchAvailable };
   },
-  head: () => ({
-    meta: [{ title: "Blog | VoxelVein" }],
+  head: ({ match }) => ({
+    meta: [
+      { title: "Blog | VoxelVein" },
+      ...socialMeta({
+        description: "News, updates, and guides from the VoxelVein team.",
+        path: match.pathname,
+        title: "Blog | VoxelVein",
+      }),
+    ],
   }),
   component: BlogPage,
 });

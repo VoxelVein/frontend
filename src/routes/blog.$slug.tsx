@@ -1,4 +1,4 @@
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 
 import { PostAuthors } from "@/components/blog/post-authors";
@@ -11,11 +11,15 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCanManagePosts } from "@/hooks/use-can-manage-posts";
+import { loadPost } from "@/lib/blog-post";
 import { MICRO_LABEL_CLASS } from "@/lib/classes";
 import type { Post } from "@/lib/posts";
 import { postCategoryLabel } from "@/lib/posts";
-import { getPost } from "@/lib/posts.functions";
+import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "long",
@@ -44,7 +48,7 @@ const wasEdited = (
 };
 
 interface BlogPostLoaderData {
-  post: Post | null;
+  post: Post;
 }
 
 /**
@@ -88,26 +92,10 @@ const PostBreadcrumb = ({ category }: { category: string | null }) => {
 
 const BlogPostPage = () => {
   const { post } = useLoaderData({ from: "/blog/$slug" });
-
-  if (!post) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
-        <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-          Post not found
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          The post you are looking for does not exist or may have been removed.
-        </p>
-        <Link
-          to="/blog"
-          className="text-primary focus-visible:ring-ring mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <IconArrowLeft size={16} aria-hidden="true" />
-          Back to blog
-        </Link>
-      </div>
-    );
-  }
+  // Admin only, and deliberately server-guarded: the edit screen itself checks
+  // the session again, so a stale client-side read can only hide or show this
+  // shortcut, never grant access.
+  const canManagePosts = useCanManagePosts();
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
@@ -127,19 +115,34 @@ const BlogPostPage = () => {
           <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
             <PostAuthors authors={post.authors} />
 
-            <p className={MICRO_LABEL_CLASS}>
-              <time dateTime={new Date(post.createdAt).toISOString()}>
-                {formatDate(post.createdAt)}
-              </time>
-              {wasEdited(post.createdAt, post.updatedAt) ? (
-                <>
-                  {" · Updated "}
-                  <time dateTime={new Date(post.updatedAt).toISOString()}>
-                    {formatDate(post.updatedAt)}
-                  </time>
-                </>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {canManagePosts ? (
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "min-h-11"
+                  )}
+                  params={{ postId: post.id }}
+                  to="/admin/posts/$postId/edit"
+                >
+                  <IconPencil aria-hidden size={16} />
+                  Edit
+                </Link>
               ) : null}
-            </p>
+              <p className={MICRO_LABEL_CLASS}>
+                <time dateTime={new Date(post.createdAt).toISOString()}>
+                  {formatDate(post.createdAt)}
+                </time>
+                {wasEdited(post.createdAt, post.updatedAt) ? (
+                  <>
+                    {" · Updated "}
+                    <time dateTime={new Date(post.updatedAt).toISOString()}>
+                      {formatDate(post.updatedAt)}
+                    </time>
+                  </>
+                ) : null}
+              </p>
+            </div>
           </div>
 
           {post.excerpt ? (
@@ -185,13 +188,30 @@ const BlogPostSkeleton = () => (
   </div>
 );
 
+export const BlogPostNotFound = () => (
+  <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+    <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
+      Post not found
+    </h1>
+    <p className="text-muted-foreground mt-2 text-sm">
+      The post you are looking for does not exist or may have been removed.
+    </p>
+    <Link
+      to="/blog"
+      className="text-primary focus-visible:ring-ring mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
+    >
+      <IconArrowLeft size={16} aria-hidden="true" />
+      Back to blog
+    </Link>
+  </div>
+);
+
 export const Route = createFileRoute("/blog/$slug")({
   pendingComponent: BlogPostSkeleton,
-  loader: async ({ params }): Promise<BlogPostLoaderData> => {
-    const post = await getPost({ data: { slug: params.slug } });
-    return { post };
-  },
-  head: ({ loaderData }) => ({
+  loader: async ({ params }): Promise<BlogPostLoaderData> => ({
+    post: await loadPost(params.slug),
+  }),
+  head: ({ loaderData, match }) => ({
     meta: [
       {
         title: loaderData?.post
@@ -201,7 +221,16 @@ export const Route = createFileRoute("/blog/$slug")({
       ...(loaderData?.post?.excerpt
         ? [{ name: "description", content: loaderData.post.excerpt }]
         : []),
+      ...socialMeta({
+        description: loaderData?.post?.excerpt ?? SITE_DESCRIPTION,
+        path: match.pathname,
+        title: loaderData?.post
+          ? `${loaderData.post.title} | VoxelVein`
+          : "Post not found | VoxelVein",
+        type: "article",
+      }),
     ],
   }),
+  notFoundComponent: BlogPostNotFound,
   component: BlogPostPage,
 });

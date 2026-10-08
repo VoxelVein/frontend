@@ -2,18 +2,26 @@ import { render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { loadPost } from "@/lib/blog-post";
 import type { Post } from "@/lib/posts";
-import { Route } from "@/routes/blog.$slug";
+import { BlogPostNotFound, Route } from "@/routes/blog.$slug";
 
-const { getPostMock, useLoaderDataMock } = vi.hoisted(() => ({
+const { getPostMock, useLoaderDataMock, useSessionMock } = vi.hoisted(() => ({
   getPostMock:
     vi.fn<(opts: { data: { slug: string } }) => Promise<Post | null>>(),
-  useLoaderDataMock: vi.fn<() => { post: Post | null }>(),
+  useLoaderDataMock: vi.fn<() => { post: Post }>(),
+  useSessionMock:
+    vi.fn<() => { data: { user: { role: string | null } } | null }>(),
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route reads a server function; a string path avoids strict factory type-checking against the server function types
 vi.mock("@/lib/posts.functions", () => ({
   getPost: getPostMock,
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking -- The edit shortcut gates on the session; stubbing the client avoids a network call in this test
+vi.mock(import("@/lib/auth-client"), () => ({
+  authClient: { useSession: useSessionMock },
 }));
 
 /** Fills a route pattern's `$params` the way the router would. */
@@ -84,6 +92,7 @@ const breadcrumb = () => screen.getByRole("navigation", { name: "Breadcrumb" });
 describe("BlogPostPage", () => {
   beforeEach(() => {
     useLoaderDataMock.mockReset();
+    useSessionMock.mockReset().mockReturnValue({ data: null });
   });
 
   it("shows the title, excerpt and body", () => {
@@ -179,6 +188,27 @@ describe("BlogPostPage", () => {
     expect(screen.getByText("By Hedi Zandi, Ben Sabic")).toBeInTheDocument();
   });
 
+  it("keeps the editor shortcut off the page for a reader", () => {
+    useSessionMock.mockReturnValue({ data: { user: { role: "user" } } });
+    showPost();
+
+    render(<BlogPostPage />);
+
+    expect(
+      screen.queryByRole("link", { name: /edit/iu })
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers an admin the editor for this post", () => {
+    useSessionMock.mockReturnValue({ data: { user: { role: "admin" } } });
+    showPost();
+
+    render(<BlogPostPage />);
+
+    const edit = screen.getByRole("link", { name: /edit/iu });
+    expect(edit.getAttribute("href")).toBe("/admin/posts/post-1/edit");
+  });
+
   it("links each author to their profile", () => {
     showPost();
 
@@ -246,9 +276,7 @@ describe("BlogPostPage", () => {
   });
 
   it("explains a missing post instead of rendering an empty article", () => {
-    useLoaderDataMock.mockReturnValue({ post: null });
-
-    render(<BlogPostPage />);
+    render(<BlogPostNotFound />);
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Post not found" })
@@ -256,6 +284,16 @@ describe("BlogPostPage", () => {
     expect(
       screen.getByRole("link", { name: /back to blog/iu })
     ).toHaveAttribute("href", "/blog");
+  });
+
+  it("throws from the loader so a missing post returns a real 404", async () => {
+    getPostMock.mockResolvedValueOnce(null);
+
+    // notFound() returns the router's marker object rather than throwing an
+    // Error, so the rejection is matched by shape, not by message.
+    await expect(loadPost("missing")).rejects.toMatchObject({
+      isNotFound: true,
+    });
   });
 
   it("never lets a payload from the body reach the document", () => {

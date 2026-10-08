@@ -15,6 +15,7 @@ const {
   postSearchAvailableMock,
   searchPostsMock,
   useLoaderDataMock,
+  useSessionMock,
 } = vi.hoisted(() => ({
   listPostsMock: vi.fn<(opts: { data: object }) => Promise<PostSummary[]>>(),
   postSearchAvailableMock: vi.fn<() => Promise<boolean>>(),
@@ -34,6 +35,8 @@ const {
       searchAvailable: boolean;
     }
   >(),
+  useSessionMock:
+    vi.fn<() => { data: { user: { role: string | null } } | null }>(),
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback is a toast; stubbing Sonner is what makes the call assertable
@@ -45,11 +48,16 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route reads server functions; string paths avoid strict factory type-checking against the server function types
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route component reads server functions; string paths avoid strict factory type-checking against the server function types
 vi.mock("@/lib/posts.functions", () => ({
   listPosts: listPostsMock,
   postSearchAvailable: postSearchAvailableMock,
   searchPosts: searchPostsMock,
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking -- The header shortcut gates on the session; stubbing the client avoids a network call in this test
+vi.mock(import("@/lib/auth-client"), () => ({
+  authClient: { useSession: useSessionMock },
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route component reads loader data through the router and PostCard renders a router Link; stubbing both avoids standing up a router in this test
@@ -132,6 +140,7 @@ describe("BlogPage", () => {
       posts: [postSummary],
       searchAvailable: true,
     });
+    useSessionMock.mockReset().mockReturnValue({ data: null });
   });
 
   afterEach(() => {
@@ -143,6 +152,25 @@ describe("BlogPage", () => {
 
     expect(screen.getByText("First post")).toBeInTheDocument();
     expect(screen.getByText("Preview of the first post.")).toBeInTheDocument();
+  });
+
+  it("keeps the editor shortcut off the page for a reader", () => {
+    useSessionMock.mockReturnValue({ data: { user: { role: "user" } } });
+
+    render(<BlogPage />);
+
+    expect(
+      screen.queryByRole("link", { name: /new post/iu })
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers an admin the new-post editor from the index", () => {
+    useSessionMock.mockReturnValue({ data: { user: { role: "admin" } } });
+
+    render(<BlogPage />);
+
+    const newPost = screen.getByRole("link", { name: /new post/iu });
+    expect(newPost.getAttribute("href")).toBe("/admin/posts/new");
   });
 
   it("hides the search field when there is nothing to search", () => {
