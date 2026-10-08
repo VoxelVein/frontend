@@ -163,9 +163,12 @@ the auth origins are pinned to 3000.
 
 ## Troubleshooting
 
-* **"Could not reach the search service"** on a browse page — search runs
-  in Postgres, not the API server, so this means the database is
+* **"Could not reach the database"** on a browse page. Search runs in
+  Postgres, not the API server, so this means the database is
   unreachable. Check `DATABASE_URL` and that Postgres is running.
+* **"Could not reach the server"** on a browse page. That search call was
+  the page's request to the app server itself, so the server likely
+  restarted mid-session (a deploy); reloading usually clears it.
 * **Password sign-in returns `503`** — Turnstile is enabled but
   misconfigured, or unconfigured entirely. The widget is hidden without
   `VITE_TURNSTILE_SITE_KEY` and the endpoint fails closed. See

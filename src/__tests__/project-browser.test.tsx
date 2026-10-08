@@ -229,8 +229,10 @@ describe(ProjectBrowser, () => {
     });
   });
 
-  it("shows an actionable message when the search service is unreachable", async () => {
-    searchModsMock.mockRejectedValueOnce(new Error("fetch failed"));
+  it("explains a refused database connection", async () => {
+    searchModsMock.mockRejectedValueOnce(
+      new Error("connect ECONNREFUSED 127.0.0.1:5432")
+    );
 
     render(<ModsPage />);
 
@@ -238,7 +240,23 @@ describe(ProjectBrowser, () => {
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
-        "Could not reach the search service"
+        "Could not reach the database"
+      );
+    });
+  });
+
+  it("distinguishes a failed browser→server call from a database outage", async () => {
+    // The browser reaches the query through a fetch to the app's own server;
+    // "failed to fetch" means that hop broke, not that Postgres is down.
+    searchModsMock.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    render(<ModsPage />);
+
+    await selectCategory("performance");
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Could not reach the server"
       );
     });
   });

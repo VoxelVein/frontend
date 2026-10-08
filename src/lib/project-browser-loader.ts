@@ -19,16 +19,21 @@ export const toSearchErrorMessage = (cause: unknown) => {
   }
 
   const message = cause.message.toLowerCase();
-  if (
-    message.includes("fetch failed") ||
-    message.includes("econnrefused") ||
-    message.includes("failed to fetch")
-  ) {
-    return "Could not reach the search service. Start the API server with `pnpm dev:all` and try again.";
+
+  // An unreachable cluster reports its own socket error, and Valkey cannot be
+  // the source: the limiter fails open and swallows its own failures.
+  if (message.includes("econnrefused")) {
+    return "Could not reach the database. Check that PostgreSQL is running and DATABASE_URL is correct, then try again.";
+  }
+
+  // A failed fetch is the browser's RPC to this app's own server, which is the
+  // only network hop on the search path; the query itself runs in Postgres.
+  if (message.includes("fetch failed") || message.includes("failed to fetch")) {
+    return "Could not reach the server. Reload the page and try again.";
   }
 
   if (message.includes("aborted due to timeout")) {
-    return "The search service timed out. Please try again.";
+    return "The search timed out. Please try again.";
   }
 
   return cause.message;
