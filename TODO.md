@@ -25,22 +25,25 @@ for the longer-term plan.
 
 ## Quality
 
-* [ ] Route-level tests for `/admin`, `/settings`, and `/dashboard`. Four
-      route shells are covered in `src/__tests__/`; these three are not.
-      Settings' tab policy is tested on its own in `settings-tabs.test.ts`,
-      so what is missing there is the shell, not the logic.
+* [ ] Route-level tests for `/admin`, `/settings`, and `/dashboard`. Five
+      route shells are covered in `src/__tests__/`: `login`, `signup`, the
+      blog index and post pages, and the public profile; these three are
+      not. Settings' tab policy is tested on its own in
+      `settings-tabs.test.ts`, so what is missing there is the shell, not
+      the logic.
 * [ ] `admin.tsx` fetches badge counts client-side in a `useEffect` while
       every other route uses a loader
-* [ ] None of the five hooks in `src/hooks/` have a test:
-      `use-post-search`, `use-username-availability`, `use-storage-available`,
-      `use-refresh-session`, `use-prefers-reduced-motion`. `use-post-search`
-      is in the `coverage.include` list despite having no test importing it.
+* [ ] None of the six hooks in `src/hooks/` have a test:
+      `use-can-manage-posts`, `use-post-search`, `use-prefers-reduced-motion`,
+      `use-refresh-session`, `use-storage-available`, `use-username-availability`.
+      `use-post-search` is in the `coverage.include` list despite having no
+      test importing it.
 * [ ] Drop `posts.author_id`. Nullable and unwritten since `0018`, and the
       follow-up is already spelled out in `docs/content/blog.md`. It cannot
       go in the next release: migrations apply when the new code merges while
       the previous deploy is still inserting into the column, so this needs a
       release where no live instance still writes it.
-* [ ] `ProjectBrowser` is exempted from the complexity lint at ~800 lines;
+* [ ] `ProjectBrowser` is exempted from the complexity lint at ~850 lines;
       worth splitting search state from filters
 
 ## Planned
