@@ -52,6 +52,23 @@ const config = defineConfig({
     // BUNDLE_SOURCEMAP=1 when running `pnpm analyze:bundle`, which needs it to
     // attribute entry-chunk bytes to their sources.
     sourcemap: process.env.BUNDLE_SOURCEMAP === "1",
+    rollupOptions: {
+      // `src/db/schema.ts` is server-only: its tables are read by the Drizzle
+      // client and the server functions, never by browser code. Start rewrites
+      // each `.functions.ts` module down to its client RPC stubs, but with
+      // `verbatimModuleSyntax` the module's `@/db/schema` import is preserved
+      // even once nothing references it. Because a `pgTable(...)` module looks
+      // side-effectful, tree-shaking kept the whole file in the entry chunk —
+      // about 11 kB of column builders plus the ~33 kB of `drizzle-orm` they
+      // pull in — for a module the browser never calls.
+      //
+      // Declaring it side-effect-free lets the unused module be dropped.
+      // Exports a client bridge genuinely used are still kept, so this only
+      // removes code that would never run in the browser.
+      treeshake: {
+        moduleSideEffects: (id) => !id.endsWith("/db/schema.ts"),
+      },
+    },
   },
   server: {
     // PORT is the single "where do I listen" variable, shared with the Nitro
