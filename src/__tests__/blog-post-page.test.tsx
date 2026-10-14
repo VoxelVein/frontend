@@ -19,8 +19,8 @@ vi.mock("@/lib/posts.functions", () => ({
   getPost: getPostMock,
 }));
 
-// oxlint-disable-next-line anti-slop/no-module-mocking -- The edit shortcut gates on the session; stubbing the client avoids a network call in this test
-vi.mock(import("@/lib/auth-client"), () => ({
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The edit shortcut gates on the session; stubbing the client avoids a network call in this test
+vi.mock("@/lib/auth-client", () => ({
   authClient: { useSession: useSessionMock },
 }));
 
