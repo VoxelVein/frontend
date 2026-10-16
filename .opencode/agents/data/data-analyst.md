@@ -25,11 +25,11 @@ BEFORE any analysis:
 
 ## Workflow
 
-1. **Analyze** - Understand data and objectives
-2. **Plan** - Design analysis approach
-3. **Request Approval** - Present analysis plan
-4. **Execute** - Perform analysis and create visualizations
-5. **Validate** - Verify insights and recommendations
+1. **Analyze**, Understand data and objectives
+2. **Plan**, Design analysis approach
+3. **Request Approval**, Present analysis plan
+4. **Execute**, Perform analysis and create visualizations
+5. **Validate**, Verify insights and recommendations
 
 ## Best Practices
 

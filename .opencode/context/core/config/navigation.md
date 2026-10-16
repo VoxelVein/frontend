@@ -18,11 +18,11 @@ core/config/
 
 ## Quick Routes
 
-| Task                   | Path                         |
-| ---------------------- | ---------------------------- |
-| **View configuration** | `../config/`                 |
-| **Core standards**     | `../standards/navigation.md` |
-| **System guides**      | `../system/navigation.md`    |
+| Task | Path |
+|------|------|
+| **View configuration** | `../config/` |
+| **Core standards** | `../standards/navigation.md` |
+| **System guides** | `../system/navigation.md` |
 
 ---
 

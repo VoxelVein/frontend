@@ -14,10 +14,10 @@ OpenAgents Control is published as `@nextsystems/oac` on npm. Users install glob
 
 **Key files**:
 
-- `package.json` - Package configuration
-- `bin/oac.js` - CLI entry point
-- `.npmignore` - Exclude dev files
-- `install.sh` - Main installer (runs when user executes `oac`)
+- `package.json`, Package configuration
+- `bin/oac.js`, CLI entry point
+- `.npmignore`, Exclude dev files
+- `install.sh`, Main installer (runs when user executes `oac`)
 
 ---
 
@@ -126,11 +126,11 @@ npm profile get  # Check email verification status
 
 **What's included** (see `package.json` → `files`):
 
-- `.opencode/` - Agents, commands, context, profiles, skills, tools
-- `scripts/` - Installation scripts
-- `bin/` - CLI entry point
-- `registry.json` - Component registry
-- `install.sh` - Main installer
+- `.opencode/`, Agents, commands, context, profiles, skills, tools
+- `scripts/`, Installation scripts
+- `bin/`, CLI entry point
+- `registry.json`, Component registry
+- `install.sh`, Main installer
 - Docs (README, CHANGELOG, LICENSE)
 
 **What's excluded** (see `.npmignore`):

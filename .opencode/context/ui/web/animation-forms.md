@@ -9,7 +9,7 @@ Animation patterns for form inputs, validation states, and scroll animations.
 ## Focus States
 
 ```css
-/* Input focus - ring and scale */
+/* Input focus—ring and scale */
 .input {
   transition: all 200ms ease-out;
 }
@@ -18,7 +18,7 @@ Animation patterns for form inputs, validation states, and scroll animations.
   box-shadow: 0 0 0 3px var(--ring);
 }
 
-/* Input blur - return to normal */
+/* Input blur—return to normal */
 .input:not(:focus) {
   transition: all 150ms ease-in;
 }
@@ -135,6 +135,6 @@ scrollHint: 800ms ∞×3 [Y±5]
 
 ## Related Files
 
-- [Animation Basics](./animation-basics.md) - Fundamentals
-- [Animation Components](./animation-components.md) - Common UI patterns
-- [Loading Animations](./animation-loading.md) - Loading states
+- [Animation Basics](./animation-basics.md), Fundamentals
+- [Animation Components](./animation-components.md), Common UI patterns
+- [Loading Animations](./animation-loading.md), Loading states

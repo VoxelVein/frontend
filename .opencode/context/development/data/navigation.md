@@ -4,7 +4,7 @@
 
 **Purpose**: Database and data access patterns
 
-**Status**: 🚧 Placeholder - Content coming soon
+**Status**: 🚧 Placeholder, Content coming soon
 
 ---
 

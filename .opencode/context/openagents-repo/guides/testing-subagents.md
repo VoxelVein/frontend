@@ -1,6 +1,6 @@
 <!-- Context: openagents-repo/guides | Priority: high | Version: 1.0 | Updated: 2026-02-15 -->
 
-# Testing Subagents - Step-by-Step Guide
+# Testing Subagents, Step-by-Step Guide
 
 **Purpose**: How to test subagents in standalone mode
 
@@ -263,7 +263,7 @@ evals/agents/ContextScout/tests/
 
 ```yaml
 prompts:
-  - text: |
+ —text: |
       List all markdown files in .opencode/context/core/
 ```
 
@@ -271,7 +271,7 @@ prompts:
 
 ```yaml
 prompts:
-  - text: |
+ —text: |
       Use the glob tool to find all markdown files in .opencode/context/core/
 
       You MUST use the glob tool like this:
@@ -295,9 +295,9 @@ prompts:
 
 ## Related
 
-- `concepts/subagent-testing-modes.md` - Understand standalone vs delegation
-- `lookup/subagent-test-commands.md` - Quick command reference
-- `errors/tool-permission-errors.md` - Common permission issues
-- `examples/subagent-prompt-structure.md` - Optimized prompt structure
+- `concepts/subagent-testing-modes.md`, Understand standalone vs delegation
+- `lookup/subagent-test-commands.md`, Quick command reference
+- `errors/tool-permission-errors.md`, Common permission issues
+- `examples/subagent-prompt-structure.md`, Optimized prompt structure
 
 **Reference**: `evals/framework/src/sdk/run-sdk-tests.ts`

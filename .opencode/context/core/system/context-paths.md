@@ -1,8 +1,8 @@
 <!-- Context: core/context-paths | Priority: low | Version: 1.0 | Updated: 2026-02-15 -->
 
 ---
-
-id: context-paths name: Context File Path Resolution
+id: context-paths
+name: Context File Path Resolution
 ---
 
 # Context File Path Resolution
@@ -11,15 +11,15 @@ id: context-paths name: Context File Path Resolution
 
 Context files are resolved in this order (later sources override earlier ones for conflicting keys):
 
-1. **Global context** (`~/.config/opencode/context/`)  -  user-wide defaults
-2. **Local context** (`.opencode/context/` in project root)  -  project-specific, highest priority
+1. **Global context** (`~/.config/opencode/context/`) — user-wide defaults
+2. **Local context** (`.opencode/context/` in project root) — project-specific, highest priority
 
 This mirrors OpenCode's own config merging behavior (see [OpenCode Config Docs](https://opencode.ai/docs/config/)).
 
 ## What Goes Where
 
 | Content Type | Recommended Location | Why |
-| --- | --- | --- |
+|---|---|---|
 | **Project Intelligence** (tech stack, patterns, naming) | Local `.opencode/context/project-intelligence/` | Project-specific, committed to git, shared with team |
 | **Core Standards** (code-quality, docs, tests) | Wherever OAC was installed | Universal standards, same across projects |
 | **Personal Defaults** (your preferred patterns) | Global `~/.config/opencode/context/project-intelligence/` | Personal coding style across all projects |
@@ -69,20 +69,17 @@ This copies `project-intelligence/` from global (`~/.config/opencode/context/`) 
 ## Common Scenarios
 
 ### Scenario 1: Everything Local (Development / Repo Maintainer)
-
 - OAC installed locally via `bash install.sh developer`
 - All context in `.opencode/context/`
 - Committed to git, team shares everything
 
 ### Scenario 2: Global Install + Local Project Intelligence
-
 - OAC installed globally via `bash install.sh developer --install-dir ~/.config/opencode`
 - Core standards at `~/.config/opencode/context/core/`
 - Run `/add-context` in project → creates `.opencode/context/project-intelligence/` locally
 - Project intelligence committed to git, core standards come from global
 
 ### Scenario 3: Global Personal Defaults
-
 - Run `/add-context --global` to save personal coding patterns
 - These apply to ALL projects as fallback
 - Any project can override with local `/add-context`

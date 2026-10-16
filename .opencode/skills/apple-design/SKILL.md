@@ -15,15 +15,15 @@ author: dickwu
 type: skill
 category: design
 tags:
-  - design
-  - ui
-  - ux
-  - apple
-  - hig
-  - review
-  - accessibility
-  - mobile
-  - desktop
+ —design
+ —ui
+ —ux
+ —apple
+ —hig
+ —review
+ —accessibility
+ —mobile
+ —desktop
 ---
 
 # Apple Design Skill
@@ -370,15 +370,15 @@ studio.
    Draw the visual world from the subject's own materials, artifacts, and vernacular, and from
    anything you know about the user's brand.
 2. **Plan a compact token system** before touching layout:
-   - **Color**: four to six named hex values with roles (surface, content, accent, signal), each
+  —**Color**: four to six named hex values with roles (surface, content, accent, signal), each
      with light and dark variants and a contrast figure against its surface.
-   - **Type**: a display face used with restraint, a body face, and a utility face for data if
+  —**Type**: a display face used with restraint, a body face, and a utility face for data if
      needed. Keep body text at or above platform minimums and show the scale.
-   - **Layout**: one sentence and an ASCII wireframe of the key screen at compact and regular
+  —**Layout**: one sentence and an ASCII wireframe of the key screen at compact and regular
      widths.
-   - **Signature**: the single element the design will be remembered by, and why it belongs to
+  —**Signature**: the single element the design will be remembered by, and why it belongs to
      this product.
-   - **Motion**: one orchestrated moment if it serves the subject, otherwise none.
+  —**Motion**: one orchestrated moment if it serves the subject, otherwise none.
 3. **Critique the plan before proposing it.** Would you have produced this same plan for a similar
    brief about a different product? Then it is a default. Revise it and say what changed and why.
    If the plan already reads as specific to this product, say so and keep it. Check it against the

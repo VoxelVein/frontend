@@ -27,9 +27,9 @@ round trip through the passkey or OAuth flow.
 Every account has a username. It is shown on projects and can be used
 to sign in instead of the email address.
 
-* **Email sign-up**  -  the user picks it on the sign-up form. The
+* **Email sign-up**, the user picks it on the sign-up form. The
   sign-up page is at `/signup`.
-* **Google or GitHub sign-up**  -  a free username is generated from the
+* **Google or GitHub sign-up**, a free username is generated from the
   GitHub login, the email address, or the name, and
   `usernameConfirmed` is false. The user is sent to `/welcome` to keep
   or change it, and the dashboard redirects there until they do. This
@@ -145,7 +145,7 @@ an error only says "too long" after the fact.
 **Save is inert until the form is edited**, and a hint says when there are
 changes waiting. A permanently live button invites a click that reports
 success without having changed anything. After a successful save the form is
-rebased onto what was *stored* rather than what was *typed*  -  the name is
+rebased onto what was *stored* rather than what was *typed*, the name is
 trimmed and the bio normalised on the way in, so rebasing on the typed values
 would leave the form still looking edited.
 
@@ -153,25 +153,25 @@ would leave the form still looking edited.
 
 Uploaded in **Settings → Profile** by `src/components/settings/avatar-card.tsx`,
 which posts to `/api/users/me/avatar`. The bytes go through the same
-sniffing, filename regeneration, and quota gate as a project image  -  see
+sniffing, filename regeneration, and quota gate as a project image, see
 [Hardening](../security/hardening.md).
 
 A picture can also come from **outside**. The card presents the two as
-**tabs**  -  *Upload* and *From a URL*  -  because they are alternatives: a
+**tabs**, *Upload* and *From a URL*, because they are alternatives: a
 picture comes from exactly one of them. Stacking both forms gave the URL
 field the visual weight of a second primary action while leaving it
 unclear which one the card was asking about.
 
 The URL tab calls `setAvatarUrl` in `account.functions.ts` and stores an
 `https://` address the account already hosts. Nothing is fetched or
-proxied  -  the reader's browser loads it from that host directly  -  so the
+proxied, the reader's browser loads it from that host directly, so the
 upload gates do not apply and `src/lib/avatar-url.ts` replaces them with a
 scheme allowlist. Emptying the field and saving removes the picture.
 
 It also **previews the address before it is saved**, and says so when the
 image fails to load. Without that, the only way to find out whether an
 address points at a usable picture is to save it, reload the page and look
-at the result  -  and the preview request carries no referrer, because it is
+at the result, and the preview request carries no referrer, because it is
 a request to a third-party host made while the person is still deciding
 and should not tell that host which account page they are on.
 
@@ -214,7 +214,7 @@ A separate `user_images` table, not a key on `users`
   and the avatar's own `id` stays a `uuid` because that one is ours.
 
 The image is resized in the browser before it is sent, using the `icon`
-kind  -  an avatar renders at 24-80px, the same range as a project icon  -
+kind, an avatar renders at 24-80px, the same range as a project icon  -
 so a phone photo is scaled rather than stored and never used.
 
 * The bio is **Markdown**, rendered with `@tanstack/markdown/react` in the
@@ -278,7 +278,7 @@ type to filter between.
 
 An account that has requested deletion resolves to null, so the bio and
 display name do not outlive the request. The `by` byline on a project links
-to the author's profile, except when the owner is gone  -  then
+to the author's profile, except when the owner is gone, then
 `authorUsername` is null and the name stays plain text rather than linking
 to a page that 404s.
 
@@ -291,7 +291,7 @@ with its owner's account, and owners cannot choose to delete them that way.
 The user-facing name is **protected project**, defined once as
 `PROTECTED_PROJECT_LABEL` in `src/lib/projects.ts`. It was previously called a
 "large project" in the deletion wizard and a "protected project" in the admin
-notification about the same event  -  two names for one thing, neither defined
+notification about the same event, two names for one thing, neither defined
 anywhere a user could read. "Protected" is also the honest word: it names
 exactly what happens without implying a download threshold that nothing
 enforces.
@@ -300,7 +300,7 @@ enforces.
 
 There are three roles: `user`, `moderator`, and `admin`, ordered in
 `ROLE_RANK` (`src/lib/roles.ts`). Almost nothing checks rank directly,
-though  -  authorization is expressed as **capabilities**, and each one
+though, authorization is expressed as **capabilities**, and each one
 declares its own minimum in `CAPABILITY_MINIMUM`. A call site asks
 `can(role, "manageUsers")`, never `role === "admin"`, so the minimum for
 every job is stated in exactly one place.
@@ -308,8 +308,8 @@ every job is stated in exactly one place.
 **`admin`** holds all eleven capabilities: user and session management,
 posts, publishing, storage, deletions, notifications, protected projects.
 
-**`moderator`** holds exactly two  -  `reviewProjects` and
-`viewAdminPanel`  -  and nothing else. It works the publishing review queue
+**`moderator`** holds exactly two, `reviewProjects` and
+`viewAdminPanel`, and nothing else. It works the publishing review queue
 and nothing beyond it. It deliberately **cannot** list, ban, or delete an
 account, revoke sessions, or read or write blog posts. Those statements
 are absent from its role object rather than checked in app code, so Better
@@ -327,7 +327,7 @@ statements in `src/lib/permissions.ts`.
 `src/lib/permissions.ts` runs two assertions at startup.
 `assertRolesInSync` fails if the ladder names a role the plugin does not
 know about. `assertCapabilitiesAgree` fails if a role holds statements for
-a capability it does not have  -  a drift that would fail **open**, since
+a capability it does not have, a drift that would fail **open**, since
 the admin panel only hides tabs and would show nothing about a power that
 had been granted.
 

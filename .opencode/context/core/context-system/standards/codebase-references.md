@@ -22,77 +22,59 @@
 ## Section Types (Use What's Relevant)
 
 ### Business Domain Context
-
 ```markdown
 **Business Logic**: (MOST IMPORTANT for business domains)
-
 - `src/orders/rules/validation-rules.ts` - Order validation business rules
 
 **Implementation**:
-
 - `src/orders/order-processor.ts` - Main order processing logic
 
 **Models/Types**:
-
 - `src/orders/models/order.model.ts` - Order data model
 
 **Tests**:
-
 - `src/orders/__tests__/processor.test.ts` - Order processing tests
 
 **Configuration**:
-
 - `config/orders.config.ts` - Order processing config
 ```
 
 ### Technical/Code Context
-
 ```markdown
 **Implementation**: (MOST IMPORTANT for technical contexts)
-
 - `src/auth/jwt-handler.ts` - JWT authentication implementation
 
 **Examples**:
-
 - `src/auth/examples/jwt-example.ts` - Working JWT example
 
 **Types**:
-
 - `src/auth/types/jwt-payload.ts` - JWT payload types
 
 **Tests**:
-
 - `src/auth/__tests__/jwt.test.ts` - JWT tests
 ```
 
 ### Standards/Quality Context
-
 ```markdown
 **Validation/Enforcement**: (MOST IMPORTANT for standards)
-
 - `scripts/validate-code-quality.ts` - Code quality validator
 - `eslint.config.js` - ESLint rules
 
 **Examples**:
-
 - `examples/good-code.ts` - Good code example
 - `examples/bad-code.ts` - Anti-pattern example
 
 **Tests**:
-
 - `tests/code-quality.test.ts` - Quality validation tests
 ```
 
 ### Operational Context
-
 ```markdown
 **Scripts/Tools**: (MOST IMPORTANT for operations)
-
 - `scripts/deploy.sh` - Deployment script
 - `scripts/monitor.ts` - Monitoring setup
 
 **Configuration**:
-
 - `config/deployment.config.ts` - Deployment configuration
 - `.github/workflows/deploy.yml` - CI/CD workflow
 ```
@@ -115,39 +97,31 @@
 ## Examples
 
 **Business Context**:
-
 ```markdown
 ## 📂 Codebase References
 
 **Business Logic**:
-
 - `src/payments/rules/validation-rules.ts` - Card validation rules
 - `src/payments/rules/fraud-detection.ts` - Fraud detection logic
 
 **Implementation**:
-
 - `src/payments/payment-processor.ts` - Main payment processing
 
 **Tests**:
-
 - `src/payments/__tests__/processor.test.ts` - Payment tests
 ```
 
 **Technical Context**:
-
 ```markdown
 ## 📂 Codebase References
 
 **Implementation**:
-
 - `src/auth/jwt-handler.ts` - JWT authentication
 
 **Examples**:
-
 - `examples/jwt-auth.ts` - Working example
 
 **Tests**:
-
 - `src/auth/__tests__/jwt.test.ts` - JWT tests
 ```
 

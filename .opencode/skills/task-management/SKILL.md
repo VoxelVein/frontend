@@ -6,11 +6,11 @@ author: opencode
 type: skill
 category: development
 tags:
-  - tasks
-  - management
-  - tracking
-  - dependencies
-  - cli
+ —tasks
+ —management
+ —tracking
+ —dependencies
+ —cli
 ---
 
 # Task Management Skill
@@ -23,11 +23,11 @@ tags:
 
 I provide a command-line interface for managing task breakdowns created by the TaskManager subagent. I help you:
 
-- **Track progress** - See status of all features and their subtasks
-- **Find next tasks** - Show eligible tasks (dependencies satisfied)
-- **Identify blocked tasks** - See what's blocked and why
-- **Manage completion** - Mark subtasks as complete with summaries
-- **Validate integrity** - Check JSON files and dependency trees
+- **Track progress**, See status of all features and their subtasks
+- **Find next tasks**, Show eligible tasks (dependencies satisfied)
+- **Identify blocked tasks**, See what's blocked and why
+- **Manage completion**, Mark subtasks as complete with summaries
+- **Validate integrity**, Check JSON files and dependency trees
 
 ---
 
@@ -87,8 +87,8 @@ $ bash .opencode/skills/task-management/router.sh next
 === Ready Tasks (deps satisfied) ===
 
 [my-feature]
-  06 - Implement API endpoint [sequential]
-  08 - Write unit tests [parallel]
+  06—Implement API endpoint [sequential]
+  08—Write unit tests [parallel]
 ```
 
 ### Mark Complete
@@ -108,9 +108,9 @@ $ bash .opencode/skills/task-management/router.sh deps my-feature 07
 
 === Dependency Tree: my-feature/07 ===
 
-07 - Write integration tests [pending]
-  ├── ✓ 05 - Implement authentication module [completed]
-  └── ○ 06 - Implement API endpoint [in_progress]
+07—Write integration tests [pending]
+  ├── ✓ 05—Implement authentication module [completed]
+  └── ○ 06—Implement API endpoint [in_progress]
 ```
 
 ### Validate Everything
@@ -208,8 +208,8 @@ task(
 
 TaskManager creates:
 
-1. `.tmp/tasks/{feature}/task.json` - Feature metadata
-2. `.tmp/tasks/{feature}/subtask_XX.json` - Individual subtasks
+1. `.tmp/tasks/{feature}/task.json`, Feature metadata
+2. `.tmp/tasks/{feature}/subtask_XX.json`, Individual subtasks
 
 You can then use this skill to track and manage progress.
 
@@ -227,10 +227,10 @@ Set `parallel: true` to indicate a subtask can run alongside other parallel task
 
 ### 3. Status Tracking
 
-- **pending** - Not started, waiting for dependencies
-- **in_progress** - Currently being worked on
-- **completed** - Finished with summary
-- **blocked** - Explicitly blocked (not waiting for deps)
+- **pending**, Not started, waiting for dependencies
+- **in_progress**, Currently being worked on
+- **completed**, Finished with summary
+- **blocked**, Explicitly blocked (not waiting for deps)
 
 ### 4. Exit Criteria
 
@@ -272,8 +272,8 @@ bash .opencode/skills/task-management/router.sh validate my-feature
 
 ### 6. Context and Reference Files
 
-- **context_files** - Standards, conventions, and guidelines to follow
-- **reference_files** - Existing project files to look at or build upon
+- **context_files**, Standards, conventions, and guidelines to follow
+- **reference_files**, Existing project files to look at or build upon
 
 ---
 
@@ -416,4 +416,4 @@ Run `validate` to see specific issues, then check the JSON files in `.tmp/tasks/
 
 ---
 
-**Task Management Skill** - Track, manage, and validate your feature implementations!
+**Task Management Skill**, Track, manage, and validate your feature implementations!

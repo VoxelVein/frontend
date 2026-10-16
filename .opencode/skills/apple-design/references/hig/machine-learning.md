@@ -19,11 +19,11 @@ Features powered by machine learning use *models* to perform tasks that make peo
 
 As you design your models, keep the intended experience of your app in mind. It can take a long time to adjust the behavior of models, so be prepared to change the way you use data and metrics if the app experience needs to change.
 
-Designing the UI and user experience of a machine learning app can be uniquely challenging. Because a machine learning app bases its behavior on the data it receives  -  reacting to changing information and conditions  -  you can’t design specific reactions to a static set of scenarios. Instead, you design the experience by teaching the app how to interpret data and react accordingly.
+Designing the UI and user experience of a machine learning app can be uniquely challenging. Because a machine learning app bases its behavior on the data it receives, reacting to changing information and conditions, you can’t design specific reactions to a static set of scenarios. Instead, you design the experience by teaching the app how to interpret data and react accordingly.
 
 To help you meet this challenge, first consider the role that machine learning plays in your app. Defining the [role](#the-role-of-machine-learning-in-your-app) of machine learning in your app can help you discover areas in which you can explore the ways machine learning can affect the experience your app provides.
 
-Use the machine learning role you identify to help you define ways your app can receive and display data. There are several patterns  -  grouped into *inputs* and *outputs*  -  that provide guidance in areas such as getting feedback, displaying data, handling mistakes, and supporting corrections. Use the guidance in these patterns to help you integrate machine learning into your app in ways that people appreciate.
+Use the machine learning role you identify to help you define ways your app can receive and display data. There are several patterns, grouped into *inputs* and *outputs*, that provide guidance in areas such as getting feedback, displaying data, handling mistakes, and supporting corrections. Use the guidance in these patterns to help you integrate machine learning into your app in ways that people appreciate.
 
 ## The role of machine learning in your app
 
@@ -36,7 +36,7 @@ If an app can still work without the feature that machine learning supports, mac
 - The keyboard uses machine learning to provide QuickType suggestions. Because the keyboard still works without these suggestions, machine learning plays a complementary role in the app.
 - Face ID relies on machine learning to perform accurate face recognition. Without machine learning, Face ID would not work.
 
-In general, the more central a feature is to your app’s purpose  -  like a personalized news feed for a news app  -  the more people expect accurate and reliable results. On the other hand, for secondary features, people are often more forgiving if the results aren’t perfectly accurate every time.
+In general, the more central a feature is to your app’s purpose, like a personalized news feed for a news app, the more people expect accurate and reliable results. On the other hand, for secondary features, people are often more forgiving if the results aren’t perfectly accurate every time.
 
 ### Private or public
 
@@ -62,7 +62,7 @@ Apps may use machine learning to support visible or invisible features. People a
 
 As the name suggests, an invisible feature provides results that aren’t obvious to people. For example, the News app proactively suggests topics and channels based on a person’s previous engagement. Because this improves the app experience without requiring people to make choices, many people aren’t aware that the feature exists.
 
-People’s impression of the reliability of results can differ depending on whether a feature is visible or invisible. With a visible feature, people form an opinion about the feature’s reliability as they choose from its results. It’s harder for an invisible feature to communicate its reliability  -  and potentially receive feedback  -  because people may not be aware of the feature at all.
+People’s impression of the reliability of results can differ depending on whether a feature is visible or invisible. With a visible feature, people form an opinion about the feature’s reliability as they choose from its results. It’s harder for an invisible feature to communicate its reliability, and potentially receive feedback, because people may not be aware of the feature at all.
 
 ### Dynamic or static
 
@@ -72,9 +72,9 @@ In addition to the frequency of app updates, static or dynamic improvements can 
 
 ## Explicit feedback
 
-Explicit feedback provides actionable information your app can use to improve the content and experience it presents to people. Unlike [implicit feedback](#implicit-feedback)  -  which is information an app gleans from user actions  -  explicit feedback is information people provide in response to a specific request from the app.
+Explicit feedback provides actionable information your app can use to improve the content and experience it presents to people. Unlike [implicit feedback](#implicit-feedback), which is information an app gleans from user actions, explicit feedback is information people provide in response to a specific request from the app.
 
-*Favoriting*  -  marking an item for quick access in the future  -  and *social feedback*  -  expressing emotions toward others  -  are common user interactions that seem like mechanisms that supply explicit feedback. However, these tools actually provide implicit feedback because they don’t support app-specific requests. People use favoriting and social feedback to accomplish their own goals and apps can gather implicit feedback from these interactions.
+*Favoriting*, marking an item for quick access in the future, and *social feedback*, expressing emotions toward others, are common user interactions that seem like mechanisms that supply explicit feedback. However, these tools actually provide implicit feedback because they don’t support app-specific requests. People use favoriting and social feedback to accomplish their own goals and apps can gather implicit feedback from these interactions.
 
 **Request explicit feedback only when necessary.** People must take action to provide explicit feedback, so it’s best to avoid requesting it if possible. Instead, consider using implicit feedback to learn how people interact with your app without asking them to do extra work.
 
@@ -100,7 +100,7 @@ Implicit feedback is information that arises as people interact with your app’
 
 **Always secure people’s information.** Implicit feedback can gather potentially sensitive user information, so you must be particularly careful to maintain strict controls on user privacy.
 
-**Help people control their information.** As an app developer, you know that the more you understand about the behavior of your users  -  both within your app and in other apps  -  the more you can improve the experience your app provides. Although most people understand the benefits of making their information available to multiple apps, they may still be surprised when things they do in one app affect experiences they have in a different app. Worse, people may assume that apps are sharing their private information, which can cause them to lose trust in the apps. It’s important to tell people how your app gets and shares their information and to give people ways to restrict the flow of their information.
+**Help people control their information.** As an app developer, you know that the more you understand about the behavior of your users, both within your app and in other apps, the more you can improve the experience your app provides. Although most people understand the benefits of making their information available to multiple apps, they may still be surprised when things they do in one app affect experiences they have in a different app. Worse, people may assume that apps are sharing their private information, which can cause them to lose trust in the apps. It’s important to tell people how your app gets and shares their information and to give people ways to restrict the flow of their information.
 
 **Don’t let implicit feedback decrease people’s opportunities to explore.** Implicit feedback tends to reinforce people’s behavior, which can improve the user experience in the short term, but may worsen it in the long term. For example, it might seem like a good idea to give people a set of suggestions that matches all the things they’re interested in now, but doing so doesn’t encourage them to explore new things.
 
@@ -114,7 +114,7 @@ Implicit feedback is information that arises as people interact with your app’
 
 **Be prepared for changes in implicit feedback when you make changes to your app’s UI.** Even small UI changes can lead to noticeable changes in the amount and types of implicit feedback. For example, changing the location of a button can affect how people use it, even if there’s no change in the benefit they get from the button’s action. Take such changes into account when interpreting the implicit feedback you receive from interactions in your app.
 
-**Beware of confirmation bias.** Implicit feedback is constrained by what people can actually see and do in your app and other apps  -  it rarely gives you insight into new things they might like to do. Avoid relying solely on implicit feedback to inform your results.
+**Beware of confirmation bias.** Implicit feedback is constrained by what people can actually see and do in your app and other apps, it rarely gives you insight into new things they might like to do. Avoid relying solely on implicit feedback to inform your results.
 
 ## Calibration
 
@@ -160,7 +160,7 @@ There are several machine learning patterns that can help you address mistakes:
 - [Corrections](#corrections) give people a way to be successful even when your results are wrong.
 - [Attribution](#attribution) gives people insight into where suggestions come from, which can help them understand mistakes.
 - [Confidence](#confidence) helps you gauge the quality of your results, which can impact how you present them.
-- Feedback  -  both [explicit](#explicit-feedback) and [implicit](#implicit-feedback)  -  lets people tell you about mistakes that you might not be aware of.
+- Feedback, both [explicit](#explicit-feedback) and [implicit](#implicit-feedback), lets people tell you about mistakes that you might not be aware of.
 
 **Understand the significance of a mistake’s consequences.** For example, incorrect keyboard suggestions might annoy people, but suggesting a travel route that results in a missed flight is a serious inconvenience. Show empathy by providing corrective actions or tools that match the seriousness of the mistake.
 
@@ -170,7 +170,7 @@ There are several machine learning patterns that can help you address mistakes:
 
 **When possible, address mistakes without complicating the UI.** Some patterns, such as corrections and limitations, tend to integrate seamlessly with an app’s UI, whereas others, like attributions, can be harder to integrate. Balance a pattern’s effect on the UI with its potential for compounding the mistake. For example, if you update the UI with an attribution that turns out to be wrong, the effect of the original mistake is magnified.
 
-**Be especially careful to avoid mistakes in proactive features.** A proactive feature  -  like a suggestion based on people’s behaviors  -  promises valuable results without asking people to do anything to get them. However, because people don’t request a proactive feature, they often have less patience with its mistakes. Mistakes made by proactive features can also cause people to feel that they have less control.
+**Be especially careful to avoid mistakes in proactive features.** A proactive feature, like a suggestion based on people’s behaviors, promises valuable results without asking people to do anything to get them. However, because people don’t request a proactive feature, they often have less patience with its mistakes. Mistakes made by proactive features can also cause people to feel that they have less control.
 
 **As you work on reducing mistakes in one area, always consider the effect your work has on other areas and overall accuracy.** For example, optimizing an image-recognition app to improve how it recognizes dogs might result in a decreased ability to recognize cats. As your models evolve, be prepared for mistakes to evolve, too. Use what you know about people’s preferences to help you determine the areas to work on.
 
@@ -216,11 +216,11 @@ You might present multiple options to people in the following contexts:
 
 Confidence indicates the measure of certainty for a result. Not all models produce confidence values by default, so you might consider computing them if you can use them to improve the user experience of your app.
 
-Although it might seem like higher confidence produces a higher quality result  -  and therefore a better user experience  -  it doesn’t necessarily work that way. You need to verify that your confidence values correspond to the quality of your results. For example, you might review values for multiple confidence thresholds or compare values across multiple versions of your app. If you’re not sure how your confidence values correlate with the quality of your results, it’s not a good idea to convey confidence to people.
+Although it might seem like higher confidence produces a higher quality result, and therefore a better user experience, it doesn’t necessarily work that way. You need to verify that your confidence values correspond to the quality of your results. For example, you might review values for multiple confidence thresholds or compare values across multiple versions of your app. If you’re not sure how your confidence values correlate with the quality of your results, it’s not a good idea to convey confidence to people.
 
-**Know what your confidence values mean before you decide how to present them.** For example, people may forgive low-quality results from [critical or complementary](#critical-or-complementary) features  -  especially when results are accompanied by [attribution](#attribution) or other contextual information  -  but presenting low-quality results in a prominent way is likely to erode trust in your app.
+**Know what your confidence values mean before you decide how to present them.** For example, people may forgive low-quality results from [critical or complementary](#critical-or-complementary) features, especially when results are accompanied by [attribution](#attribution) or other contextual information, but presenting low-quality results in a prominent way is likely to erode trust in your app.
 
-**In general, translate confidence values into concepts that people already understand.** Simply displaying a confidence value doesn’t necessarily help people understand how it relates to a result. For example, a feature that suggests new music based on a person’s listening habits might calculate that there’s a 97% match between a new song and the songs they usually listen to. However, displaying “97% match” next to the new song as an attribution doesn’t communicate enough information to help people make a choice. In contrast, providing an attribution that clearly identifies the behavior  -  such as “Because you listen to pop music”  -  can be more actionable.
+**In general, translate confidence values into concepts that people already understand.** Simply displaying a confidence value doesn’t necessarily help people understand how it relates to a result. For example, a feature that suggests new music based on a person’s listening habits might calculate that there’s a 97% match between a new song and the songs they usually listen to. However, displaying “97% match” next to the new song as an attribution doesn’t communicate enough information to help people make a choice. In contrast, providing an attribution that clearly identifies the behavior, such as “Because you listen to pop music”, can be more actionable.
 
 **In situations where attributions aren’t helpful, consider ranking or ordering the results in a way that implies confidence levels.** If you must display confidence directly, consider expressing it in terms of semantic categories. For example, a feature that predicts travel prices might replace ranges of confidence numbers with categories like “high chance” and “low chance” to give context to the values and help people understand and compare the results.
 
@@ -253,7 +253,7 @@ To help you decide whether to include attributions in your app, consider how you
 
 ## Limitations
 
-Every feature  -  whether it’s based on machine learning or not  -  has certain limitations to what it can deliver. In general, there are two types of limitations: things a feature can’t do well and things a feature can’t do at all. When there’s a mismatch between people’s expectations about a feature and what the feature can actually accomplish, a limitation can seem like a defect.
+Every feature, whether it’s based on machine learning or not, has certain limitations to what it can deliver. In general, there are two types of limitations: things a feature can’t do well and things a feature can’t do at all. When there’s a mismatch between people’s expectations about a feature and what the feature can actually accomplish, a limitation can seem like a defect.
 
 An important part of the design process is to identify the scenarios where limitations impact the user experience and design ways to help people work with them. For example:
 

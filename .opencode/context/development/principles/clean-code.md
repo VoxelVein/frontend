@@ -135,24 +135,24 @@ async function fetchData() {
 
 ## Best Practices
 
-1. **Write self-documenting code** - Code should explain itself through clear naming and structure
-2. **Keep functions pure when possible** - Avoid side effects, return new values instead of mutating
-3. **Use consistent formatting** - Follow language-specific style guides (Prettier, ESLint, etc.)
-4. **Write tests first** - TDD helps design better APIs and catch issues early
-5. **Refactor regularly** - Improve code structure as you learn more about the domain
-6. **Comment why, not what** - Code shows what, comments explain why
-7. **Use type systems** - TypeScript, type hints, or static analysis tools
-8. **Favor composition** - Build complex behavior from simple, reusable pieces
+1. **Write self-documenting code**, Code should explain itself through clear naming and structure
+2. **Keep functions pure when possible**, Avoid side effects, return new values instead of mutating
+3. **Use consistent formatting**, Follow language-specific style guides (Prettier, ESLint, etc.)
+4. **Write tests first**, TDD helps design better APIs and catch issues early
+5. **Refactor regularly**, Improve code structure as you learn more about the domain
+6. **Comment why, not what**, Code shows what, comments explain why
+7. **Use type systems**, TypeScript, type hints, or static analysis tools
+8. **Favor composition**, Build complex behavior from simple, reusable pieces
 
 ## Anti-Patterns
 
-- ❌ **Magic numbers** - Use named constants instead of hardcoded values
-- ❌ **God objects** - Classes that do too much or know too much
-- ❌ **Premature optimization** - Optimize for readability first, performance second
-- ❌ **Clever code** - Simple and clear beats clever and complex
-- ❌ **Long parameter lists** - Use objects or configuration patterns instead
-- ❌ **Boolean flags** - Often indicate a function doing multiple things
-- ❌ **Mutable global state** - Leads to unpredictable behavior and bugs
+- ❌ **Magic numbers**, Use named constants instead of hardcoded values
+- ❌ **God objects**, Classes that do too much or know too much
+- ❌ **Premature optimization**, Optimize for readability first, performance second
+- ❌ **Clever code**, Simple and clear beats clever and complex
+- ❌ **Long parameter lists**, Use objects or configuration patterns instead
+- ❌ **Boolean flags**, Often indicate a function doing multiple things
+- ❌ **Mutable global state**, Leads to unpredictable behavior and bugs
 
 ## Language-Specific Guidelines
 

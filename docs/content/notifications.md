@@ -2,9 +2,9 @@
 
 Two inboxes, deliberately separate:
 
-* **`user_notifications`**  -  addressed to one account, shown in the navbar
+* **`user_notifications`**, addressed to one account, shown in the navbar
   bell.
-* **`admin_notifications`**  -  a shared inbox every admin reads, rendered by
+* **`admin_notifications`**, a shared inbox every admin reads, rendered by
   the admin panel's Notifications tab.
 
 A member is told when a moderator reviews one of their projects, and when a
@@ -37,7 +37,7 @@ one.
 ## Why the panel does not claim an empty inbox while loading
 
 The list loads on open, so there is a window where the panel has no data. The
-earlier version rendered "Nothing here yet" throughout it  -  so opening the
+earlier version rendered "Nothing here yet" throughout it, so opening the
 bell with twenty unread notifications told the reader they had none, for as
 long as the request took.
 
@@ -61,7 +61,7 @@ which, which is the opposite of a summary.
 **Unread as a background, not only a dot.** The dot is decoration; the
 screen-reader word is `sr-only`, because a bare dot announces nothing.
 
-## Read, and dismissed  -  two different things
+## Read, and dismissed, two different things
 
 Marking read and dismissing are separate actions on purpose.
 
@@ -92,7 +92,7 @@ nowhere is worse than no control, and the message is the whole notification.
 
 `user_notifications.project_id` is nullable for exactly this reason. It was
 `NOT NULL` before report outcomes existed, which meant the only way to notify a
-reporter was to attach the notification to some arbitrary project  -  a link to
+reporter was to attach the notification to some arbitrary project, a link to
 somewhere unrelated. Migration `0020` dropped the constraint.
 
 A row about a project still cascades with it, so a notification can never point
@@ -100,15 +100,15 @@ at something that no longer exists.
 
 ## Tests
 
-* `src/lib/__tests__/notifications.test.ts`  -  the day buckets, including that
+* `src/lib/__tests__/notifications.test.ts`, the day buckets, including that
   a future timestamp is still "today" and that 11pm read at 9am is "yesterday";
   and that the two project outcomes get different tones.
-* `src/components/__tests__/user-notifications.test.tsx`  -  the loading state
+* `src/components/__tests__/user-notifications.test.tsx`, the loading state
   never claiming an empty inbox, a load failure being distinguishable from an
   empty one, grouping, the relative timestamp, a report row having no link, and
   dismiss existing independently of mark-as-read.
 
 ## Related
 
-* [Reports](reports.md)  -  where two of these kinds come from
-* [Admin Panel](admin-panel.md)  -  the admin-side inbox
+* [Reports](reports.md), where two of these kinds come from
+* [Admin Panel](admin-panel.md), the admin-side inbox

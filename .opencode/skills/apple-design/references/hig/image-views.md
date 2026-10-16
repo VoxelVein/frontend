@@ -5,7 +5,7 @@
 > Platforms covered: iOS, iPadOS, macOS (guidance specific to tvOS, visionOS, watchOS omitted)
 > Last change on Apple's site: 2023-06-21 (Updated to include guidance for visionOS.)
 
-An image view displays a single image  -  or in some cases, an animated sequence of images  -  on a transparent or opaque background.
+An image view displays a single image, or in some cases, an animated sequence of images, on a transparent or opaque background.
 
 ---
 

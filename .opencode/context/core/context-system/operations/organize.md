@@ -20,7 +20,6 @@
 ## 8-Stage Workflow
 
 ### Stage 1: Scan
-
 **Action**: Scan category for all files and detect structure
 
 **Output**: List of files with current structure type (flat vs organized)
@@ -28,11 +27,9 @@
 ---
 
 ### Stage 2: Categorize
-
 **Action**: Categorize each file by function
 
 **Categorization Rules**:
-
 - Explains concept? → `concepts/`
 - Shows working code? → `examples/`
 - Step-by-step instructions? → `guides/`
@@ -44,30 +41,28 @@
 ---
 
 ### Stage 3: Resolve Conflicts (APPROVAL REQUIRED)
-
 **Action**: Present categorization plan and handle conflicts
 
 **Format**:
-
 ```
 Organizing {category}/ (23 files, flat structure)
 
 Clear categorization (18 files):
   concepts/ (8):
     ✓ authentication.md → concepts/authentication.md
-
+  
   examples/ (5):
     ✓ jwt-example.md → examples/jwt-example.md
 
 Ambiguous files (5 - need your input):
-
+  
   [?] api-design.md (contains concepts AND steps)
       → [A] Split: concepts/api-design.md + guides/api-design-guide.md
       → [B] Keep as concepts/api-design.md
       → [C] Keep as guides/api-design.md
 
 Conflicts (2):
-
+  
   [!] authentication.md → concepts/auth.md
       Target already exists (120 lines)
       → [J] Merge into existing
@@ -82,11 +77,9 @@ Select resolutions (A J or 'auto'):
 ---
 
 ### Stage 4: Preview (APPROVAL REQUIRED)
-
 **Action**: Show preview of all changes
 
 **Format**:
-
 ```
 Preview changes:
 
@@ -121,7 +114,6 @@ Dry-run? (yes/no/show-diff):
 ---
 
 ### Stage 5: Backup
-
 **Action**: Create backup before making changes
 
 **Location**: `.tmp/backup/organize-{category}-{timestamp}/`
@@ -131,11 +123,9 @@ Dry-run? (yes/no/show-diff):
 ---
 
 ### Stage 6: Execute
-
 **Action**: Perform the reorganization
 
 **Process**:
-
 1. Create function folders
 2. Move files to correct locations
 3. Split ambiguous files if requested
@@ -144,11 +134,9 @@ Dry-run? (yes/no/show-diff):
 ---
 
 ### Stage 7: Update
-
 **Action**: Update navigation and fix references
 
 **Process**:
-
 1. Update README.md with navigation tables
 2. Fix all internal references to moved files
 3. Validate all links work
@@ -157,11 +145,9 @@ Dry-run? (yes/no/show-diff):
 ---
 
 ### Stage 8: Report
-
 **Action**: Show comprehensive results
 
 **Format**:
-
 ```
 ✅ Organized X files into function folders
 📁 Created Y new folders
@@ -177,29 +163,23 @@ Rollback available if needed.
 ## Conflict Resolution
 
 ### Ambiguous Files
-
 File fits multiple categories (e.g., has concepts AND steps)
 
 **Options**:
-
 - Split into multiple files (recommended)
 - Keep in primary category
 - User decides which is primary
 
 ### Duplicate Targets
-
 Target file already exists
 
 **Options**:
-
 - Merge content into existing file
 - Rename to avoid conflict (e.g., -v2)
 - Skip (keep in flat structure)
 
 ### Auto-Resolution
-
 Agent suggests best option based on:
-
 - File size
 - Content analysis
 - Existing structure
@@ -209,19 +189,16 @@ Agent suggests best option based on:
 ## Examples
 
 ### Organize Flat Directory
-
 ```bash
 /context organize development/
 ```
 
 ### Dry-Run First
-
 ```bash
 /context organize development/ --dry-run
 ```
 
 ### Organize Multiple
-
 ```bash
 /context organize development/
 /context organize core/

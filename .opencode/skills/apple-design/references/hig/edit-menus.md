@@ -30,7 +30,7 @@ Editing content is rare in tvOS and watchOS experiences, so the system doesn’t
 
 **List custom commands near relevant system-provided ones.** For example, if you offer custom formatting commands, you can help maintain the ordering people expect by listing them after the system-provided commands in the format section. Avoid overwhelming people with too many custom commands.
 
-**When it makes sense, let people select and copy noneditable text.** People appreciate being able to paste static content  -  such as an image caption or social media status  -  into a message, note, or web search. In general, let people copy content text, but not control labels.
+**When it makes sense, let people select and copy noneditable text.** People appreciate being able to paste static content, such as an image caption or social media status, into a message, note, or web search. In general, let people copy content text, but not control labels.
 
 **Support undo and redo when possible.** Like all menus, an edit menu doesn’t require confirmation before performing its actions, so people can easily use undo and redo to recover a previous state. For guidance, see [Undo and redo](undo-and-redo.md).
 

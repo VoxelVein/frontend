@@ -91,16 +91,16 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
 
 **Create**:
 
-- `.opencode/agents/data/data-analyst.md` - Main agent definition with frontmatter and prompt
-- `evals/agents/data/data-analyst/config/eval-config.yaml` - Eval configuration
-- `evals/agents/data/data-analyst/tests/smoke-test.yaml` - Basic smoke test
-- `evals/agents/data/data-analyst/tests/data-analysis-test.yaml` - Data analysis capability test
-- `evals/agents/data/data-analyst/README.md` - Agent documentation
+- `.opencode/agents/data/data-analyst.md`, Main agent definition with frontmatter and prompt
+- `evals/agents/data/data-analyst/config/eval-config.yaml`, Eval configuration
+- `evals/agents/data/data-analyst/tests/smoke-test.yaml`, Basic smoke test
+- `evals/agents/data/data-analyst/tests/data-analysis-test.yaml`, Data analysis capability test
+- `evals/agents/data/data-analyst/README.md`, Agent documentation
 
 **Modify**:
 
-- `registry.json` - Add data-analyst agent entry
-- `.opencode/context/navigation.md` - Add data category context if needed
+- `registry.json`, Add data-analyst agent entry
+- `.opencode/context/navigation.md`, Add data category context if needed
 
 ## Success Criteria
 
@@ -117,13 +117,13 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
 
 **Scripts to Run**:
 
-- `./scripts/registry/validate-registry.sh` - Validates registry.json schema and entries
-- `./scripts/validation/validate-test-suites.sh` - Validates eval test structure
+- `./scripts/registry/validate-registry.sh`, Validates registry.json schema and entries
+- `./scripts/validation/validate-test-suites.sh`, Validates eval test structure
 
 **Tests to Run**:
 
-- `cd evals/framework && npm run eval:sdk -- --agent=data/data-analyst --pattern="smoke-test.yaml"` - Run smoke test
-- `cd evals/framework && npm run eval:sdk -- --agent=data/data-analyst` - Run all tests
+- `cd evals/framework && npm run eval:sdk -- --agent=data/data-analyst --pattern="smoke-test.yaml"`, Run smoke test
+- `cd evals/framework && npm run eval:sdk -- --agent=data/data-analyst`, Run all tests
 
 **Manual Checks**:
 
@@ -180,38 +180,38 @@ Create a new data analyst agent for the OpenAgents Control repository. This agen
 **Approach**:
 
 1. **Load Context**: Read all context files listed above to understand:
-   - How agents are structured (core-concepts/agents.md)
-   - How to add an agent (guides/adding-agent-basics.md)
-   - Code standards (standards/code-quality.md)
-   - Testing requirements (core-concepts/evals.md)
+  —How agents are structured (core-concepts/agents.md)
+  —How to add an agent (guides/adding-agent-basics.md)
+  —Code standards (standards/code-quality.md)
+  —Testing requirements (core-concepts/evals.md)
 
 2. **Create Agent File**:
-   - Create `.opencode/agents/data/data-analyst.md`
-   - Add frontmatter with all required metadata
-   - Write agent prompt with:
-     - Context section (system, domain, task, execution context)
-     - Role definition
-     - Task description
-     - Instructions and workflow
-     - Tools and capabilities
-     - Examples if helpful
+  —Create `.opencode/agents/data/data-analyst.md`
+  —Add frontmatter with all required metadata
+  —Write agent prompt with:
+    —Context section (system, domain, task, execution context)
+    —Role definition
+    —Task description
+    —Instructions and workflow
+    —Tools and capabilities
+    —Examples if helpful
 
 3. **Create Eval Structure**:
-   - Create directory: `evals/agents/data/data-analyst/`
-   - Create config: `config/eval-config.yaml`
-   - Create tests directory: `tests/`
-   - Create smoke test: `tests/smoke-test.yaml`
-   - Create capability test: `tests/data-analysis-test.yaml`
-   - Create README: `README.md`
+  —Create directory: `evals/agents/data/data-analyst/`
+  —Create config: `config/eval-config.yaml`
+  —Create tests directory: `tests/`
+  —Create smoke test: `tests/smoke-test.yaml`
+  —Create capability test: `tests/data-analysis-test.yaml`
+  —Create README: `README.md`
 
 4. **Update Registry**:
-   - Add entry to `registry.json` following schema
-   - Include: id, name, description, category, type, path, version, tags
+  —Add entry to `registry.json` following schema
+  —Include: id, name, description, category, type, path, version, tags
 
 5. **Validate**:
-   - Run validation scripts
-   - Run eval tests
-   - Fix any issues
+  —Run validation scripts
+  —Run eval tests
+  —Fix any issues
 
 **Constraints**:
 

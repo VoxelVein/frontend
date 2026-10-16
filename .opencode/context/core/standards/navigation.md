@@ -9,7 +9,7 @@
 ## Files
 
 | File | Topic | Priority | Load When |
-| --- | --- | --- | --- |
+|------|-------|----------|-----------|
 | `code-quality.md` | Code quality rules | ⭐⭐⭐⭐⭐ | Writing/reviewing code |
 | `test-coverage.md` | Testing standards | ⭐⭐⭐⭐⭐ | Writing tests |
 | `documentation.md` | Documentation rules | ⭐⭐⭐⭐ | Writing docs |
@@ -26,42 +26,34 @@
 ## Loading Strategy
 
 **For code implementation**:
-
 1. Load `code-quality.md` (critical)
 2. Load `security-patterns.md` (high)
 
 **For TypeScript code**:
-
 1. Load `typescript.md` (critical)
 2. Load `code-quality.md` (high)
 
 **For C# / .NET code**:
-
 1. Load `csharp.md` (critical)
 2. Load `code-quality.md` (high)
 
 **For C# API project structure**:
-
 1. Load `csharp-project-structure.md` (critical)
 2. Load `csharp.md` (high)
 
 **For testing**:
-
 1. Load `test-coverage.md` (critical)
 2. Depends on: `code-quality.md`
 
 **For documentation**:
-
 1. Load `documentation.md` (critical)
 
 **For code review**:
-
 1. Load `code-quality.md` (critical)
 2. Load `security-patterns.md` (high)
 3. Load `test-coverage.md` (high)
 
 **For project onboarding/understanding**:
-
 1. Load `project-intelligence.md` (high)
 2. Then load: `../../project-intelligence/` folder for full project context
 

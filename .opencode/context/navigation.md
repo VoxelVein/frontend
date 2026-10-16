@@ -39,4 +39,4 @@
 
 ## By Category
 
-**core/** - Standards, workflows, patterns → `core/navigation.md` **openagents-repo/** - Repository-specific → `openagents-repo/navigation.md` **development/** - All development → `development/navigation.md` **ui/** - Design & UX → `ui/navigation.md` **content-creation/** - Content creation (all formats) → `content-creation/navigation.md` **data/** - Data engineering → `data/navigation.md` **product/** - Product management → `product/navigation.md` **learning/** - Educational → `learning/navigation.md`
+**core/**, Standards, workflows, patterns → `core/navigation.md` **openagents-repo/**, Repository-specific → `openagents-repo/navigation.md` **development/**, All development → `development/navigation.md` **ui/**, Design & UX → `ui/navigation.md` **content-creation/**, Content creation (all formats) → `content-creation/navigation.md` **data/**, Data engineering → `data/navigation.md` **product/**, Product management → `product/navigation.md` **learning/**, Educational → `learning/navigation.md`

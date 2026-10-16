@@ -14,8 +14,8 @@ on the admin panel's **Reports** tab, which a moderator works through.
 
 It is a plain button rather than something buried in a menu: a member who
 can see something wrong should not have to go looking for the control.
-On your own project or profile it renders an explanation instead  -  "This
-is your project."  -  rather than nothing, because a control that is
+On your own project or profile it renders an explanation instead, "This
+is your project.", rather than nothing, because a control that is
 silently absent is worse than one that says why.
 
 The dialog states that nothing happens to the target automatically. That
@@ -74,11 +74,11 @@ anything enforced only in the UI is enforced by nothing at all.
 
 1. **Signed in.** Deliberately weaker than `requireUploader`: reporting is
    a safety valve, and gating it behind a verified email would mean the
-   people most likely to need it  -  a banned or unverified account  -  could
+   people most likely to need it, a banned or unverified account, could
    not use it.
 2. **Not yourself.** Checked against the *resolved* id, so neither a
    differently-cased handle nor a rename slips past it.
-3. **Rate limit.** `RATE_LIMITS.report`  -  5 per hour, per account, keyed
+3. **Rate limit.** `RATE_LIMITS.report`, 5 per hour, per account, keyed
    on the user id so a shared NAT does not throttle everyone behind it
    and reconnecting cannot buy more reports. This is the tightest bucket
    on the site and the only one measured in hours: a report is a queue a
@@ -91,7 +91,7 @@ anything enforced only in the UI is enforced by nothing at all.
    duplication, so someone who disagrees with a decision cannot refile
    every few minutes and fill the queue with identical rows. Checked
    rather than enforced by a unique index, because the constraint only
-   applies while a report is **open**  -  a resolved report must not block
+   applies while a report is **open**, a resolved report must not block
    reporting the same thing again later.
 
 ## The queue
@@ -121,7 +121,7 @@ worth anything.
 That notification has no project attached, and so no link. A report is about a
 project or an account, and the reporter's own project would be an unrelated
 thing to send them to; the row is read in place. That is why
-`user_notifications.project_id` became nullable in `0020`  -  it was `NOT NULL`
+`user_notifications.project_id` became nullable in `0020`, it was `NOT NULL`
 before, which meant the only way to notify a reporter at all was to attach the
 notification to some arbitrary project.
 
@@ -132,19 +132,19 @@ notification to some arbitrary project.
 
 ## Tests
 
-* `src/lib/__tests__/reports.test.ts`  -  the target rules, the closed
+* `src/lib/__tests__/reports.test.ts`, the target rules, the closed
   reason list, the length cap at and past its boundary, and the narrowing
   of stored columns.
-* `src/components/__tests__/report-dialog.test.tsx`  -  both target kinds,
+* `src/components/__tests__/report-dialog.test.tsx`, both target kinds,
   the reason requirement, optional details, and an inline failure that
   keeps the dialog open.
-* `src/components/__tests__/admin-reports.test.tsx`  -  the reporter and
+* `src/components/__tests__/admin-reports.test.tsx`, the reporter and
   target being visible, a report whose people are deleted still listing,
   and the two resolutions staying distinguishable.
 
 ## Related
 
-* [Notifications](notifications.md)  -  where a report outcome is announced
-* [Admin Panel](admin-panel.md)  -  the tab and the capability
+* [Notifications](notifications.md), where a report outcome is announced
+* [Admin Panel](admin-panel.md), the tab and the capability
 * [Projects](projects.md)
 * [Hardening](../security/hardening.md#rate-limits)

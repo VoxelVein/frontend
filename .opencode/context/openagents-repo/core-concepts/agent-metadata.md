@@ -3,7 +3,7 @@
 # Core Concept: Agent Metadata System
 
 **Purpose**: Understanding the centralized metadata system for OpenAgents Control  
-**Priority**: CRITICAL - Load this before working with agent metadata
+**Priority**: CRITICAL, Load this before working with agent metadata
 
 ---
 
@@ -96,19 +96,19 @@ Based on [OpenCode documentation](https://opencode.ai/docs/agents/), these are t
 
 ### Required Fields
 
-- `description` - When to use this agent (required)
-- `mode` - Agent type: `primary`, `subagent`, or `all` (defaults to `all`)
+- `description`, When to use this agent (required)
+- `mode`, Agent type: `primary`, `subagent`, or `all` (defaults to `all`)
 
 ### Optional Fields
 
-- `model` - Model override (e.g., `anthropic/claude-sonnet-4-20250514`)
-- `temperature` - Response randomness (0.0-1.0)
-- `maxSteps` - Max agentic iterations
-- `disable` - Set to `true` to disable agent
-- `prompt` - Custom prompt file path (e.g., `{file:./prompts/build.txt}`)
-- `hidden` - Hide from @ autocomplete (subagents only)
-- `tools` - Tool access configuration
-- `permission` - Permission rules for tools (v1.1.1+, replaces deprecated `permissions`)
+- `model`, Model override (e.g., `anthropic/claude-sonnet-4-20250514`)
+- `temperature`, Response randomness (0.0-1.0)
+- `maxSteps`, Max agentic iterations
+- `disable`, Set to `true` to disable agent
+- `prompt`, Custom prompt file path (e.g., `{file:./prompts/build.txt}`)
+- `hidden`, Hide from @ autocomplete (subagents only)
+- `tools`, Tool access configuration
+- `permission`, Permission rules for tools (v1.1.1+, replaces deprecated `permissions`)
 
 ### Example Valid Frontmatter
 
@@ -249,10 +249,10 @@ The auto-detect script:
 
 The auto-detect script (`scripts/registry/auto-detect-components.sh`) has been enhanced to:
 
-1. **Extract frontmatter** - Read description from agent file
-2. **Lookup metadata** - Check `agent-metadata.json` for agent ID
-3. **Merge data** - Combine frontmatter + metadata
-4. **Update registry** - Write complete entry to registry.json
+1. **Extract frontmatter**, Read description from agent file
+2. **Lookup metadata**, Check `agent-metadata.json` for agent ID
+3. **Merge data**, Combine frontmatter + metadata
+4. **Update registry**, Write complete entry to registry.json
 
 **Code snippet** (from auto-detect script):
 
@@ -520,7 +520,7 @@ jq 'del(.components.agents[] | select(.id == "agent-id"))' registry.json > tmp.j
 **Solution**: Remove invalid fields from agent frontmatter, add to metadata file
 
 ```bash
-# 1. Edit agent file - remove id, name, category, type, version, author, tags, dependencies
+# 1. Edit agent file—remove id, name, category, type, version, author, tags, dependencies
 vim .opencode/agents/category/agent.md
 
 # 2. Add to metadata file

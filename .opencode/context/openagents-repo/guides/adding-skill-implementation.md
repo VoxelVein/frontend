@@ -165,7 +165,7 @@ npx ts-node .opencode/skills/{skill-name}/scripts/skill-cli.ts help
 
 ## Related
 
-- `adding-skill-basics.md` - Directory and SKILL.md setup
-- `adding-skill-example.md` - Complete example
-- `creating-skills.md` - Claude Code Skills
-- `plugins/context/capabilities/events_skills.md` - Skills Plugin
+- `adding-skill-basics.md`, Directory and SKILL.md setup
+- `adding-skill-example.md`, Complete example
+- `creating-skills.md`, Claude Code Skills
+- `plugins/context/capabilities/events_skills.md`, Skills Plugin

@@ -8,7 +8,7 @@
 
 ```
 .opencode/context/project-intelligence/
-├── navigation.md              # This file - quick overview
+├── navigation.md              # This file—quick overview
 ├── business-domain.md         # Business context and problem statement
 ├── technical-domain.md        # Stack, architecture, technical decisions
 ├── business-tech-bridge.md    # How business needs map to solutions

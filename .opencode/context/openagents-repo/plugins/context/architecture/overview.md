@@ -2,18 +2,18 @@
 
 # OpenCode Plugins Overview
 
-OpenCode plugins are JavaScript or TypeScript modules that hook into **25+ events** across the entire OpenCode lifecycle - from when you type a prompt, to when tools execute, to when sessions complete.
+OpenCode plugins are JavaScript or TypeScript modules that hook into **25+ events** across the entire OpenCode lifecycle, from when you type a prompt, to when tools execute, to when sessions complete.
 
 ## Key Concepts
 
 - **Zero-Config**: No build step or compilation required. Just drop `.ts` or `.js` files into the plugin folder.
 - **Middleware Pattern**: Plugins subscribe to events and execute logic, similar to Express.js middleware.
 - **Access**: Plugins receive a `context` object with:
-  - `project`: Current project metadata.
-  - `client`: OpenCode SDK client for programmatic control.
-  - `$`: Bun's shell API for running commands.
-  - `directory`: Current working directory.
-  - `worktree`: Git worktree path.
+ —`project`: Current project metadata.
+ —`client`: OpenCode SDK client for programmatic control.
+ —`$`: Bun's shell API for running commands.
+ —`directory`: Current working directory.
+ —`worktree`: Git worktree path.
 
 ## Plugin Registration
 

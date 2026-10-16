@@ -47,12 +47,12 @@ _Repeat this for each component in the Master Plan:_
 
 1.  **Select Component**: Pick the next unblocked component.
 2.  **Draft Component Plan**: Create `component-{name}.md`.
-    - Define the _exact_ interface/types first.
-    - List the atomic implementation steps.
+   —Define the _exact_ interface/types first.
+   —List the atomic implementation steps.
 3.  **Approve**: Show the detailed component plan to the user.
 4.  **Execute**:
-    - Load `component-{name}.md` into `TodoWrite`.
-    - Implement -> Validate -> Check off.
+   —Load `component-{name}.md` into `TodoWrite`.
+   —Implement -> Validate -> Check off.
 5.  **Integrate**: Update `master-plan.md` to mark component as complete.
 
 ---

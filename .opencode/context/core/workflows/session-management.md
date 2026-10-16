@@ -4,7 +4,7 @@
 
 ## Quick Reference
 
-**Key Principle**: Lazy initialization - only create when needed
+**Key Principle**: Lazy initialization, only create when needed
 
 **Session ID**: `{timestamp}-{random-4-chars}` (e.g., `20250118-143022-a4f2`)
 
@@ -42,9 +42,9 @@
 
 ## Session Isolation
 
-**Each session has unique ID - prevents concurrent agent conflicts**
+**Each session has unique ID, prevents concurrent agent conflicts**
 
-✅ Multiple agent instances can run simultaneously ✅ No file conflicts between sessions ✅ Each session tracks only its own files ✅ Safe cleanup - only deletes own session folder
+✅ Multiple agent instances can run simultaneously ✅ No file conflicts between sessions ✅ Each session tracks only its own files ✅ Safe cleanup, only deletes own session folder
 
 ## Manifest Structure
 

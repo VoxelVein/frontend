@@ -1,7 +1,7 @@
 # Core Concept: Agents
 
 **Purpose**: Understanding how agents work in OpenAgents Control  
-**Priority**: CRITICAL - Load this before working with agents
+**Priority**: CRITICAL, Load this before working with agents
 
 ---
 
@@ -11,8 +11,8 @@ Agents are AI prompt files that define specialized behaviors for different tasks
 
 - **Markdown files** with frontmatter metadata
 - **Category-organized** by domain (core, development, content, etc.)
-- **Context-aware** - load relevant context files
-- **Testable** - validated through eval framework
+- **Context-aware**, load relevant context files
+- **Testable**, validated through eval framework
 
 ---
 
@@ -31,23 +31,23 @@ dependencies: ["subagent:tester"]
 
 # Agent Name
 
-[Agent prompt content - instructions, workflows, constraints]
+[Agent prompt content—instructions, workflows, constraints]
 ```
 
 ### Key Components
 
 1. **Frontmatter** (YAML metadata)
-   - `description`: Brief description
-   - `category`: Category name (core, development, content, etc.)
-   - `type`: Always "agent"
-   - `tags`: Optional tags for discovery
-   - `dependencies`: Optional dependencies (e.g., subagents)
+  —`description`: Brief description
+  —`category`: Category name (core, development, content, etc.)
+  —`type`: Always "agent"
+  —`tags`: Optional tags for discovery
+  —`dependencies`: Optional dependencies (e.g., subagents)
 
 2. **Prompt Content**
-   - Instructions and workflows
-   - Constraints and rules
-   - Context loading requirements
-   - Tool usage patterns
+  —Instructions and workflows
+  —Constraints and rules
+  —Context loading requirements
+  —Tool usage patterns
 
 ---
 
@@ -61,9 +61,9 @@ Agents are organized by domain expertise:
 
 Agents:
 
-- `openagent.md` - General-purpose orchestrator
-- `opencoder.md` - Development specialist
-- `system-builder.md` - System generation
+- `openagent.md`, General-purpose orchestrator
+- `opencoder.md`, Development specialist
+- `system-builder.md`, System generation
 
 **When to use**: System-level tasks, orchestration
 
@@ -75,8 +75,8 @@ Agents:
 
 Agents:
 
-- `frontend-specialist.md` - React, Vue, modern CSS
-- `devops-specialist.md` - CI/CD, deployment, infrastructure
+- `frontend-specialist.md`, React, Vue, modern CSS
+- `devops-specialist.md`, CI/CD, deployment, infrastructure
 
 **When to use**: Building applications, dev tasks
 
@@ -88,8 +88,8 @@ Agents:
 
 Agents:
 
-- `copywriter.md` - Marketing copy, persuasive writing
-- `technical-writer.md` - Documentation, technical content
+- `copywriter.md`, Marketing copy, persuasive writing
+- `technical-writer.md`, Documentation, technical content
 
 **When to use**: Writing, documentation, marketing
 
@@ -101,7 +101,7 @@ Agents:
 
 Agents:
 
-- `data-analyst.md` - Data analysis, visualization
+- `data-analyst.md`, Data analysis, visualization
 
 **When to use**: Data tasks, analysis, reporting
 
@@ -135,25 +135,25 @@ Agents:
 
 ### Subagent Categories
 
-1. **code/** - Code-related specialists
-   - `tester.md` - Test authoring and TDD
-   - `reviewer.md` - Code review and security
-   - `coder-agent.md` - Focused implementations
-   - `build-agent.md` - Type checking and builds
+1. **code/**, Code-related specialists
+  —`tester.md`, Test authoring and TDD
+  —`reviewer.md`, Code review and security
+  —`coder-agent.md`, Focused implementations
+  —`build-agent.md`, Type checking and builds
 
-2. **core/** - Core workflow specialists
-   - `task-manager.md` - Task breakdown and management
-   - `documentation.md` - Documentation generation
+2. **core/**, Core workflow specialists
+  —`task-manager.md`, Task breakdown and management
+  —`documentation.md`, Documentation generation
 
-3. **system-builder/** - System generation specialists
-   - `agent-generator.md` - Generate agent files
-   - `command-creator.md` - Create slash commands
-   - `domain-analyzer.md` - Analyze domains
-   - `context-organizer.md` - Organize context
-   - `workflow-designer.md` - Design workflows
+3. **system-builder/**, System generation specialists
+  —`agent-generator.md`, Generate agent files
+  —`command-creator.md`, Create slash commands
+  —`domain-analyzer.md`, Analyze domains
+  —`context-organizer.md`, Organize context
+  —`workflow-designer.md`, Design workflows
 
-4. **utils/** - Utility specialists
-   - `image-specialist.md` - Image editing and analysis
+4. **utils/**, Utility specialists
+  —`image-specialist.md`, Image editing and analysis
 
 ### Subagents vs Category Agents
 
@@ -216,10 +216,10 @@ The system supports multiple path formats for backward compatibility:
 
 ### Supported Models
 
-- `gemini.md` - Google Gemini optimizations
-- `grok.md` - xAI Grok optimizations
-- `llama.md` - Meta Llama optimizations
-- `openrouter.md` - OpenRouter optimizations
+- `gemini.md`, Google Gemini optimizations
+- `grok.md`, xAI Grok optimizations
+- `llama.md`, Meta Llama optimizations
+- `openrouter.md`, OpenRouter optimizations
 
 ### When to Create Variants
 
@@ -306,11 +306,11 @@ cd evals/framework && npm run eval:sdk -- --agent={category}/{agent-name}
 
 ### Agent Design
 
-✅ **Single responsibility** - One domain, one agent  
-✅ **Clear instructions** - Explicit workflows and constraints  
-✅ **Context-aware** - Load relevant context files  
-✅ **Testable** - Include eval tests  
-✅ **Well-documented** - Clear description and usage
+✅ **Single responsibility**, One domain, one agent  
+✅ **Clear instructions**, Explicit workflows and constraints  
+✅ **Context-aware**, Load relevant context files  
+✅ **Testable**, Include eval tests  
+✅ **Well-documented**, Clear description and usage
 
 ### Naming Conventions
 
@@ -322,11 +322,11 @@ cd evals/framework && npm run eval:sdk -- --agent={category}/{agent-name}
 
 ```yaml
 ---
-description: "Required - brief description"
-category: "Required - category name"
-type: "Required - always 'agent'"
-tags: ["Optional - for discovery"]
-dependencies: ["Optional - e.g., 'subagent:tester'"]
+description: "Required—brief description"
+category: "Required—category name"
+type: "Required—always 'agent'"
+tags: ["Optional—for discovery"]
+dependencies: ["Optional—e.g., 'subagent:tester'"]
 ---
 ```
 

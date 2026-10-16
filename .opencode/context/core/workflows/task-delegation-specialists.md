@@ -6,7 +6,7 @@
 
 ---
 
-## OpenFrontendSpecialist - UI/UX Design
+## OpenFrontendSpecialist, UI/UX Design
 
 **✅ DELEGATE when:**
 
@@ -40,7 +40,7 @@ task(
 
 ---
 
-## TestEngineer - Test Authoring
+## TestEngineer, Test Authoring
 
 **✅ DELEGATE when:**
 
@@ -65,7 +65,7 @@ task(
 
 ---
 
-## CodeReviewer - Quality Assurance
+## CodeReviewer, Quality Assurance
 
 **✅ DELEGATE when:**
 
@@ -90,7 +90,7 @@ task(
 
 ---
 
-## CoderAgent - Focused Implementation
+## CoderAgent, Focused Implementation
 
 **✅ DELEGATE when:**
 
@@ -134,6 +134,6 @@ task(
 
 ## Related
 
-- `task-delegation-basics.md` - Core delegation workflow
-- `task-delegation-caching.md` - Context caching
-- `design-iteration-overview.md` - OpenFrontendSpecialist workflow
+- `task-delegation-basics.md`, Core delegation workflow
+- `task-delegation-caching.md`, Context caching
+- `design-iteration-overview.md`, OpenFrontendSpecialist workflow

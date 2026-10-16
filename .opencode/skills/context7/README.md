@@ -4,7 +4,7 @@
 
 Fetches **live, version-specific documentation** for external libraries and frameworks using the Context7 API. Ensures you always get current API patterns instead of potentially outdated training data.
 
-**Golden Rule**: Always fetch live docs for external libraries - training data may be outdated.
+**Golden Rule**: Always fetch live docs for external libraries, training data may be outdated.
 
 ## Quick Start
 
@@ -80,9 +80,9 @@ User receives current, actionable docs
 
 ## Files
 
-- **`SKILL.md`** - Context7 API documentation and usage
-- **`library-registry.md`** - Supported libraries, aliases, and query patterns
-- **`README.md`** - This file (overview and quick start)
+- **`SKILL.md`**, Context7 API documentation and usage
+- **`library-registry.md`**, Supported libraries, aliases, and query patterns
+- **`README.md`**, This file (overview and quick start)
 
 ## Adding New Libraries
 
@@ -93,10 +93,10 @@ To add a new library to the registry:
    ```markdown
    #### Library Name
 
-   - **Aliases**: `alias1`, `alias2`, `package-name`
-   - **Docs**: https://example.com/docs
-   - **Context7**: `use context7 for library-name`
-   - **Common topics**: topic1, topic2, topic3
+  —**Aliases**: `alias1`, `alias2`, `package-name`
+  —**Docs**: https://example.com/docs
+  —**Context7**: `use context7 for library-name`
+  —**Common topics**: topic1, topic2, topic3
    ```
 3. (Optional) Add query optimization patterns
 4. ExternalScout will automatically detect the new library

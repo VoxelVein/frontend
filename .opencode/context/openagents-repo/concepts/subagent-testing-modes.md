@@ -12,8 +12,8 @@
 
 Subagents have **two distinct testing modes** depending on what you're validating:
 
-1. **Standalone Mode** - Test subagent logic directly (unit testing)
-2. **Delegation Mode** - Test parent → subagent workflow (integration testing)
+1. **Standalone Mode**, Test subagent logic directly (unit testing)
+2. **Delegation Mode**, Test parent → subagent workflow (integration testing)
 
 The mode determines which agent runs and how tools are used.
 
@@ -88,10 +88,10 @@ npm run eval:sdk -- --agent=core/openagent --pattern="delegation/*.yaml"
 **Common Mistake**:
 
 ```bash
-# ❌ WRONG - This runs OpenAgent, not ContextScout
+# ❌ WRONG—This runs OpenAgent, not ContextScout
 npm run eval:sdk -- --agent=ContextScout
 
-# ✅ CORRECT - This runs ContextScout directly
+# ✅ CORRECT—This runs ContextScout directly
 npm run eval:sdk -- --subagent=ContextScout
 ```
 
@@ -137,8 +137,8 @@ Testing agent: core/openagent
 
 ## Related
 
-- `guides/testing-subagents.md` - Step-by-step testing guide
-- `lookup/subagent-test-commands.md` - Quick command reference
-- `errors/tool-permission-errors.md` - Common testing issues
+- `guides/testing-subagents.md`, Step-by-step testing guide
+- `lookup/subagent-test-commands.md`, Quick command reference
+- `errors/tool-permission-errors.md`, Common testing issues
 
 **Reference**: `evals/framework/src/sdk/run-sdk-tests.ts` (mode forcing logic)

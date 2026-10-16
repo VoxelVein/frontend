@@ -38,7 +38,7 @@ author: community
 ### 1.1 General Rules
 
 | Element | Convention | Example |
-| --- | --- | --- |
+|---------|-----------|---------|
 | Classes, structs, records | PascalCase | `UserService`, `OrderItem` |
 | Interfaces | `I` + PascalCase | `IUserRepository`, `IOrderService` |
 | Methods | PascalCase | `GetUserById`, `ProcessOrder` |
@@ -782,8 +782,7 @@ public class OrderServiceTests
 ```
 
 **Why NSubstitute?**
-
-- ✅ Fluent, readable syntax  -  substitutes ARE the interfaces, no `.Object` indirection
+- ✅ Fluent, readable syntax — substitutes ARE the interfaces, no `.Object` indirection
 - ✅ Lower ceremony, less noise in tests
 - ✅ `Arg.Any<T>()` is cleaner than `It.IsAny<T>()`
 - ✅ `Received()` reads naturally as "verify it received this call"
@@ -891,7 +890,7 @@ public class OrdersApiTests : IClassFixture<WebApplicationFactory<Program>>
 ## Quick Reference
 
 | Topic | Key Rule |
-| --- | --- |
+|-------|---------|
 | Naming | PascalCase methods/properties, `_camelCase` fields, `I`-prefix interfaces, `Async` suffix |
 | Nullability | Enable `<Nullable>enable</Nullable>`, use `?` explicitly, guard with `ArgumentNullException.ThrowIfNull` |
 | Async | Always pass `CancellationToken`, avoid `async void`, prefer `Task.WhenAll` for parallel ops |

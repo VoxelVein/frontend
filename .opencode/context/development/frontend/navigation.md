@@ -31,7 +31,7 @@ frontend/
 
 ## By Framework
 
-**React** → `react/` - Modern React patterns, hooks, component design
+**React** → `react/`, Modern React patterns, hooks, component design
 
 ---
 

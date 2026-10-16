@@ -25,8 +25,8 @@ This category contains UI/UX patterns, design systems, and interface standards f
 
 ### Future Subcategories
 
-- **mobile/** - React Native, Flutter patterns (planned)
-- **desktop/** - Electron, Tauri patterns (planned)
+- **mobile/**, React Native, Flutter patterns (planned)
+- **desktop/**, Electron, Tauri patterns (planned)
 
 ---
 
@@ -74,9 +74,9 @@ This category covers:
 
 ## Related Categories
 
-- `development/` - General development patterns (backend, APIs, clean code)
-- `product/` - Product design and UX strategy
-- `content/` - Content design and copywriting
+- `development/`, General development patterns (backend, APIs, clean code)
+- `product/`, Product design and UX strategy
+- `content/`, Content design and copywriting
 
 ---
 

@@ -13,7 +13,7 @@ A text field is a rectangular area in which people enter or edit small, specific
 
 **Use a text field to request a small amount of information, such as a name or an email address.** To let people input larger amounts of text, use a [text view](text-views.md) instead.
 
-**Show a hint in a text field to help communicate its purpose.** A text field can contain placeholder text  -  such as “Email” or “Password”  -  when there’s no other text in the field. Because placeholder text disappears when people start typing, it can also be useful to include a separate label describing the field to remind people of its purpose.
+**Show a hint in a text field to help communicate its purpose.** A text field can contain placeholder text, such as “Email” or “Password”, when there’s no other text in the field. Because placeholder text disappears when people start typing, it can also be useful to include a separate label describing the field to remind people of its purpose.
 
 **Use secure text fields to hide private data.** Always use a secure text field when your app asks for sensitive data, such as a password. For developer guidance, see [SecureField](https://developer.apple.com/documentation/swiftui/securefield).
 

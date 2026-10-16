@@ -13,10 +13,10 @@
 | **Generate image/diagram** | This file | Image Specialist | tool:gemini |
 | **Edit existing image** | This file | Image Specialist | tool:gemini |
 | **UI mockup (static)** | This file | Image Specialist | tool:gemini |
-| **Interactive UI design** | `workflows/design-iteration-overview.md` | - | - |
-| **Design system** | `ui/web/design-systems.md` | - | - |
-| **UI standards** | `ui/web/ui-styling-standards.md` | - | - |
-| **Animation patterns** | `ui/web/animation-patterns.md` | - | - |
+| **Interactive UI design** | `workflows/design-iteration-overview.md` |—|—|
+| **Design system** | `ui/web/design-systems.md` |—|—|
+| **UI standards** | `ui/web/ui-styling-standards.md` |—|—|
+| **Animation patterns** | `ui/web/animation-patterns.md` |—|—|
 
 ---
 
@@ -26,12 +26,12 @@
 
 The **Image Specialist** subagent uses Gemini Nano Banana AI to:
 
-- ✅ **Generate images from text descriptions** - Create original images, illustrations, graphics
-- ✅ **Edit existing images** - Modify, enhance, or transform images
-- ✅ **Analyze images** - Describe image content, extract information
-- ✅ **Create diagrams** - Architecture diagrams, flowcharts, system visualizations
-- ✅ **Design mockups** - UI mockups, wireframes, design concepts
-- ✅ **Generate graphics** - Social media graphics, promotional images, icons
+- ✅ **Generate images from text descriptions**, Create original images, illustrations, graphics
+- ✅ **Edit existing images**, Modify, enhance, or transform images
+- ✅ **Analyze images**, Describe image content, extract information
+- ✅ **Create diagrams**, Architecture diagrams, flowcharts, system visualizations
+- ✅ **Design mockups**, UI mockups, wireframes, design concepts
+- ✅ **Generate graphics**, Social media graphics, promotional images, icons
 
 ### When to Delegate
 
@@ -48,12 +48,12 @@ Delegate to Image Specialist when users request:
 
 **Common Use Cases**:
 
-1. **Architecture Diagrams** - Microservices, system design, infrastructure
-2. **UI Mockups** - Dashboard designs, app interfaces, web layouts
-3. **Social Media Graphics** - Announcements, promotions, branded content
-4. **Documentation Images** - Tutorial screenshots, feature highlights, guides
-5. **Presentations** - Slide graphics, charts, visual aids
-6. **Marketing Assets** - Product images, hero graphics, banners
+1. **Architecture Diagrams**, Microservices, system design, infrastructure
+2. **UI Mockups**, Dashboard designs, app interfaces, web layouts
+3. **Social Media Graphics**, Announcements, promotions, branded content
+4. **Documentation Images**, Tutorial screenshots, feature highlights, guides
+5. **Presentations**, Slide graphics, charts, visual aids
+6. **Marketing Assets**, Product images, hero graphics, banners
 
 ### How to Invoke
 
@@ -62,16 +62,16 @@ task(
   subagent_type="Image Specialist",
   description="[Brief 3-5 word description]",
   prompt="Context to load:
-          - .opencode/context/core/visual-development.md
+         —.opencode/context/core/visual-development.md
 
           Task: [Detailed visual requirement]
 
           Requirements:
-          - Style: [Visual aesthetic - modern, minimalist, professional, etc.]
-          - Dimensions: [Width x Height or aspect ratio]
-          - Key Elements: [What must be included]
-          - Colors: [Color scheme, brand colors, palette]
-          - Format: [PNG, JPG, SVG preference]
+         —Style: [Visual aesthetic—modern, minimalist, professional, etc.]
+         —Dimensions: [Width x Height or aspect ratio]
+         —Key Elements: [What must be included]
+         —Colors: [Color scheme, brand colors, palette]
+         —Format: [PNG, JPG, SVG preference]
 
           Output: [Expected deliverable and location]"
 )
@@ -94,23 +94,23 @@ task(
   prompt="Create a technical architecture diagram showing:
 
           **Services**:
-          - API Gateway (entry point)
-          - Auth Service (authentication)
-          - User Service (user management)
-          - Order Service (order processing)
-          - Payment Service (payment processing)
-          - Notification Service (emails/SMS)
+         —API Gateway (entry point)
+         —Auth Service (authentication)
+         —User Service (user management)
+         —Order Service (order processing)
+         —Payment Service (payment processing)
+         —Notification Service (emails/SMS)
 
           **Infrastructure**:
-          - PostgreSQL databases (one per service)
-          - Redis cache (shared)
-          - RabbitMQ message queue
-          - AWS S3 (file storage)
+         —PostgreSQL databases (one per service)
+         —Redis cache (shared)
+         —RabbitMQ message queue
+         —AWS S3 (file storage)
 
           **External Services**:
-          - Stripe (payments)
-          - SendGrid (emails)
-          - Twilio (SMS)
+         —Stripe (payments)
+         —SendGrid (emails)
+         —Twilio (SMS)
 
           **Style**: Clean, professional, modern tech diagram
           **Colors**: Blue for services, green for databases, orange for external
@@ -136,22 +136,22 @@ task(
   prompt="Create a UI mockup for an analytics dashboard:
 
           **Layout**:
-          - Top: Header with logo, navigation, user menu
-          - Below header: 4 metric cards in a row
+         —Top: Header with logo, navigation, user menu
+         —Below header: 4 metric cards in a row
             * Total Users (with trend arrow)
             * Revenue (with percentage change)
             * Conversion Rate (with sparkline)
             * Active Sessions (with live indicator)
-          - Middle: Large line chart showing 30-day trends
-          - Bottom: Data table with recent transactions
+         —Middle: Large line chart showing 30-day trends
+         —Bottom: Data table with recent transactions
 
           **Style**: Modern, professional SaaS aesthetic
           **Theme**: Dark mode with subtle gradients
           **Colors**:
-            - Background: Dark gray (#1e293b)
-            - Cards: Slightly lighter (#334155)
-            - Accent: Blue (#3b82f6)
-            - Text: White/gray
+           —Background: Dark gray (#1e293b)
+           —Cards: Slightly lighter (#334155)
+           —Accent: Blue (#3b82f6)
+           —Text: White/gray
           **Typography**: Clean sans-serif (Inter-style)
           **Format**: PNG, 1440x900
 
@@ -174,20 +174,20 @@ task(
   prompt="Create a social media graphic for feature launch:
 
           **Content**:
-          - Main headline: 'Introducing Real-Time Collaboration'
-          - Subheadline: 'Work together, ship faster'
-          - Small text: 'Available now for all teams'
+         —Main headline: 'Introducing Real-Time Collaboration'
+         —Subheadline: 'Work together, ship faster'
+         —Small text: 'Available now for all teams'
 
           **Visual Elements**:
-          - Abstract illustration of people collaborating
-          - Subtle geometric shapes in background
-          - Modern, energetic feel
+         —Abstract illustration of people collaborating
+         —Subtle geometric shapes in background
+         —Modern, energetic feel
 
           **Brand Colors**:
-          - Primary: #6366f1 (indigo)
-          - Secondary: #8b5cf6 (purple)
-          - Background: White with gradient
-          - Text: Dark gray (#1e293b)
+         —Primary: #6366f1 (indigo)
+         —Secondary: #8b5cf6 (purple)
+         —Background: White with gradient
+         —Text: Dark gray (#1e293b)
 
           **Format**: PNG, 1200x630 (optimized for Twitter/LinkedIn)
           **Style**: Modern, professional, eye-catching
@@ -221,16 +221,16 @@ task(
           8. Dashboard access
 
           **Decision Points**:
-          - Email verified? (Yes → Continue, No → Resend)
-          - Plan selected? (Free → Skip payment, Paid → Payment)
-          - Payment successful? (Yes → Continue, No → Retry)
+         —Email verified? (Yes → Continue, No → Resend)
+         —Plan selected? (Free → Skip payment, Paid → Payment)
+         —Payment successful? (Yes → Continue, No → Retry)
 
           **Style**: Clean flowchart with standard symbols
           **Colors**:
-            - Start/End: Green
-            - Process: Blue
-            - Decision: Yellow
-            - Error: Red
+           —Start/End: Green
+           —Process: Blue
+           —Decision: Yellow
+           —Error: Red
           **Format**: PNG, 1600x1200
           **Layout**: Top-to-bottom flow
 
@@ -254,12 +254,12 @@ task(
 
           **Concept**: Cloud with upward arrow
           **Style**:
-            - Minimalist, clean lines
-            - Rounded corners
-            - Flat design (no gradients)
+           —Minimalist, clean lines
+           —Rounded corners
+           —Flat design (no gradients)
           **Colors**:
-            - Primary: #3b82f6 (blue)
-            - Accent: #60a5fa (lighter blue)
+           —Primary: #3b82f6 (blue)
+           —Accent: #60a5fa (lighter blue)
           **Size**: 512x512px (will be scaled down)
           **Format**: PNG with transparent background
           **Usage**: App UI, documentation, marketing
@@ -283,15 +283,15 @@ task(
   prompt="Edit the existing screenshot at docs/raw-screenshot.png:
 
           **Enhancements Needed**:
-          - Add subtle drop shadow for depth
-          - Round the corners (8px radius)
-          - Add a thin border (#e5e7eb)
-          - Increase contrast slightly
-          - Ensure text is crisp and readable
+         —Add subtle drop shadow for depth
+         —Round the corners (8px radius)
+         —Add a thin border (#e5e7eb)
+         —Increase contrast slightly
+         —Ensure text is crisp and readable
 
           **Optional**:
-          - Add subtle gradient background
-          - Highlight key UI elements with arrows/boxes
+         —Add subtle gradient background
+         —Highlight key UI elements with arrows/boxes
 
           **Output Format**: PNG, maintain original dimensions
           **Quality**: High (for documentation)
@@ -312,17 +312,17 @@ User needs visual content
 Is it interactive/responsive HTML/CSS?
     ↓
   YES → Use design-iteration-overview.md workflow
-    |    - Create HTML files
-    |    - Iterate on designs
-    |    - Production-ready code
+    |   —Create HTML files
+    |   —Iterate on designs
+    |   —Production-ready code
     ↓
   NO → Is it a static visual asset?
     ↓
   YES → Use Image Specialist
-    |    - Diagrams
-    |    - Mockups (non-interactive)
-    |    - Graphics
-    |    - Illustrations
+    |   —Diagrams
+    |   —Mockups (non-interactive)
+    |   —Graphics
+    |   —Illustrations
     ↓
   NO → Clarify requirements with user
 ```
@@ -346,7 +346,7 @@ Is it interactive/responsive HTML/CSS?
 
 ### Required Tool
 
-**tool:gemini** - Gemini Nano Banana AI
+**tool:gemini**, Gemini Nano Banana AI
 
 - Automatically included in Developer profile
 - Requires GEMINI_API_KEY environment variable

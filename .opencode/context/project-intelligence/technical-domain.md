@@ -45,9 +45,9 @@ Diagram: [Link to architecture diagram if exists]
 
 **Key Directories**:
 
-- `src/` - Contains all application logic organized by [module/feature/domain]
-- `tests/` - [How tests are organized]
-- `docs/` - [What documentation lives here]
+- `src/`, Contains all application logic organized by [module/feature/domain]
+- `tests/`—[How tests are organized]
+- `docs/`—[What documentation lives here]
 
 ## Key Technical Decisions
 
@@ -104,6 +104,6 @@ Monitoring: [Tools for observability]
 
 ## Related Files
 
-- `business-domain.md` - Why this technical foundation exists
-- `business-tech-bridge.md` - How business needs map to technical solutions
-- `decisions-log.md` - Full decision history with context
+- `business-domain.md`, Why this technical foundation exists
+- `business-tech-bridge.md`, How business needs map to technical solutions
+- `decisions-log.md`, Full decision history with context

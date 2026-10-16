@@ -2,12 +2,14 @@
 
 # Project Intelligence
 
-> **What**: Living documentation that bridges business domain and technical implementation. **Why**: Quick project understanding and onboarding for developers, agents, and stakeholders. **Where**: `.opencode/context/project-intelligence/` (dedicated folder)
+> **What**: Living documentation that bridges business domain and technical implementation.
+> **Why**: Quick project understanding and onboarding for developers, agents, and stakeholders.
+> **Where**: `.opencode/context/project-intelligence/` (dedicated folder)
 
 ## Quick Reference
 
 | What You Need | File | Description |
-| --- | --- | --- |
+|---------------|------|-------------|
 | Understand the "why" | `business-domain.md` | Problem, users, value |
 | Understand the "how" | `technical-domain.md` | Stack, architecture |
 | See the connection | `business-tech-bridge.md` | Business → technical mapping |
@@ -17,7 +19,6 @@
 ## Why This Exists
 
 Projects fail when:
-
 - Business intent is lost in code
 - Technical decisions aren't documented with context
 - New members spend weeks instead of hours understanding the project
@@ -53,13 +54,13 @@ For new team members or agents:
 
 ## How to Keep This Alive
 
-| Trigger                   | Action                           |
-| ------------------------- | -------------------------------- |
-| Business direction shifts | Update `business-domain.md`      |
-| New technical decision    | Add to `decisions-log.md`        |
-| New issues or debt        | Update `living-notes.md`         |
-| Feature launch            | Update `business-tech-bridge.md` |
-| Stack changes             | Update `technical-domain.md`     |
+| Trigger | Action |
+|---------|--------|
+| Business direction shifts | Update `business-domain.md` |
+| New technical decision | Add to `decisions-log.md` |
+| New issues or debt | Update `living-notes.md` |
+| Feature launch | Update `business-tech-bridge.md` |
+| Stack changes | Update `technical-domain.md` |
 
 **Full Management Guide**: See `.opencode/context/core/standards/project-intelligence-management.md`
 

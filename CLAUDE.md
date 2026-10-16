@@ -4,7 +4,7 @@
 
 ## Read this first
 
-Everything above this line is imported from `AGENTS.md`  -  Ultracite and
+Everything above this line is imported from `AGENTS.md`, Ultracite and
 Oxlint rules, the WCAG 2.2 AA requirements, the code standards, the
 UI/UX rules, and the tooling table.
 
@@ -19,7 +19,7 @@ it here.
 ## Where the tooling lives
 
 OpenCode and Claude Code read different directories. Nothing below is
-duplicated  -  this table says where to look and edit.
+duplicated, this table says where to look and edit.
 
 | Thing | OpenCode | Claude Code | Canonical location |
 | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ duplicated  -  this table says where to look and edit.
 | Commands | `.opencode/command/` | `.claude/commands/` | `.opencode/command/` |
 | Agents | `.opencode/agents/` | `.claude/agents/` | `.opencode/agents/` |
 | Plugins | `.opencode/plugins/` | hooks in `.claude/` | `.opencode/plugins/` |
-| Context | `.opencode/context/` | - | `.opencode/context/` |
+| Context | `.opencode/context/` | same | `.opencode/context/` |
 
 ### MCP servers
 
@@ -57,7 +57,7 @@ OpenCode-side; see the MCP table in `AGENTS.md`.
 The skills in `.opencode/skills/` are the maintained set. Claude Code does
 not read that directory. To use them here, either:
 
-* Run `/import` once to copy them into `.claude/skills/`  -  simplest, but
+* Run `/import` once to copy them into `.claude/skills/`, simplest, but
   the copies drift, so re-run it after changing a skill; or
 * Symlink it with
   `mkdir -p .claude && ln -s ../.opencode/skills .claude/skills`  -
@@ -70,7 +70,7 @@ The same applies to commands and agents.
 ## Claude Code specifics
 
 * Prefer plan mode for anything touching `src/db/schema.ts`, the auth
-  configuration, or `drizzle.config.ts`  -  those deploy on merge to
+  configuration, or `drizzle.config.ts`, those deploy on merge to
   `main` and are not reviewed after the fact.
 * The repo has a Husky pre-commit hook that runs `ultracite fix` on the
   working tree and re-stages. Expect files to be reformatted
@@ -81,5 +81,5 @@ The same applies to commands and agents.
   template checks that a changed searchable field is reachable by the
   query and covered by an index.
 * `docs/` and `CONTRIBUTING.md` describe the same workflows. When a
-  procedure changes, update both or neither  -  a doc that contradicts
+  procedure changes, update both or neither, a doc that contradicts
   `AGENTS.md` is worse than no doc.

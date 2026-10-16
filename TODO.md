@@ -5,7 +5,7 @@ for the longer-term plan.
 
 ## Before Production
 
-* [ ] Legal pages  -  real operator name and address. `/legal` still
+* [ ] Legal pages, real operator name and address. `/legal` still
       renders `Unknown` for both, which is a § 5 DDG compliance gap. The
       contact address is now `admin@vomlabs.com` everywhere.
 * [ ] Legal review by a qualified professional before production
@@ -87,10 +87,10 @@ for the longer-term plan.
 * [x] Indexes on the seven foreign keys that had none. Postgres never creates
       these, so deleting a project was scanning every notification and report
       ever filed about it. `foreign-key-indexes.test.ts` now fails on any new
-      one, in either direction  -  unindexed key, or an index left behind by a
+      one, in either direction, unindexed key, or an index left behind by a
       dropped column
 * [x] Settings tab resolution extracted to `src/lib/settings-tabs.ts` and
-      tested  -  the `tab` / legacy `passkeys` / `confirm=delete` interaction,
+      tested, the `tab` / legacy `passkeys` / `confirm=delete` interaction,
       plus the case where a tab and `confirm` disagree
 * [x] Account deletion wizard: reducer, `sessionStorage` handshake, and the
       return-from-re-authentication resume

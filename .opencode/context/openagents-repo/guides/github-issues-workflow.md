@@ -69,16 +69,16 @@ gh issue close NUMBER --repo darrenhinde/OpenAgentsControl
 
 ### Priority Labels
 
-- `priority-high` - Critical, blocking work
-- `priority-medium` - Important, not blocking
-- `priority-low` - Nice to have
+- `priority-high`, Critical, blocking work
+- `priority-medium`, Important, not blocking
+- `priority-low`, Nice to have
 
 ### Category Labels
 
-- `agents` - Agent system related
-- `framework` - Core framework changes
-- `evals` - Evaluation framework
-- `idea` - High-level proposal
+- `agents`, Agent system related
+- `framework`, Core framework changes
+- `evals`, Evaluation framework
+- `idea`, High-level proposal
 
 ### Creating an Issue
 
@@ -151,11 +151,11 @@ gh project item-list 2 --owner darrenhinde --format json | jq '.items[] | {title
 
 ### Workflow States
 
-1. **Backlog** - New issues, not yet prioritized
-2. **Todo** - Prioritized, ready to work on
-3. **In Progress** - Currently being worked on
-4. **In Review** - PR submitted, awaiting review
-5. **Done** - Completed and merged
+1. **Backlog**, New issues, not yet prioritized
+2. **Todo**, Prioritized, ready to work on
+3. **In Progress**, Currently being worked on
+4. **In Review**, PR submitted, awaiting review
+5. **Done**, Completed and merged
 
 ### Moving Issues
 
@@ -407,26 +407,26 @@ git commit -m "fix: resolve permission error (closes #140)"
 
 ### Issue Creation
 
-✅ **Clear titles** - Descriptive and specific  
-✅ **Detailed descriptions** - Include context and goals  
-✅ **Proper labels** - Use consistent labeling  
-✅ **Success criteria** - Define what "done" means  
-✅ **Link related issues** - Show dependencies
+✅ **Clear titles**, Descriptive and specific  
+✅ **Detailed descriptions**, Include context and goals  
+✅ **Proper labels**, Use consistent labeling  
+✅ **Success criteria**, Define what "done" means  
+✅ **Link related issues**, Show dependencies
 
 ### Issue Management
 
-✅ **Regular triage** - Review and prioritize weekly  
-✅ **Keep updated** - Add comments on progress  
-✅ **Close stale issues** - Clean up old/irrelevant issues  
-✅ **Use milestones** - Group related issues  
-✅ **Assign owners** - Clear responsibility
+✅ **Regular triage**, Review and prioritize weekly  
+✅ **Keep updated**, Add comments on progress  
+✅ **Close stale issues**, Clean up old/irrelevant issues  
+✅ **Use milestones**, Group related issues  
+✅ **Assign owners**, Clear responsibility
 
 ### Project Board
 
-✅ **Update status** - Keep board current  
-✅ **Limit WIP** - Don't overload "In Progress"  
-✅ **Review regularly** - Weekly board review  
-✅ **Archive completed** - Keep board clean
+✅ **Update status**, Keep board current  
+✅ **Limit WIP**, Don't overload "In Progress"  
+✅ **Review regularly**, Weekly board review  
+✅ **Archive completed**, Keep board clean
 
 ---
 

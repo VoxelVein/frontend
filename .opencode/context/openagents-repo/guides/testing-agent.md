@@ -35,10 +35,10 @@ description: Verify agent responds correctly
 agent: {category}/{agent}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Hello, can you help me?"
 expectations:
-  - type: no_violations
+ —type: no_violations
 ```
 
 **Run**:
@@ -59,10 +59,10 @@ description: Verify agent requests approval before execution
 agent: {category}/{agent}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Create a new file called test.js"
 expectations:
-  - type: specific_evaluator
+ —type: specific_evaluator
     evaluator: approval_gate
     should_pass: true
 ```
@@ -79,10 +79,10 @@ description: Verify agent loads required context
 agent: {category}/{agent}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Write a new function"
 expectations:
-  - type: context_loaded
+ —type: context_loaded
     contexts: ["core/standards/code-quality.md"]
 ```
 
@@ -98,10 +98,10 @@ description: Verify agent uses appropriate tools
 agent: {category}/{agent}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Read the package.json file"
 expectations:
-  - type: tool_usage
+ —type: tool_usage
     tools: ["read"]
     min_count: 1
 ```
@@ -224,21 +224,21 @@ description: What this test validates
 agent: {category}/{agent}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "User message"
-  - role: assistant
+ —role: assistant
     content: "Expected response (optional)"
 expectations:
-  - type: no_violations
+ —type: no_violations
 ```
 
 ### Best Practices
 
-✅ **Clear name** - Descriptive test name  
-✅ **Good description** - Explain what's being tested  
-✅ **Realistic scenario** - Test real-world usage  
-✅ **Specific expectations** - Clear pass/fail criteria  
-✅ **Fast execution** - Keep under 10 seconds
+✅ **Clear name**, Descriptive test name  
+✅ **Good description**, Explain what's being tested  
+✅ **Realistic scenario**, Test real-world usage  
+✅ **Specific expectations**, Clear pass/fail criteria  
+✅ **Fast execution**, Keep under 10 seconds
 
 ---
 
@@ -248,10 +248,10 @@ expectations:
 
 ```yaml
 conversation:
-  - role: user
+ —role: user
     content: "Create a new file"
 expectations:
-  - type: specific_evaluator
+ —type: specific_evaluator
     evaluator: approval_gate
     should_pass: true
 ```
@@ -260,10 +260,10 @@ expectations:
 
 ```yaml
 conversation:
-  - role: user
+ —role: user
     content: "Write new code"
 expectations:
-  - type: context_loaded
+ —type: context_loaded
     contexts: ["core/standards/code-quality.md"]
 ```
 
@@ -271,10 +271,10 @@ expectations:
 
 ```yaml
 conversation:
-  - role: user
+ —role: user
     content: "Read the README file"
 expectations:
-  - type: tool_usage
+ —type: tool_usage
     tools: ["read"]
     min_count: 1
 ```

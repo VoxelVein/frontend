@@ -41,9 +41,9 @@ Main Agent (OpenAgent, etc.)
   3. Call ContextScout for internal context
   ↓
   4. Call ExternalScout for external docs
-     - ExternalScout fetches from Context7 API
-     - ExternalScout persists to .tmp/external-context/
-     - ExternalScout returns file paths
+    —ExternalScout fetches from Context7 API
+    —ExternalScout persists to .tmp/external-context/
+    —ExternalScout returns file paths
   ↓
   5. Capture returned file paths
   ↓
@@ -56,9 +56,9 @@ Main Agent (OpenAgent, etc.)
 Main Agent
   ↓
   1. Show user lightweight summary:
-     - What will be done
-     - Which external libraries involved
-     - Which context files will be used
+    —What will be done
+    —Which external libraries involved
+    —Which context files will be used
   ↓
   2. Include discovered external context files in proposal
   ↓
@@ -81,17 +81,17 @@ Main Agent
   1. Create .tmp/sessions/{session-id}/context.md
   ↓
   2. Populate sections:
-     - ## Context Files (from ContextScout)
-     - ## Reference Files (project files)
-     - ## External Context Fetched (from ExternalScout)
-     - ## Components
-     - ## Constraints
-     - ## Exit Criteria
+    —## Context Files (from ContextScout)
+    —## Reference Files (project files)
+    —## External Context Fetched (from ExternalScout)
+    —## Components
+    —## Constraints
+    —## Exit Criteria
   ↓
   3. CRITICAL: Add "## External Context Fetched" section with:
-     - File paths returned by ExternalScout
-     - Brief description of each file
-     - Note that files are read-only
+    —File paths returned by ExternalScout
+    —Brief description of each file
+    —Note that files are read-only
 ```
 
 ### Stage 5: Delegate with Context Path
@@ -144,9 +144,9 @@ task(
   subagent_type="ExternalScout",
   description="Fetch external documentation",
   prompt="Fetch documentation for these libraries:
-          - Drizzle ORM: modular schema organization
-          - Better Auth: Next.js integration
-          - Next.js: App Router setup
+         —Drizzle ORM: modular schema organization
+         —Better Auth: Next.js integration
+         —Next.js: App Router setup
 
           Persist fetched docs to .tmp/external-context/
           Return file paths for each fetched document"
@@ -154,9 +154,9 @@ task(
 
 // Capture returned file paths
 // Example return:
-// - .tmp/external-context/drizzle-orm/modular-schemas.md
-// - .tmp/external-context/better-auth/nextjs-integration.md
-// - .tmp/external-context/next.js/app-router-setup.md
+//—.tmp/external-context/drizzle-orm/modular-schemas.md
+//—.tmp/external-context/better-auth/nextjs-integration.md
+//—.tmp/external-context/next.js/app-router-setup.md
 ```
 
 ### Step 2: Propose Plan with External Context
@@ -217,18 +217,18 @@ These are live documentation files fetched from external libraries. Subagents sh
 
 ### Drizzle ORM
 
-- `.tmp/external-context/drizzle-orm/modular-schemas.md`  -  Schema organization patterns for modular architecture
-- `.tmp/external-context/drizzle-orm/postgresql-setup.md`  -  PostgreSQL configuration and setup
+- `.tmp/external-context/drizzle-orm/modular-schemas.md` — Schema organization patterns for modular architecture
+- `.tmp/external-context/drizzle-orm/postgresql-setup.md` — PostgreSQL configuration and setup
 
 ### Better Auth
 
-- `.tmp/external-context/better-auth/nextjs-integration.md`  -  Integration guide for Next.js App Router
-- `.tmp/external-context/better-auth/drizzle-adapter.md`  -  Drizzle adapter setup and configuration
+- `.tmp/external-context/better-auth/nextjs-integration.md` — Integration guide for Next.js App Router
+- `.tmp/external-context/better-auth/drizzle-adapter.md` — Drizzle adapter setup and configuration
 
 ### Next.js
 
-- `.tmp/external-context/next.js/app-router-setup.md`  -  App Router basics and configuration
-- `.tmp/external-context/next.js/server-actions.md`  -  Server Actions patterns for mutations
+- `.tmp/external-context/next.js/app-router-setup.md` — App Router basics and configuration
+- `.tmp/external-context/next.js/server-actions.md` — Server Actions patterns for mutations
 
 **Important**: These files are read-only and cached for reference. Do not modify them.
 
@@ -278,9 +278,9 @@ task(
           4. Test suite
 
           For each subtask, include:
-          - context_files: Standards from context.md
-          - reference_files: Project files to understand
-          - external_context: External docs to reference
+         —context_files: Standards from context.md
+         —reference_files: Project files to understand
+         —external_context: External docs to reference
 
           Create subtask files in tasks/subtasks/drizzle-auth-integration/"
 )

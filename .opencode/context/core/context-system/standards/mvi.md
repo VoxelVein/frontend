@@ -11,7 +11,6 @@
 ## Core Idea
 
 Extract the **minimum information** needed for an AI agent to understand and use a concept:
-
 - Core concept (1-3 sentences)
 - Key points (3-5 bullets)
 - Minimal working example
@@ -62,24 +61,28 @@ Related Files (cross-refs)
 ## Example: JWT Authentication
 
 ### ❌ Too Verbose (400+ lines)
-
 ```markdown
 # JWT Authentication
 
-JSON Web Tokens (JWT) are an open standard (RFC 7519) that defines a compact and self-contained way for securely transmitting information between parties as a JSON object. This information can be verified and trusted because it is digitally signed. JWTs can be signed using a secret (with the HMAC algorithm) or a public/private key pair using RSA or ECDSA.
+JSON Web Tokens (JWT) are an open standard (RFC 7519) that defines 
+a compact and self-contained way for securely transmitting information 
+between parties as a JSON object. This information can be verified and 
+trusted because it is digitally signed. JWTs can be signed using a 
+secret (with the HMAC algorithm) or a public/private key pair using RSA 
+or ECDSA.
 
 [... 400 more lines of explanation, examples, edge cases ...]
 ```
 
 ### ✅ MVI Compliant (~50 lines)
-
-````markdown
+```markdown
 # Concept: JWT Authentication
 
-**Core Idea**: Stateless authentication using JSON Web Tokens signed with a secret key. Token contains user data (payload) that server can trust because signature is verified.
+**Core Idea**: Stateless authentication using JSON Web Tokens signed 
+with a secret key. Token contains user data (payload) that server can 
+trust because signature is verified.
 
 **Key Points**:
-
 - Token has 3 parts: header.payload.signature (Base64 encoded)
 - Server verifies signature to trust payload without database lookup
 - No session storage needed (stateless)
@@ -87,27 +90,25 @@ JSON Web Tokens (JWT) are an open standard (RFC 7519) that defines a compact and
 - Store in httpOnly cookie or Authorization header
 
 **Quick Example**:
-
 ```js
 // Sign token
-const token = jwt.sign({ userId: 123, role: "admin" }, SECRET_KEY, {
-  expiresIn: "1h",
-});
+const token = jwt.sign(
+  { userId: 123, role: 'admin' }, 
+  SECRET_KEY, 
+  { expiresIn: '1h' }
+)
 
 // Verify token
-const decoded = jwt.verify(token, SECRET_KEY);
-console.log(decoded.userId); // 123
+const decoded = jwt.verify(token, SECRET_KEY)
+console.log(decoded.userId) // 123
 ```
-````
 
 **Reference**: https://jwt.io/introduction
 
-**Related**:
-
+**Related**: 
 - examples/jwt-auth-example.md
 - guides/implementing-jwt.md
 - errors/auth-errors.md
-
 ```
 
 ---
@@ -148,4 +149,3 @@ If any answer is "no", apply more compression.
 - compact.md - How to minimize
 - templates.md - Standard formats
 - creation.md - File creation rules
-```

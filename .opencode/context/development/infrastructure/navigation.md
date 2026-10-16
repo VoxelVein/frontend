@@ -4,7 +4,7 @@
 
 **Purpose**: DevOps and deployment patterns
 
-**Status**: 🚧 Placeholder - Content coming soon
+**Status**: 🚧 Placeholder, Content coming soon
 
 ---
 

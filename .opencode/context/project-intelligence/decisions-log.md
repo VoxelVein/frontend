@@ -135,6 +135,6 @@ Decisions that were later overturned (for historical context):
 
 ## Related Files
 
-- `technical-domain.md` - Technical implementation affected by these decisions
-- `business-tech-bridge.md` - How decisions connect business and technical
-- `living-notes.md` - Current open questions that may become decisions
+- `technical-domain.md`, Technical implementation affected by these decisions
+- `business-tech-bridge.md`, How decisions connect business and technical
+- `living-notes.md`, Current open questions that may become decisions

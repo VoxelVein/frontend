@@ -42,7 +42,7 @@ disconnects as soon as it fires, so scrolling back up never re-hides
 anything.
 
 The animation is CSS, not JS, and it is a **transition** rather than
-keyframes  -  which is what the "reach for `EASE_OUT_CSS` first" rule below
+keyframes, which is what the "reach for `EASE_OUT_CSS` first" rule below
 asks for. `.reveal` in `src/styles.css` sits at `opacity: 0` and
 `translateY(16px)`; adding `.is-visible` transitions both to their resting
 place over 500 ms on the project curve.
@@ -57,9 +57,9 @@ block through props rather than through a new class per variant.
 The resting state is hidden, and that is only safe because two rules in
 `styles.css` force it visible when the observer cannot run:
 
-* `@media (prefers-reduced-motion: reduce)`  -  content shown, not moved,
+* `@media (prefers-reduced-motion: reduce)`, content shown, not moved,
   transition removed.
-* `@media (scripting: none)`  -  content shown with no JavaScript.
+* `@media (scripting: none)`, content shown with no JavaScript.
 
 An earlier version used a paused keyframe animation, which left every
 `Reveal` block **invisible without JavaScript** and invisible under reduced
@@ -80,15 +80,15 @@ ledger feel like one page rather than three.
 
 Four sections, one motion system:
 
-* `Hero`  -  keyframes, deliberately, because it is above the fold and has to
+* `Hero`, keyframes, deliberately, because it is above the fold and has to
   reach its resting state from the stylesheet alone with no JavaScript. The
   headline lands, then the call to action 90 ms behind it, so the eye reads
   the sentence before the button. Same curve as everything below it.
-* `TrendingProjects`  -  the heading reveals on its own, then the cards land in
+* `TrendingProjects`, the heading reveals on its own, then the cards land in
   sequence. One block for the whole section made five cards arrive as a slab.
-* `NewsSection`  -  the lead story leads, and the ledger entries stagger behind
+* `NewsSection`, the lead story leads, and the ledger entries stagger behind
   it.
-* `ExploreSection`  -  heading, then the category tiles.
+* `ExploreSection`, heading, then the category tiles.
 
 ## Reduced motion
 
@@ -121,11 +121,11 @@ Two traps in that library, both of which have been live here:
   select popups carried it *alongside* `data-open:animate-in`, on the same
   element. The important flag won, so both menus had an animation written on
   them that could never run and appeared instantly. A behavioural test cannot
-  catch this  -  the menu still opens, closes and traps focus  -  which is why
+  catch this, the menu still opens, closes and traps focus, which is why
   `overlay-motion.test.tsx` asserts on the class list.
 * **`ease-*` utilities write `--tw-ease`, not `transition-timing-function`.**
   That is a tw-animate override of Tailwind's own utilities, so on a keyframe
-  animation `ease-smooth` does take effect  -  just not through the property its
+  animation `ease-smooth` does take effect, just not through the property its
   name suggests.
 
 Menu items highlight on `data-highlighted` (Base UI) and transition at
@@ -150,14 +150,14 @@ Four live in `src/components/motion/`.
 `PixelReveal`
 : Drives the CSS `::view-transition-new(root)` pseudo-element from a
   `requestAnimationFrame` loop, so a view transition dissolves through a
-  grid of individually-masked pixels  -  one mask layer per cell, which CSS
+  grid of individually-masked pixels, one mask layer per cell, which CSS
   alone cannot express. `PIXEL_SWAP_PRESET` is 64 px cells over 600 ms,
   with a 250 ms per-pixel growth and a 0.35 scale. It is the only one of
   these four that runs its own animation loop rather than delegating to a
   CSS transition. Used by the theme toggle's `pixel` variant.
 
 `ThemeToggle`
-: Wraps the other three and offers four transitions  -  `rectangle`,
+: Wraps the other three and offers four transitions, `rectangle`,
   `circle`, `blinds`, and `pixel`, defaulting to `rectangle`. It injects
   one `<style>` element with the id `beui-theme-toggle-vt`, registers an
   `@property --beui-vt-slat` so the blinds mask can be animated, then sets
@@ -170,11 +170,11 @@ Four live in `src/components/motion/`.
 The project guideline is to keep UI transitions under 400 ms. Only one
 transition in this layer meets it:
 
-* `rectangle` theme transition  -  400 ms
-* `pixel` theme transition  -  600 ms
-* `circle` and `blinds` theme transitions  -  700 ms
-* `.reveal`  -  500 ms
-* `IconSwap` exit  -  200 ms
+* `rectangle` theme transition, 400 ms
+* `pixel` theme transition, 600 ms
+* `circle` and `blinds` theme transitions, 700 ms
+* `.reveal`, 500 ms
+* `IconSwap` exit, 200 ms
 
 Hover and press feedback stays at 200 ms: the explore tiles, the project
 cards, the news ledger rows and the hero button all use the same figure, so
@@ -195,7 +195,7 @@ per-frame, it must honour `usePrefersReducedMotion()`.
 
 ## Related
 
-* [Accessibility Standards](../accessibility/standards.md)  -  the WCAG 2.2
+* [Accessibility Standards](../accessibility/standards.md), the WCAG 2.2
   AA baseline these animations must not break
-* [Discovery](discovery.md)  -  where `Reveal` is used
-* [Custom Theme](../theming/custom-theme.md)  -  the tokens motion inherits
+* [Discovery](discovery.md), where `Reveal` is used
+* [Custom Theme](../theming/custom-theme.md), the tokens motion inherits

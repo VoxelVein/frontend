@@ -4,7 +4,7 @@
 
 ## Quick Reference
 
-**Golden Rule**: Review code as you'd want yours reviewed - thoroughly but kindly
+**Golden Rule**: Review code as you'd want yours reviewed, thoroughly but kindly
 
 **Checklist**: Functionality, Code Quality, Security, Testing, Performance, Maintainability
 
@@ -33,7 +33,7 @@
 - [ ] Functions small and focused
 - [ ] No unnecessary complexity
 - [ ] Follows coding standards
-- [ ] DRY - no duplication
+- [ ] DRY, no duplication
 
 ### Security
 
@@ -122,4 +122,4 @@
 
 ✅ Review within 24 hours ✅ Provide specific, actionable feedback ✅ Explain WHY, not just WHAT ✅ Suggest alternatives ✅ Acknowledge good work ✅ Use severity levels (Critical/Warning/Suggestion) ✅ Test the code if possible ✅ Check for security issues first
 
-**Golden Rule**: Review code as you'd want yours reviewed - thoroughly but kindly.
+**Golden Rule**: Review code as you'd want yours reviewed, thoroughly but kindly.

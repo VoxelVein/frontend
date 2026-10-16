@@ -21,7 +21,7 @@ it is a regression.
   keyboard (Tab, Enter, Space, Arrow keys).
 * Never trap focus. If a dialog traps focus, provide a clear escape
   (Esc to close, focus returns to the trigger).
-* Keep visible focus indicators  -  never remove `outline` without a
+* Keep visible focus indicators, never remove `outline` without a
   replacement.
 * Support `prefers-reduced-motion` by disabling or minimizing
   animations.
@@ -34,7 +34,7 @@ it is a regression.
   on disclosure buttons, `aria-current` on active nav items,
   `role="alert"` for live errors.
 * Use `aria-label` only when there is no visible text label.
-* Use `aria-live` for dynamic content updates  -  `polite` for
+* Use `aria-live` for dynamic content updates, `polite` for
   non-urgent, `assertive` for urgent.
 * Use `aria-invalid` and `aria-describedby` together for form
   validation errors.
@@ -57,17 +57,17 @@ it is a regression.
 * Text contrast must meet WCAG AA: 4.5:1 for normal text, 3:1 for
   large text (18pt or 14pt bold).
 * UI component contrast (borders, icons, focus rings): 3:1 minimum.
-* Never rely on color alone to convey meaning  -  pair color with icons,
+* Never rely on color alone to convey meaning, pair color with icons,
   text, or patterns.
 * Test both light and dark themes.
 * Use the project's OKLCH semantic tokens (`--primary`,
-  `--muted-foreground`, and so on)  -  never hardcode colors.
+  `--muted-foreground`, and so on), never hardcode colors.
 
 ## Images and media
 
 * Every `<img>` needs meaningful `alt` text. Use `alt=""` for
   decorative images.
-* Do not put critical information in images  -  use real text.
+* Do not put critical information in images, use real text.
 * Provide captions or transcripts for video and audio content.
 * Do not autoplay media with sound.
 
@@ -79,7 +79,7 @@ it is a regression.
   `matchMedia` directly, so the check stays SSR-safe, and add
   `motion-reduce:` utilities to CSS transitions.
 * Keep animations under 400ms for UI interactions.
-* Use `transform` and `opacity` for animations  -  never animate
+* Use `transform` and `opacity` for animations, never animate
   `width`, `height`, `top`, or `left`.
 * Use `EASE_OUT_CSS` from `src/lib/ease.ts` for scroll reveals and page
   transitions, not ad-hoc keyframes.
@@ -103,7 +103,7 @@ it is a regression.
   `src/components/ui/skeleton.tsx`, and mark the container
   `aria-busy="true"`.
 * Skeleton what is actually loading, not the whole page. The home page
-  keeps its hero and category grid  -  neither needs data  -  and stubs only
+  keeps its hero and category grid, neither needs data, and stubs only
   the trending and news sections.
 * Every list has an `EmptyState` with an icon, a title, a description
   that says what would fill it, and an action where one exists. Use
@@ -134,7 +134,7 @@ stylistic one. The rule:
 
 An action failure that offers **Try again** must repeat the request that
 *failed*, not whatever the form or search field holds when the button is
-clicked  -  otherwise correcting the query and retrying silently re-runs the
+clicked, otherwise correcting the query and retrying silently re-runs the
 old one. Hold the failed query in a ref for the handler to read.
 
 This replaced a shared `FormError` component that every form mounted above
@@ -142,12 +142,12 @@ its fields.
 
 ## Testing
 
-* Test with keyboard only  -  every flow must work.
+* Test with keyboard only, every flow must work.
 * Test with a screen reader (NVDA, VoiceOver, or axe DevTools).
 * Check contrast at all breakpoints and in both themes.
 * Verify heading hierarchy and landmark structure.
 * Query like a user in tests: `getByRole`, `getByLabelText`,
-  `getByText`  -  never by CSS class.
+  `getByText`, never by CSS class.
 
 ## Related
 

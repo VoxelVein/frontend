@@ -119,10 +119,10 @@ task(
   subagent_type="ExternalScout",
   description="Fetch Drizzle ORM documentation",
   prompt="Fetch current documentation for Drizzle ORM focusing on:
-          - Modular schema patterns
-          - Next.js integration
-          - Database setup
-          - Migration strategies"
+         —Modular schema patterns
+         —Next.js integration
+         —Database setup
+         —Migration strategies"
 )
 ```
 
@@ -173,18 +173,18 @@ task(
 
 1. Read: `guides/adding-agent.md`
 2. **If agent uses external packages**:
-   - Use ExternalScout to fetch docs
-   - Document dependencies in agent metadata
-   - Add to registry with correct versions
+  —Use ExternalScout to fetch docs
+  —Document dependencies in agent metadata
+  —Add to registry with correct versions
 3. Test: `guides/testing-agent.md`
 
 ### When Adding a Skill
 
 1. Read: `guides/adding-skill.md`
 2. **If skill uses external packages**:
-   - Use ExternalScout to fetch docs
-   - Document dependencies in skill metadata
-   - Add to registry with correct versions
+  —Use ExternalScout to fetch docs
+  —Document dependencies in skill metadata
+  —Add to registry with correct versions
 3. Test: `guides/testing-subagents.md`
 
 ---
@@ -221,10 +221,10 @@ Before implementing with external libraries:
 
 ## Related Guides
 
-- `guides/adding-agent.md` - Creating new agents
-- `guides/adding-skill.md` - Creating new skills
-- `guides/debugging.md` - Troubleshooting (includes dependency issues)
-- `guides/updating-registry.md` - Registry management
+- `guides/adding-agent.md`, Creating new agents
+- `guides/adding-skill.md`, Creating new skills
+- `guides/debugging.md`, Troubleshooting (includes dependency issues)
+- `guides/updating-registry.md`, Registry management
 
 ---
 
@@ -232,4 +232,4 @@ Before implementing with external libraries:
 
 > **External libraries change constantly. Your training data is outdated. Always fetch current documentation before implementing.**
 
-This is not optional - it's the difference between working code and broken code.
+This is not optional, it's the difference between working code and broken code.

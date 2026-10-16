@@ -19,28 +19,24 @@
 ## Core Principles
 
 ### 1. Token Efficiency
-
 **Goal**: 200-300 tokens per navigation file
 
 **How**:
-
 - Use ASCII trees (not verbose descriptions)
 - Use tables (not paragraphs)
 - Be concise (not comprehensive)
 
 ### 2. Scannable Structure
-
 **Goal**: AI can find what it needs in <5 seconds
 
 **Format**:
-
 1. **Structure** (ASCII tree) - See what exists
 2. **Quick Routes** (table) - Jump to common tasks
 3. **By Concern/Type** (sections) - Browse by category
 
 ### 3. Self-Contained
-
-**Include**: ✅ Paths | ✅ Brief descriptions (3-5 words) | ✅ When to use **Exclude**: ❌ File contents | ❌ Detailed explanations | ❌ Duplicates
+**Include**: ✅ Paths | ✅ Brief descriptions (3-5 words) | ✅ When to use
+**Exclude**: ❌ File contents | ❌ Detailed explanations | ❌ Duplicates
 
 ---
 
@@ -49,7 +45,7 @@
 ### 1. Determine Navigation Type
 
 | Type | Path | Purpose |
-| --- | --- | --- |
+|------|------|---------|
 | Category-level | `{category}/navigation.md` | Overview of category |
 | Subcategory-level | `{category}/{sub}/navigation.md` | Files in subcategory |
 | Specialized | `{category}/{domain}-navigation.md` | Cross-cutting (e.g., ui-navigation.md) |
@@ -58,12 +54,19 @@
 
 ```markdown
 ## Structure
-```
-
-openagents-repo/ ├── navigation.md ├── quick-start.md ├── concepts/ │ └── subagent-testing-modes.md ├── guides/ │ ├── adding-agent.md │ └── testing-agent.md └── lookup/ └── commands.md
 
 ```
-
+openagents-repo/
+├── navigation.md
+├── quick-start.md
+├── concepts/
+│   └── subagent-testing-modes.md
+├── guides/
+│   ├── adding-agent.md
+│   └── testing-agent.md
+└── lookup/
+    └── commands.md
+```
 ```
 
 **Token count**: ~50-100 tokens
@@ -73,10 +76,10 @@ openagents-repo/ ├── navigation.md ├── quick-start.md ├── conc
 ```markdown
 ## Quick Routes
 
-| Task           | Path                       |
-| -------------- | -------------------------- |
-| **Add agent**  | `guides/adding-agent.md`   |
-| **Test agent** | `guides/testing-agent.md`  |
+| Task | Path |
+|------|------|
+| **Add agent** | `guides/adding-agent.md` |
+| **Test agent** | `guides/testing-agent.md` |
 | **Find files** | `lookup/file-locations.md` |
 ```
 
@@ -87,7 +90,10 @@ openagents-repo/ ├── navigation.md ├── quick-start.md ├── conc
 ```markdown
 ## By Type
 
-**Concepts** → Core ideas and principles **Guides** → Step-by-step workflows **Lookup** → Quick reference tables **Errors** → Troubleshooting
+**Concepts** → Core ideas and principles
+**Guides** → Step-by-step workflows
+**Lookup** → Quick reference tables
+**Errors** → Troubleshooting
 ```
 
 ### 5. Add Related Context (Optional)

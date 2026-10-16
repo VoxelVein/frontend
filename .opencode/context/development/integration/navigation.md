@@ -4,7 +4,7 @@
 
 **Purpose**: Connecting systems and services
 
-**Status**: 🚧 Placeholder - Content coming soon
+**Status**: 🚧 Placeholder, Content coming soon
 
 ---
 

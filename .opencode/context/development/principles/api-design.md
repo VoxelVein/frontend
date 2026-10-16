@@ -36,11 +36,11 @@ DELETE /users/123
 
 **Use appropriate HTTP methods**:
 
-- `GET` - Retrieve resources (idempotent, safe)
-- `POST` - Create new resources
-- `PUT` - Replace entire resource (idempotent)
-- `PATCH` - Partial update (idempotent)
-- `DELETE` - Remove resource (idempotent)
+- `GET`, Retrieve resources (idempotent, safe)
+- `POST`, Create new resources
+- `PUT`, Replace entire resource (idempotent)
+- `PATCH`, Partial update (idempotent)
+- `DELETE`, Remove resource (idempotent)
 
 ### 3. Status Codes
 
@@ -48,21 +48,21 @@ DELETE /users/123
 
 ```
 2xx Success
-  200 OK - Successful GET, PUT, PATCH
-  201 Created - Successful POST
-  204 No Content - Successful DELETE
+  200 OK—Successful GET, PUT, PATCH
+  201 Created—Successful POST
+  204 No Content—Successful DELETE
 
 4xx Client Errors
-  400 Bad Request - Invalid input
-  401 Unauthorized - Missing/invalid auth
-  403 Forbidden - Authenticated but not authorized
-  404 Not Found - Resource doesn't exist
-  409 Conflict - Resource conflict (e.g., duplicate)
-  422 Unprocessable Entity - Validation errors
+  400 Bad Request—Invalid input
+  401 Unauthorized—Missing/invalid auth
+  403 Forbidden—Authenticated but not authorized
+  404 Not Found—Resource doesn't exist
+  409 Conflict—Resource conflict (e.g., duplicate)
+  422 Unprocessable Entity—Validation errors
 
 5xx Server Errors
-  500 Internal Server Error - Unexpected error
-  503 Service Unavailable - Temporary unavailability
+  500 Internal Server Error—Unexpected error
+  503 Service Unavailable—Temporary unavailability
 ```
 
 ### 4. Consistent Response Format
@@ -145,11 +145,11 @@ GET /users?q=john
 **Handle relationships appropriately**:
 
 ```
-# Good - Shallow nesting
+# Good—Shallow nesting
 GET /users/123/posts
 GET /posts?userId=123
 
-# Avoid - Deep nesting
+# Avoid—Deep nesting
 GET /users/123/posts/456/comments/789
 # Better
 GET /comments/789
@@ -397,27 +397,27 @@ app.delete("/users/:id", authenticateToken, authorize("admin"), deleteUser);
 
 ## Best Practices
 
-1. **Use HTTPS everywhere** - Encrypt all API traffic
-2. **Implement rate limiting** - Prevent abuse and ensure fair usage
-3. **Validate all inputs** - Never trust client data
-4. **Use proper error handling** - Return meaningful error messages
-5. **Document your API** - Use OpenAPI/Swagger or GraphQL introspection
-6. **Version your API** - Plan for breaking changes
-7. **Implement CORS properly** - Configure allowed origins carefully
-8. **Log requests and errors** - Enable debugging and monitoring
-9. **Use caching** - Implement ETags, Cache-Control headers
-10. **Test thoroughly** - Unit, integration, and contract tests
+1. **Use HTTPS everywhere**—Encrypt all API traffic
+2. **Implement rate limiting**—Prevent abuse and ensure fair usage
+3. **Validate all inputs**—Never trust client data
+4. **Use proper error handling**—Return meaningful error messages
+5. **Document your API**—Use OpenAPI/Swagger or GraphQL introspection
+6. **Version your API**—Plan for breaking changes
+7. **Implement CORS properly**—Configure allowed origins carefully
+8. **Log requests and errors**—Enable debugging and monitoring
+9. **Use caching**—Implement ETags, Cache-Control headers
+10. **Test thoroughly**—Unit, integration, and contract tests
 
 ## Anti-Patterns
 
-- ❌ **Exposing internal IDs** - Use UUIDs or opaque identifiers
-- ❌ **Returning too much data** - Support field selection
-- ❌ **Ignoring idempotency** - PUT/PATCH/DELETE should be idempotent
-- ❌ **Inconsistent naming** - Use camelCase or snake_case consistently
-- ❌ **Missing pagination** - Always paginate collections
-- ❌ **No rate limiting** - Protect against abuse
-- ❌ **Verbose error messages** - Don't leak implementation details
-- ❌ **Synchronous long operations** - Use async jobs for long tasks
+- ❌ **Exposing internal IDs**—Use UUIDs or opaque identifiers
+- ❌ **Returning too much data**—Support field selection
+- ❌ **Ignoring idempotency**—PUT/PATCH/DELETE should be idempotent
+- ❌ **Inconsistent naming**—Use camelCase or snake_case consistently
+- ❌ **Missing pagination**—Always paginate collections
+- ❌ **No rate limiting**—Protect against abuse
+- ❌ **Verbose error messages**—Don't leak implementation details
+- ❌ **Synchronous long operations**—Use async jobs for long tasks
 
 ## References
 

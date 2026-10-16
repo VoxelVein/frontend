@@ -93,7 +93,7 @@ replaced.
 `/admin` is a layout whose index route holds the panel, and `/blog` is a
 layout whose index route holds the listing. Both were parents that once
 rendered their own content instead of an `Outlet`, which meant their
-children never mounted  -  `/blog/$slug` swapped the URL and ran its loader
+children never mounted, `/blog/$slug` swapped the URL and ran its loader
 while the parent kept painting the list. A parent route with children must
 render `<Outlet />`, so anything that should be a page belongs in an
 index route.
@@ -142,8 +142,8 @@ them, which made every account past that row unreachable.
 ## Publishing and moderation
 
 A project is created as a `draft`. It becomes `pending` when its owner
-submits it for review  -  with a version and file, or join details for a
-server  -  and `published` only when an admin approves it. Every public
+submits it for review, with a version and file, or join details for a
+server, and `published` only when an admin approves it. Every public
 read path filters on `status = 'published'`, so a project under review
 disappears from search, downloads, trending, and profiles without any of
 those queries changing. See [Projects and Files](../content/projects.md).

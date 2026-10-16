@@ -1,6 +1,6 @@
 # Object Storage
 
-Uploaded files  -  mods, modpacks, plugins, resource packs, and shaders  -
+Uploaded files, mods, modpacks, plugins, resource packs, and shaders  -
 live in S3-compatible object storage. The app only uses the S3 API
 (`@aws-sdk/client-s3`), so switching providers only means changing
 environment variables.
@@ -156,13 +156,13 @@ It is safe to run more than once.
 Garage's S3 API listens on `127.0.0.1:3900`. Without
 `STORAGE_PUBLIC_URL`, downloads redirect to presigned Garage URLs.
 
-To use RustFS instead  -  it has a web console, so the bucket and key are
-created in a browser rather than by a shell script  -  see
+To use RustFS instead, it has a web console, so the bucket and key are
+created in a browser rather than by a shell script, see
 [RustFS](rustfs.md).
 
 ## Related
 
-* [RustFS](rustfs.md)  -  local development provider with a web console
-* [Cloudflare R2](cloudflare-r2.md)  -  the production provider
+* [RustFS](rustfs.md), local development provider with a web console
+* [Cloudflare R2](cloudflare-r2.md), the production provider
 * [Projects and Files](../content/projects.md)
 * [Admin Panel](../content/admin-panel.md)

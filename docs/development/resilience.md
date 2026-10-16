@@ -79,8 +79,8 @@ restart, and setting it `true` without a proxy that sets
 
 With `TRUST_PROXY` off behind a proxy, every anonymous visitor shares the
 `ip:127.0.0.1` bucket, so only their first download per file per day
-counts. The deduper is still doing its job  -  stopping a request loop from
-inflating totals  -  but anonymous counts become a large undercount. See
+counts. The deduper is still doing its job, stopping a request loop from
+inflating totals, but anonymous counts become a large undercount. See
 [Docker](../deployment/docker.md#client-ips-behind-a-reverse-proxy) for the
 correct setting behind Traefik.
 
@@ -107,7 +107,7 @@ governs it.
 The two consumers read that variable differently, which is deliberate.
 `readTrustProxy` (`src/lib/client-key.ts:7`) **throws** in production
 unless the value is exactly `true` or `false`, so the event stream cannot
-boot with the setting undecided  -  an unset value would otherwise let one
+boot with the setting undecided, an unset value would otherwise let one
 client take every slot. It warns instead when production sets it explicitly
 to `false`, which is a deliberate "no per-client limits" choice. The
 download route compares `process.env.TRUST_PROXY === "true"` directly and
@@ -122,7 +122,7 @@ rate-limit budget per connect (`sse-connect`, 30/min) from the shared
 limiter. That is what catches a reconnect storm: right after a deploy,
 every open browser tab reconnects at once, and without this one bad
 network could have every client retrying in a tight loop. The two limits
-are complementary  -  slots cap concurrency, the budget cap the rate.
+are complementary, slots cap concurrency, the budget cap the rate.
 
 Counters live in Valkey rather than in process memory, because this route
 runs in the API container while the web container enforces limits of its
@@ -132,7 +132,7 @@ See [API Server](../architecture/api.md) for the event stream itself.
 
 ## Related
 
-* [API Server](../architecture/api.md)  -  routes, SSE, and webhooks
-* [Projects and Files](../content/projects.md)  -  files and versions
-* [Hardening](../security/hardening.md)  -  headers, CSRF, and upload gates
-* [Docker](../deployment/docker.md)  -  `TRUST_PROXY` and reverse proxies
+* [API Server](../architecture/api.md), routes, SSE, and webhooks
+* [Projects and Files](../content/projects.md), files and versions
+* [Hardening](../security/hardening.md), headers, CSRF, and upload gates
+* [Docker](../deployment/docker.md), `TRUST_PROXY` and reverse proxies

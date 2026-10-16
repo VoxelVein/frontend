@@ -1,10 +1,10 @@
 ---
 description: Maintain registry quality through dependency validation and consistency checks
 tags:
-  - registry
-  - quality
-  - validation
-  - dependencies
+ —registry
+ —quality
+ —validation
+ —dependencies
 dependencies: []
 ---
 
@@ -64,10 +64,10 @@ id: opencoder
 name: OpenCoder
 description: Multi-language implementation agent
 dependencies:
-  - subagent:task-manager      # Can delegate to task-manager
-  - subagent:coder-agent        # Can delegate to coder-agent
-  - subagent:tester             # Can delegate to tester
-  - context:core/standards/code # Requires code standards context
+ —subagent:task-manager      # Can delegate to task-manager
+ —subagent:coder-agent        # Can delegate to coder-agent
+ —subagent:tester             # Can delegate to tester
+ —context:core/standards/code # Requires code standards context
 ```
 
 **Why declare dependencies?**
@@ -108,7 +108,7 @@ BEFORE any code implementation, ALWAYS load:
 ```
 id: opencoder
 dependencies:
-  - context:core/standards/code  # ← ADD THIS
+ —context:core/standards/code  # ← ADD THIS
 ```
 
 **Use `/check-context-deps` to find missing declarations**:
@@ -136,10 +136,10 @@ Dependency:    context:core/standards/code
 
 ```
 dependencies:
-  - context:core/standards/code           # .opencode/context/core/standards/code-quality.md
-  - context:core/standards/docs           # .opencode/context/core/standards/documentation.md
-  - context:core/workflows/delegation     # .opencode/context/core/workflows/task-delegation-basics.md
-  - context:openagents-repo/guides/adding-agent  # Project-specific context
+ —context:core/standards/code           # .opencode/context/core/standards/code-quality.md
+ —context:core/standards/docs           # .opencode/context/core/standards/documentation.md
+ —context:core/workflows/delegation     # .opencode/context/core/workflows/task-delegation-basics.md
+ —context:openagents-repo/guides/adding-agent  # Project-specific context
 ```
 
 ---
@@ -155,33 +155,33 @@ Before committing changes to agents, commands, or context files:
    ```bash
    /check-context-deps
    ```
-   - Identifies agents using context files without declaring them
-   - Reports unused context files
-   - Validates context file paths
+  —Identifies agents using context files without declaring them
+  —Reports unused context files
+  —Validates context file paths
 
 2. **Fix missing dependencies** (if needed):
 
    ```bash
    /check-context-deps --fix
    ```
-   - Automatically adds missing `context:` dependencies to frontmatter
-   - Preserves existing dependencies
+  —Automatically adds missing `context:` dependencies to frontmatter
+  —Preserves existing dependencies
 
 3. **Update registry**:
 
    ```bash
    ./scripts/registry/auto-detect-components.sh --auto-add
    ```
-   - Extracts dependencies from frontmatter
-   - Updates registry.json
+  —Extracts dependencies from frontmatter
+  —Updates registry.json
 
 4. **Validate registry**:
    ```bash
    ./scripts/registry/validate-registry.sh
    ```
-   - Checks all dependencies exist
-   - Validates component paths
-   - Reports missing dependencies
+  —Checks all dependencies exist
+  —Validates component paths
+  —Reports missing dependencies
 
 ### Validation Tools
 
@@ -229,11 +229,11 @@ Before committing changes to agents, commands, or context files:
 ### opencoder
 Uses but not declared:
 - context:core/standards/code (referenced 3 times)
-  - Line 64: "Code tasks → .opencode/context/core/standards/code-quality.md"
+ —Line 64: "Code tasks → .opencode/context/core/standards/code-quality.md"
 
 Recommended fix:
 dependencies:
-  - context:core/standards/code
+ —context:core/standards/code
 ```
 
 #### 2. `auto-detect-components.sh` Script
@@ -290,7 +290,7 @@ Validating registry.json...
 ✗ Dependency not found: opencoder → context:core/standards/code
 
 Missing dependencies: 1
-  - opencoder (agent) → context:core/standards/code
+ —opencoder (agent) → context:core/standards/code
 
 Fix: Add missing component to registry or remove from dependencies
 ```
@@ -335,11 +335,11 @@ id: my-agent
 name: My Agent
 description: Does something useful
 tags:
-  - development
-  - coding
+ —development
+ —coding
 dependencies:
-  - subagent:coder-agent
-  - context:core/standards/code
+ —subagent:coder-agent
+ —context:core/standards/code
 ```
 
 **2. Validate dependencies**:
@@ -397,7 +397,7 @@ vim .opencode/context/core/standards/code-quality.md
 **5. Commit with impact note**:
 
 ```bash
-git commit -m "Update code standards - affects opencoder, openagent, reviewer"
+git commit -m "Update code standards—affects opencoder, openagent, reviewer"
 ```
 
 ### When Deleting Components
@@ -457,7 +457,7 @@ rm .opencode/agents/subagents/old-agent.md
 # Edit .opencode/agents/core/opencoder.md
 # Add to frontmatter:
 dependencies:
-  - context:core/standards/code
+ —context:core/standards/code
 
 # Then update registry
 ./scripts/registry/auto-detect-components.sh --auto-add
@@ -563,12 +563,12 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+     —uses: actions/checkout@v2
 
-      - name: Validate registry
+     —name: Validate registry
         run: ./scripts/registry/validate-registry.sh
 
-      - name: Check context dependencies
+     —name: Check context dependencies
         run: /check-context-deps
 ```
 

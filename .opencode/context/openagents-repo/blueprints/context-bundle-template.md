@@ -28,7 +28,7 @@ Session: {session-id} Created: {ISO timestamp} For: {subagent-name} Status: in_p
 
 ## User Request
 
-{Original user request - what they asked for}
+{Original user request—what they asked for}
 
 ## Relevant Standards (Load These Before Starting)
 
@@ -100,9 +100,9 @@ Session: {session-id} Created: {ISO timestamp} For: {subagent-name} Status: in_p
 
 {List technical constraints and limitations}
 
-- {constraint 1 - e.g., "Must use TypeScript"}
-- {constraint 2 - e.g., "Must follow category-based organization"}
-- {constraint 3 - e.g., "Must include proper frontmatter metadata"}
+- {constraint 1—e.g., "Must use TypeScript"}
+- {constraint 2—e.g., "Must follow category-based organization"}
+- {constraint 3—e.g., "Must include proper frontmatter metadata"}
 
 ## Files to Create/Modify
 
@@ -110,22 +110,22 @@ Session: {session-id} Created: {ISO timestamp} For: {subagent-name} Status: in_p
 
 **Create**:
 
-- `{file-path-1}` - {purpose and what it should contain}
-- `{file-path-2}` - {purpose and what it should contain}
+- `{file-path-1}`—{purpose and what it should contain}
+- `{file-path-2}`—{purpose and what it should contain}
 
 **Modify**:
 
-- `{file-path-3}` - {what needs to be changed}
-- `{file-path-4}` - {what needs to be changed}
+- `{file-path-3}`—{what needs to be changed}
+- `{file-path-4}`—{what needs to be changed}
 
 ## Success Criteria
 
-{Define what "done" looks like - binary pass/fail conditions}
+{Define what "done" looks like—binary pass/fail conditions}
 
-- [ ] {criteria 1 - e.g., "Agent file created with proper frontmatter"}
-- [ ] {criteria 2 - e.g., "Eval tests pass"}
-- [ ] {criteria 3 - e.g., "Registry validation passes"}
-- [ ] {criteria 4 - e.g., "Documentation updated"}
+- [ ] {criteria 1—e.g., "Agent file created with proper frontmatter"}
+- [ ] {criteria 2—e.g., "Eval tests pass"}
+- [ ] {criteria 3—e.g., "Registry validation passes"}
+- [ ] {criteria 4—e.g., "Documentation updated"}
 
 ## Validation Requirements
 
@@ -133,13 +133,13 @@ Session: {session-id} Created: {ISO timestamp} For: {subagent-name} Status: in_p
 
 **Scripts to Run**:
 
-- `{validation-script-1}` - {what it validates}
-- `{validation-script-2}` - {what it validates}
+- `{validation-script-1}`—{what it validates}
+- `{validation-script-2}`—{what it validates}
 
 **Tests to Run**:
 
-- `{test-command-1}` - {what it tests}
-- `{test-command-2}` - {what it tests}
+- `{test-command-1}`—{what it tests}
+- `{test-command-2}`—{what it tests}
 
 **Manual Checks**:
 
@@ -223,11 +223,11 @@ Create a context bundle when:
    ```
 
 3. **Fill in all sections**:
-   - Replace all `{placeholders}` with actual values
-   - List specific context files to load (with full paths)
-   - Extract key requirements from loaded context
-   - Define clear success criteria
-   - Provide specific instructions
+  —Replace all `{placeholders}` with actual values
+  —List specific context files to load (with full paths)
+  —Extract key requirements from loaded context
+  —Define clear success criteria
+  —Provide specific instructions
 
 4. **Pass to subagent**:
    ```javascript

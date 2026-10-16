@@ -68,13 +68,13 @@ function UserProfile({ userId }) {
 **Use composition to avoid prop drilling**:
 
 ```jsx
-// Bad - Props drilling
+// Bad—Props drilling
 function App() {
   const [theme, setTheme] = useState("light");
   return <Layout theme={theme} setTheme={setTheme} />;
 }
 
-// Good - Composition with Context
+// Good—Composition with Context
 const ThemeContext = createContext();
 
 function App() {
@@ -146,17 +146,17 @@ Tabs.Panel = function TabPanel({ index, children }) {
 **Always specify dependencies correctly**:
 
 ```jsx
-// Bad - Missing dependencies
+// Bad—Missing dependencies
 useEffect(() => {
   fetchData(userId);
 }, []);
 
-// Good - Correct dependencies
+// Good—Correct dependencies
 useEffect(() => {
   fetchData(userId);
 }, [userId]);
 
-// Good - Stable function reference
+// Good—Stable function reference
 const fetchData = useCallback((id) => {
   api.getUser(id).then(setUser);
 }, []);
@@ -188,10 +188,10 @@ function DataTable({ data, filters }) {
 function Parent() {
   const [count, setCount] = useState(0);
 
-  // Bad - New function on every render
+  // Bad—New function on every render
   const handleClick = () => setCount((c) => c + 1);
 
-  // Good - Stable function reference
+  // Good—Stable function reference
   const handleClick = useCallback(() => {
     setCount((c) => c + 1);
   }, []);
@@ -241,7 +241,7 @@ function reducer(state, action) {
     case "increment":
       return { ...state, count: state.count + state.step };
     case "decrement":
-      return { ...state, count: state.count - state.step };
+      return { ...state, count: state.count—state.step };
     case "setStep":
       return { ...state, step: action.payload };
     default:
@@ -313,24 +313,24 @@ function VirtualList({ items }) {
 
 ## Best Practices
 
-1. **Keep components small and focused** - Single responsibility principle
-2. **Use TypeScript** - Type safety prevents bugs and improves DX
-3. **Colocate related code** - Keep components, styles, and tests together
-4. **Use meaningful prop names** - Clear, descriptive names improve readability
-5. **Avoid inline functions in JSX** - Extract to named functions or useCallback
-6. **Use fragments** - Avoid unnecessary wrapper divs
-7. **Handle loading and error states** - Always show feedback to users
-8. **Test components** - Use React Testing Library for user-centric tests
+1. **Keep components small and focused**, Single responsibility principle
+2. **Use TypeScript**, Type safety prevents bugs and improves DX
+3. **Colocate related code**, Keep components, styles, and tests together
+4. **Use meaningful prop names**, Clear, descriptive names improve readability
+5. **Avoid inline functions in JSX**, Extract to named functions or useCallback
+6. **Use fragments**, Avoid unnecessary wrapper divs
+7. **Handle loading and error states**, Always show feedback to users
+8. **Test components**, Use React Testing Library for user-centric tests
 
 ## Anti-Patterns
 
-- ❌ **Prop drilling** - Use context or composition instead
-- ❌ **Massive components** - Break down into smaller, focused components
-- ❌ **Mutating state directly** - Always use setState or dispatch
-- ❌ **Using index as key** - Use stable, unique identifiers
-- ❌ **Unnecessary useEffect** - Derive state when possible
-- ❌ **Ignoring ESLint warnings** - React hooks rules prevent bugs
-- ❌ **Not memoizing context values** - Causes unnecessary re-renders
+- ❌ **Prop drilling**, Use context or composition instead
+- ❌ **Massive components**, Break down into smaller, focused components
+- ❌ **Mutating state directly**, Always use setState or dispatch
+- ❌ **Using index as key**, Use stable, unique identifiers
+- ❌ **Unnecessary useEffect**, Derive state when possible
+- ❌ **Ignoring ESLint warnings**, React hooks rules prevent bugs
+- ❌ **Not memoizing context values**, Causes unnecessary re-renders
 
 ## References
 

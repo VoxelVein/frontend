@@ -26,14 +26,14 @@ core/context-system/
 
 ## Quick Routes
 
-| Task                          | Path                       |
-| ----------------------------- | -------------------------- |
-| **Understand context system** | `../context-system.md`     |
-| **Operations & procedures**   | `operations/navigation.md` |
-| **Implementation guides**     | `guides/navigation.md`     |
-| **Standards & templates**     | `standards/navigation.md`  |
-| **Examples**                  | `examples/navigation.md`   |
-| **Migrate global → local**    | `operations/migrate.md`    |
+| Task | Path |
+|------|------|
+| **Understand context system** | `../context-system.md` |
+| **Operations & procedures** | `operations/navigation.md` |
+| **Implementation guides** | `guides/navigation.md` |
+| **Standards & templates** | `standards/navigation.md` |
+| **Examples** | `examples/navigation.md` |
+| **Migrate global → local** | `operations/migrate.md` |
 
 ---
 

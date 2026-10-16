@@ -18,13 +18,13 @@ Nitro server output as Vercel Functions plus the static assets.
 Set these in the Vercel project settings. Variables marked build-time
 are baked into the bundle, so changing them needs a new deploy.
 
-* `VITE_API_URL`  -  public URL of the Elysia API (build-time)
-* `VITE_SITE_URL`  -  public URL of the web app (build-time)
-* `VITE_TURNSTILE_SITE_KEY`  -  optional (build-time)
-* `DATABASE_URL`  -  managed Postgres connection string (runtime)
-* `BETTER_AUTH_SECRET`  -  32+ characters (runtime)
-* `BETTER_AUTH_URL`  -  same as `VITE_SITE_URL` (runtime)
-* `VALKEY_URL`  -  managed Valkey/Redis, or omit (runtime)
+* `VITE_API_URL`, public URL of the Elysia API (build-time)
+* `VITE_SITE_URL`, public URL of the web app (build-time)
+* `VITE_TURNSTILE_SITE_KEY`, optional (build-time)
+* `DATABASE_URL`, managed Postgres connection string (runtime)
+* `BETTER_AUTH_SECRET`, 32+ characters (runtime)
+* `BETTER_AUTH_URL`, same as `VITE_SITE_URL` (runtime)
+* `VALKEY_URL`, managed Valkey/Redis, or omit (runtime)
 
 Set `NITRO_PRESET=vercel` in the build environment as well; `vercel.json`
 already supplies it. Environment variables marked build-time are baked

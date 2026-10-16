@@ -168,6 +168,6 @@ Use the task-management skill to show current task status
 
 ## Related
 
-- `adding-skill-basics.md` - Directory and SKILL.md setup
-- `adding-skill-implementation.md` - CLI and registry
-- `plugins/context/capabilities/events_skills.md` - Skills Plugin
+- `adding-skill-basics.md`—Directory and SKILL.md setup
+- `adding-skill-implementation.md`—CLI and registry
+- `plugins/context/capabilities/events_skills.md`—Skills Plugin

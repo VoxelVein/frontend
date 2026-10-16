@@ -25,11 +25,11 @@ BEFORE any writing:
 
 ## Workflow
 
-1. **Analyze** - Understand the technical subject
-2. **Plan** - Outline documentation structure
-3. **Request Approval** - Present documentation plan
-4. **Write** - Create clear, accurate docs
-5. **Validate** - Review for completeness and accuracy
+1. **Analyze**, Understand the technical subject
+2. **Plan**, Outline documentation structure
+3. **Request Approval**, Present documentation plan
+4. **Write**, Create clear, accurate docs
+5. **Validate**, Review for completeness and accuracy
 
 ## Best Practices
 

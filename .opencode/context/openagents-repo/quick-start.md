@@ -1,6 +1,6 @@
 <!-- Context: openagents-repo/quick-start | Priority: critical | Version: 1.0 | Updated: 2026-02-15 -->
 
-# OpenAgents Control Repository - Quick Start
+# OpenAgents Control Repository, Quick Start
 
 **Purpose**: Get oriented in this repo in 2 minutes
 
@@ -22,27 +22,27 @@ OpenAgents Control is an AI agent framework with:
 Before working on this repo, understand these 4 systems:
 
 1. **Agents** → Load: `core-concepts/agents.md`
-   - How agents are structured
-   - Category system
-   - Prompt variants
-   - Subagents vs category agents
+  —How agents are structured
+  —Category system
+  —Prompt variants
+  —Subagents vs category agents
 
 2. **Evals** → Load: `core-concepts/evals.md`
-   - How testing works
-   - Running tests
-   - Evaluators
-   - Session collection
+  —How testing works
+  —Running tests
+  —Evaluators
+  —Session collection
 
 3. **Registry** → Load: `core-concepts/registry.md`
-   - How components are tracked
-   - Auto-detect system
-   - Validation
-   - Install system
+  —How components are tracked
+  —Auto-detect system
+  —Validation
+  —Install system
 
 4. **Categories** → Load: `core-concepts/categories.md`
-   - How organization works
-   - Naming conventions
-   - Path patterns
+  —How organization works
+  —Naming conventions
+  —Path patterns
 
 ---
 

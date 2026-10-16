@@ -4,7 +4,7 @@
 > Section: Components › Status
 > Platforms covered: macOS
 
-A rating indicator uses a series of horizontally arranged graphical symbols  -  by default, stars  -  to communicate a ranking level.
+A rating indicator uses a series of horizontally arranged graphical symbols, by default, stars, to communicate a ranking level.
 
 ---
 

@@ -8,11 +8,11 @@
 
 **AI agents that learn YOUR coding patterns and generate matching code every time.**
 
-🎯 **Pattern Control** - Define your patterns once, AI uses them forever  
-✋ **Approval Gates** - Review and approve before execution  
-🔁 **Repeatable Results** - Same patterns = Same quality code  
-📝 **Editable Agents** - Full control over AI behavior  
-👥 **Team-Ready** - Everyone uses the same patterns
+🎯 **Pattern Control**, Define your patterns once, AI uses them forever  
+✋ **Approval Gates**, Review and approve before execution  
+🔁 **Repeatable Results**, Same patterns = Same quality code  
+📝 **Editable Agents**, Full control over AI behavior  
+👥 **Team-Ready**, Everyone uses the same patterns
 
 **Multi-language:** TypeScript • Python • Go • Rust • C# • Any language*  
 **Model Agnostic:** Claude • GPT • Gemini • MiniMax • Local models
@@ -25,7 +25,7 @@
 
 ---
 
-> **Built on [OpenCode](https://opencode.ai)** - An open-source AI coding framework. OAC extends OpenCode with specialized agents, context management, and team workflows.
+> **Built on [OpenCode](https://opencode.ai)**, An open-source AI coding framework. OAC extends OpenCode with specialized agents, context management, and team workflows.
 
 ---
 
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 Agents load YOUR patterns before generating code. Code matches your project from the start. No refactoring needed.
 
 **📝 Editable Agents (Not Baked-In Plugins)**  
-Full control over agent behavior. Edit markdown files directly - no compilation, no vendor lock-in. Change workflows, add constraints, customize for your team.
+Full control over agent behavior. Edit markdown files directly, no compilation, no vendor lock-in. Change workflows, add constraints, customize for your team.
 
 **✋ Approval Gates (Human-Guided AI)**  
 Agents ALWAYS request approval before execution. Propose → Approve → Execute. You stay in control. No "oh no, what did the AI just do?" moments.
@@ -204,11 +204,11 @@ Add a login endpoint
 
 **Documentation:**
 
-- [Plugin README](./plugins/claude-code/README.md) - Complete plugin documentation
-- [First-Time Setup](./plugins/claude-code/FIRST-TIME-SETUP.md) - Step-by-step guide
-- [Quick Start](./plugins/claude-code/QUICK-START.md) - Quick reference
+- [Plugin README](./plugins/claude-code/README.md), Complete plugin documentation
+- [First-Time Setup](./plugins/claude-code/FIRST-TIME-SETUP.md), Step-by-step guide
+- [Quick Start](./plugins/claude-code/QUICK-START.md), Quick reference
 
-**Status:** BETA - Actively tested and ready for early adopters
+**Status:** BETA, Actively tested and ready for early adopters
 
 ---
 
@@ -342,10 +342,10 @@ Agents are markdown files you can edit. Change workflows, add constraints, custo
 
 ### What Makes This Special
 
-**1. ContextScout - Smart Pattern Discovery**  
+**1. ContextScout, Smart Pattern Discovery**  
 Before generating code, ContextScout discovers relevant patterns from your context files. Ranks by priority (Critical → High → Medium). Prevents wasted work.
 
-**2. Editable Agents - Full Control**  
+**2. Editable Agents, Full Control**  
 Unlike Cursor/Copilot where behavior is baked into plugins, OAC agents are markdown files. Edit them directly:
 
 ```bash
@@ -354,15 +354,15 @@ nano .opencode/agents/core/opencoder.md  # local project install
 # Add project rules, change workflows, customize behavior
 ```
 
-**3. ExternalScout - Live Documentation** 🆕  
+**3. ExternalScout, Live Documentation** 🆕  
 Working with external libraries? ExternalScout fetches current documentation:
 
 - Gets live docs from official sources (npm, GitHub, docs sites)
-- No outdated training data - always current
+- No outdated training data, always current
 - Automatically triggered when agents detect external dependencies
 - Supports frameworks, APIs, libraries, and more
 
-**4. Approval Gates - No Surprises**  
+**4. Approval Gates, No Surprises**  
 Agents ALWAYS request approval before:
 
 - Writing/editing files
@@ -372,7 +372,7 @@ Agents ALWAYS request approval before:
 
 You stay in control. Review plans before execution.
 
-**5. MVI Principle - Token Efficiency**  
+**5. MVI Principle, Token Efficiency**  
 Files designed for quick loading:
 
 - Concepts: <100 lines
@@ -381,7 +381,7 @@ Files designed for quick loading:
 
 Result: Lower token usage vs loading entire codebase.
 
-**6. Team Patterns - Repeatable Results**  
+**6. Team Patterns, Repeatable Results**  
 Store patterns in `.opencode/context/project/`. Commit to repo. Entire team uses same standards. New developers inherit patterns automatically.
 
 ---
@@ -450,40 +450,40 @@ Interactive wizard generates orchestrators, subagents, context files, workflows,
 
 ### 🤖 Main Agents
 
-- **OpenAgent** - General tasks, questions, learning (start here)
-- **OpenCoder** - Production development, complex features
-- **SystemBuilder** - Generate custom AI systems
+- **OpenAgent**, General tasks, questions, learning (start here)
+- **OpenCoder**, Production development, complex features
+- **SystemBuilder**, Generate custom AI systems
 
 ### 🔧 Specialized Subagents (Auto-delegated)
 
-- **ContextScout** - Smart pattern discovery (your secret weapon)
-- **TaskManager** - Breaks complex features into atomic subtasks
-- **CoderAgent** - Focused code implementations
-- **TestEngineer** - Test authoring and TDD
-- **CodeReviewer** - Code review and security analysis
-- **BuildAgent** - Type checking and build validation
-- **DocWriter** - Documentation generation
-- **ExternalScout** - Fetches live docs for external libraries (no outdated training data) **NEW!**
+- **ContextScout**, Smart pattern discovery (your secret weapon)
+- **TaskManager**, Breaks complex features into atomic subtasks
+- **CoderAgent**, Focused code implementations
+- **TestEngineer**, Test authoring and TDD
+- **CodeReviewer**, Code review and security analysis
+- **BuildAgent**, Type checking and build validation
+- **DocWriter**, Documentation generation
+- **ExternalScout**, Fetches live docs for external libraries (no outdated training data) **NEW!**
 - Plus category specialists: frontend, devops, copywriter, technical-writer, data-analyst
 
 ### ⚡ Productivity Commands
 
-- `/add-context` - Interactive wizard to add your patterns
-- `/commit` - Smart git commits with conventional format
-- `/test` - Testing workflows
-- `/optimize` - Code optimization
-- `/context` - Context management
+- `/add-context`, Interactive wizard to add your patterns
+- `/commit`, Smart git commits with conventional format
+- `/test`, Testing workflows
+- `/optimize`, Code optimization
+- `/context`, Context management
 - And 7+ more productivity commands
 
 ### 📚 Context System (MVI Principle)
 
 Your coding standards automatically loaded by agents:
 
-- **Code quality** - Your patterns, security, standards
-- **UI/design** - Design system, component patterns
-- **Task management** - Workflow definitions
-- **External libraries** - Integration guides (18+ libraries supported)
-- **Project-specific** - Your team's patterns
+- **Code quality**, Your patterns, security, standards
+- **UI/design**, Design system, component patterns
+- **Task management**, Workflow definitions
+- **External libraries**, Integration guides (18+ libraries supported)
+- **Project-specific**, Your team's patterns
 
 **Key features:**
 
@@ -508,10 +508,10 @@ ContextScout discovers context files using a **local-first** approach:
 
 **Key rules:**
 
-- **Local always wins**  -  if you installed locally, global is never checked
-- **Global fallback is only for `core/`** (standards, workflows, guides)  -  universal files that are the same across projects
-- **Project intelligence is always local**  -  your tech stack, patterns, and naming conventions live in `.opencode/context/project-intelligence/` and are never loaded from global
-- **One-time check**  -  ContextScout resolves the core location once at startup (max 2 glob checks), not per-file
+- **Local always wins**, if you installed locally, global is never checked
+- **Global fallback is only for `core/`** (standards, workflows, guides), universal files that are the same across projects
+- **Project intelligence is always local**, your tech stack, patterns, and naming conventions live in `.opencode/context/project-intelligence/` and are never loaded from global
+- **One-time check**, ContextScout resolves the core location once at startup (max 2 glob checks), not per-file
 
 **Common setups:**
 
@@ -532,14 +532,14 @@ opencode --agent OpenCoder
 
 **What happens:**
 
-**1. Discover (~1-2 min)** - ContextScout finds relevant patterns
+**1. Discover (~1-2 min)**, ContextScout finds relevant patterns
 
 - Your tech stack (Next.js + TypeScript + PostgreSQL)
 - Your API pattern (Zod validation, error handling)
 - Your component pattern (functional, TypeScript, Tailwind)
 - Your naming conventions (kebab-case files, PascalCase components)
 
-**2. Propose (~2-3 min)** - Agent creates detailed implementation plan
+**2. Propose (~2-3 min)**, Agent creates detailed implementation plan
 
 ```
 ## Proposed Implementation
@@ -562,22 +562,22 @@ All code will follow YOUR patterns from context.
 Approve? [y/n]
 ```
 
-**3. Approve** - You review and approve the plan (human-guided)
+**3. Approve**, You review and approve the plan (human-guided)
 
-**4. Execute (~10-15 min)** - Incremental implementation with validation
+**4. Execute (~10-15 min)**, Incremental implementation with validation
 
 - Implements one component at a time
 - Uses YOUR patterns for every file
 - Validates after each step (type check, lint)
-- _This is the longest step - generating quality code takes time_
+- _This is the longest step, generating quality code takes time_
 
-**5. Validate (~2-3 min)** - Tests, type checking, code review
+**5. Validate (~2-3 min)**, Tests, type checking, code review
 
 - Delegates to TestEngineer for tests
 - Delegates to CodeReviewer for security check
 - Ensures production quality
 
-**6. Ship** - Production-ready code
+**6. Ship**, Production-ready code
 
 - Code matches your project exactly
 - No refactoring needed
@@ -596,7 +596,7 @@ Approve? [y/n]
 **Working with external libraries?**
 
 - **ExternalScout** automatically fetches current documentation
-- No more outdated training data - gets live docs from official sources
+- No more outdated training data, gets live docs from official sources
 - Works with npm packages, APIs, frameworks, and more
 
 ---
@@ -702,10 +702,10 @@ If you answered "yes" to any of these, OAC is for you.
 
 The **OpenFrontendSpecialist** follows a structured 4-stage design workflow:
 
-1. **Layout** - ASCII wireframe, responsive structure planning
-2. **Theme** - Design system selection, OKLCH colors, typography
-3. **Animation** - Micro-interactions, timing, accessibility
-4. **Implementation** - Single HTML file, semantic markup
+1. **Layout**, ASCII wireframe, responsive structure planning
+2. **Theme**, Design system selection, OKLCH colors, typography
+3. **Animation**, Micro-interactions, timing, accessibility
+4. **Implementation**, Single HTML file, semantic markup
 
 ### Task Management & Breakdown
 
@@ -785,8 +785,8 @@ A: Bash 3.2+ (macOS default works). Run `bash scripts/tests/test-compatibility.s
 **Q: Do I need to install plugins/tools?**  
 A: No, they're optional. Only install if you want Telegram notifications or Gemini AI features.
 
-**Q: Where should I install - globally or per-project?**  
-A: Local (`.opencode/` in your project) is recommended  -  patterns are committed to git and shared with your team. Global (`~/.config/opencode/`) is good for personal defaults across all projects. The installer asks you to choose. See [OpenCode Config Docs](https://opencode.ai/docs/config/) for how configs merge.
+**Q: Where should I install, globally or per-project?**  
+A: Local (`.opencode/` in your project) is recommended, patterns are committed to git and shared with your team. Global (`~/.config/opencode/`) is good for personal defaults across all projects. The installer asks you to choose. See [OpenCode Config Docs](https://opencode.ai/docs/config/) for how configs merge.
 
 ---
 
@@ -798,19 +798,19 @@ A: Local (`.opencode/` in your project) is recommended  -  patterns are committe
 
 Check out our [**Project Board**](https://github.com/darrenhinde/OpenAgentsControl/projects) to see:
 
-- 🔨 **In Progress** - Features being built right now
-- 📋 **Planned** - What's coming soon
-- 💡 **Ideas** - Future enhancements under consideration
-- ✅ **Recently Shipped** - Latest improvements
+- 🔨 **In Progress**, Features being built right now
+- 📋 **Planned**, What's coming soon
+- 💡 **Ideas**, Future enhancements under consideration
+- ✅ **Recently Shipped**, Latest improvements
 
 ### 🎯 Current Focus Areas
 
-- **Plugin System** - npm-based plugin architecture for easy distribution
-- **Performance Improvements** - Faster agent execution and context loading
-- **Enhanced Context Discovery** - Smarter pattern recognition
-- **Multi-language Support** - Better Python, Go, Rust, C# / .NET support
-- **Team Collaboration** - Shared context and team workflows
-- **Documentation** - More examples, tutorials, and guides
+- **Plugin System**, npm-based plugin architecture for easy distribution
+- **Performance Improvements**, Faster agent execution and context loading
+- **Enhanced Context Discovery**, Smarter pattern recognition
+- **Multi-language Support**, Better Python, Go, Rust, C# / .NET support
+- **Team Collaboration**, Shared context and team workflows
+- **Documentation**, More examples, tutorials, and guides
 
 ### 💬 Have Ideas?
 

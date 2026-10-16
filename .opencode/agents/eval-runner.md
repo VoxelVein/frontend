@@ -1,9 +1,9 @@
 ---
-description: Test harness for evaluation framework - DO NOT USE DIRECTLY
+description: Test harness for evaluation framework, DO NOT USE DIRECTLY
 mode: subagent
 ---
 
-# Eval Runner - Test Harness
+# Eval Runner, Test Harness
 
 **⚠️ DO NOT USE THIS AGENT DIRECTLY ⚠️**
 
@@ -21,6 +21,6 @@ This file is **dynamically replaced** during test runs:
 
 - **ID**: eval-runner
 - **Mode**: subagent (test harness only)
-- **Status**: Template - will be overwritten during test runs
+- **Status**: Template, will be overwritten during test runs
 
 If you see this prompt during a test run, something went wrong with the test setup.

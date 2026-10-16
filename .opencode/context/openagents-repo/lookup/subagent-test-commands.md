@@ -1,6 +1,6 @@
 <!-- Context: openagents-repo/lookup | Priority: high | Version: 1.0 | Updated: 2026-02-15 -->
 
-# Subagent Testing Commands - Quick Reference
+# Subagent Testing Commands, Quick Reference
 
 **Purpose**: Quick command reference for testing subagents
 
@@ -208,8 +208,8 @@ cat evals/results/latest.json | jq '.summary'
 
 ## Related
 
-- `concepts/subagent-testing-modes.md` - Understand testing modes
-- `guides/testing-subagents.md` - Step-by-step testing guide
-- `errors/tool-permission-errors.md` - Fix common issues
+- `concepts/subagent-testing-modes.md`, Understand testing modes
+- `guides/testing-subagents.md`, Step-by-step testing guide
+- `errors/tool-permission-errors.md`, Fix common issues
 
 **Reference**: `evals/framework/src/sdk/run-sdk-tests.ts`

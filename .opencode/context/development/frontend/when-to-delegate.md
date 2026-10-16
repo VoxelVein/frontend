@@ -120,20 +120,20 @@ task(
   subagent_type="frontend-specialist",
   description="Create landing page design",
   prompt="Context to load:
-  - .opencode/context/ui/web/design-systems.md
-  - .opencode/context/ui/web/ui-styling-standards.md
-  - .opencode/context/ui/web/animation-basics.md
+ —.opencode/context/ui/web/design-systems.md
+ —.opencode/context/ui/web/ui-styling-standards.md
+ —.opencode/context/ui/web/animation-basics.md
 
   Task: Create a landing page with:
-  - Hero section with headline, subheadline, CTA button
-  - Features grid (3 columns on desktop, 1 on mobile)
-  - Smooth scroll animations
+ —Hero section with headline, subheadline, CTA button
+ —Features grid (3 columns on desktop, 1 on mobile)
+ —Smooth scroll animations
 
   Requirements:
-  - Use Tailwind CSS + Flowbite
-  - Mobile-first responsive design
-  - Animations <400ms
-  - Save to design_iterations/landing_1.html
+ —Use Tailwind CSS + Flowbite
+ —Mobile-first responsive design
+ —Animations <400ms
+ —Save to design_iterations/landing_1.html
 
   Follow your staged workflow:
   1. Layout (ASCII wireframe)
@@ -298,18 +298,18 @@ The frontend-specialist will automatically load these via ContextScout:
 
 **Design System**:
 
-- `ui/web/design-systems.md` - Theme templates, color systems
-- `ui/web/ui-styling-standards.md` - Tailwind, Flowbite, responsive design
-- `ui/web/design-assets.md` - Images, icons, fonts
+- `ui/web/design-systems.md`, Theme templates, color systems
+- `ui/web/ui-styling-standards.md`, Tailwind, Flowbite, responsive design
+- `ui/web/design-assets.md`, Images, icons, fonts
 
 **Patterns**:
 
-- `ui/web/animation-patterns.md` - Animation syntax, micro-interactions
-- `development/frontend/react/react-patterns.md` - React patterns (if React project)
+- `ui/web/animation-patterns.md`, Animation syntax, micro-interactions
+- `development/frontend/react/react-patterns.md`, React patterns (if React project)
 
 **Workflows**:
 
-- `core/workflows/design-iteration-overview.md` - Design iteration workflow
+- `core/workflows/design-iteration-overview.md`, Design iteration workflow
 
 ---
 
@@ -317,21 +317,21 @@ The frontend-specialist will automatically load these via ContextScout:
 
 ### Do's ✅
 
-- ✅ **Propose before delegating** - Show user the plan first
-- ✅ **Get approval** - Never delegate without user approval
-- ✅ **Provide context** - List context files the subagent should load
-- ✅ **Set clear requirements** - Specify design system, breakpoints, animations
-- ✅ **Use staged workflow** - Let frontend-specialist follow its process
-- ✅ **Trust the specialist** - It knows design patterns and best practices
+- ✅ **Propose before delegating**, Show user the plan first
+- ✅ **Get approval**, Never delegate without user approval
+- ✅ **Provide context**, List context files the subagent should load
+- ✅ **Set clear requirements**, Specify design system, breakpoints, animations
+- ✅ **Use staged workflow**, Let frontend-specialist follow its process
+- ✅ **Trust the specialist**, It knows design patterns and best practices
 
 ### Don'ts ❌
 
-- ❌ **Don't delegate simple edits** - Handle directly for efficiency
-- ❌ **Don't skip approval** - Always get user sign-off first
-- ❌ **Don't delegate backend work** - Wrong subagent
-- ❌ **Don't micromanage** - Let the specialist follow its workflow
-- ❌ **Don't delegate without context** - Provide context files to load
-- ❌ **Don't delegate bug fixes** - Handle directly unless it's a design issue
+- ❌ **Don't delegate simple edits**, Handle directly for efficiency
+- ❌ **Don't skip approval**, Always get user sign-off first
+- ❌ **Don't delegate backend work**, Wrong subagent
+- ❌ **Don't micromanage**, Let the specialist follow its workflow
+- ❌ **Don't delegate without context**, Provide context files to load
+- ❌ **Don't delegate bug fixes**, Handle directly unless it's a design issue
 
 ---
 
@@ -372,21 +372,21 @@ task(
   subagent_type="frontend-specialist",
   description="Create SaaS landing page",
   prompt="Context to load:
-  - .opencode/context/ui/web/design-systems.md
-  - .opencode/context/ui/web/ui-styling-standards.md
-  - .opencode/context/ui/web/animation-basics.md
+ —.opencode/context/ui/web/design-systems.md
+ —.opencode/context/ui/web/ui-styling-standards.md
+ —.opencode/context/ui/web/animation-basics.md
 
   Task: Create a SaaS landing page with:
-  - Hero section (headline, subheadline, CTA)
-  - Features section (3-column grid)
-  - Pricing section (3 tiers)
-  - Footer
+ —Hero section (headline, subheadline, CTA)
+ —Features section (3-column grid)
+ —Pricing section (3 tiers)
+ —Footer
 
   Requirements:
-  - Tailwind CSS + Flowbite
-  - Mobile-first responsive
-  - Smooth scroll animations
-  - Modern design system
+ —Tailwind CSS + Flowbite
+ —Mobile-first responsive
+ —Smooth scroll animations
+ —Modern design system
 
   Follow staged workflow and request approval between stages."
 )
@@ -441,17 +441,17 @@ task(
   subagent_type="frontend-specialist",
   description="Implement Tailwind + Shadcn design system",
   prompt="Context to load:
-  - .opencode/context/ui/web/design-systems.md
-  - .opencode/context/ui/web/ui-styling-standards.md
+ —.opencode/context/ui/web/design-systems.md
+ —.opencode/context/ui/web/ui-styling-standards.md
 
   Task: Implement design system using Tailwind CSS and Shadcn/ui
 
   Requirements:
-  - Call ExternalScout for current Shadcn docs
-  - Set up Tailwind config
-  - Integrate Shadcn components
-  - Create theme file with OKLCH colors
-  - Document component usage
+ —Call ExternalScout for current Shadcn docs
+ —Set up Tailwind config
+ —Integrate Shadcn components
+ —Create theme file with OKLCH colors
+ —Document component usage
 
   Follow staged workflow and request approval between stages."
 )

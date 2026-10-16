@@ -207,7 +207,7 @@ plugin's role map and refuses anything unrecognised.
 **The panel opens with only Reviews**
 : The account is a `moderator`. That clears `viewAdminPanel`, which is
   enough to reach `/admin`, but not `manageUsers`, `managePosts`, or
-  anything else. There is no `ADMIN_PANEL_ROLE` setting to change  -  the
+  anything else. There is no `ADMIN_PANEL_ROLE` setting to change, the
   bar is the `CAPABILITY_MINIMUM` table in `src/lib/roles.ts`.
 
 **`UPDATE 0`**
@@ -253,7 +253,7 @@ plugin's role map and refuses anything unrecognised.
 
 ## Related
 
-* [Admin Panel](../content/admin-panel.md)  -  what each role unlocks
-* [Dokploy](../deployment/dokploy.md)  -  the deployment this assumes
-* [Sessions](sessions.md)  -  how long a session lives
-* [Accounts](accounts.md)  -  how accounts are created and deleted
+* [Admin Panel](../content/admin-panel.md), what each role unlocks
+* [Dokploy](../deployment/dokploy.md), the deployment this assumes
+* [Sessions](sessions.md), how long a session lives
+* [Accounts](accounts.md), how accounts are created and deleted

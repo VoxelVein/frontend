@@ -24,10 +24,28 @@
 ---
 
 ## Structure
+
 ```
-
-openagents-repo/ ├── navigation.md ├── quick-start.md │ ├── core-concepts/ │ ├── agent-architecture.md │ ├── eval-framework.md │ └── registry-system.md │ ├── guides/ │ ├── adding-agent.md │ ├── testing-agent.md │ └── debugging-issues.md │ ├── lookup/ │ ├── commands.md │ └── file-locations.md │ └── errors/ └── tool-permission-errors.md
-
+openagents-repo/
+├── navigation.md
+├── quick-start.md
+│
+├── core-concepts/
+│   ├── agent-architecture.md
+│   ├── eval-framework.md
+│   └── registry-system.md
+│
+├── guides/
+│   ├── adding-agent.md
+│   ├── testing-agent.md
+│   └── debugging-issues.md
+│
+├── lookup/
+│   ├── commands.md
+│   └── file-locations.md
+│
+└── errors/
+    └── tool-permission-errors.md
 ```
 
 ---
@@ -54,7 +72,6 @@ openagents-repo/ ├── navigation.md ├── quick-start.md │ ├── 
 ```
 
 **Why this works**:
-
 - ✅ Token-efficient (~250 tokens)
 - ✅ ASCII tree shows structure
 - ✅ Quick routes for common tasks
@@ -78,10 +95,29 @@ openagents-repo/ ├── navigation.md ├── quick-start.md │ ├── 
 ---
 
 ## Structure
+
 ```
-
-development/ ├── navigation.md ├── ui-navigation.md # Specialized ├── backend-navigation.md # Specialized │ ├── principles/ │ ├── clean-code.md │ └── api-design.md │ ├── frontend/ │ ├── react/ │ └── vue/ │ ├── backend/ │ ├── api-patterns/ │ ├── nodejs/ │ └── authentication/ │ └── data/ ├── sql-patterns/ └── orm-patterns/
-
+development/
+├── navigation.md
+├── ui-navigation.md           # Specialized
+├── backend-navigation.md      # Specialized
+│
+├── principles/
+│   ├── clean-code.md
+│   └── api-design.md
+│
+├── frontend/
+│   ├── react/
+│   └── vue/
+│
+├── backend/
+│   ├── api-patterns/
+│   ├── nodejs/
+│   └── authentication/
+│
+└── data/
+    ├── sql-patterns/
+    └── orm-patterns/
 ```
 
 ---
@@ -106,7 +142,6 @@ development/ ├── navigation.md ├── ui-navigation.md # Specialized �
 ```
 
 **Why this works**:
-
 - ✅ Token-efficient (~280 tokens)
 - ✅ Shows specialized navigation files
 - ✅ Organized by concern (frontend, backend, data)
@@ -130,12 +165,21 @@ development/ ├── navigation.md ├── ui-navigation.md # Specialized �
 ---
 
 ## Structure
+
 ```
+Frontend Code (development/frontend/):
+├── react/
+│   ├── hooks-patterns.md
+│   ├── component-architecture.md
+│   └── tanstack/
+│       ├── query-patterns.md
+│       └── router-patterns.md
+└── vue/
 
-Frontend Code (development/frontend/): ├── react/ │ ├── hooks-patterns.md │ ├── component-architecture.md │ └── tanstack/ │ ├── query-patterns.md │ └── router-patterns.md └── vue/
-
-Visual Design (ui/web/): ├── animation-patterns.md ├── ui-styling-standards.md └── design-systems.md
-
+Visual Design (ui/web/):
+├── animation-patterns.md
+├── ui-styling-standards.md
+└── design-systems.md
 ```
 
 ---
@@ -164,7 +208,6 @@ Visual Design (ui/web/): ├── animation-patterns.md ├── ui-styling-st
 ```
 
 **Why this works**:
-
 - ✅ Token-efficient (~270 tokens)
 - ✅ Spans multiple categories (development/ + ui/)
 - ✅ Task-focused (UI development)
@@ -188,10 +231,26 @@ Visual Design (ui/web/): ├── animation-patterns.md ├── ui-styling-st
 ---
 
 ## Structure
+
 ```
-
-backend/ ├── navigation.md │ ├── api-patterns/ │ ├── rest-design.md │ ├── graphql-design.md │ └── grpc-patterns.md │ ├── nodejs/ │ ├── express-patterns.md │ └── fastify-patterns.md │ ├── python/ │ └── fastapi-patterns.md │ └── authentication/ ├── jwt-patterns.md └── oauth-patterns.md
-
+backend/
+├── navigation.md
+│
+├── api-patterns/
+│   ├── rest-design.md
+│   ├── graphql-design.md
+│   └── grpc-patterns.md
+│
+├── nodejs/
+│   ├── express-patterns.md
+│   └── fastify-patterns.md
+│
+├── python/
+│   └── fastapi-patterns.md
+│
+└── authentication/
+    ├── jwt-patterns.md
+    └── oauth-patterns.md
 ```
 
 ---
@@ -219,7 +278,6 @@ backend/ ├── navigation.md │ ├── api-patterns/ │ ├── rest-
 ```
 
 **Why this works**:
-
 - ✅ Token-efficient (~240 tokens)
 - ✅ Organized by approach first (REST, GraphQL)
 - ✅ Then by tech (Node.js, Python)
@@ -246,16 +304,17 @@ backend/ ├── navigation.md │ ├── api-patterns/ │ ├── rest-
 
 ### MERN (MongoDB, Express, React, Node)
 ```
-
-Frontend: development/frontend/react/ Backend: development/backend/nodejs/express-patterns.md Data: development/data/nosql-patterns/mongodb.md API: development/backend/api-patterns/rest-design.md
-
+Frontend: development/frontend/react/
+Backend:  development/backend/nodejs/express-patterns.md
+Data:     development/data/nosql-patterns/mongodb.md
+API:      development/backend/api-patterns/rest-design.md
 ```
 
 ### T3 Stack (Next.js, tRPC, Prisma, Tailwind)
 ```
-
-Frontend: development/frontend/react/ + ui/web/ui-styling-standards.md Backend: development/backend/nodejs/ + api-patterns/trpc-patterns.md Data: development/data/orm-patterns/prisma.md
-
+Frontend: development/frontend/react/ + ui/web/ui-styling-standards.md
+Backend:  development/backend/nodejs/ + api-patterns/trpc-patterns.md
+Data:     development/data/orm-patterns/prisma.md
 ```
 
 ---
@@ -284,7 +343,6 @@ Frontend: development/frontend/react/ + ui/web/ui-styling-standards.md Backend: 
 ```
 
 **Why this works**:
-
 - ✅ Token-efficient (~300 tokens)
 - ✅ Shows common tech stacks
 - ✅ Workflow-focused (how to build features)
@@ -308,10 +366,12 @@ Frontend: development/frontend/react/ + ui/web/ui-styling-standards.md Backend: 
 ---
 
 ## Structure
+
 ```
-
-content/ ├── navigation.md ├── copywriting-frameworks.md └── tone-voice.md
-
+content/
+├── navigation.md
+├── copywriting-frameworks.md
+└── tone-voice.md
 ```
 
 ---
@@ -332,7 +392,6 @@ content/ ├── navigation.md ├── copywriting-frameworks.md └── t
 ```
 
 **Why this works**:
-
 - ✅ Token-efficient (~150 tokens)
 - ✅ Simple structure (only 2 files)
 - ✅ No unnecessary complexity
@@ -357,7 +416,6 @@ The development category represents a significant portion of our context system.
 ```
 
 **Problems**:
-
 - ❌ 800+ tokens (should be 200-300)
 - ❌ Verbose explanations (should be concise)
 - ❌ Hard to scan (should use tables/trees)
@@ -370,7 +428,6 @@ The development category represents a significant portion of our context system.
 # Development Navigation
 
 Here are the files:
-
 - clean-code.md
 - api-design.md
 - react-patterns.md
@@ -378,7 +435,6 @@ Here are the files:
 ```
 
 **Problems**:
-
 - ❌ No ASCII tree (hard to see hierarchy)
 - ❌ No quick routes (hard to find tasks)
 - ❌ No organization (just a list)
@@ -393,18 +449,17 @@ Here are the files:
 ## React Patterns
 
 ### Hooks
-
 React hooks allow you to use state and lifecycle features in functional components. The most common hooks are:
 
 1. useState - For managing component state
    - Syntax: const [state, setState] = useState(initialValue)
    - Example: const [count, setCount] = useState(0)
-
-2. useEffect - For side effects [... continues with full documentation]
+   
+2. useEffect - For side effects
+   [... continues with full documentation]
 ```
 
 **Problems**:
-
 - ❌ Contains file contents (should just point to files)
 - ❌ Duplicates information (should reference, not repeat)
 - ❌ Too detailed (navigation, not documentation)

@@ -6,17 +6,17 @@ author: voxelvein
 type: skill
 category: performance
 tags:
-  - performance
-  - optimization
-  - pacer
-  - virtual
-  - unpic
-  - images
-  - debounce
-  - throttle
-  - virtualization
-  - bundle
-  - cls
+ —performance
+ —optimization
+ —pacer
+ —virtual
+ —unpic
+ —images
+ —debounce
+ —throttle
+ —virtualization
+ —bundle
+ —cls
 ---
 
 # Performance Guidelines
@@ -60,7 +60,7 @@ Use the right hook for the job:
 | Sequential task processing | `useQueue` |
 | Polling / periodic work | `useInterval` |
 
-Example  -  debounce the mods search query:
+Example, debounce the mods search query:
 
 ```tsx
 const [query, setQuery] = useState("");
@@ -73,7 +73,7 @@ useEffect(() => {
 
 Notes:
 
-- Pacer hooks use TanStack Store; by default there are NO reactive subscriptions  -  pass a `selector` to opt into re-renders (e.g. `(state) => ({ isPending: state.isPending })` for loading indicators)
+- Pacer hooks use TanStack Store; by default there are NO reactive subscriptions, pass a `selector` to opt into re-renders (e.g. `(state) => ({ isPending: state.isPending })` for loading indicators)
 - Prefer `useDebouncedValue` over `useDebouncedCallback` when the value drives an effect
 
 ### Step 3: Apply TanStack Virtual
@@ -95,7 +95,7 @@ const rowVirtualizer = useVirtualizer({
 - Use `useWindowVirtualizer` when the scroll container is the window
 - Use `measureElement` plus a `data-index` attribute for dynamic/variable item sizes
 - Use `initialRect`/`initialOffset` for SSR viewport hints
-- Combine with infinite scroll: fetch the next page when `lastItem.index >= allRows.length - 1`
+- Combine with infinite scroll: fetch the next page when `lastItem.index >= allRows.length—1`
 - For grids, virtualize rows and render columns inside each row
 
 ### Step 4: Apply General Performance Rules
@@ -108,7 +108,7 @@ const rowVirtualizer = useVirtualizer({
 - Clean up event listeners and observers in effects
 - Use `Intl.NumberFormat`/`Intl.DateTimeFormat` instead of hardcoded formats
 - Batch DOM reads before writes (avoid layout thrash)
-- React Compiler is NOT enabled  -  memoize with `useCallback`/`useMemo` only where it measurably helps
+- React Compiler is NOT enabled, memoize with `useCallback`/`useMemo` only where it measurably helps
 
 ### Step 5: Apply Unpic for Image Optimization
 
@@ -133,14 +133,14 @@ import { Image } from "@unpic/react";
 Notes:
 
 - Use Unpic for content images (thumbnails, banners, gallery shots) served
-  from a CDN  -  it knows how to resize images from most CDNs and generates
+  from a CDN, it knows how to resize images from most CDNs and generates
   responsive `srcset` automatically
 - For arbitrary remote URLs Unpic falls back to a plain `<img>`; only use
   it where it can actually generate multiple sizes
-- Do NOT wrap tiny fixed-size images (e.g. 24–36px user avatars) in Unpic  - 
+- Do NOT wrap tiny fixed-size images (e.g. 24–36px user avatars) in Unpic —
   there is no responsive benefit at that size; keep a plain `<img>` with
   explicit `width`/`height`
-- Do NOT use Unpic for local static assets (e.g. `/logo_light.png`)  -  it
+- Do NOT use Unpic for local static assets (e.g. `/logo_light.png`), it
   is designed for CDN-backed remote images
 - The current app has no content images yet (mod cards use letter avatars);
   when real thumbnails arrive, render them with Unpic
@@ -151,7 +151,7 @@ Output findings in terse `file:line` format, grouped by file. State the issue an
 
 ## Tips
 
-- Verify the actual data size before recommending virtualization  -  a list capped at 24 items (e.g. the mods search `limit: 24`) does NOT need `useVirtualizer`
-- Debounce search inputs before recommending server calls  -  the mods page currently fires `runSearch` on every keystroke
+- Verify the actual data size before recommending virtualization, a list capped at 24 items (e.g. the mods search `limit: 24`) does NOT need `useVirtualizer`
+- Debounce search inputs before recommending server calls, the mods page currently fires `runSearch` on every keystroke
 - Run `pnpm check`, `pnpm typecheck`, and `pnpm test` after changes
 - Check bundle impact with `pnpm check:bundle` after adding dependencies

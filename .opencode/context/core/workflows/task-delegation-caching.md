@@ -146,5 +146,5 @@ Track metrics:
 
 ## Related
 
-- `task-delegation-basics.md` - Core delegation workflow
-- `task-delegation-specialists.md` - When to delegate
+- `task-delegation-basics.md`, Core delegation workflow
+- `task-delegation-specialists.md`, When to delegate

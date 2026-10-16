@@ -9,7 +9,7 @@ Multitasking lets people switch quickly from one app to another, performing task
 
 ---
 
-People expect to use multitasking on their devices, and they may think something is wrong if your app doesn’t allow it. With rare exceptions  -  such as some games, and Apple Vision Pro apps running in a Full Space  -  every app needs to work well with multitasking.
+People expect to use multitasking on their devices, and they may think something is wrong if your app doesn’t allow it. With rare exceptions, such as some games, and Apple Vision Pro apps running in a Full Space, every app needs to work well with multitasking.
 
 In addition to app switching, multitasking can present different experiences on different devices; see [Platform considerations](#platform-considerations).
 

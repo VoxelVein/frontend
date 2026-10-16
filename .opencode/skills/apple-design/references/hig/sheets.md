@@ -35,7 +35,7 @@ The placement of these buttons varies between platforms; see [Platform considera
 
 **Provide an alternative to the Done button.** If you provide a Done button, always pair it with a Cancel button to give people a clear way to dismiss the sheet without confirming or saving their changes, or a Back button to move to a previous step in the sheet. Relying solely on the Done button implies that completing the task is the only way to exit the sheet, which can feel restrictive or misleading.
 
-Avoid showing all three buttons  -  Cancel, Done, and Back  -  together.
+Avoid showing all three buttons, Cancel, Done, and Back, together.
 
 ## Platform considerations
 
@@ -63,9 +63,9 @@ Sheets automatically support the large detent. Adding the medium detent allows t
 
 In macOS, a sheet is a cardlike view with rounded corners that floats on top of its parent window. The parent window is dimmed while the sheet is onscreen, signaling that people can’t interact with it until they dismiss the sheet. However, people expect to interact with other app windows before dismissing a sheet.
 
-**Present a sheet in a reasonable default size.** People don’t generally expect to resize sheets, so it’s important to use a size that’s appropriate for the content you display. In some cases, however, people appreciate a resizable sheet  -  such as when they need to expand the contents for a clearer view  -  so it’s a good idea to support resizing.
+**Present a sheet in a reasonable default size.** People don’t generally expect to resize sheets, so it’s important to use a size that’s appropriate for the content you display. In some cases, however, people appreciate a resizable sheet, such as when they need to expand the contents for a clearer view, so it’s a good idea to support resizing.
 
-**Let people interact with other app windows without first dismissing a sheet.** When a sheet opens, you bring its parent window to the front  -  if the parent window is a document window, you also bring forward its modeless document-related panels. When people want to interact with other windows in your app, make sure they can bring those windows forward even if they haven’t dismissed the sheet yet.
+**Let people interact with other app windows without first dismissing a sheet.** When a sheet opens, you bring its parent window to the front, if the parent window is a document window, you also bring forward its modeless document-related panels. When people want to interact with other windows in your app, make sure they can bring those windows forward even if they haven’t dismissed the sheet yet.
 
 **Use a panel instead of a sheet if people need to repeatedly provide input and observe results.** A find and replace panel, for example, might let people initiate replacements individually, so they can observe the result of each search for correctness. For guidance, see [Panels](panels.md).
 

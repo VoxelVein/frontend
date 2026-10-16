@@ -25,7 +25,7 @@
 
 ## What if I already know the library?
 
-**DON'T rely on training data - it's outdated.**
+**DON'T rely on training data, it's outdated.**
 
 Example: You think "I know Next.js, I'll use pages/"  
 Reality: Next.js 15 uses app/  
@@ -83,8 +83,8 @@ task(
   prompt="Fetch current documentation for [Library]: [specific question]
 
   Focus on:
-  - [What you need - be specific]
-  - [Related features/APIs]
+ —[What you need—be specific]
+ —[Related features/APIs]
 
   Context: [What you're building]"
 )
@@ -118,7 +118,7 @@ task(
 
 ## Do I need approval to use ExternalScout?
 
-**NO - ExternalScout is read-only, no approval required.**
+**NO, ExternalScout is read-only, no approval required.**
 
 **Approval required:** ❌ Write code | ❌ Run commands | ❌ Install packages **No approval:** ✅ ContextScout | ✅ ExternalScout | ✅ Read files
 
@@ -165,6 +165,6 @@ Not listed? ExternalScout can still fetch from official docs.
 
 ## Related
 
-- `external-libraries-workflow.md` - Core workflow
-- `external-libraries-scenarios.md` - Common scenarios
-- `.opencode/agents/subagents/core/externalscout.md` - ExternalScout agent
+- `external-libraries-workflow.md`, Core workflow
+- `external-libraries-scenarios.md`, Common scenarios
+- `.opencode/agents/subagents/core/externalscout.md`, ExternalScout agent

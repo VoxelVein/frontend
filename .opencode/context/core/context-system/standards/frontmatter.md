@@ -10,11 +10,10 @@
 
 <rule id="frontmatter_required" enforcement="strict">
   ALL context files MUST start with:
-
-```markdown
-<!-- Context: {category}/{function} | Priority: {level} | Version: X.Y | Updated: YYYY-MM-DD -->
-```
-
+  
+  ```markdown
+  <!-- Context: {category}/{function} | Priority: {level} | Version: X.Y | Updated: YYYY-MM-DD -->
+  ```
 </rule>
 
 ---
@@ -22,13 +21,11 @@
 ## Components
 
 **Category/Function**: `{category}/{function}`
-
 - Examples: `ecommerce/concepts`, `development/examples`, `core/standards`
 - Category = domain (ecommerce, payments, development)
 - Function = file type (concepts, examples, guides, lookup, errors)
 
 **Priority**: `critical` | `high` | `medium` | `low`
-
 - critical: 80% of use cases (business logic, core concepts)
 - high: 15% of use cases (common workflows, examples)
 - medium: 4% of use cases (edge cases)

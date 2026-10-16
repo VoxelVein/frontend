@@ -29,7 +29,7 @@ This context file provides reusable design system patterns, theme templates, and
 
 ```css
 :root {
-  /* Colors - High contrast, bold */
+  /* Colors—High contrast, bold */
   --background: oklch(1 0 0);
   --foreground: oklch(0 0 0);
   --card: oklch(1 0 0);
@@ -72,14 +72,14 @@ This context file provides reusable design system patterns, theme templates, and
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Space Mono, monospace;
 
-  /* Border radius - Sharp corners */
+  /* Border radius—Sharp corners */
   --radius: 0px;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius)—4px);
+  --radius-md: calc(var(--radius)—2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Shadows - Bold, offset shadows */
+  /* Shadows—Bold, offset shadows */
   --shadow-2xs: 4px 4px 0px 0px hsl(0 0% 0% / 0.5);
   --shadow-xs: 4px 4px 0px 0px hsl(0 0% 0% / 0.5);
   --shadow-sm:
@@ -117,7 +117,7 @@ This context file provides reusable design system patterns, theme templates, and
 
 ```css
 :root {
-  /* Colors - Subtle, professional */
+  /* Colors—Subtle, professional */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -138,7 +138,7 @@ This context file provides reusable design system patterns, theme templates, and
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
 
-  /* Chart colors - Monochromatic blues */
+  /* Chart colors—Monochromatic blues */
   --chart-1: oklch(0.81 0.1 252);
   --chart-2: oklch(0.62 0.19 260);
   --chart-3: oklch(0.55 0.22 263);
@@ -155,7 +155,7 @@ This context file provides reusable design system patterns, theme templates, and
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Typography - System fonts */
+  /* Typography—System fonts */
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
@@ -165,14 +165,14 @@ This context file provides reusable design system patterns, theme templates, and
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
 
-  /* Border radius - Rounded */
+  /* Border radius—Rounded */
   --radius: 0.625rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius)—4px);
+  --radius-md: calc(var(--radius)—2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Shadows - Subtle, soft */
+  /* Shadows—Subtle, soft */
   --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-sm:
@@ -335,8 +335,8 @@ Use `--spacing: 0.25rem` (4px) as base unit
 ### Radius Scales
 
 ```css
---radius-sm: calc(var(--radius) - 4px);
---radius-md: calc(var(--radius) - 2px);
+--radius-sm: calc(var(--radius)—4px);
+--radius-md: calc(var(--radius)—2px);
 --radius-lg: var(--radius);
 --radius-xl: calc(var(--radius) + 4px);
 ```

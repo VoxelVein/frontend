@@ -92,7 +92,7 @@ This file helps translate between worlds:
 
 ## Related Files
 
-- `business-domain.md` - Business needs in detail
-- `technical-domain.md` - Technical implementation in detail
-- `decisions-log.md` - Decisions made with full context
-- `living-notes.md` - Current open questions and issues
+- `business-domain.md`, Business needs in detail
+- `technical-domain.md`, Technical implementation in detail
+- `decisions-log.md`, Decisions made with full context
+- `living-notes.md`, Current open questions and issues

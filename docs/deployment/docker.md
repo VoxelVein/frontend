@@ -15,18 +15,18 @@ runner. All of them are built on `node:24-alpine`.
 
 The stages are:
 
-1. **deps**  -  enables Corepack and installs dependencies with `pnpm install
+1. **deps**, enables Corepack and installs dependencies with `pnpm install
    --frozen-lockfile`.
-2. **migrate**  -  `node_modules`, `drizzle.config.ts`, `env.config.ts`,
+2. **migrate**, `node_modules`, `drizzle.config.ts`, `env.config.ts`,
    `drizzle/`, and `src/db/`. Applies pending migrations and exits. It
    needs `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` too, because
    `drizzle.config.ts` imports the validated `env.config.ts`.
-3. **api**  -  `node_modules`, `server/`, `tsconfig.json`, and the whole of
+3. **api**, `node_modules`, `server/`, `tsconfig.json`, and the whole of
    `src/lib/`. Runs the API on port 3002 with a `/api/health` healthcheck.
-4. **build**  -  runs `pnpm build`, producing the Nitro output in
+4. **build**, runs `pnpm build`, producing the Nitro output in
    `.output/`. Requires the `VITE_API_URL` and `VITE_SITE_URL` build
    arguments.
-5. **runtime**  -  copies only `.output/` and runs the web server on
+5. **runtime**, copies only `.output/` and runs the web server on
    port 3000 (override with `PORT`) with a `/` healthcheck.
 
 Every image runs as a non-root user (`nodejs`).
@@ -158,7 +158,7 @@ testing secret and `TURNSTILE_HOSTNAMES` must not include `localhost`.
 Rate limits key anonymous callers by IP, and the API limits event
 streams per client while the web app counts a download once per client
 and file. All of them identify the client by IP from
-`X-Forwarded-For`, using the **last** entry  -  the one the reverse proxy
+`X-Forwarded-For`, using the **last** entry, the one the reverse proxy
 appends. That is only trustworthy when a proxy you control sits in front
 and appends to the header rather than passing a client-supplied one
 through unchanged, which is what `TRUST_PROXY` switches on.
@@ -177,7 +177,7 @@ through unchanged, which is what `TRUST_PROXY` switches on.
   variables for `BETTER_AUTH_SECRET` and the OAuth secrets.
 * The deploy workflow pushes the web, API, and migration images to
   `ghcr.io/<repo>`, each tagged with the `package.json` version and the
-  commit SHA  -  deliberately with no floating `latest`, so a roll-forward
+  commit SHA, deliberately with no floating `latest`, so a roll-forward
   is explicit. It fails unless both the `VITE_API_URL` and `VITE_SITE_URL`
   repository variables are set.
 * Set the image tag with `TAG` when building locally, otherwise Compose
@@ -202,12 +202,12 @@ cannot go live as-is. The email is the only real value.
 **The legal page dates are hardcoded.** Each of `/legal`, `/privacy`,
 `/terms`, `/disclaimer`, and `/cookies` passes its own `updated` date as a
 literal. Editing the text does not update the date, so there is nothing keeping
-the two in sync. (`/terms-of-use` no longer renders a page  -  it redirects to
+the two in sync. (`/terms-of-use` no longer renders a page, it redirects to
 `/terms`.)
 
 **Cookie consent is recorded but not enforced.** The banner stores
 `accepted` or `declined` in `localStorage` under `voxelvein-cookie-consent`
-and nothing reads it back. That is consistent with the code today  -  there
+and nothing reads it back. That is consistent with the code today, there
 is no analytics, no third-party script, and no non-essential cookie, so
 there is nothing to gate. It is only worth knowing because the banner
 offers a choice that currently has no consequence, so adding a tracker
@@ -224,6 +224,6 @@ If the app is reachable at more than one origin, set
 * [Commands](../development/commands.md)
 * [Object Storage](../storage/object-storage.md)
 * [Migrations](../database/migrations.md)
-* [Hardening](../security/hardening.md)  -  response headers and CSRF scope
-* [Resilience](../development/resilience.md)  -  chunk reload and download
+* [Hardening](../security/hardening.md), response headers and CSRF scope
+* [Resilience](../development/resilience.md), chunk reload and download
   counting

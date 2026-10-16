@@ -1,15 +1,15 @@
 ---
 name: drizzle-migrations
-description: Change the Postgres schema safely in this repo  -  generating a Drizzle migration, naming the file, reviewing the SQL, applying it, and handling the deploy and search-index consequences. Use when adding or altering a table, column, index, or constraint in src/db/schema.ts, when touching Better Auth's schema, or when a migration fails to apply. Triggers on "add a column", "change the schema", "migrate", "alter table", "add an index", or any edit to src/db/schema.ts.
+description: Change the Postgres schema safely in this repo, generating a Drizzle migration, naming the file, reviewing the SQL, applying it, and handling the deploy and search-index consequences. Use when adding or altering a table, column, index, or constraint in src/db/schema.ts, when touching Better Auth's schema, or when a migration fails to apply. Triggers on "add a column", "change the schema", "migrate", "alter table", "add an index", or any edit to src/db/schema.ts.
 version: 1.0.0
 author: voxelvein
 type: skill
 category: database
 tags:
-  - drizzle
-  - postgres
-  - migrations
-  - schema
+ —drizzle
+ —postgres
+ —migrations
+ —schema
 ---
 
 # Drizzle Migrations
@@ -36,7 +36,7 @@ Running any `drizzle-kit` command therefore requires:
 - `BETTER_AUTH_SECRET`
 - `BETTER_AUTH_URL`
 
-Missing any of them fails before Drizzle starts  -  including `generate`,
+Missing any of them fails before Drizzle starts, including `generate`,
 which does not touch the database but still loads the config. Copy
 `.env.example` if the environment isn't set up.
 
@@ -44,7 +44,7 @@ which does not touch the database but still loads the config. Copy
 
 ### 1. Edit the schema
 
-All tables live in `src/db/schema.ts`  -  there are no per-table files.
+All tables live in `src/db/schema.ts`, there are no per-table files.
 It exports `users`, `sessions`, `accounts`, `verifications`, `passkeys`,
 `posts`, `projects`, `projectVersions`, `projectFiles`, plus a
 `relations` block per table.
@@ -77,11 +77,11 @@ Rename to `00NN_snake_case_intent.sql`. **You must also set that
 entry's `tag` in `drizzle/meta/_journal.json` to the new name.** The
 migrator resolves the SQL file by `tag`, so a renamed `.sql` with an
 unchanged tag makes `drizzle-kit migrate` exit 1 with no error message
-at all  -  the spinner overwrites the real error, so it reads like a
+at all, the spinner overwrites the real error, so it reads like a
 silent skip and the migration never applies. Leave the snapshot file
 alone: `00NN_snapshot.json` is named by index, not by tag.
 
-### 4. Read the generated SQL  -  always
+### 4. Read the generated SQL, always
 
 Never apply an unreviewed migration. Drizzle will happily emit a
 destructive statement you did not intend. Check specifically for:
@@ -90,14 +90,14 @@ destructive statement you did not intend. Check specifically for:
 - **Cascade.** A dropped FK with `CASCADE` deletes dependent rows.
 - **Missing indexes** on new foreign keys. Postgres never creates these,
   so the schema has to. `src/db/__tests__/foreign-key-indexes.test.ts`
-  fails on any FK column that leads no index, so `pnpm test` catches it  - 
+  fails on any FK column that leads no index, so `pnpm test` catches it —
   but that only helps if the index is missing from the schema, not just
   from the generated SQL.
 - **Type changes** that rewrite the whole table (`ALTER COLUMN TYPE`
   without a `USING` clause usually fails; a widening `varchar` is
   usually safe).
 - **Defaults on NOT NULL columns** added to a table that already has
-  rows  -  this fails if the table is non-empty.
+  rows, this fails if the table is non-empty.
 
 If the output doesn't match your intent, fix the schema and regenerate.
 Don't hand-edit the SQL unless you know exactly why.
@@ -117,7 +117,7 @@ resync and no reindex command. A changed field does need a matching index:
 - Changing a `tsvector` expression means editing it in **both** the migration
   and `src/lib/search/text.ts`, identically. A GIN expression index is only
   used when the query repeats the expression exactly, and a mismatch does not
-  error  -  it silently falls back to a sequential scan.
+  error, it silently falls back to a sequential scan.
 - A new indexed expression needs its own `CREATE INDEX` in a generated
   migration.
 - Verify with `EXPLAIN` that the index is used, not by reading the code.

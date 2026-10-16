@@ -53,7 +53,7 @@ Brief description (1-2 sentences).
   <rule id="tool_usage">
     ONLY use: glob, read, grep, list
     NEVER use: bash, write, edit, task
-    You're read-only - no modifications allowed
+    You're read-only—no modifications allowed
   </rule>
   <rule id="always_use_tools">
     ALWAYS use tools to discover/verify
@@ -81,16 +81,16 @@ Brief description (1-2 sentences).
 
 <execution_priority>
   <tier level="1" desc="Critical Operations">
-    - @tool_usage: Use ONLY allowed tools
-    - @always_use_tools: Verify everything
-    - @output_format: Precise results
+   —@tool_usage: Use ONLY allowed tools
+   —@always_use_tools: Verify everything
+   —@output_format: Precise results
   </tier>
   <tier level="2" desc="Core Workflow">
-    - Main workflow steps
+   —Main workflow steps
   </tier>
   <tier level="3" desc="Quality">
-    - Quality checks
-    - Validation
+   —Quality checks
+   —Validation
   </tier>
   <conflict_resolution>
     Tier 1 always overrides Tier 2/3
@@ -121,7 +121,7 @@ Brief description (1-2 sentences).
 ## What NOT to Do
 
 - ❌ **NEVER use bash/write/edit/task tools** (@tool_usage)
-- ❌ Don't assume information - verify with tools
+- ❌ Don't assume information—verify with tools
 - ❌ Don't fabricate paths or details
 - ❌ Don't skip required output fields
 
@@ -174,14 +174,14 @@ Brief description (1-2 sentences).
 ```xml
 <execution_priority>
   <tier level="1" desc="Critical">
-    - Tool usage rules
-    - Verification requirements
+   —Tool usage rules
+   —Verification requirements
   </tier>
   <tier level="2" desc="Core">
-    - Main workflow
+   —Main workflow
   </tier>
   <tier level="3" desc="Quality">
-    - Nice-to-haves
+   —Nice-to-haves
   </tier>
   <conflict_resolution>Tier 1 always overrides</conflict_resolution>
 </execution_priority>
@@ -232,7 +232,7 @@ Brief description (1-2 sentences).
 ## What NOT to Do
 
 - ❌ **NEVER use bash/write/edit/task tools**
-- ❌ Don't assume - verify with tools
+- ❌ Don't assume—verify with tools
 - ❌ Don't fabricate information
 ```
 
@@ -285,8 +285,8 @@ Before deploying optimized prompt:
 
 ## Related
 
-- `concepts/subagent-testing-modes.md` - How to test optimized prompts
-- `guides/testing-subagents.md` - Verify tool usage works
-- `errors/tool-permission-errors.md` - Fix tool issues
+- `concepts/subagent-testing-modes.md`, How to test optimized prompts
+- `guides/testing-subagents.md`, Verify tool usage works
+- `errors/tool-permission-errors.md`, Fix tool issues
 
 **Reference**: `.opencode/command/prompt-engineering/prompt-optimizer.md` (optimization principles)

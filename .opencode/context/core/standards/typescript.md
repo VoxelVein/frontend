@@ -54,13 +54,13 @@ function processFileContent(path) {}     // Use: process()
 ```typescript
 // ✅ GOOD - Pure function
 function calculateTotal(items: Item[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0);
+  return items.reduce((sum, item) => sum + item.price, 0)
 }
 
 // ❌ AVOID - Side effects
-let total = 0;
+let total = 0
 function addToTotal(item: Item) {
-  total += item.price; // Mutates external state
+  total += item.price  // Mutates external state
 }
 ```
 
@@ -71,19 +71,16 @@ function addToTotal(item: Item) {
 const filtered = agents
   .filter((a) => a.mode !== "primary")
   .filter((a) => hasPermission(a, caller))
-  .map((a) => a.name);
+  .map((a) => a.name)
 
 // ✅ GOOD - Higher-order functions
-export function withRetry<T>(
-  fn: () => Promise<T>,
-  maxRetries: number
-): Promise<T> {
+export function withRetry<T>(fn: () => Promise<T>, maxRetries: number): Promise<T> {
   return fn().catch((error) => {
     if (maxRetries > 0) {
-      return withRetry(fn, maxRetries - 1);
+      return withRetry(fn, maxRetries - 1)
     }
-    throw error;
-  });
+    throw error
+  })
 }
 ```
 
@@ -98,9 +95,9 @@ export function withRetry<T>(
 ```typescript
 // ✅ GOOD - Explicit types
 interface User {
-  id: string;
-  name: string;
-  email: string;
+  id: string
+  name: string
+  email: string
 }
 
 function getUser(id: string): User {
@@ -119,12 +116,12 @@ function getUser(id: any): any {
 
 ```typescript
 // ✅ GOOD - Inference works
-const count = 42; // TypeScript knows this is number
-const users = await fetchUsers(); // Type inferred from return type
+const count = 42  // TypeScript knows this is number
+const users = await fetchUsers()  // Type inferred from return type
 
 // ❌ AVOID - Redundant annotations
-const count: number = 42;
-const users: User[] = await fetchUsers();
+const count: number = 42
+const users: User[] = await fetchUsers()
 ```
 
 ### 2.3 Type Guards
@@ -139,12 +136,12 @@ function isUser(value: unknown): value is User {
     value !== null &&
     "id" in value &&
     "name" in value
-  );
+  )
 }
 
 // Usage
 if (isUser(data)) {
-  console.log(data.name); // TypeScript knows data is User
+  console.log(data.name)  // TypeScript knows data is User
 }
 ```
 
@@ -156,14 +153,14 @@ if (isUser(data)) {
 // ✅ GOOD - unknown requires type checking
 function processData(data: unknown) {
   if (typeof data === "string") {
-    return data.toUpperCase();
+    return data.toUpperCase()
   }
-  throw new Error("Invalid data");
+  throw new Error("Invalid data")
 }
 
 // ❌ AVOID - any bypasses type checking
 function processData(data: any) {
-  return data.toUpperCase(); // No compile-time safety
+  return data.toUpperCase()  // No compile-time safety
 }
 ```
 
@@ -181,29 +178,28 @@ const files = messages
   .flatMap((x) => x.parts)
   .filter((x): x is Patch => x.type === "patch")
   .flatMap((x) => x.files)
-  .map((x) => path.relative(worktree, x));
+  .map((x) => path.relative(worktree, x))
 
 // ✅ GOOD - Parallel async operations
 const results = await Promise.all(
   toolCalls.map(async (call) => {
-    return executeCall(call);
-  })
-);
+    return executeCall(call)
+  }),
+)
 
 // ✅ GOOD - Reduce for aggregation
-const totalAdditions = diffs.reduce((sum, x) => sum + x.additions, 0);
+const totalAdditions = diffs.reduce((sum, x) => sum + x.additions, 0)
 
 // ✅ GOOD - Unique values
-const uniqueNames = Array.from(new Set(items.map((x) => x.name)));
+const uniqueNames = Array.from(new Set(items.map((x) => x.name)))
 
 // ✅ GOOD - Sorting
-const sorted = items.toSorted((a, b) => a.timestamp - b.timestamp);
+const sorted = items.toSorted((a, b) => a.timestamp - b.timestamp)
 ```
 
 ### 3.2 For-Loops (When Necessary)
 
 **Rule: Use for-loops only for:**
-
 1. Algorithm complexity (DP, graph traversal)
 2. Early exit requirements
 3. Sequential side effects
@@ -211,12 +207,12 @@ const sorted = items.toSorted((a, b) => a.timestamp - b.timestamp);
 
 ```typescript
 // ✅ GOOD - Early exit
-const patches = [];
+const patches = []
 for (const msg of all) {
-  if (msg.info.id === targetID) break;
+  if (msg.info.id === targetID) break
   for (const part of msg.parts) {
     if (part.type === "patch") {
-      patches.push(part);
+      patches.push(part)
     }
   }
 }
@@ -224,7 +220,7 @@ for (const msg of all) {
 // ✅ GOOD - Sequential mutations
 for (const key of Object.keys(tools)) {
   if (disabled.has(key)) {
-    delete tools[key];
+    delete tools[key]
   }
 }
 ```
@@ -237,13 +233,13 @@ for (const key of Object.keys(tools)) {
 // ✅ GOOD - Type guard preserves type information
 const patches = messages
   .flatMap((msg) => msg.parts)
-  .filter((part): part is PatchPart => part.type === "patch");
+  .filter((part): part is PatchPart => part.type === "patch")
 // patches is now PatchPart[], not Part[]
 
 // ❌ BAD - Loses type information
 const patches = messages
   .flatMap((msg) => msg.parts)
-  .filter((part) => part.type === "patch");
+  .filter((part) => part.type === "patch")
 // patches is still Part[], requires casting later
 ```
 
@@ -262,19 +258,19 @@ const [language, cfg, provider, auth] = await Promise.all([
   getConfig(),
   getProvider(model.providerID),
   getAuth(model.providerID),
-]);
+])
 
 // ✅ GOOD - Parallel array processing
 const results = await Promise.all(
   items.map(async (item) => {
-    return processItem(item);
-  })
-);
+    return processItem(item)
+  }),
+)
 
 // ❌ BAD - Sequential when independent
-const language = await getLanguage(model);
-const cfg = await getConfig(); // Could run in parallel!
-const provider = await getProvider(model.providerID);
+const language = await getLanguage(model)
+const cfg = await getConfig()  // Could run in parallel!
+const provider = await getProvider(model.providerID)
 ```
 
 ### 4.2 Sequential Operations
@@ -283,14 +279,14 @@ const provider = await getProvider(model.providerID);
 
 ```typescript
 // ✅ GOOD - Sequential dependency chain
-const session = await createSession({ title: "New" });
-const message = await addMessage(session.id, { content: "Hello" });
-const response = await processMessage(message.id);
+const session = await createSession({ title: "New" })
+const message = await addMessage(session.id, { content: "Hello" })
+const response = await processMessage(message.id)
 
 // ✅ GOOD - Promise chain for clarity
 const result = await createSession({ title: "New" })
   .then((session) => addMessage(session.id, { content: "Hello" }))
-  .then((message) => processMessage(message.id));
+  .then((message) => processMessage(message.id))
 ```
 
 ### 4.3 Error Handling in Async
@@ -300,44 +296,44 @@ const result = await createSession({ title: "New" })
 ```typescript
 // ✅ GOOD - Catch at call site
 const result = await operation().catch((error) => {
-  console.error("Operation failed", error);
-  return defaultValue;
-});
+  console.error("Operation failed", error)
+  return defaultValue
+})
 
 // ✅ GOOD - Promise.all with error handling
 const results = await Promise.all(
   items.map(async (item) => {
     return processItem(item).catch((error) => {
-      console.error("Item failed", { item, error });
-      return null;
-    });
-  })
-);
+      console.error("Item failed", { item, error })
+      return null
+    })
+  }),
+)
 
 // ✅ ACCEPTABLE - try/catch for multiple operations
 try {
-  const session = await createSession(input);
-  await addMessage(session.id, message);
-  await publishEvent({ session });
-  return session;
+  const session = await createSession(input)
+  await addMessage(session.id, message)
+  await publishEvent({ session })
+  return session
 } catch (error) {
-  console.error("Session creation failed", error);
-  throw error;
+  console.error("Session creation failed", error)
+  throw error
 }
 
 // ❌ AVOID - try/catch for single operation
 try {
-  const result = await operation();
-  return result;
+  const result = await operation()
+  return result
 } catch (error) {
-  console.error(error);
-  throw error;
+  console.error(error)
+  throw error
 }
 // Better:
 const result = await operation().catch((error) => {
-  console.error(error);
-  throw error;
-});
+  console.error(error)
+  throw error
+})
 ```
 
 ---
@@ -351,34 +347,34 @@ const result = await operation().catch((error) => {
 ```typescript
 // ✅ GOOD - Early returns
 function getStatus(session: Session) {
-  if (!session) return "not_found";
-  if (session.busy) return "busy";
-  if (session.error) return "error";
-  return "ready";
+  if (!session) return "not_found"
+  if (session.busy) return "busy"
+  if (session.error) return "error"
+  return "ready"
 }
 
 async function process(id: string) {
-  const session = await getSession(id);
-  if (!session) return { error: "Not found" };
+  const session = await getSession(id)
+  if (!session) return { error: "Not found" }
 
-  const result = await execute(session);
-  if (!result.success) return { error: result.message };
+  const result = await execute(session)
+  if (!result.success) return { error: result.message }
 
-  return { data: result.data };
+  return { data: result.data }
 }
 
 // ❌ BAD - Else statements
 function getStatus(session: Session) {
   if (!session) {
-    return "not_found";
+    return "not_found"
   } else {
     if (session.busy) {
-      return "busy";
+      return "busy"
     } else {
       if (session.error) {
-        return "error";
+        return "error"
       } else {
-        return "ready";
+        return "ready"
       }
     }
   }
@@ -390,14 +386,14 @@ function getStatus(session: Session) {
 ```typescript
 // ✅ GOOD - Guard clauses at function start
 async function updateSession(id: string, data: UpdateData) {
-  if (!id) throw new Error("ID required");
-  if (!data) throw new Error("Data required");
-  if (data.title && data.title.length > 100) throw new Error("Title too long");
+  if (!id) throw new Error("ID required")
+  if (!data) throw new Error("Data required")
+  if (data.title && data.title.length > 100) throw new Error("Title too long")
 
   // Main logic here
-  const session = await getSession(id);
-  await update(id, data);
-  return session;
+  const session = await getSession(id)
+  await update(id, data)
+  return session
 }
 ```
 
@@ -410,17 +406,17 @@ async function updateSession(id: string, data: UpdateData) {
 function handleEvent(event: Event) {
   switch (event.type) {
     case "start":
-      return handleStart(event);
-
+      return handleStart(event)
+    
     case "update":
-      return handleUpdate(event);
-
+      return handleUpdate(event)
+    
     case "complete":
-      return handleComplete(event);
-
+      return handleComplete(event)
+    
     default:
-      const _exhaustive: never = event;
-      throw new Error(`Unhandled event type: ${(event as any).type}`);
+      const _exhaustive: never = event
+      throw new Error(`Unhandled event type: ${(event as any).type}`)
   }
 }
 ```
@@ -436,35 +432,35 @@ function handleEvent(event: Event) {
 ```typescript
 // ✅ GOOD - Organized imports
 // 1. Node built-ins
-import path from "path";
-import fs from "fs/promises";
+import path from "path"
+import fs from "fs/promises"
 
 // 2. External packages
-import { z } from "zod";
-import express from "express";
+import { z } from "zod"
+import express from "express"
 
 // 3. Internal modules
-import { User } from "./types";
-import { getConfig } from "./config";
+import { User } from "./types"
+import { getConfig } from "./config"
 ```
 
 ### 6.2 Naming Conventions
 
 ```typescript
 // ✅ GOOD - Clear naming
-const session = await getSession(id);
-const user = await getCurrentUser();
-const messages = await getMessages({ sessionID });
+const session = await getSession(id)
+const user = await getCurrentUser()
+const messages = await getMessages({ sessionID })
 
 // ❌ BAD - Unnecessary verbosity
-const currentSession = await getSession(id);
-const currentlyAuthenticatedUser = await getCurrentUser();
-const sessionMessagesList = await getMessages({ sessionID });
+const currentSession = await getSession(id)
+const currentlyAuthenticatedUser = await getCurrentUser()
+const sessionMessagesList = await getMessages({ sessionID })
 
 // ✅ GOOD - Multi-word when single word is ambiguous
-const sessionID = params.id;
-const userAgent = req.headers["user-agent"];
-const maxRetries = config.retries;
+const sessionID = params.id
+const userAgent = req.headers["user-agent"]
+const maxRetries = config.retries
 ```
 
 ### 6.3 File Structure
@@ -474,8 +470,8 @@ const maxRetries = config.retries;
 ```typescript
 // user.ts
 export interface User {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 export async function getUser(id: string): Promise<User> {
@@ -499,15 +495,15 @@ export async function createUser(data: CreateUserInput): Promise<User> {
 // ✅ GOOD - AAA pattern
 test("creates user with valid data", async () => {
   // Arrange
-  const userData = { name: "Alice", email: "alice@example.com" };
-
+  const userData = { name: "Alice", email: "alice@example.com" }
+  
   // Act
-  const user = await createUser(userData);
-
+  const user = await createUser(userData)
+  
   // Assert
-  expect(user.name).toBe("Alice");
-  expect(user.email).toBe("alice@example.com");
-});
+  expect(user.name).toBe("Alice")
+  expect(user.email).toBe("alice@example.com")
+})
 ```
 
 ### 7.2 Coverage Goals
@@ -518,19 +514,16 @@ test("creates user with valid data", async () => {
 // ✅ GOOD - Both positive and negative tests
 describe("createUser", () => {
   test("creates user with valid data", async () => {
-    const user = await createUser({
-      name: "Alice",
-      email: "alice@example.com",
-    });
-    expect(user).toBeDefined();
-  });
-
+    const user = await createUser({ name: "Alice", email: "alice@example.com" })
+    expect(user).toBeDefined()
+  })
+  
   test("throws error with invalid email", async () => {
     await expect(
       createUser({ name: "Alice", email: "invalid" })
-    ).rejects.toThrow("Invalid email");
-  });
-});
+    ).rejects.toThrow("Invalid email")
+  })
+})
 ```
 
 ### 7.3 Mock External Dependencies
@@ -541,14 +534,14 @@ describe("createUser", () => {
 // ✅ GOOD - Mocked dependencies
 test("fetches user data", async () => {
   const mockFetch = vi.fn().mockResolvedValue({
-    json: () => Promise.resolve({ id: "1", name: "Alice" }),
-  });
-
-  global.fetch = mockFetch;
-
-  const user = await fetchUser("1");
-  expect(user.name).toBe("Alice");
-});
+    json: () => Promise.resolve({ id: "1", name: "Alice" })
+  })
+  
+  global.fetch = mockFetch
+  
+  const user = await fetchUser("1")
+  expect(user.name).toBe("Alice")
+})
 ```
 
 ---
@@ -561,27 +554,27 @@ test("fetches user data", async () => {
 
 ```typescript
 // ✅ GOOD - Immutable with ternary
-const foo = condition ? 1 : 2;
-const result = await (isValid ? processValid() : processInvalid());
+const foo = condition ? 1 : 2
+const result = await (isValid ? processValid() : processInvalid())
 
 // ❌ BAD - Reassignment
-let foo;
+let foo
 if (condition) {
-  foo = 1;
+  foo = 1
 } else {
-  foo = 2;
+  foo = 2
 }
 
 // ✅ GOOD - Early return instead of reassignment
 function getValue(condition: boolean) {
-  if (condition) return 1;
-  return 2;
+  if (condition) return 1
+  return 2
 }
 
 // ✅ ACCEPTABLE - let when mutation is necessary
-let accumulator = 0;
+let accumulator = 0
 for (const item of items) {
-  accumulator += item.value;
+  accumulator += item.value
 }
 ```
 

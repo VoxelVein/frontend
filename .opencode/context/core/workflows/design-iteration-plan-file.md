@@ -35,7 +35,7 @@ current_stage: layout
 
 ## User Requirements
 
-{What the user asked for - verbatim or close paraphrase}
+{What the user asked for—verbatim or close paraphrase}
 
 ## Design Goals
 

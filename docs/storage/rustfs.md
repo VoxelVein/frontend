@@ -33,15 +33,15 @@ these.
 
 * Docker, able to run containers
 * Ports `9000` and `9001` free on the host
-* A `.env.local` copied from `.env.example`  -  see
+* A `.env.local` copied from `.env.example`, see
   [Setup](../development/setup.md)
 
 RustFS has two listeners. The app only ever talks to the first.
 
 | Port   | Listener                           |
 | ------ | ---------------------------------- |
-| `9000` | S3 API - the endpoint the app uses |
-| `9001` | web console - browser only         |
+| `9000` | S3 API, the endpoint the app uses  |
+| `9001` | web console, browser only          |
 
 The console can be turned off with `RUSTFS_CONSOLE_ENABLE=false` once
 setup is done. It is on by default.
@@ -133,7 +133,7 @@ right → a name → **Create**.
 `voxelvein-dev` matches the `.env.example` default. Names must be
 DNS-compatible, and uniqueness only matters within your own deployment.
 
-The app needs nothing else on the bucket  -  no versioning, no lifecycle
+The app needs nothing else on the bucket, no versioning, no lifecycle
 rules, no public ACLs. Every download goes through
 `/api/download/<fileId>` first. See [Object Storage](object-storage.md).
 
@@ -149,7 +149,7 @@ right → an **expiration time**, **name**, and **description** →
 **Submit**. Then **Copy** or **Export**, because the secret is shown once
 and never again.
 
-Name it for who it is and when it dies  -  `voxelvein-app-2026-12`  -  and
+Name it for who it is and when it dies, `voxelvein-app-2026-12`, and
 give it an expiry, so the next rotation is a date rather than an
 archaeological dig.
 
@@ -194,7 +194,7 @@ STORAGE_ENDPOINT=http://rustfs:9000
 
 `STORAGE_QUOTA_BYTES` works the same as with any provider, and the app
 enforces it. RustFS's own per-bucket quota is a second, separate limit
-worth leaving unset  -  two ceilings that disagree are a support ticket
+worth leaving unset, two ceilings that disagree are a support ticket
 waiting to happen.
 
 ## 7. Prove it end to end
@@ -229,7 +229,7 @@ cd demo && zip -r ../demo.jar META-INF
 
 ## Running with Compose instead
 
-`just infra` starts Postgres, Garage, and Valkey  -  not RustFS. To use
+`just infra` starts Postgres, Garage, and Valkey, not RustFS. To use
 RustFS instead, create `compose.rustfs.yaml` with a `rustfs` service and
 name the services you want, leaving Garage out:
 
@@ -239,8 +239,8 @@ services:
   rustfs:
     image: rustfs/rustfs:latest
     ports:
-      - "9000:9000"
-      - "9001:9001"
+     - "9000:9000"
+     - "9001:9001"
     environment:
       RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:?set it in .env.local}
       RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:?set it in .env.local}
@@ -248,8 +248,8 @@ services:
       RUSTFS_OBS_LOGGER_LEVEL: info
       RUSTFS_OBS_LOG_DIRECTORY: /var/log/rustfs
     volumes:
-      - rustfs-data:/data
-      - rustfs-logs:/var/log/rustfs
+     - rustfs-data:/data
+     - rustfs-logs:/var/log/rustfs
     restart: unless-stopped
 
 volumes:
@@ -264,10 +264,10 @@ docker compose -f docker-compose.yml -f compose.rustfs.yaml \
 
 Naming the services replaces `just infra` and leaves Garage out. Compose
 reads `.env` by default, so `--env-file .env.local` is what lets it pick
-up the credentials from step 1  -  the same flag `just infra` passes.
+up the credentials from step 1, the same flag `just infra` passes.
 
 The `:?` form fails the stack when a variable is unset, which is what
-you want  -  a RustFS silently falling back to `rustfsadmin` on a shared
+you want, a RustFS silently falling back to `rustfsadmin` on a shared
 machine is not a good surprise.
 
 `docker-compose.yml` is the development stack. `compose.yaml` is the
@@ -321,9 +321,9 @@ key is invisible until it restarts.
 
 ## Related
 
-* [Object Storage](object-storage.md)  -  how the app uses storage, and the
+* [Object Storage](object-storage.md), how the app uses storage, and the
   quota rules
-* [Cloudflare R2](cloudflare-r2.md)  -  the production provider
-* [Setup](../development/setup.md)  -  the rest of the local environment
-* [Projects and Files](../content/projects.md)  -  the upload and download
+* [Cloudflare R2](cloudflare-r2.md), the production provider
+* [Setup](../development/setup.md), the rest of the local environment
+* [Projects and Files](../content/projects.md), the upload and download
   flows

@@ -8,7 +8,7 @@
 
 **Location**: `.tmp/sessions/{YYYY-MM-DD}-{task-slug}/context.md`
 
-**Key Principle**: ContextScout discovers paths. The orchestrator persists them into context.md AFTER approval. Downstream agents read from context.md  -  no re-discovery.
+**Key Principle**: ContextScout discovers paths. The orchestrator persists them into context.md AFTER approval. Downstream agents read from context.md, no re-discovery.
 
 ---
 
@@ -48,7 +48,7 @@ Session ID: {YYYY-MM-DD}-{task-slug} Created: {ISO timestamp} Status: in_progres
 
 ## Current Request
 
-{What user asked for  -  verbatim or close paraphrase}
+{What user asked for — verbatim or close paraphrase}
 
 ## Context Files (Standards to Follow)
 
@@ -59,7 +59,7 @@ Paths ContextScout discovered. Downstream agents load these for coding standards
 
 ## Reference Files (Source Material)
 
-Project files relevant to the task  -  NOT standards.
+Project files relevant to the task — NOT standards.
 
 - {e.g. package.json}
 - {e.g. src/existing-module.ts}
@@ -68,12 +68,12 @@ Project files relevant to the task  -  NOT standards.
 
 Live docs fetched via ExternalScout. Read-only cache.
 
-- `.tmp/external-context/{package}/{topic}.md`  -  {description}
+- `.tmp/external-context/{package}/{topic}.md` — {description}
 
 ## Components
 
-- {Component 1}  -  {what it does}
-- {Component 2}  -  {what it does}
+- {Component 1} — {what it does}
+- {Component 2} — {what it does}
 
 ## Constraints
 
@@ -148,6 +148,6 @@ task(
 
 ## Related
 
-- `task-delegation-specialists.md` - When to delegate to which specialist
-- `task-delegation-caching.md` - Context caching for repeated patterns
-- `../context-system/standards/mvi.md` - MVI principle
+- `task-delegation-specialists.md`, When to delegate to which specialist
+- `task-delegation-caching.md`, Context caching for repeated patterns
+- `../context-system/standards/mvi.md`, MVI principle

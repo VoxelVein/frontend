@@ -1,7 +1,7 @@
 # Core Concept: Category System
 
 **Purpose**: Understanding how components are organized  
-**Priority**: HIGH - Load this before adding categories or organizing components
+**Priority**: HIGH, Load this before adding categories or organizing components
 
 ---
 
@@ -11,10 +11,10 @@ Categories are domain-based groupings that organize agents, context files, and t
 
 **Benefits**:
 
-- **Scalability** - Easy to add new domains
-- **Discovery** - Find agents by domain
-- **Organization** - Clear structure
-- **Modularity** - Install only what you need
+- **Scalability**, Easy to add new domains
+- **Discovery**, Find agents by domain
+- **Organization**, Clear structure
+- **Modularity**, Install only what you need
 
 ---
 
@@ -155,22 +155,22 @@ Each category has a metadata file:
 
 ### Category Names
 
-✅ **Lowercase** - `development`, not `Development`  
-✅ **Singular** - `content`, not `contents`  
-✅ **Descriptive** - Clear domain name  
-✅ **Consistent** - Follow existing patterns
+✅ **Lowercase**—`development`, not `Development`  
+✅ **Singular**—`content`, not `contents`  
+✅ **Descriptive**, Clear domain name  
+✅ **Consistent**, Follow existing patterns
 
 ### Agent Names
 
-✅ **Kebab-case** - `frontend-specialist.md`  
-✅ **Descriptive** - Clear purpose  
-✅ **Suffix** - Use `-specialist`, `-agent`, `-writer` as appropriate
+✅ **Kebab-case**—`frontend-specialist.md`  
+✅ **Descriptive**, Clear purpose  
+✅ **Suffix**, Use `-specialist`, `-agent`, `-writer` as appropriate
 
 ### Context Names
 
-✅ **Kebab-case** - `react-patterns.md`  
-✅ **Descriptive** - Clear topic  
-✅ **Specific** - Focused on one topic
+✅ **Kebab-case**—`react-patterns.md`  
+✅ **Descriptive**, Clear topic  
+✅ **Specific**, Focused on one topic
 
 ---
 
@@ -180,10 +180,10 @@ The system resolves agent paths flexibly:
 
 ### Resolution Order
 
-1. **Check for `/`** - If present, treat as category path
-2. **Check core/** - For backward compatibility
-3. **Search categories** - Look in all categories
-4. **Error** - If not found
+1. **Check for `/`**, If present, treat as category path
+2. **Check core/**, For backward compatibility
+3. **Search categories**, Look in all categories
+4. **Error**, If not found
 
 ### Examples
 
@@ -263,17 +263,17 @@ EOF
 
 ### When to Create a New Category
 
-✅ **Distinct domain** - Clear expertise area  
-✅ **Multiple agents** - Plan for 2+ agents  
-✅ **Shared context** - Common knowledge to share  
-✅ **User demand** - Requested by users
+✅ **Distinct domain**, Clear expertise area  
+✅ **Multiple agents**, Plan for 2+ agents  
+✅ **Shared context**, Common knowledge to share  
+✅ **User demand**, Requested by users
 
 ### When NOT to Create a Category
 
-❌ **Single agent** - Use existing category  
-❌ **Overlapping** - Fits in existing category  
-❌ **Too specific** - Too narrow focus  
-❌ **Unclear domain** - Not well-defined
+❌ **Single agent**, Use existing category  
+❌ **Overlapping**, Fits in existing category  
+❌ **Too specific**, Too narrow focus  
+❌ **Unclear domain**, Not well-defined
 
 ---
 
@@ -323,24 +323,24 @@ Loads: `.opencode/context/ui/web/react-patterns.md`
 
 ### Organization
 
-✅ **Clear categories** - Well-defined domains  
-✅ **Consistent naming** - Follow conventions  
-✅ **Proper metadata** - Complete 0-category.json  
-✅ **README files** - Document each category
+✅ **Clear categories**, Well-defined domains  
+✅ **Consistent naming**, Follow conventions  
+✅ **Proper metadata**, Complete 0-category.json  
+✅ **README files**, Document each category
 
 ### Scalability
 
-✅ **Modular** - Categories are independent  
-✅ **Extensible** - Easy to add new categories  
-✅ **Maintainable** - Clear structure  
-✅ **Testable** - Each category has tests
+✅ **Modular**, Categories are independent  
+✅ **Extensible**, Easy to add new categories  
+✅ **Maintainable**, Clear structure  
+✅ **Testable**, Each category has tests
 
 ### Discovery
 
-✅ **Descriptive names** - Clear purpose  
-✅ **Good descriptions** - Explain when to use  
-✅ **Proper tags** - Aid discovery  
-✅ **Documentation** - Document in README
+✅ **Descriptive names**, Clear purpose  
+✅ **Good descriptions**, Explain when to use  
+✅ **Proper tags**, Aid discovery  
+✅ **Documentation**, Document in README
 
 ---
 

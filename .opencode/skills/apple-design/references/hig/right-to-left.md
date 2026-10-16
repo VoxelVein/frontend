@@ -8,7 +8,7 @@ Support right-to-left languages like Arabic and Hebrew by reversing your interfa
 
 ---
 
-When people choose a language for their device  -  or just your app or game  -  they expect the interface to adapt in various ways (to learn more, see [Localization](https://developer.apple.com/localization/)).
+When people choose a language for their device, or just your app or game, they expect the interface to adapt in various ways (to learn more, see [Localization](https://developer.apple.com/localization/)).
 
 System-provided UI frameworks support right-to-left (RTL) by default, allowing system-provided UI components to flip automatically in the RTL context. If you use system-provided elements and standard layouts, you might not need to make any changes to your app’s automatically reversed interface.
 
@@ -18,7 +18,7 @@ If you want to fine-tune your layout or enhance specific localizations to adapt 
 
 **Adjust text alignment to match the interface direction, if the system doesn’t do so automatically.** For example, if you left-align text with content in the left-to-right (LTR) context, right-align the text to match the content’s mirrored position in the RTL context.
 
-**Align a paragraph based on its language, not on the current context.** When the alignment of a paragraph  -  defined as three or more lines of text  -  doesn’t match its language, it can be difficult to read. For example, right-aligning a paragraph that consists of LTR text can make the beginning of each line difficult to see. To improve readability, continue aligning one- and two-line text blocks to match the reading direction of the current context, but align a paragraph to match its language.
+**Align a paragraph based on its language, not on the current context.** When the alignment of a paragraph, defined as three or more lines of text, doesn’t match its language, it can be difficult to read. For example, right-aligning a paragraph that consists of LTR text can make the beginning of each line difficult to see. To improve readability, continue aligning one- and two-line text blocks to match the reading direction of the current context, but align a paragraph to match its language.
 
 **Use a consistent alignment for all text items in a list.** To ensure a comfortable reading and scanning experience, reverse the alignment of all items in a list, including items that are displayed in a different script.
 
@@ -28,7 +28,7 @@ Different RTL languages can use different number systems. For example, Hebrew te
 
 If your app covers mathematical concepts or other number-centric topics, it’s a good idea to identify the appropriate way to display such information in each locale you support. In contrast, apps that don’t address number-related topics can generally rely on system-provided number representations.
 
-**Don’t reverse the order of numerals in a specific number.** Regardless of the current language or the surrounding content, the digits in a specific number  -  such as “541,” a phone number, or a credit card number  -  always appear in the same order.
+**Don’t reverse the order of numerals in a specific number.** Regardless of the current language or the surrounding content, the digits in a specific number, such as “541,” a phone number, or a credit card number, always appear in the same order.
 
 **Reverse the order of numerals that show progress or a counting direction; never flip the numerals themselves.** Controls like progress bars, sliders, and rating controls often include numerals to clarify their meaning. If you use numerals in this way, be sure to reverse the order of the numerals to match the direction of the flipped control. Also reverse a sequence of numerals if you use the sequence to communicate a specific order.
 
@@ -64,7 +64,7 @@ If you have a custom interface icon that uses letters or words to communicate a 
 
 **In general, avoid flipping interface icons that depict real-world objects.** Unless you use the object to indicate directionality, it’s best to avoid flipping an icon that represents a familiar item. For example, clocks work the same everywhere, so a traditional clock interface icon needs to look the same regardless of language direction. Some interface icons might seem to reference language or reading direction because they represent items that are slanted for right-handed use. However, most people are right-handed, so flipping an icon that shows a right-handed tool isn’t necessary and might be confusing.
 
-**Before merely flipping a complex custom interface icon, consider its individual components and the overall visual balance.** In some cases, a component  -  like a badge, slash, or magnifying glass  -  needs to adhere to a visual design language regardless of localization. For example, SF Symbols maintains visual consistency by using the same backslash to represent the prohibition or negation of a symbol’s meaning in both LTR and RTL versions.
+**Before merely flipping a complex custom interface icon, consider its individual components and the overall visual balance.** In some cases, a component, like a badge, slash, or magnifying glass, needs to adhere to a visual design language regardless of localization. For example, SF Symbols maintains visual consistency by using the same backslash to represent the prohibition or negation of a symbol’s meaning in both LTR and RTL versions.
 
 In other cases, you might need to flip a component (or its position) to ensure the localized version of the icon still makes sense. For example, if a badge represents the actual UI that people see in your app, it needs to flip if your UI flips. Alternatively, if a badge modifies the meaning of an interface icon, consider whether flipping the badge preserves both the modified meaning and the overall visual balance of the icon. In the images shown below, the badge doesn’t depict an object in the UI, but keeping it in the top-right corner visually unbalances the cart.
 

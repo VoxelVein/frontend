@@ -10,7 +10,7 @@ On a Mac, people can secondary click an app’s or game’s icon in the Dock to 
 
 The system-provided Dock menu items can vary depending on whether the app is open. For example, the Dock menu for Safari includes menu items for actions like viewing a current window or creating a new window.
 
-> **Note:** Although iOS and iPadOS don’t support a Dock menu, people can reveal a similar menu of system-provided and custom items  -  called Home Screen quick actions  -  when they long press an app icon on the Home Screen or in the Dock. For guidance, see [Home Screen quick actions](home-screen-quick-actions.md).
+> **Note:** Although iOS and iPadOS don’t support a Dock menu, people can reveal a similar menu of system-provided and custom items, called Home Screen quick actions, when they long press an app icon on the Home Screen or in the Dock. For guidance, see [Home Screen quick actions](home-screen-quick-actions.md).
 
 ## Best practices
 

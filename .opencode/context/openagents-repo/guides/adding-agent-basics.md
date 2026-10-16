@@ -26,12 +26,12 @@ Adding a new agent involves:
 
 ```bash
 # Available categories:
-# - core/          (system agents)
-# - development/   (dev specialists)
-# - content/       (content creators)
-# - data/          (data analysts)
-# - product/       (product managers)
-# - learning/      (educators)
+#—core/          (system agents)
+#—development/   (dev specialists)
+#—content/       (content creators)
+#—data/          (data analysts)
+#—product/       (product managers)
+#—learning/      (educators)
 ```
 
 ### Create File with Frontmatter
@@ -83,7 +83,7 @@ agent: {category}/{agent-name}
 model: anthropic/claude-sonnet-4-5
 timeout: 60000
 suites:
-  - smoke
+ —smoke
 EOF
 
 # Create smoke test
@@ -93,10 +93,10 @@ description: Basic functionality check
 agent: {category}/{agent-name}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Hello, can you help me?"
 expectations:
-  - type: no_violations
+ —type: no_violations
 EOF
 ```
 
@@ -154,7 +154,7 @@ REGISTRY_URL="file://$(pwd)/registry.json" ./install.sh --list
 
 ## Related
 
-- `core-concepts/agents.md` - Agent concepts
-- `adding-agent-testing.md` - Additional test patterns
-- `testing-agent.md` - Testing guide
-- `creating-subagents.md` - Claude Code subagents (different system)
+- `core-concepts/agents.md`, Agent concepts
+- `adding-agent-testing.md`, Additional test patterns
+- `testing-agent.md`, Testing guide
+- `creating-subagents.md`, Claude Code subagents (different system)

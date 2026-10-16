@@ -155,8 +155,8 @@ useEffect(() => {
   // Draw centered
   ctx.drawImage(
     img,
-    (canvas.width - img.width) / 2,
-    (canvas.height - img.height) / 2
+    (canvas.width—img.width) / 2,
+    (canvas.height—img.height) / 2
   );
 }, [currentFrame, images]);
 ```
@@ -277,9 +277,9 @@ Show spinner while frames load:
 
 ## Related
 
-- concepts/scroll-linked-animations.md - Understanding the technique
-- examples/headphone-scrollytelling.md - Full code example
-- lookup/animation-image-prompts.md - Prompts for frame generation
+- concepts/scroll-linked-animations.md, Understanding the technique
+- examples/headphone-scrollytelling.md, Full code example
+- lookup/animation-image-prompts.md, Prompts for frame generation
 
 ---
 

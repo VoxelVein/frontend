@@ -3,7 +3,7 @@
 # Guide: Profile Validation
 
 **Purpose**: Ensure installation profiles include all appropriate components  
-**Priority**: HIGH - Check this when adding new agents or updating registry
+**Priority**: HIGH, Check this when adding new agents or updating registry
 
 ---
 
@@ -11,11 +11,11 @@
 
 Profiles are pre-configured component bundles in `registry.json` that users install:
 
-- **essential** - Minimal setup (openagent + core subagents)
-- **developer** - Full dev environment (all dev agents + tools)
-- **business** - Content/product focus (content agents + tools)
-- **full** - Everything (all agents, subagents, tools)
-- **advanced** - Full + meta-level (system-builder, repo-manager)
+- **essential**, Minimal setup (openagent + core subagents)
+- **developer**, Full dev environment (all dev agents + tools)
+- **business**, Content/product focus (content agents + tools)
+- **full**, Everything (all agents, subagents, tools)
+- **advanced**, Full + meta-level (system-builder, repo-manager)
 
 ---
 
@@ -322,11 +322,11 @@ Save this as: `scripts/registry/validate-profile-coverage.sh`
 
 ## Best Practices
 
-✅ **Use auto-detect** - Adds to components automatically  
-✅ **Check all profiles** - Verify agent in correct profiles  
-✅ **Test locally** - Install and verify before pushing  
-✅ **Validate** - Run validation script after changes  
-✅ **Document** - Update CHANGELOG with profile changes
+✅ **Use auto-detect**, Adds to components automatically  
+✅ **Check all profiles**, Verify agent in correct profiles  
+✅ **Test locally**, Install and verify before pushing  
+✅ **Validate**, Run validation script after changes  
+✅ **Document**, Update CHANGELOG with profile changes
 
 ---
 

@@ -25,9 +25,9 @@ When users provide simple instructions, use this meta-prompt approach to create 
 
 1. **Identify core purpose**: Schematic/diagram, action illustration, or emotive scene?
 2. **Choose optimal format**:
-   - Technical topics → "flat vector technical diagram with labeled components"
-   - Actions/scenarios → "dynamic illustration with realistic lighting"
-   - Conceptual/emotive → "stylized art with cohesive color palette"
+  —Technical topics → "flat vector technical diagram with labeled components"
+  —Actions/scenarios → "dynamic illustration with realistic lighting"
+  —Conceptual/emotive → "stylized art with cohesive color palette"
 3. **Determine style attributes**: Color palette, typography, composition
 4. **Build final prompt**: "Create a [FORMAT] illustrating [TOPIC] in a [STYLE] style, using [COLORS], with [TYPOGRAPHY] labels, include [LAYOUT ELEMENTS]"
 
@@ -48,7 +48,7 @@ When users provide simple instructions, use this meta-prompt approach to create 
 - Images are automatically organized by date: `assets/images/YYYY-MM-DD/`
 - Generations saved to: `generations/` subdirectory
 - Edits saved to: `edits/` subdirectory with auto-increment naming
-- No files are overwritten - each edit creates a unique numbered version
+- No files are overwritten, each edit creates a unique numbered version
 - All images stored in repo's `assets/images/` directory for proper organization
 
 Always ensure you have necessary inputs and provide clear descriptions of operations performed.

@@ -30,7 +30,6 @@
 ## 1. Initiation (TaskManager)
 
 Create feature folder and files:
-
 ```
 .tmp/tasks/{feature-slug}/
 ├── task.json
@@ -46,14 +45,12 @@ Validate with: `task-cli.ts validate {feature}`
 ## 2. Task Selection
 
 Find eligible tasks using CLI:
-
 ```bash
 task-cli.ts next {feature}      # All ready tasks
 task-cli.ts parallel {feature}  # Parallelizable only
 ```
 
 Selection criteria:
-
 - `status == "pending"`
 - All `depends_on` tasks have `status == "completed"`
 
@@ -102,26 +99,26 @@ When `completed_count == subtask_count`:
 
 ## Status Ownership
 
-| Status      | Who Sets      | When                   |
-| ----------- | ------------- | ---------------------- |
-| pending     | TaskManager   | Initial creation       |
-| in_progress | Working agent | Picks up task          |
-| completed   | TaskManager   | After verification     |
-| blocked     | Either        | Dependency/issue found |
+| Status | Who Sets | When |
+|--------|----------|------|
+| pending | TaskManager | Initial creation |
+| in_progress | Working agent | Picks up task |
+| completed | TaskManager | After verification |
+| blocked | Either | Dependency/issue found |
 
 ---
 
 ## CLI Commands Summary
 
-| Command    | Use Case            |
-| ---------- | ------------------- |
-| `status`   | Quick overview      |
-| `next`     | What to work on     |
+| Command | Use Case |
+|---------|----------|
+| `status` | Quick overview |
+| `next` | What to work on |
 | `parallel` | Batch parallel work |
-| `deps`     | Understand blockers |
-| `blocked`  | Identify issues     |
-| `complete` | Mark task done      |
-| `validate` | Health check        |
+| `deps` | Understand blockers |
+| `blocked` | Identify issues |
+| `complete` | Mark task done |
+| `validate` | Health check |
 
 ---
 

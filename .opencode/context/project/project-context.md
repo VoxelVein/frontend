@@ -1,6 +1,6 @@
 <!-- Context: project/project-context | Priority: low | Version: 1.0 | Updated: 2026-02-15 -->
 
-<!-- DEPRECATED: 2026-01-12 - Replaced by project-intelligence/technical-domain.md -->
+<!-- DEPRECATED: 2026-01-12, Replaced by project-intelligence/technical-domain.md -->
 <!-- REPLACED BY: ../project-intelligence/technical-domain.md -->
 
 # ⚠️ DEPRECATED: OpenCode Agent System Project Context

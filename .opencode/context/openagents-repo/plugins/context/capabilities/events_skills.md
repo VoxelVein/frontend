@@ -55,10 +55,10 @@ const beforeHook = async (input: any, output: any) => {
 
 **Input Parameters:**
 
-- `input.tool` - Tool name (e.g., "skills_brand_guidelines")
-- `input.sessionID` - Current session ID
-- `input.agent` - Agent name that called the tool
-- `output.args` - Tool arguments
+- `input.tool`, Tool name (e.g., "skills_brand_guidelines")
+- `input.sessionID`, Current session ID
+- `input.agent`, Agent name that called the tool
+- `output.args`, Tool arguments
 
 **What you can do:**
 
@@ -108,10 +108,10 @@ const afterHook = async (input: any, output: any) => {
 
 **Input Parameters:**
 
-- `input.tool` - Tool name (e.g., "skills_brand_guidelines")
-- `input.sessionID` - Current session ID
-- `output.output` - Tool result/output
-- `output.title` - Output title (can be modified)
+- `input.tool`, Tool name (e.g., "skills_brand_guidelines")
+- `input.sessionID`, Current session ID
+- `output.output`, Tool result/output
+- `output.title`, Output title (can be modified)
 
 **What you can do:**
 
@@ -187,10 +187,10 @@ const afterHook = async (input: any, output: any) => {
 ┌─────────────────────────────────────────────────────────────────┐
 │                  RESULT RETURNED TO AGENT                       │
 │                                                                 │
-│  - Tool confirmation message                                    │
-│  - Skill content in conversation history                        │
-│  - Enhanced output with emoji title                             │
-│  - Agent can now use skill content in reasoning                 │
+│ —Tool confirmation message                                    │
+│ —Skill content in conversation history                        │
+│ —Enhanced output with emoji title                             │
+│ —Agent can now use skill content in reasoning                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -580,7 +580,7 @@ const beforeHook = async (input, output) => {
     }
   } catch (error) {
     console.error(`Hook error:`, error);
-    // Don't rethrow - let tool execute anyway
+    // Don't rethrow—let tool execute anyway
   }
 };
 ```

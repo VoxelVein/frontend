@@ -71,7 +71,7 @@ Standards and conventions for CSS frameworks, responsive design, and styling bes
 **Breakpoints** (Tailwind defaults):
 
 ```css
-/* Mobile first - base styles apply to mobile */
+/* Mobile first—base styles apply to mobile */
 .element {
 }
 
@@ -231,7 +231,7 @@ body {
 ### Specificity Best Practices
 
 1. **Prefer utility classes** over custom CSS
-2. **Use !important sparingly** - only for framework overrides
+2. **Use !important sparingly**, only for framework overrides
 3. **Scope custom styles** to avoid conflicts
 4. **Use CSS custom properties** for theming
 

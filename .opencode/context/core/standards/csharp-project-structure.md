@@ -13,17 +13,17 @@ author: community
 # C# Project Structure Standards
 
 **Purpose**: Standard project structure for ASP.NET Core APIs using Minimal APIs, CQRS (MediatR), Vertical Slice Architecture, and EF Core with PostgreSQL  
-**Scope**: Project layout, wiring patterns, and conventions  -  not language-level rules (see `csharp.md`)  
+**Scope**: Project layout, wiring patterns, and conventions — not language-level rules (see `csharp.md`)  
 **Last Updated**: 2026-03-15
 
 ---
 
 ## Design Principles
 
-- **`Features/`** contains only business logic  -  Commands, Queries, Validators, Handlers. No HTTP or framework code.
-- **`Features/Common/`** contains shared feature-level concerns  -  pipeline behaviors, shared exceptions.
-- **`Infrastructure/`** contains all technical wiring  -  endpoint registration, DB context, external services.
-- **Command/Query records are the API contract**  -  they are sent directly from endpoints. No separate DTO mapping layer.
+- **`Features/`** contains only business logic — Commands, Queries, Validators, Handlers. No HTTP or framework code.
+- **`Features/Common/`** contains shared feature-level concerns — pipeline behaviors, shared exceptions.
+- **`Infrastructure/`** contains all technical wiring — endpoint registration, DB context, external services.
+- **Command/Query records are the API contract** — they are sent directly from endpoints. No separate DTO mapping layer.
 
 ---
 
@@ -32,7 +32,7 @@ author: community
 1. [Project Initialization](#1-project-initialization)
 2. [Project Layout](#2-project-layout)
 3. [Program.cs](#3-programcs)
-4. [Features  -  Vertical Slices](#4-features--vertical-slices)
+4. [Features — Vertical Slices](#4-features--vertical-slices)
 5. [Infrastructure](#5-infrastructure)
 6. [EF Core & PostgreSQL](#6-ef-core--postgresql)
 7. [Migrations](#7-migrations)
@@ -57,7 +57,6 @@ cd MyApi
 ```
 
 **Why this order?**
-
 - `.gitignore` must exist before any build artifacts are created (prevents committing `bin/`, `obj/`, etc.)
 - `.gitattributes` ensures consistent line endings across team members
 - Projects created after these are in place benefit from proper version control setup
@@ -71,12 +70,12 @@ MyApi/
 ├── Program.cs                          # DI wiring + endpoint mapping only
 ├── MyApi.csproj
 │
-├── Api/                                # Endpoint entry points  -  discover processes here
-│   ├── OrderEndpoints.cs               # IEndpointRouteBuilder extension  -  all /orders routes
+├── Api/                                # Endpoint entry points — discover processes here
+│   ├── OrderEndpoints.cs               # IEndpointRouteBuilder extension — all /orders routes
 │   ├── UserEndpoints.cs
 │   └── ProductEndpoints.cs
 │
-├── Features/                           # Pure business logic  -  no HTTP/framework code
+├── Features/                           # Pure business logic — no HTTP/framework code
 │   ├── Orders/
 │   │   ├── CreateOrder.cs              # Command + Validator + Handler (co-located)
 │   │   ├── GetOrder.cs                 # Query + Handler
@@ -173,10 +172,10 @@ public partial class Program { }   // allows WebApplicationFactory in integratio
 
 ---
 
-## 4. Features  -  Vertical Slices
+## 4. Features — Vertical Slices
 
-Each use case lives in its own file: **Command or Query record + Validator + Handler  -  nothing else**.  
-The Command/Query record is the API contract  -  it is bound directly from the HTTP request body/route.  
+Each use case lives in its own file: **Command or Query record + Validator + Handler — nothing else**.  
+The Command/Query record is the API contract — it is bound directly from the HTTP request body/route.  
 No separate DTO types, no mapping layer.
 
 ### 3.1 Command Slice (write operation)
@@ -189,7 +188,7 @@ namespace MyApi.Features.Orders;
 // Bound directly from HTTP request body. No separate DTO needed.
 public record CreateOrderCommand(Guid UserId, List<OrderItem> Items) : IRequest<CreatedOrderResult>;
 
-// Return type is also a record  -  represents the response shape
+// Return type is also a record — represents the response shape
 public record CreatedOrderResult(Guid Id, Guid UserId, DateTime CreatedAt);
 
 // ── Validator ─────────────────────────────────────────────────────────────
@@ -284,7 +283,7 @@ public class SendCancellationEmailHandler(IEmailService email)
 }
 ```
 
-### 3.4 Features/Common  -  Pipeline Behaviors
+### 3.4 Features/Common — Pipeline Behaviors
 
 ```csharp
 // Features/Common/Behaviors/LoggingBehavior.cs
@@ -350,7 +349,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
 
 ### 4.1 API Endpoints (Entry Points)
 
-Endpoint files live in the `Api/` directory at the project root  -  they are the entry points for discovering business processes. These files handle HTTP concerns only: routing, parameter binding, response shaping, and dispatching to MediatR. No business logic here.
+Endpoint files live in the `Api/` directory at the project root — they are the entry points for discovering business processes. These files handle HTTP concerns only: routing, parameter binding, response shaping, and dispatching to MediatR. No business logic here.
 
 ```csharp
 // Api/OrderEndpoints.cs
@@ -371,8 +370,8 @@ public static class OrderEndpoints
         group.MapDelete("/{id}", CancelOrder) .WithName("CancelOrder");
     }
 
-    // Command/Query records are bound directly from HTTP  -  no mapping needed
-    // Use ISender (not IMediator)  -  exposes only Send/CreateStream
+    // Command/Query records are bound directly from HTTP — no mapping needed
+    // Use ISender (not IMediator) — exposes only Send/CreateStream
 
     private static async Task<Ok<List<OrderResult>>> GetAllOrders(
         ISender sender, CancellationToken ct)
@@ -513,13 +512,11 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 ```
 
 Override in environment / Docker / Kubernetes using double-underscore notation:
-
 ```
 ConnectionStrings__DefaultConnection=Host=prod-db;...
 ```
 
 For local development, use `dotnet user-secrets`:
-
 ```bash
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;..."
 ```
@@ -550,7 +547,7 @@ await db.Orders
 ### 5.3 AsNoTracking
 
 ```csharp
-// ✅ Use AsNoTracking for all read/query handlers  -  no change tracker overhead
+// ✅ Use AsNoTracking for all read/query handlers — no change tracker overhead
 var result = await db.Orders
     .AsNoTracking()
     .Where(o => o.Id == id)
@@ -591,7 +588,7 @@ dotnet ef migrations add MigrationName \
 ### Production Deployment
 
 ```bash
-# Generate idempotent SQL script  -  safe to run multiple times (recommended for CI/CD)
+# Generate idempotent SQL script — safe to run multiple times (recommended for CI/CD)
 dotnet ef migrations script --idempotent --output migrations.sql
 
 # EF 9: self-contained migration bundle (no dotnet SDK needed at deploy time)
@@ -599,7 +596,7 @@ dotnet ef migrations bundle --output migrations-bundle
 ./migrations-bundle --connection "${DB_CONNECTION_STRING}"
 ```
 
-> **Do not** auto-migrate in `Program.cs` (`db.Database.MigrateAsync()`) in production multi-instance deployments  -  use SQL scripts or migration bundles instead to avoid race conditions.
+> **Do not** auto-migrate in `Program.cs` (`db.Database.MigrateAsync()`) in production multi-instance deployments — use SQL scripts or migration bundles instead to avoid race conditions.
 
 ---
 
@@ -658,7 +655,7 @@ global using NSubstitute;
 ## Quick Reference
 
 | Concern | Where it lives | Rule |
-| --- | --- | --- |
+|---------|---------------|------|
 | DI wiring + endpoint mapping | `Program.cs` | Declarative only, no logic |
 | API entry points (discover processes) | `Api/{Name}Endpoints.cs` | `IEndpointRouteBuilder` extension, routing + dispatch only |
 | Business use case | `Features/{Name}/{UseCase}.cs` | Command/Query + Validator + Handler only |

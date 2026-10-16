@@ -3,7 +3,7 @@
 # Core Concept: Eval Framework
 
 **Purpose**: Understanding how agent testing works  
-**Priority**: CRITICAL - Load this before testing agents
+**Priority**: CRITICAL, Load this before testing agents
 
 ---
 
@@ -62,9 +62,9 @@ agent: {category}/{agent-name}
 model: anthropic/claude-sonnet-4-5
 timeout: 60000
 suites:
-  - smoke
-  - approval
-  - context
+ —smoke
+ —approval
+ —context
 ```
 
 **Fields**:
@@ -84,12 +84,12 @@ description: Basic functionality check
 agent: core/openagent
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Hello, can you help me?"
-  - role: assistant
+ —role: assistant
     content: "Yes, I can help you!"
 expectations:
-  - type: no_violations
+ —type: no_violations
 ```
 
 **Fields**:
@@ -266,10 +266,10 @@ Sessions are recordings of agent interactions stored in `.tmp/sessions/`.
 
 Events capture agent actions:
 
-- `tool_call` - Agent invoked a tool
-- `context_load` - Agent loaded context file
-- `approval_request` - Agent requested approval
-- `error` - Error occurred
+- `tool_call`, Agent invoked a tool
+- `context_load`, Agent loaded context file
+- `approval_request`, Agent requested approval
+- `error`, Error occurred
 
 ---
 
@@ -279,7 +279,7 @@ Events capture agent actions:
 
 ```yaml
 expectations:
-  - type: no_violations
+ —type: no_violations
 ```
 
 **Validates**: No evaluator violations occurred
@@ -290,7 +290,7 @@ expectations:
 
 ```yaml
 expectations:
-  - type: specific_evaluator
+ —type: specific_evaluator
     evaluator: approval_gate
     should_pass: true
 ```
@@ -303,7 +303,7 @@ expectations:
 
 ```yaml
 expectations:
-  - type: tool_usage
+ —type: tool_usage
     tools: ["read", "write"]
     min_count: 1
 ```
@@ -316,7 +316,7 @@ expectations:
 
 ```yaml
 expectations:
-  - type: context_loaded
+ —type: context_loaded
     contexts: ["core/standards/code-quality.md"]
 ```
 
@@ -370,10 +370,10 @@ description: Verify agent responds correctly
 agent: core/openagent
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Hello, can you help me?"
 expectations:
-  - type: no_violations
+ —type: no_violations
 ```
 
 ### Approval Gate Test
@@ -384,10 +384,10 @@ description: Verify agent requests approval before execution
 agent: core/opencoder
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Create a new file called test.js with a hello world function"
 expectations:
-  - type: specific_evaluator
+ —type: specific_evaluator
     evaluator: approval_gate
     should_pass: true
 ```
@@ -400,10 +400,10 @@ description: Verify agent loads required context
 agent: core/opencoder
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Write a new function that calculates fibonacci numbers"
 expectations:
-  - type: context_loaded
+ —type: context_loaded
     contexts: ["core/standards/code-quality.md"]
 ```
 
@@ -459,25 +459,25 @@ Update agent prompt to:
 
 ### Test Coverage
 
-✅ **Smoke test** - Basic functionality  
-✅ **Approval gate test** - Verify approval workflow  
-✅ **Context loading test** - Verify context usage  
-✅ **Tool usage test** - Verify correct tools  
-✅ **Error handling test** - Verify stop on failure
+✅ **Smoke test**, Basic functionality  
+✅ **Approval gate test**, Verify approval workflow  
+✅ **Context loading test**, Verify context usage  
+✅ **Tool usage test**, Verify correct tools  
+✅ **Error handling test**, Verify stop on failure
 
 ### Test Design
 
-✅ **Clear expectations** - Explicit what should happen  
-✅ **Realistic scenarios** - Test real-world usage  
-✅ **Isolated tests** - One concern per test  
-✅ **Fast execution** - Keep tests under 10 seconds
+✅ **Clear expectations**, Explicit what should happen  
+✅ **Realistic scenarios**, Test real-world usage  
+✅ **Isolated tests**, One concern per test  
+✅ **Fast execution**, Keep tests under 10 seconds
 
 ### Debugging
 
-✅ **Use debug mode** - See detailed output  
-✅ **Check sessions** - Analyze agent behavior  
-✅ **Review events** - Understand timeline  
-✅ **Iterate quickly** - Fix and re-test
+✅ **Use debug mode**, See detailed output  
+✅ **Check sessions**, Analyze agent behavior  
+✅ **Review events**, Understand timeline  
+✅ **Iterate quickly**, Fix and re-test
 
 ---
 

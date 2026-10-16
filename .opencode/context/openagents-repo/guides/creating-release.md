@@ -79,7 +79,7 @@ cat package.json | jq '.version'
 ```markdown
 # Changelog
 
-## [0.X.Y] - 2025-12-10
+## [0.X.Y]—2025-12-10
 
 ### Added
 
@@ -100,17 +100,17 @@ cat package.json | jq '.version'
 
 - Deprecated feature 1
 
-## [Previous Version] - Date
+## [Previous Version]—Date
 
 ...
 ```
 
 ### Tips
 
-✅ **Group by type** - Added, Changed, Fixed, Removed  
-✅ **User-focused** - Describe impact, not implementation  
-✅ **Link PRs** - Reference PR numbers  
-✅ **Breaking changes** - Clearly mark breaking changes
+✅ **Group by type**, Added, Changed, Fixed, Removed  
+✅ **User-focused**, Describe impact, not implementation  
+✅ **Link PRs**, Reference PR numbers  
+✅ **Breaking changes**, Clearly mark breaking changes
 
 ---
 
@@ -205,7 +205,7 @@ jq '.version = "0.6.0"' package.json > tmp && mv tmp package.json
 
 # 2. Update CHANGELOG
 cat >> CHANGELOG.md << 'EOF'
-## [0.6.0] - 2025-12-10
+## [0.6.0]—2025-12-10
 
 ### Added
 - New API specialist agent

@@ -91,10 +91,10 @@ npx ts-node .opencode/skills/{skill-name}/scripts/skill-cli.ts command1
 ### Claude Code Skills (Optional)
 
 For Claude Code Skills (`.claude/skills/`), add extra frontmatter:
-- `allowed-tools` - Tool restrictions
-- `context` + `agent` - Run in forked subagent
-- `hooks` - Lifecycle events
-- `user-invocable` - Hide from slash menu
+- `allowed-tools`—Tool restrictions
+- `context` + `agent`—Run in forked subagent
+- `hooks`—Lifecycle events
+- `user-invocable`—Hide from slash menu
 
 See `creating-skills.md` for Claude Code Skills details.
 
@@ -118,7 +118,7 @@ shift
 
 case "$COMMAND" in
     help|--help|-h)
-        echo "{Skill Name} - Description"
+        echo "{Skill Name}—Description"
         echo "Commands: command1, command2, help"
         ;;
     command1|command2)
@@ -147,7 +147,7 @@ chmod +x .opencode/skills/{skill-name}/router.sh
 
 ## Related
 
-- `creating-skills.md` - Claude Code Skills (different system)
-- `adding-skill-implementation.md` - CLI and registry
-- `adding-skill-example.md` - Task-management example
-- `plugins/context/capabilities/events_skills.md` - Skills Plugin
+- `creating-skills.md`—Claude Code Skills (different system)
+- `adding-skill-implementation.md`—CLI and registry
+- `adding-skill-example.md`—Task-management example
+- `plugins/context/capabilities/events_skills.md`—Skills Plugin

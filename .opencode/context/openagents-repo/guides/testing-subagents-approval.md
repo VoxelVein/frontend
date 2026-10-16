@@ -36,11 +36,11 @@ approvalStrategy:
 
 behavior:
   mustUseTools:
-    - read
-    - glob
+   —read
+   —glob
   forbiddenTools:
-    - write
-    - edit
+   —write
+   —edit
   minToolCalls: 2
   maxToolCalls: 15
 
@@ -51,7 +51,7 @@ behavior:
 
 ```yaml
 expectedViolations:
-  - rule: approval-gate # ❌ WRONG for subagents
+ —rule: approval-gate # ❌ WRONG for subagents
     shouldViolate: false
     severity: error
 ```
@@ -96,35 +96,35 @@ category: developer
 agent: ContextScout
 
 prompts:
-  - text: |
+ —text: |
       Search for context files related to: coding standards
 
       Task type: code
 
       Return:
-      - Exact file paths
-      - Priority order
-      - Key findings
+     —Exact file paths
+     —Priority order
+     —Key findings
 
 approvalStrategy:
   type: auto-approve
 
 behavior:
   mustUseTools:
-    - read
-    - glob
+   —read
+   —glob
   forbiddenTools:
-    - write
-    - edit
+   —write
+   —edit
   minToolCalls: 2
   maxToolCalls: 15
 
 timeout: 60000
 
 tags:
-  - contextscout
-  - discovery
-  - subagent
+ —contextscout
+ —discovery
+ —subagent
 ```
 
 ---

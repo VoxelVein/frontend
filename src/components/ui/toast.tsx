@@ -8,8 +8,8 @@ import {
   IconLoader,
 } from "@tabler/icons-react";
 import { cn } from "cn";
+import type { ReactNode } from "react";
 /* oxlint-disable eslint/arrow-body-style, eslint/func-style, react/todo, react/function-component-definition, react-doctor/only-export-components */
-import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -107,13 +107,14 @@ const ToastDescription = ({
 
 const ToastAction = ({
   className,
-  render = <Button variant="outline" size="sm" />,
+  render,
   ...props
 }: ToastPrimitive.Action.Props) => {
+  const resolvedRender = render ?? <Button variant="outline" size="sm" />;
   return (
     <ToastPrimitive.Action
       data-slot="toast-action"
-      render={render}
+      render={resolvedRender}
       className={cn("shrink-0", className)}
       {...props}
     />
@@ -123,14 +124,15 @@ const ToastAction = ({
 const ToastClose = ({
   className,
   children,
-  render = <Button variant="ghost" size="icon-sm" />,
+  render,
   ...props
 }: ToastPrimitive.Close.Props) => {
+  const resolvedRender = render ?? <Button variant="ghost" size="icon-sm" />;
   return (
     <ToastPrimitive.Close
       data-slot="toast-close"
       aria-label="Close toast"
-      render={render}
+      render={resolvedRender}
       className={cn(
         "text-muted-foreground hover:text-foreground relative shrink-0 after:absolute after:-inset-2 after:content-['']",
         className
@@ -143,7 +145,7 @@ const ToastClose = ({
 };
 
 const ToastIcon = ({ type }: { type: string | undefined }) => {
-  let icon: React.ReactNode = null;
+  let icon: ReactNode = null;
 
   if (type === "success") {
     icon = <IconCircleCheck aria-hidden="true" />;
@@ -179,6 +181,7 @@ const ToastIcon = ({ type }: { type: string | undefined }) => {
   );
 };
 
+// oxlint-disable-next-line sonarjs/function-name -- JSX component names must start uppercase
 const ToastList = () => {
   const { toasts } = ToastPrimitive.useToastManager();
 

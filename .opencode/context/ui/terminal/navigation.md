@@ -42,26 +42,26 @@ This subcategory will contain patterns and best practices for building terminal 
 
 ### React-based TUI
 
-- **Ink** - React for CLIs
-- **Pastel** - React-like TUI framework
+- **Ink**, React for CLIs
+- **Pastel**, React-like TUI framework
 
 ### Traditional TUI
 
-- **Blessed** - High-level terminal interface library
-- **Blessed-contrib** - Widgets for blessed (charts, gauges)
-- **Terminal-kit** - Comprehensive terminal manipulation
+- **Blessed**, High-level terminal interface library
+- **Blessed-contrib**, Widgets for blessed (charts, gauges)
+- **Terminal-kit**, Comprehensive terminal manipulation
 
 ### Styling
 
-- **Chalk** - Terminal string styling
-- **Gradient-string** - Gradient colors in terminal
-- **Boxen** - Create boxes in terminal
+- **Chalk**, Terminal string styling
+- **Gradient-string**, Gradient colors in terminal
+- **Boxen**, Create boxes in terminal
 
 ### Progress/Animation
 
-- **Ora** - Elegant terminal spinners
-- **CLI-progress** - Progress bars
-- **Listr** - Terminal task lists
+- **Ora**, Elegant terminal spinners
+- **CLI-progress**, Progress bars
+- **Listr**, Terminal task lists
 
 ---
 
@@ -78,14 +78,14 @@ This subcategory will contain patterns and best practices for building terminal 
 
 ## Related Categories
 
-- `ui/web/` - Web UI patterns
-- `development/` - General development patterns
+- `ui/web/`, Web UI patterns
+- `development/`, General development patterns
 
 ---
 
 ## Status
 
-⏳ **Placeholder** - This subcategory is planned but not yet populated.
+⏳ **Placeholder**, This subcategory is planned but not yet populated.
 
 To contribute content here, follow the MVI principles:
 

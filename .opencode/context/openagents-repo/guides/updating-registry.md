@@ -50,11 +50,11 @@ Update the registry when you:
 Scanning .opencode/ for components...
 
 Would add:
-  - agent: development/api-specialist
-  - context: development/api-patterns.md
+ —agent: development/api-specialist
+ —context: development/api-patterns.md
 
 Would update:
-  - agent: core/openagent (description changed)
+ —agent: core/openagent (description changed)
 ```
 
 ### Step 2: Apply Changes
@@ -85,13 +85,13 @@ The auto-detect script automatically extracts `tags` and `dependencies` from com
 ---
 description: Your component description
 tags:
-  - tag1
-  - tag2
-  - tag3
+ —tag1
+ —tag2
+ —tag3
 dependencies:
-  - subagent:coder-agent
-  - context:core/standards/code
-  - command:context
+ —subagent:coder-agent
+ —context:core/standards/code
+ —command:context
 ---
 ```
 
@@ -113,12 +113,12 @@ dependencies: [subagent:coder-agent, context:core/standards/code]
 ---
 description: Brief description of what this command does
 tags:
-  - category
-  - feature
-  - use-case
+ —category
+ —feature
+ —use-case
 dependencies:
-  - subagent:context-organizer
-  - subagent:contextscout
+ —subagent:context-organizer
+ —subagent:contextscout
 ---
 ```
 
@@ -132,11 +132,11 @@ description: What this agent does
 category: specialist
 type: specialist
 tags:
-  - domain
-  - capability
+ —domain
+ —capability
 dependencies:
-  - subagent:coder-agent
-  - context:core/standards/code
+ —subagent:coder-agent
+ —context:core/standards/code
 ---
 ```
 
@@ -146,10 +146,10 @@ dependencies:
 ---
 description: What knowledge this context provides
 tags:
-  - domain
-  - topic
+ —domain
+ —topic
 dependencies:
-  - context:core/standards/code
+ —context:core/standards/code
 ---
 ```
 
@@ -159,18 +159,18 @@ Dependencies use the format: `type:id`
 
 **Valid types**:
 
-- `subagent:` - References a subagent (e.g., `subagent:coder-agent`)
-- `command:` - References a command (e.g., `command:context`)
-- `context:` - References a context file (e.g., `context:core/standards/code`)
-- `agent:` - References a main agent (e.g., `agent:openagent`)
+- `subagent:`, References a subagent (e.g., `subagent:coder-agent`)
+- `command:`, References a command (e.g., `command:context`)
+- `context:`, References a context file (e.g., `context:core/standards/code`)
+- `agent:`, References a main agent (e.g., `agent:openagent`)
 
 **Examples**:
 
 ```yaml
 dependencies:
-  - subagent:coder-agent # Depends on coder-agent subagent
-  - context:core/standards/code # Requires code standards context
-  - command:context # Uses context command
+ —subagent:coder-agent # Depends on coder-agent subagent
+ —context:core/standards/code # Requires code standards context
+ —command:context # Uses context command
 ```
 
 ### How It Works
@@ -224,11 +224,11 @@ Only edit `registry.json` manually if auto-detect doesn't work.
 
 ### What Gets Validated
 
-✅ **Schema** - Correct JSON structure  
-✅ **Paths** - All paths exist  
-✅ **IDs** - Unique IDs  
-✅ **Categories** - Valid categories  
-✅ **Dependencies** - Dependencies exist
+✅ **Schema**, Correct JSON structure  
+✅ **Paths**, All paths exist  
+✅ **IDs**, Unique IDs  
+✅ **Categories**, Valid categories  
+✅ **Dependencies**, Dependencies exist
 
 ### Validation Errors
 
@@ -374,15 +374,15 @@ Registry can be auto-updated after merge:
 
 ## Best Practices
 
-✅ **Use frontmatter** - Add tags/dependencies to component files, not registry  
-✅ **Use auto-detect** - Don't manually edit registry  
-✅ **Validate often** - Catch issues early  
-✅ **Test locally** - Use local registry for testing  
-✅ **Dry run first** - See changes before applying  
-✅ **Version consistency** - Keep versions in sync  
-✅ **Multi-line arrays** - More readable than inline format  
-✅ **Meaningful tags** - Use descriptive, searchable tags  
-✅ **Declare dependencies** - Helps with component discovery and validation
+✅ **Use frontmatter**, Add tags/dependencies to component files, not registry  
+✅ **Use auto-detect**, Don't manually edit registry  
+✅ **Validate often**, Catch issues early  
+✅ **Test locally**, Use local registry for testing  
+✅ **Dry run first**, See changes before applying  
+✅ **Version consistency**, Keep versions in sync  
+✅ **Multi-line arrays**, More readable than inline format  
+✅ **Meaningful tags**, Use descriptive, searchable tags  
+✅ **Declare dependencies**, Helps with component discovery and validation
 
 ---
 
@@ -403,9 +403,9 @@ Registry can be auto-updated after merge:
 **Solutions**:
 
 1. **Check frontmatter format**:
-   - Must be at top of file
-   - Must start/end with `---`
-   - Must use valid YAML syntax
+  —Must be at top of file
+  —Must start/end with `---`
+  —Must use valid YAML syntax
 
 2. **Verify array format**:
 
@@ -413,8 +413,8 @@ Registry can be auto-updated after merge:
    # ✅ Valid formats
    tags: [tag1, tag2]
    tags:
-     - tag1
-     - tag2
+    —tag1
+    —tag2
 
    # ❌ Invalid
    tags: tag1, tag2 # Missing brackets

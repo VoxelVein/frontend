@@ -5,7 +5,7 @@
 > Platforms covered: iOS, iPadOS, macOS (guidance specific to tvOS, visionOS, watchOS omitted)
 > Last change on Apple's site: 2023-09-12 (Updated artwork and guidance for redeeming offer codes.)
 
-People can use in-app purchase to pay for virtual goods  -  like premium content, digital goods, and subscriptions  -  securely within your app.
+People can use in-app purchase to pay for virtual goods, like premium content, digital goods, and subscriptions, securely within your app.
 
 ---
 
@@ -34,13 +34,13 @@ For marketing and business guidance, see [In-app purchase](https://developer.app
 
 **Display the total billing price for each in-app purchase you offer, regardless of type.** People need to know the total billing amount for every purchase they consider.
 
-**Display your store only when people can make payments.** If someone canʼt make payments  -  for example, because of parental restrictions  -  consider hiding your store or displaying UI that explains why the store isnʼt available. For developer guidance, see [canMakePayments](https://developer.apple.com/documentation/storekit/appstore/canmakepayments).
+**Display your store only when people can make payments.** If someone canʼt make payments, for example, because of parental restrictions, consider hiding your store or displaying UI that explains why the store isnʼt available. For developer guidance, see [canMakePayments](https://developer.apple.com/documentation/storekit/appstore/canmakepayments).
 
 **Use the default confirmation sheet.** When someone initiates an in-app purchase, the system displays a confirmation sheet to help prevent accidental purchases. Don’t modify or replicate this sheet.
 
 ### Supporting Family Sharing
 
-People can use Family Sharing to share access to their purchased content  -  such as auto-renewable subscriptions and non-consumable in-app purchases  -  with up to five additional family members, across all their Apple devices. To encourage people to take advantage of the Family Sharing support you offer, consider the following guidelines.
+People can use Family Sharing to share access to their purchased content, such as auto-renewable subscriptions and non-consumable in-app purchases, with up to five additional family members, across all their Apple devices. To encourage people to take advantage of the Family Sharing support you offer, consider the following guidelines.
 
 **Prominently mention Family Sharing in places where people learn about the content you offer.** For example, including “Family” or “Shareable” in a subscription or item name and referring to Family Sharing in your sign-up screen can highlight the feature and help people make an informed choice.
 
@@ -56,7 +56,7 @@ Sometimes, people need help with a purchase or want to request a refund. To help
 
 **Use a simple title for the refund action, like “Refund” or “Request a Refund”.** The system-provided refund flow makes it clear that people request a refund from Apple, so there’s no need to reiterate this information.
 
-**Help people find the problematic purchase.** For each recent purchase you display, include contextual information that helps people identify the one they want. For example, you might display an image of the product  -  along with its name and description  -  and list the original purchase date.
+**Help people find the problematic purchase.** For each recent purchase you display, include contextual information that helps people identify the one they want. For example, you might display an image of the product, along with its name and description, and list the original purchase date.
 
 **Consider offering alternative solutions.** For example, if the customer didn’t receive the item they purchased, you might offer immediate fulfillment or a conciliatory item. Regardless of the alternatives you offer, make it clear that people can still request a refund.
 
@@ -135,7 +135,7 @@ Supporting subscription management means people can upgrade, downgrade, or cance
 
 **Consider ways to encourage a subscriber to keep their subscription or resubscribe later.** When you use StoreKit APIs, your app is notified when someone chooses to cancel their subscription. In this scenario, you might want to extend a personalized offer as an alternative to cancellation or invite people to describe their reasons for canceling in an exit survey. In addition to giving you insights into various customer problems, survey feedback can also help inform messaging for retention and win-back strategies.
 
-**Always make it easy for customers to cancel an auto-renewable subscription.** If the manage subscription action is deep within an app  -  or hard to recognize  -  subscribers can feel they’re being discouraged or prevented from canceling.
+**Always make it easy for customers to cancel an auto-renewable subscription.** If the manage subscription action is deep within an app, or hard to recognize, subscribers can feel they’re being discouraged or prevented from canceling.
 
 **Consider creating a branded, contextual experience to complement the system-provided management UI.** Within your custom UI, you might offer a popular premium tier or provide personalized suggestions for alternative plans based on what you know about the customer’s preferences or how they use your app. For example, you can create a promotional offer that provides a discounted price for a specific period of time. You might also consider subscription [offer codes](#supporting-offer-codes) to help you win back lapsed subscribers and encourage existing subscribers to upgrade.
 

@@ -6,7 +6,7 @@
 
 ## Quick Reference
 
-**Golden Rule**: Review code as you'd want yours reviewed - thoroughly but kindly
+**Golden Rule**: Review code as you'd want yours reviewed, thoroughly but kindly
 
 **Checklist**: Functionality, Code Quality, Security, Testing, Performance, Maintainability
 

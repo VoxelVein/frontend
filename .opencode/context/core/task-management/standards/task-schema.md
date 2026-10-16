@@ -12,8 +12,8 @@
 
 Task management uses two JSON file types:
 
-- `task.json` - Feature-level metadata and tracking
-- `subtask_NN.json` - Individual atomic tasks with dependencies
+- `task.json`, Feature-level metadata and tracking
+- `subtask_NN.json`, Individual atomic tasks with dependencies
 
 Location: `.tmp/tasks/{feature-slug}/` (at project root)
 
@@ -39,8 +39,8 @@ For **enhanced features** (line-number precision, domain modeling, contracts, AD
 | `name` | string | Yes | Human-readable name (max 100) |
 | `status` | enum | Yes | active / completed / blocked / archived |
 | `objective` | string | Yes | One-line objective (max 200) |
-| `context_files` | array | No | **Standards paths only**  -  coding conventions, patterns, security rules to follow |
-| `reference_files` | array | No | **Source material only**  -  project files to look at (existing code, config, schemas) |
+| `context_files` | array | No | **Standards paths only**, coding conventions, patterns, security rules to follow |
+| `reference_files` | array | No | **Source material only**, project files to look at (existing code, config, schemas) |
 | `exit_criteria` | array | No | Completion conditions |
 | `subtask_count` | int | No | Total subtasks |
 | `completed_count` | int | No | Done subtasks |
@@ -59,8 +59,8 @@ For **enhanced features** (line-number precision, domain modeling, contracts, AD
 | `status` | enum | Yes | pending / in_progress / completed / blocked |
 | `depends_on` | array | No | Sequence numbers of dependencies |
 | `parallel` | bool | No | True if can run alongside others |
-| `context_files` | array | No | **Standards paths only**  -  conventions and patterns to follow |
-| `reference_files` | array | No | **Source material only**  -  existing files to reference |
+| `context_files` | array | No | **Standards paths only**, conventions and patterns to follow |
+| `reference_files` | array | No | **Source material only**, existing files to reference |
 | `suggested_agent` | string | No | Recommended agent for this task (e.g., OpenFrontendSpecialist) |
 | `acceptance_criteria` | array | No | Binary pass/fail conditions |
 | `deliverables` | array | No | Files to create/modify |
@@ -91,7 +91,7 @@ Use `task-cli.ts parallel` to find all parallelizable tasks ready to run.
 
 ---
 
-## context_files vs reference_files  -  The Rule
+## context_files vs reference_files, The Rule
 
 These two fields serve fundamentally different purposes. **Never mix them.**
 
@@ -100,7 +100,7 @@ These two fields serve fundamentally different purposes. **Never mix them.**
 | `context_files` | "What rules do I follow?" | Standards, conventions, patterns from `.opencode/context/` | Load and apply as coding guidelines |
 | `reference_files` | "What existing code do I look at?" | Project source files, configs, schemas | Read to understand existing patterns |
 
-**Wrong** ❌  -  mixing standards and source files:
+**Wrong** ❌, mixing standards and source files:
 
 ```json
 "context_files": [
@@ -110,7 +110,7 @@ These two fields serve fundamentally different purposes. **Never mix them.**
 ]
 ```
 
-**Right** ✅  -  clean separation:
+**Right** ✅, clean separation:
 
 ```json
 "context_files": [
@@ -155,22 +155,22 @@ The enhanced schema adds powerful features while maintaining full backward compa
 
 Use `enhanced-task-schema.md` when you need:
 
-- **Line-number precision** - Point to specific sections of large files (reduces cognitive load)
-- **Domain modeling** - Track bounded contexts, modules, vertical slices
-- **Contract tracking** - Manage API/interface dependencies
-- **Design artifacts** - Link Figma, wireframes, mockups
-- **ADR references** - Connect architectural decisions to tasks
-- **Prioritization** - RICE/WSJF scoring for release planning
+- **Line-number precision**, Point to specific sections of large files (reduces cognitive load)
+- **Domain modeling**, Track bounded contexts, modules, vertical slices
+- **Contract tracking**, Manage API/interface dependencies
+- **Design artifacts**, Link Figma, wireframes, mockups
+- **ADR references**, Connect architectural decisions to tasks
+- **Prioritization**, RICE/WSJF scoring for release planning
 
 ### Migration Path
 
-1. **No changes required** - Existing task files work as-is
-2. **Gradual adoption** - Add enhanced fields incrementally:
-   - Start with line-number precision for large context files
-   - Add domain fields (bounded_context, module) when modeling architecture
-   - Add contracts when defining APIs
-   - Add prioritization scores when planning releases
-3. **Mixed formats** - You can mix old and new formats in the same file
+1. **No changes required**, Existing task files work as-is
+2. **Gradual adoption**, Add enhanced fields incrementally:
+  —Start with line-number precision for large context files
+  —Add domain fields (bounded_context, module) when modeling architecture
+  —Add contracts when defining APIs
+  —Add prioritization scores when planning releases
+3. **Mixed formats**, You can mix old and new formats in the same file
 
 ### Example: Adding Line-Number Precision
 
@@ -200,7 +200,7 @@ Both formats work. Agents handle both automatically.
 
 ## Related
 
-- `enhanced-task-schema.md` - Extended schema with advanced features
-- `../guides/splitting-tasks.md` - How to decompose features
-- `../guides/managing-tasks.md` - Lifecycle workflow
-- `../lookup/task-commands.md` - CLI reference
+- `enhanced-task-schema.md`, Extended schema with advanced features
+- `../guides/splitting-tasks.md`, How to decompose features
+- `../guides/managing-tasks.md`, Lifecycle workflow
+- `../lookup/task-commands.md`, CLI reference

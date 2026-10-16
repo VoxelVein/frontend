@@ -4,7 +4,7 @@
 > Section: Components › Layout and organization
 > Platforms covered: macOS
 
-A column view  -  also called a *browser*  -  lets people view and navigate a data hierarchy using a series of vertical columns.
+A column view, also called a *browser*, lets people view and navigate a data hierarchy using a series of vertical columns.
 
 ---
 

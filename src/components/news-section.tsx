@@ -104,11 +104,11 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
         <NewsDate value={post.createdAt} />
         <PostCategoryBadge category={post.category} variant="subtle" />
       </div>
-      <h3 className="text-foreground mt-2 max-w-full text-xl font-semibold tracking-tight text-balance break-words sm:text-2xl">
+      <h3 className="text-foreground mt-2 truncate text-xl font-semibold tracking-tight sm:text-2xl">
         {post.title}
       </h3>
       {post.preview ? (
-        <p className="text-muted-foreground mt-3 max-w-full text-sm leading-6 break-words sm:text-base">
+        <p className="text-muted-foreground mt-3 truncate text-sm leading-6 sm:text-base">
           {truncate(post.preview, MAX_LEAD_PREVIEW_CHARS)}
         </p>
       ) : null}
@@ -141,11 +141,11 @@ const OlderPost = ({ post }: { post: PostSummary }) => (
       <NewsDate value={post.createdAt} />
       <PostCategoryBadge category={post.category} variant="subtle" />
     </div>
-    <h3 className="text-foreground mt-2 max-w-full text-base font-semibold tracking-tight text-balance break-words">
+    <h3 className="text-foreground mt-2 truncate text-base font-semibold tracking-tight">
       {post.title}
     </h3>
     {post.preview ? (
-      <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-6">
+      <p className="text-muted-foreground mt-1 truncate text-sm leading-6">
         {post.preview}
       </p>
     ) : null}

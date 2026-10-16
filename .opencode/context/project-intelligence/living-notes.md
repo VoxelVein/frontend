@@ -62,30 +62,30 @@ _Status_: [Known/In Progress/Fixed in vX.X]
 
 ### What Works Well
 
-- [Positive pattern 1] - [Why it works]
-- [Positive pattern 2] - [Why it works]
+- [Positive pattern 1]—[Why it works]
+- [Positive pattern 2]—[Why it works]
 
 ### What Could Be Better
 
-- [Area for improvement 1] - [Why it's a problem]
-- [Area for improvement 2] - [Why it's a problem]
+- [Area for improvement 1]—[Why it's a problem]
+- [Area for improvement 2]—[Why it's a problem]
 
 ### Lessons Learned
 
-- [Lesson 1] - [Context and implication]
-- [Lesson 2] - [Context and implication]
+- [Lesson 1]—[Context and implication]
+- [Lesson 2]—[Context and implication]
 
 ## Patterns & Conventions
 
 ### Code Patterns Worth Preserving
 
-- [Pattern 1] - [Where it lives, why it's good]
-- [Pattern 2] - [Where it lives, why it's good]
+- [Pattern 1]—[Where it lives, why it's good]
+- [Pattern 2]—[Where it lives, why it's good]
 
 ### Gotchas for Maintainers
 
-- [Gotcha 1] - [What to watch out for]
-- [Gotcha 2] - [What to watch out for]
+- [Gotcha 1]—[What to watch out for]
+- [Gotcha 2]—[What to watch out for]
 
 ## Active Projects
 
@@ -114,7 +114,7 @@ Moved here for historical reference. Current team should refer to current notes 
 
 ## Related Files
 
-- `decisions-log.md` - Past decisions that inform current state
-- `business-domain.md` - Business context for current priorities
-- `technical-domain.md` - Technical context for current state
-- `business-tech-bridge.md` - Context for current trade-offs
+- `decisions-log.md`, Past decisions that inform current state
+- `business-domain.md`, Business context for current priorities
+- `technical-domain.md`, Technical context for current state
+- `business-tech-bridge.md`, Context for current trade-offs

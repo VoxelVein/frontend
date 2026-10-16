@@ -29,7 +29,7 @@ People appreciate the precision and flexibility that pointing devices offer. On 
 
 ### Tablet (iPadOS)
 
-iPadOS builds on the traditional pointer experience, automatically adapting the pointer to the current context and providing rich visual feedback at a level of precision that enhances productivity and simplifies common tasks on a touchscreen device. The iPadOS pointing system gives people an additional way to interact with apps and content  -  it doesn’t replace touch.
+iPadOS builds on the traditional pointer experience, automatically adapting the pointer to the current context and providing rich visual feedback at a level of precision that enhances productivity and simplifies common tasks on a touchscreen device. The iPadOS pointing system gives people an additional way to interact with apps and content, it doesn’t replace touch.
 
 **Allow multiple selection in custom views when necessary.** In iPadOS 15 and later, people can click and drag the pointer over multiple items to select them. As people use the pointer in this way, it expands into a visible rectangle that selects the items it encompasses. Standard nonlist collection views support this interaction by default; if you want to support multiple selection in custom views, you need to implement it yourself. For developer guidance, see [UIBandSelectionInteraction](https://developer.apple.com/documentation/uikit/uibandselectioninteraction).
 
@@ -87,7 +87,7 @@ The system also applies magnetism to text-entry areas, where it can help people 
 
 **Create contiguous hit regions for custom bar buttons.** If there’s space between the hit regions of adjacent buttons in a bar, people may experience a distracting motion when the pointer reverts briefly to its default shape as it moves between buttons.
 
-**Specify the corner radius of a nonstandard element that receives the lift effect.** With the system-provided lift effect, the pointer transforms to match the element’s shape as it fades out. By default, the pointer uses the system-defined corner radius to transform into a rounded rectangle. If your element is a different shape  -  if it’s a circle, for example  -  you need to provide the radius so the pointer can animate seamlessly into the shape of the element. For developer guidance, see [UIPointerShape.roundedRect(_:radius:)](https://developer.apple.com/documentation/uikit/uipointershape-swift.enum/roundedrect(_:radius:)).
+**Specify the corner radius of a nonstandard element that receives the lift effect.** With the system-provided lift effect, the pointer transforms to match the element’s shape as it fades out. By default, the pointer uses the system-defined corner radius to transform into a rounded rectangle. If your element is a different shape, if it’s a circle, for example, you need to provide the radius so the pointer can animate seamlessly into the shape of the element. For developer guidance, see [UIPointerShape.roundedRect(_:radius:)](https://developer.apple.com/documentation/uikit/uipointershape-swift.enum/roundedrect(_:radius:)).
 
 #### Customizing pointers
 
@@ -135,11 +135,11 @@ macOS offers a variety of standard pointer styles, which your app can use to com
 | Pointer | Name | Meaning | AppKit API |
 | --- | --- | --- | --- |
 | *image: pointers arrow* | Arrow | Standard pointer for selecting and interacting with content and interface elements. | [arrow](https://developer.apple.com/documentation/appkit/nscursor/arrow) |
-| *image: pointers closed hand* | Closed hand | Dragging to reposition the display of content within a view - for example, dragging a map around in Maps. | [closedHand](https://developer.apple.com/documentation/appkit/nscursor/closedhand) |
+| *image: pointers closed hand* | Closed hand | Dragging to reposition the display of content within a view, for example, dragging a map around in Maps. | [closedHand](https://developer.apple.com/documentation/appkit/nscursor/closedhand) |
 | *image: pointers contextual menu* | Contextual menu | A contextual menu is available for the content below the pointer. This pointer is generally shown only when the Control key is pressed. | [contextualMenu](https://developer.apple.com/documentation/appkit/nscursor/contextualmenu) |
 | *image: pointers crosshair* | Crosshair | Precise rectangular selection is possible, such as when viewing an image in Preview. | [crosshair](https://developer.apple.com/documentation/appkit/nscursor/crosshair) |
 | *image: pointers disappearing item* | Disappearing item | A dragged item will disappear when dropped. If the item references an original item, the original is unaffected. For example, when dragging a mailbox out of the favorites bar in Mail, the original mailbox isn’t removed. | [disappearingItem](https://developer.apple.com/documentation/appkit/nscursor/disappearingitem) |
-| *image: pointers drag copy* | Drag copy | Duplicates a dragged - not moved - item when dropped into the destination. Appears when pressing the Option key during a drag operation. | [dragCopy](https://developer.apple.com/documentation/appkit/nscursor/dragcopy) |
+| *image: pointers drag copy* | Drag copy | Duplicates a dragged, not moved, item when dropped into the destination. Appears when pressing the Option key during a drag operation. | [dragCopy](https://developer.apple.com/documentation/appkit/nscursor/dragcopy) |
 | *image: pointers drag link* | Drag link | During a drag and drop operation, creates an alias of the selected file when dropped. The alias points to the original file, which remains unmoved. Appears when pressing the Option and Command keys during a drag operation. | [dragLink](https://developer.apple.com/documentation/appkit/nscursor/draglink) |
 | *image: pointers horizontal beam* | Horizontal I beam | Selection and insertion of text is possible in a horizontal layout, such as a TextEdit or Pages document. | [iBeam](https://developer.apple.com/documentation/appkit/nscursor/ibeam) |
 | *image: pointers open hand* | Open hand | Dragging to reposition content within a view is possible. | [openHand](https://developer.apple.com/documentation/appkit/nscursor/openhand) |

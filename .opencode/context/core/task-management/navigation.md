@@ -15,7 +15,7 @@ core/task-management/
 ├── navigation.md
 ├── standards/
 │   ├── task-schema.md           # Base JSON schema (v1.0)
-│   └── enhanced-task-schema.md  # Extended schema (v2.0) - line precision, domain modeling, contracts
+│   └── enhanced-task-schema.md  # Extended schema (v2.0)—line precision, domain modeling, contracts
 ├── guides/
 │   ├── splitting-tasks.md       # Task decomposition
 │   └── managing-tasks.md        # Workflow guide

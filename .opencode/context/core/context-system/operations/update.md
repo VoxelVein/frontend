@@ -20,11 +20,9 @@
 ## 8-Stage Workflow
 
 ### Stage 1: Identify Changes (APPROVAL REQUIRED)
-
 **Action**: User describes what changed
 
 **Format**:
-
 ```
 What changed in {topic}?
   [A] API changes
@@ -43,17 +41,14 @@ Select all that apply (A B C D or describe):
 ---
 
 ### Stage 2: Find Affected Files
-
 **Action**: Search for files referencing the topic
 
 **Process**:
-
 1. Grep for topic references across all context
 2. Count references per file
 3. Show impact analysis
 
 **Format**:
-
 ```
 Found 5 files referencing {topic}:
   📄 concepts/routing.md (3 references, 145 lines)
@@ -68,11 +63,9 @@ Total impact: 17 references across 5 files
 ---
 
 ### Stage 3: Preview Changes (APPROVAL REQUIRED)
-
 **Action**: Show line-by-line diff for each file
 
 **Format**:
-
 ```
 Proposed updates:
 
@@ -103,7 +96,6 @@ Approve changes? (yes/no/edit):
 ---
 
 ### Stage 4: Backup
-
 **Action**: Create backup before updating
 
 **Location**: `.tmp/backup/update-{topic}-{timestamp}/`
@@ -113,11 +105,9 @@ Approve changes? (yes/no/edit):
 ---
 
 ### Stage 5: Update Files
-
 **Action**: Apply approved changes
 
 **Process**:
-
 1. Update concepts, examples, guides, lookups
 2. Maintain MVI format (<200 lines)
 3. Update "Last Updated" dates
@@ -128,21 +118,17 @@ Approve changes? (yes/no/edit):
 ---
 
 ### Stage 6: Add Migration Notes
-
 **Action**: Add migration guide to errors/
 
 **Format**:
-
 ```markdown
 ## Migration: {Old Version} → {New Version}
 
 **Breaking Changes**:
-
 - Change 1
 - Change 2
 
 **Migration Steps**:
-
 1. Step 1
 2. Step 2
 
@@ -154,11 +140,9 @@ Approve changes? (yes/no/edit):
 ---
 
 ### Stage 7: Validate
-
 **Action**: Check all references and links
 
 **Checks**:
-
 - All internal references still work
 - No broken links
 - All files still <200 lines
@@ -167,11 +151,9 @@ Approve changes? (yes/no/edit):
 ---
 
 ### Stage 8: Report
-
 **Action**: Show comprehensive results
 
 **Format**:
-
 ```
 ✅ Updated X files
 📝 Modified Y references
@@ -193,25 +175,21 @@ Rollback available if needed.
 ## Change Types
 
 ### API Changes
-
 - Method signatures changed
 - Parameters added/removed
 - Return types changed
 
 ### Deprecations
-
 - Features marked deprecated
 - Replacement APIs available
 - Timeline for removal
 
 ### New Features
-
 - New capabilities added
 - New APIs introduced
 - New patterns available
 
 ### Breaking Changes
-
 - Incompatible changes
 - Migration required
 - Old code won't work
@@ -221,21 +199,18 @@ Rollback available if needed.
 ## Examples
 
 ### Framework Update
-
 ```bash
 /context update for Next.js 15
 /context update for React 19
 ```
 
 ### API Changes
-
 ```bash
 /context update for Stripe API v2024
 /context update for OpenAI API breaking changes
 ```
 
 ### Library Update
-
 ```bash
 /context update for Tailwind CSS v4
 ```

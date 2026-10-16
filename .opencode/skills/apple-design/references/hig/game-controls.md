@@ -54,12 +54,12 @@ For iOS and iPadOS games, supporting touch interaction means that you can provid
 | --- | --- |
 | A | Activates a control |
 | B | Cancels an action or returns to previous screen |
-| X |  -  |
-| Y |  -  |
+| X |, |
+| Y |, |
 | Left shoulder | Navigates left to a different screen or section |
 | Right shoulder | Navigates right to a different screen or section |
-| Left trigger |  -  |
-| Right trigger |  -  |
+| Left trigger |, |
+| Right trigger |, |
 | Left/right thumbstick | Moves selection |
 | Directional pad | Moves selection |
 | Home/logo | Reserved for system controls |

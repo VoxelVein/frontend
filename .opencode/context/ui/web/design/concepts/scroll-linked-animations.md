@@ -18,11 +18,11 @@ Map scroll position to video frames. As user scrolls, play through image sequenc
 
 ## Essential Parts
 
-1. **Image sequence** - 60-150 WebP frames from video/3D render
-2. **Sticky canvas** - Fixed HTML5 canvas, always visible while scrolling
-3. **Scroll tracker** - Framer Motion `useScroll` hook
-4. **Preloader** - Load all frames upfront (prevents flicker)
-5. **Background match** - Page BG = image BG (hides edges)
+1. **Image sequence**—60-150 WebP frames from video/3D render
+2. **Sticky canvas**, Fixed HTML5 canvas, always visible while scrolling
+3. **Scroll tracker**, Framer Motion `useScroll` hook
+4. **Preloader**, Load all frames upfront (prevents flicker)
+5. **Background match**, Page BG = image BG (hides edges)
 
 ---
 
@@ -43,12 +43,12 @@ useEffect(() => {
 
 ## Related
 
-- examples/scrollytelling-headphone.md - Full code
-- guides/building-scrollytelling-pages.md - Implementation
-- lookup/scroll-animation-prompts.md - Generate sequences
+- examples/scrollytelling-headphone.md, Full code
+- guides/building-scrollytelling-pages.md, Implementation
+- lookup/scroll-animation-prompts.md, Generate sequences
 
 ---
 
 ## Reference
 
-[Apple AirPods Pro](https://www.apple.com/airpods-pro/) - Production example
+[Apple AirPods Pro](https://www.apple.com/airpods-pro/), Production example

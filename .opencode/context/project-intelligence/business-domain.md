@@ -69,8 +69,8 @@ Market Position: [Where we fit in the market]
 
 ## Business Constraints
 
-- [Constraint 1] - [Why it exists]
-- [Constraint 2] - [Why it exists]
+- [Constraint 1]—[Why it exists]
+- [Constraint 2]—[Why it exists]
 
 ## Onboarding Checklist
 
@@ -83,6 +83,6 @@ Market Position: [Where we fit in the market]
 
 ## Related Files
 
-- `technical-domain.md` - How this business need is solved technically
-- `business-tech-bridge.md` - Mapping between business and technical
-- `decisions-log.md` - Business decisions with context
+- `technical-domain.md`, How this business need is solved technically
+- `business-tech-bridge.md`, Mapping between business and technical
+- `decisions-log.md`, Business decisions with context

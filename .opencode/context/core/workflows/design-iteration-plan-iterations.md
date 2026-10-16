@@ -18,7 +18,7 @@
 **Example**:
 
 ```
-User: "I've updated the plan file - changed the color scheme to dark mode"
+User: "I've updated the plan file—changed the color scheme to dark mode"
 
 Agent:
 ✅ Read updated plan: .tmp/design-plans/saas-landing-page.md
@@ -28,8 +28,8 @@ Changes detected:
 - Primary color: Blue → Purple
 
 This affects:
-- Stage 2 (Theme) - needs regeneration
-- Stage 4 (Implementation) - needs CSS update
+- Stage 2 (Theme)—needs regeneration
+- Stage 4 (Implementation)—needs CSS update
 
 Would you like me to:
 1. Regenerate theme with dark mode
@@ -54,7 +54,7 @@ Would you like me to:
 **Example**:
 
 ```
-Stage 1 - Layout Design
+Stage 1—Layout Design
 
 Agent: [presents wireframe]
 
@@ -77,14 +77,14 @@ Agent:
 ```markdown
 ## Design Evolution
 
-### Iteration 1 - Initial Layout
+### Iteration 1—Initial Layout
 
 - Date: 2026-01-30T10:00:00Z
 - Stage: Layout
 - Changes: Initial wireframe created
 - User feedback: "Hero section too short, CTA below fold"
 
-### Iteration 2 - Revised Layout
+### Iteration 2—Revised Layout
 
 - Date: 2026-01-30T10:15:00Z
 - Stage: Layout
@@ -92,7 +92,7 @@ Agent:
 - User feedback: "Perfect! Approved."
 - Status: ✅ Approved
 
-### Iteration 3 - Theme Adjustment
+### Iteration 3—Theme Adjustment
 
 - Date: 2026-01-30T10:30:00Z
 - Stage: Theme
@@ -119,16 +119,16 @@ task(
   prompt="Load design plan from .tmp/design-plans/saas-landing-page.md
 
   Read the plan file for:
-  - All approved decisions from Stages 1-3
-  - User requirements and constraints
-  - Design evolution and iterations
+ —All approved decisions from Stages 1-3
+ —User requirements and constraints
+ —Design evolution and iterations
 
   Implement Stage 4 (Implementation) following all approved decisions.
 
   Update the plan file with:
-  - Output file paths
-  - Implementation status
-  - Any issues encountered"
+ —Output file paths
+ —Implementation status
+ —Any issues encountered"
 )
 ```
 

@@ -45,7 +45,7 @@ When necessary, you can provide a custom settings area within your app or game t
 
 ### Desktop (macOS)
 
-When people choose the Settings item in your app’s or game’s App menu, your custom settings window opens. Typically, a custom settings window contains a toolbar that includes buttons for switching between views  -  called *panes*  -  that each contain a group of related settings.
+When people choose the Settings item in your app’s or game’s App menu, your custom settings window opens. Typically, a custom settings window contains a toolbar that includes buttons for switching between views, called *panes*, that each contain a group of related settings.
 
 **Include a settings item in the [App menu](the-menu-bar.md#app-menu).** Avoid adding settings buttons to a window’s toolbar, because doing so decreases the space available for essential commands that people use frequently. If you provide document-level options, add this item to your app’s [File menu](the-menu-bar.md#file-menu).
 

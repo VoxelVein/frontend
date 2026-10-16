@@ -15,12 +15,12 @@ deploys the server as a Netlify Function.
 Set the variables in the Netlify site settings. Values prefixed with
 `VITE_` are baked into the bundle at build time.
 
-* `VITE_API_URL`  -  public URL of the Elysia API (build-time)
-* `VITE_SITE_URL`  -  public URL of the web app (build-time)
-* `DATABASE_URL`  -  runtime connection string
-* `BETTER_AUTH_SECRET`  -  32+ characters (runtime)
-* `BETTER_AUTH_URL`  -  same as `VITE_SITE_URL` (runtime)
-* `VALKEY_URL`  -  optional; omit to disable shared rate limits
+* `VITE_API_URL`, public URL of the Elysia API (build-time)
+* `VITE_SITE_URL`, public URL of the web app (build-time)
+* `DATABASE_URL`, runtime connection string
+* `BETTER_AUTH_SECRET`, 32+ characters (runtime)
+* `BETTER_AUTH_URL`, same as `VITE_SITE_URL` (runtime)
+* `VALKEY_URL`, optional; omit to disable shared rate limits
 
 `NITRO_PRESET=netlify` is set through `netlify.toml`.
 

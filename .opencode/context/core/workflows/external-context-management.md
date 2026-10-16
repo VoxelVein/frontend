@@ -35,12 +35,12 @@ External context is live documentation fetched from external libraries and frame
 ### Naming Conventions
 
 - **Package name** (directory): Exact npm package name (kebab-case)
-  - ✅ `drizzle-orm`, `better-auth`, `next.js`, `@tanstack/react-query`
-  - ❌ `drizzle`, `nextjs`, `tanstack-query`
+ —✅ `drizzle-orm`, `better-auth`, `next.js`, `@tanstack/react-query`
+ —❌ `drizzle`, `nextjs`, `tanstack-query`
 
 - **File name** (topic): Kebab-case description of the topic
-  - ✅ `modular-schemas.md`, `nextjs-integration.md`, `server-components.md`
-  - ❌ `modular schemas.md`, `NextJS Integration.md`, `ServerComponents.md`
+ —✅ `modular-schemas.md`, `nextjs-integration.md`, `server-components.md`
+ —❌ `modular schemas.md`, `NextJS Integration.md`, `ServerComponents.md`
 
 ---
 
@@ -163,9 +163,9 @@ Main Agent
   Adds section: "## External Context Fetched"
   ↓
   Lists files:
-    - .tmp/external-context/drizzle-orm/modular-schemas.md
-    - .tmp/external-context/better-auth/nextjs-integration.md
-    - .tmp/external-context/next.js/app-router-setup.md
+   —.tmp/external-context/drizzle-orm/modular-schemas.md
+   —.tmp/external-context/better-auth/nextjs-integration.md
+   —.tmp/external-context/next.js/app-router-setup.md
   ↓
   Delegates to TaskManager with session path
 ```
@@ -201,18 +201,18 @@ These are live documentation files fetched from external libraries. Subagents sh
 
 ### Drizzle ORM
 
-- `.tmp/external-context/drizzle-orm/modular-schemas.md`  -  Schema organization patterns
-- `.tmp/external-context/drizzle-orm/postgresql-setup.md`  -  PostgreSQL configuration
+- `.tmp/external-context/drizzle-orm/modular-schemas.md` — Schema organization patterns
+- `.tmp/external-context/drizzle-orm/postgresql-setup.md` — PostgreSQL configuration
 
 ### Better Auth
 
-- `.tmp/external-context/better-auth/nextjs-integration.md`  -  Next.js integration guide
-- `.tmp/external-context/better-auth/drizzle-adapter.md`  -  Drizzle adapter setup
+- `.tmp/external-context/better-auth/nextjs-integration.md` — Next.js integration guide
+- `.tmp/external-context/better-auth/drizzle-adapter.md` — Drizzle adapter setup
 
 ### Next.js
 
-- `.tmp/external-context/next.js/app-router-setup.md`  -  App Router basics
-- `.tmp/external-context/next.js/server-actions.md`  -  Server Actions patterns
+- `.tmp/external-context/next.js/app-router-setup.md` — App Router basics
+- `.tmp/external-context/next.js/server-actions.md` — Server Actions patterns
 
 **Important**: These files are read-only and should not be modified. They're cached for reference only.
 ```
@@ -289,23 +289,23 @@ After deleting external context files, update `.manifest.json`:
 2. **Capture returned file paths** from ExternalScout
 3. **Add to session context** in "## External Context Fetched" section
 4. **Pass session path to subagents** so they know where to find external docs
-5. **Don't re-fetch**  -  trust that ExternalScout persisted correctly
+5. **Don't re-fetch**, trust that ExternalScout persisted correctly
 
 ### For ExternalScout
 
 1. **Always persist** fetched documentation to `.tmp/external-context/`
 2. **Update manifest** after each fetch
 3. **Include metadata header** in every file (source, library, package, topic, fetched timestamp)
-4. **Filter aggressively**  -  only include relevant sections
-5. **Cite sources**  -  include official docs links
+4. **Filter aggressively**, only include relevant sections
+5. **Cite sources**, include official docs links
 
 ### For Subagents (TaskManager, CoderAgent, etc.)
 
 1. **Read external context files** from session context
-2. **Don't re-fetch**  -  use persisted files
-3. **Reference in implementation**  -  cite which external docs informed decisions
-4. **Don't modify** external context files  -  they're read-only
-5. **Include in subtask JSONs**  -  pass external_context to downstream agents
+2. **Don't re-fetch**, use persisted files
+3. **Reference in implementation**, cite which external docs informed decisions
+4. **Don't modify** external context files, they're read-only
+5. **Include in subtask JSONs**, pass external_context to downstream agents
 
 ---
 
@@ -319,11 +319,11 @@ After deleting external context files, update `.manifest.json`:
 1. User asks: "Set up Drizzle + Better Auth in Next.js"
 2. Main agent calls ExternalScout
 3. ExternalScout fetches:
-   - drizzle-orm/modular-schemas.md
-   - drizzle-orm/postgresql-setup.md
-   - better-auth/nextjs-integration.md
-   - better-auth/drizzle-adapter.md
-   - next.js/app-router-setup.md
+  —drizzle-orm/modular-schemas.md
+  —drizzle-orm/postgresql-setup.md
+  —better-auth/nextjs-integration.md
+  —better-auth/drizzle-adapter.md
+  —next.js/app-router-setup.md
 4. ExternalScout persists all files to .tmp/external-context/
 5. Main agent creates session with "## External Context Fetched" section
 6. Main agent delegates to TaskManager with session path
@@ -359,9 +359,9 @@ After deleting external context files, update `.manifest.json`:
 1. User asks: "How do I use TanStack Query with Next.js Server Components?"
 2. Main agent calls ExternalScout
 3. ExternalScout fetches:
-   - tanstack-query/server-components.md
-   - tanstack-query/prefetching.md
-   - next.js/server-components.md
+  —tanstack-query/server-components.md
+  —tanstack-query/prefetching.md
+  —next.js/server-components.md
 4. ExternalScout persists to .tmp/external-context/
 5. Main agent creates session with external context references
 6. Subagents read and implement using external docs
@@ -410,7 +410,7 @@ After deleting external context files, update `.manifest.json`:
 
 ## References
 
-- **ExternalScout**: `.opencode/agents/subagents/core/externalscout.md`  -  Fetches and persists external docs
-- **Task Delegation**: `.opencode/context/core/workflows/task-delegation-basics.md`  -  How to reference external context in sessions
-- **Session Management**: `.opencode/context/core/workflows/session-management.md`  -  Session lifecycle
-- **Library Registry**: `.opencode/skills/context7/library-registry.md`  -  Supported libraries and query patterns
+- **ExternalScout**: `.opencode/agents/subagents/core/externalscout.md`, Fetches and persists external docs
+- **Task Delegation**: `.opencode/context/core/workflows/task-delegation-basics.md`, How to reference external context in sessions
+- **Session Management**: `.opencode/context/core/workflows/session-management.md`, Session lifecycle
+- **Library Registry**: `.opencode/skills/context7/library-registry.md`, Supported libraries and query patterns

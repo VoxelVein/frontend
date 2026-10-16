@@ -1,6 +1,6 @@
 <!-- Context: workflows/design-iteration-overview | Priority: high | Version: 1.0 | Updated: 2025-12-09 -->
 
-# Design Iteration Workflow - Overview
+# Design Iteration Workflow, Overview
 
 ## Overview
 
@@ -18,12 +18,12 @@ A structured 4-stage workflow for creating and iterating on UI designs. This pro
 
 **✅ STRONGLY RECOMMENDED** to delegate for:
 
-- **New UI/UX design work** - Landing pages, dashboards, app interfaces
-- **Design system creation** - Component libraries, theme systems, style guides
-- **Complex layouts** - Multi-column grids, responsive designs, intricate structures
-- **Visual polish** - Animations, transitions, micro-interactions
-- **Brand-focused work** - Marketing pages, product showcases, hero sections
-- **Accessibility-critical UI** - Forms, navigation, interactive components
+- **New UI/UX design work**, Landing pages, dashboards, app interfaces
+- **Design system creation**, Component libraries, theme systems, style guides
+- **Complex layouts**, Multi-column grids, responsive designs, intricate structures
+- **Visual polish**, Animations, transitions, micro-interactions
+- **Brand-focused work**, Marketing pages, product showcases, hero sections
+- **Accessibility-critical UI**, Forms, navigation, interactive components
 
 **Why delegate?**
 
@@ -53,8 +53,8 @@ task(
   prompt="Design a {feature} following the 4-stage workflow:
 
   Requirements:
-  - {requirement 1}
-  - {requirement 2}
+ —{requirement 1}
+ —{requirement 2}
 
   Context: {what this UI is for}
 
@@ -82,7 +82,7 @@ task(
 
 ## Related Files
 
-- [Design Plan File](./design-iteration-plan-file.md) - MANDATORY plan file template
+- [Design Plan File](./design-iteration-plan-file.md), MANDATORY plan file template
 - [Stage 1: Layout](./design-iteration-stage-layout.md)
 - [Stage 2: Theme](./design-iteration-stage-theme.md)
 - [Stage 3: Animation](./design-iteration-stage-animation.md)

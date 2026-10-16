@@ -41,8 +41,8 @@ permission:
 **How it works**:
 
 - `bash: false` means agent doesn't have access to bash tool
-- Framework enforces this - agent can't use bash even if prompt says to
-- NOT an approval issue - it's a permission restriction
+- Framework enforces this, agent can't use bash even if prompt says to
+- NOT an approval issue, it's a permission restriction
 
 ---
 
@@ -57,7 +57,7 @@ Add critical rules section at top of agent prompt:
   <rule id="tool_usage">
     ONLY use: glob, read, grep, list
     NEVER use: bash, write, edit, task
-    You're read-only - no modifications allowed
+    You're read-only—no modifications allowed
   </rule>
   <rule id="always_use_tools">
     ALWAYS use tools to discover files
@@ -138,7 +138,7 @@ In a **subagent** test.
 
 ### Cause
 
-**Subagents should NOT have approval gates** - they're delegated to by primary agents who already got approval.
+**Subagents should NOT have approval gates**, they're delegated to by primary agents who already got approval.
 
 The issue is usually:
 
@@ -222,8 +222,8 @@ After fixing tool permission:
 
 ## Related
 
-- `concepts/subagent-testing-modes.md` - Understand subagent testing
-- `guides/testing-subagents.md` - How to test subagents
-- `examples/subagent-prompt-structure.md` - Prompt structure with tool emphasis
+- `concepts/subagent-testing-modes.md`, Understand subagent testing
+- `guides/testing-subagents.md`, How to test subagents
+- `examples/subagent-prompt-structure.md`, Prompt structure with tool emphasis
 
 **Reference**: `.opencode/agents/subagents/core/contextscout.md` (tool configuration)

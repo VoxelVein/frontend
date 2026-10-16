@@ -20,20 +20,18 @@ AI agents create summary files (OVERVIEW.md, SESSION-*.md, SUMMARY.md) that cont
 
 <rule id="summary_patterns" enforcement="strict">
   Harvest automatically detects these patterns:
-
-Filename patterns:
-
-- *OVERVIEW.md
-- *SUMMARY.md
-- SESSION-*.md
-- CONTEXT-*.md
-- *NOTES.md
-
-Location patterns:
-
-- Files in .tmp/ directory
-- Files with "Summary", "Overview", "Session" in title
-- Files >2KB in root directory (likely summaries)
+  
+  Filename patterns:
+  - *OVERVIEW.md
+  - *SUMMARY.md
+  - SESSION-*.md
+  - CONTEXT-*.md
+  - *NOTES.md
+  
+  Location patterns:
+  - Files in .tmp/ directory
+  - Files with "Summary", "Overview", "Session" in title
+  - Files >2KB in root directory (likely summaries)
 </rule>
 
 ---
@@ -41,13 +39,11 @@ Location patterns:
 ## 6-Stage Workflow
 
 <workflow id="harvest" enforce="@critical_rules">
-
+  
 ### Stage 1: Scan
-
 **Action**: Find all summary files in workspace
 
 **Process**:
-
 1. Search for auto-detection patterns
 2. Check .tmp/ directory
 3. List files with sizes
@@ -56,7 +52,6 @@ Location patterns:
 **Output**: List of candidate files
 
 **Example**:
-
 ```
 Found 3 summary documents:
 1. CONTEXT-SYSTEM-OVERVIEW.md (4.2 KB, modified 1 hour ago)
@@ -67,13 +62,11 @@ Found 3 summary documents:
 ---
 
 ### Stage 2: Analyze
-
 **Action**: Categorize content by function
 
 **Mapping Rules**:
-
 | Content Type | Target Folder | How to Identify |
-| --- | --- | --- |
+|--------------|---------------|-----------------|
 | Design decisions | `concepts/` | "We decided to...", "Architecture", "Pattern" |
 | Solutions/patterns | `examples/` | Code snippets, "Here's how we..." |
 | Workflows | `guides/` | Numbered steps, "How to...", "Setup" |
@@ -81,7 +74,6 @@ Found 3 summary documents:
 | Reference data | `lookup/` | Tables, lists, paths, commands |
 
 **Process**:
-
 1. Read each file
 2. Identify valuable sections (skip planning/conversation)
 3. Categorize by function
@@ -93,7 +85,6 @@ Found 3 summary documents:
 ---
 
 ### Stage 3: Approve (CRITICAL)
-
 **Action**: Present approval UI with letter-based selection
 
 <rule id="approval_gate" enforcement="strict">
@@ -102,7 +93,6 @@ Found 3 summary documents:
 </rule>
 
 **Format**:
-
 ```
 ### CONTEXT-SYSTEM-OVERVIEW.md (4.2 KB)
 
@@ -148,7 +138,6 @@ Found 3 summary documents:
 ```
 
 **Validation**:
-
 - MUST wait for user input
 - MUST not proceed without approval
 - If user types 'cancel', stop immediately
@@ -158,7 +147,6 @@ Found 3 summary documents:
 ---
 
 ### Stage 4: Extract
-
 **Action**: Extract and minimize approved items
 
 <rule id="extraction" enforce="@mvi_principle">
@@ -171,7 +159,6 @@ Found 3 summary documents:
 </rule>
 
 **Process**:
-
 1. For each approved item:
    - Extract core content
    - Apply MVI minimization (see compact.md)
@@ -218,7 +205,6 @@ Show all? [y/n] | Approve extraction? [y/n/edit]: _
 ---
 
 ### Stage 5: Cleanup (APPROVAL REQUIRED)
-
 **Action**: Archive or delete source summary files
 
 ```
@@ -235,13 +221,13 @@ Skipped (no valuable content):
 
 How should we handle these source files?
 
-  1. Archive (safe)  -  move to .tmp/archive/harvested/{date}/
+  1. Archive (safe) — move to .tmp/archive/harvested/{date}/
      → Can restore later if needed
 
-  2. Delete  -  permanently remove harvested files
+  2. Delete — permanently remove harvested files
      → Frees disk space, no undo
 
-  3. Keep  -  leave source files in place
+  3. Keep — leave source files in place
      → No cleanup, files remain where they are
 
 Choose [1/2/3] (default: 1): _
@@ -257,11 +243,9 @@ Choose [1/2/3] (default: 1): _
 ---
 
 ### Stage 6: Report
-
 **Action**: Show comprehensive results summary
 
 **Format**:
-
 ```
 ✅ Harvested 5 items into permanent context:
    - Added to core/concepts/context-organization.md
@@ -289,20 +273,17 @@ Choose [1/2/3] (default: 1): _
 ## Usage Examples
 
 ### Scan entire workspace
-
 ```bash
 /context harvest
 ```
 
 ### Scan specific directory
-
 ```bash
 /context harvest .tmp/
 /context harvest docs/sessions/
 ```
 
 ### Harvest specific file
-
 ```bash
 /context harvest OVERVIEW.md
 /context harvest SESSION-2026-01-06.md
@@ -313,7 +294,6 @@ Choose [1/2/3] (default: 1): _
 ## Smart Content Detection
 
 ### ✅ Extract (Valuable Knowledge)
-
 - Design decisions ("We chose X because...")
 - Patterns that worked ("This pattern solved...")
 - Errors encountered + solutions
@@ -322,7 +302,6 @@ Choose [1/2/3] (default: 1): _
 - Core concepts explained
 
 ### ❌ Skip (Temporary/Noise)
-
 - Planning discussion ("Should we...?", "Maybe try...")
 - Conversational notes ("I think...", "We talked about...")
 - Duplicate info (already in context)

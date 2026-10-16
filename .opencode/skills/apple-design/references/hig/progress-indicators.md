@@ -18,7 +18,7 @@ Because the duration of an operation is either known or unknown, there are two t
 
 Both determinate and indeterminate progress indicators can have different appearances depending on the platform. A determinate progress indicator shows the progress of a task by filling a linear or circular track as the task completes. *Progress bars* include a track that fills from the leading side to the trailing side. *Circular progress indicators* have a track that fills in a clockwise direction.
 
-An indeterminate progress indicator  -  also called an *activity indicator*  -  uses an animated image to indicate progress. All platforms support a circular image that appears to spin; however, macOS also supports an indeterminate progress bar.
+An indeterminate progress indicator, also called an *activity indicator*, uses an animated image to indicate progress. All platforms support a circular image that appears to spin; however, macOS also supports an indeterminate progress bar.
 
 For developer guidance, see [ProgressView](https://developer.apple.com/documentation/swiftui/progressview).
 
@@ -38,7 +38,7 @@ For developer guidance, see [ProgressView](https://developer.apple.com/documenta
 
 **Display a progress indicator in a consistent location.** Choosing a consistent location for a progress indicator helps people reliably find the status of an operation across platforms or within or between apps.
 
-**When it’s feasible, let people halt processing.** If people can interrupt a process without causing negative side effects, include a Cancel button. If interrupting the process might cause negative side effects  -  such as losing the downloaded portion of a file  -  it can be useful to provide a Pause button in addition to a Cancel button.
+**When it’s feasible, let people halt processing.** If people can interrupt a process without causing negative side effects, include a Cancel button. If interrupting the process might cause negative side effects, such as losing the downloaded portion of a file, it can be useful to provide a Pause button in addition to a Cancel button.
 
 **Let people know when halting a process has a negative consequence.** When canceling a process results in lost progress, it’s helpful to provide an [alert](alerts.md) that includes an option to confirm the cancellation or resume the process.
 

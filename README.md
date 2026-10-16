@@ -1,8 +1,5 @@
 <p align="center">
-  <img
-    alt="VoxelVein Frontend"
-    src="https://shieldcn.dev/header/surface.svg?title=VoxelVein+Frontend"
-  />
+  <img alt="header" src="https://shieldcn.dev/header/gradient.svg?title=VoxelVein+Frontend&amp;subtitle=The+frontend+of+a+modern%2C+open-source+marketplace+for+Minecraft+creators.&amp;mode=dark&amp;image=https%3A%2F%2Fi.postimg.cc%2FC5MrrnwD%2Fvscode.jpg" />
 </p>
 
 <p align="center">
@@ -12,15 +9,38 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/VoxelVein/frontend">
-    <img
-      alt="License"
-      src="https://shieldcn.dev/github/VoxelVein/frontend/license.svg"
-    />
-  </a>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary" /><img alt="GitHub Stars" src="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary" /><img alt="GitHub Forks" src="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary" /><img alt="Watchers" src="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost" /><img alt="Branches" src="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald" /><img alt="Contributors" src="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary" /><img alt="Last commit" src="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary" /><img alt="Commits" src="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary" /><img alt="Open issues" src="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost" /><img alt="Closed issues" src="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary" /><img alt="Open PRs" src="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost" /><img alt="Closed PRs" src="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost" /><img alt="Merged PRs" src="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/release/VoxelVein/frontend.svg" /><img alt="Release" src="https://shieldcn.dev/github/release/VoxelVein/frontend.svg?mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary" /><img alt="CI" src="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost" /><img alt="License" src="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;logo=pnpm" /><img alt="Package mgr · pnpm" src="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;mode=light&amp;logo=pnpm" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;logo=docker" /><img alt="Container · Docker" src="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;mode=light&amp;logo=docker" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;logo=typescript" /><img alt="Language · TypeScript" src="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;mode=light&amp;logo=typescript" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;logo=vite" /><img alt="Bundler · Vite" src="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;mode=light&amp;logo=vite" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;logo=vitest" /><img alt="Tests · Vitest" src="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;mode=light&amp;logo=vitest" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;logo=reactquery" /><img alt="TanStack Query" src="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;mode=light&amp;logo=reactquery" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;logo=ri%3ARiShieldKeyholeFill" /><img alt="Better Auth" src="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;mode=light&amp;logo=ri%3ARiShieldKeyholeFill" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;logo=drizzle" /><img alt="Drizzle" src="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;mode=light&amp;logo=drizzle" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;logo=postgresql" /><img alt="PostgreSQL" src="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;mode=light&amp;logo=postgresql" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;logo=react" /><img alt="React" src="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;mode=light&amp;logo=react" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;logo=redis" /><img alt="Redis" src="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;mode=light&amp;logo=redis" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;logo=tailwindcss" /><img alt="Tailwind CSS" src="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;mode=light&amp;logo=tailwindcss" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;logo=valibot" /><img alt="Valibot" src="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;mode=light&amp;logo=valibot" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;logo=husky" /><img alt="Husky" src="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;mode=light&amp;logo=husky" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary" /><img alt="ESM only" src="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary" /><img alt="Agent-friendly AGENTS.md" src="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary&amp;mode=light" /></picture>
 </p>
-
-# VoxelVein Frontend
 
 ## Overview
 
@@ -115,29 +135,29 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 ## Tech Stack
 
-| Technology          | Purpose                                    |
-| ------------------- | ------------------------------------------ |
-| **React 19**        | User interface                             |
-| **TypeScript**      | Static typing                              |
-| **TanStack Start**  | Full-stack React framework and SSR         |
-| **TanStack Router** | Type-safe, file-based routing              |
-| **TanStack Query**  | Server state, caching, background refresh  |
-| **TanStack Form**   | Form state and validation                  |
-| **Tailwind CSS v4** | Styling                                    |
-| **Base UI**         | Accessible UI primitives                   |
-| **Better Auth**     | Authentication, passkeys, admin plugin     |
-| **Drizzle ORM**     | Database access and schema management      |
-| **PostgreSQL**      | Relational database and search             |
-| **ElysiaJS**        | Standalone API server (webhooks, SSE)      |
-| **Valibot**         | Validation schemas shared across the stack |
-| **Vite**            | Development and build tooling              |
-| **Nitro**           | Production server runtime and tasks        |
-| **Vitest**          | Testing                                    |
-| **Oxlint**          | Linting                                    |
-| **Oxfmt**           | Formatting                                 |
-| **Ultracite**       | Unified code-quality checks and fixes      |
-| **markdownlint**    | Documentation linting                      |
-| **pnpm**            | Package management                         |
+| Technology | Purpose |
+| --- | --- |
+| **React 19** | User interface |
+| **TypeScript** | Static typing |
+| **TanStack Start** | Full-stack React framework and SSR |
+| **TanStack Router** | Type-safe, file-based routing |
+| **TanStack Query** | Server state, caching, background refresh |
+| **TanStack Form** | Form state and validation |
+| **Tailwind CSS v4** | Styling |
+| **Base UI** | Accessible UI primitives |
+| **Better Auth** | Authentication, passkeys, admin plugin |
+| **Drizzle ORM** | Database access and schema management |
+| **PostgreSQL** | Relational database and search |
+| **ElysiaJS** | Standalone API server (webhooks, SSE) |
+| **Valibot** | Validation schemas shared across the stack |
+| **Vite** | Development and build tooling |
+| **Nitro** | Production server runtime and tasks |
+| **Vitest** | Testing |
+| **Oxlint** | Linting |
+| **Oxfmt** | Formatting |
+| **Ultracite** | Unified code-quality checks and fixes |
+| **markdownlint** | Documentation linting |
+| **pnpm** | Package management |
 
 ---
 
@@ -220,49 +240,49 @@ pnpm dev:api    # API server on http://localhost:3002
 
 ### Development
 
-| Command               | Description                                   |
-| --------------------- | --------------------------------------------- |
-| `pnpm dev`            | Starts the whole dev environment (app + API)  |
-| `pnpm dev:web`        | Starts only the Vite app (port 3000)          |
-| `pnpm dev:api`        | Starts the ElysiaJS API server (watch)        |
-| `pnpm dev:all`        | Runs the app and API server together          |
-| `pnpm start:api`      | Starts the API server (no watch)              |
-| `pnpm send:webhook`   | Sends a test mod webhook to the API           |
-| `pnpm build`          | Builds the production bundle                  |
-| `pnpm preview`        | Previews the production build                 |
-| `pnpm start`          | Starts the built Nitro server from `.output/` |
-| `pnpm check:bundle`   | Checks the main chunk against the size budget |
-| `pnpm analyze:bundle` | Attributes the entry chunk to packages        |
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Starts the whole dev environment (app + API) |
+| `pnpm dev:web` | Starts only the Vite app (port 3000) |
+| `pnpm dev:api` | Starts the ElysiaJS API server (watch) |
+| `pnpm dev:all` | Runs the app and API server together |
+| `pnpm start:api` | Starts the API server (no watch) |
+| `pnpm send:webhook` | Sends a test mod webhook to the API |
+| `pnpm build` | Builds the production bundle |
+| `pnpm preview` | Previews the production build |
+| `pnpm start` | Starts the built Nitro server from `.output/` |
+| `pnpm check:bundle` | Checks the main chunk against the size budget |
+| `pnpm analyze:bundle` | Attributes the entry chunk to packages |
 
 ### Quality
 
-| Command              | Description                         |
-| -------------------- | ----------------------------------- |
-| `pnpm typecheck`     | Runs the TypeScript type checker    |
-| `pnpm test`          | Runs the Vitest test suite          |
+| Command | Description |
+| --- | --- |
+| `pnpm typecheck` | Runs the TypeScript type checker |
+| `pnpm test` | Runs the Vitest test suite |
 | `pnpm test:coverage` | Runs the Vitest suite with coverage |
-| `pnpm check`         | Lint and format check (read-only)   |
-| `pnpm fix`           | Lint and format auto-fix            |
-| `pnpm lint`          | Runs the Oxlint linter only         |
-| `pnpm format`        | Formats source files with Oxfmt     |
-| `pnpm lint:md`       | Runs markdownlint on Markdown files |
-| `pnpm lint:md:fix`   | Auto-fixes Markdown issues          |
-| `pnpm prepare`       | Initializes Husky Git hooks         |
+| `pnpm check` | Lint and format check (read-only) |
+| `pnpm fix` | Lint and format auto-fix |
+| `pnpm lint` | Runs the Oxlint linter only |
+| `pnpm format` | Formats source files with Oxfmt |
+| `pnpm lint:md` | Runs markdownlint on Markdown files |
+| `pnpm lint:md:fix` | Auto-fixes Markdown issues |
+| `pnpm prepare` | Initializes Husky Git hooks |
 
 ### Database, content, and infrastructure
 
-| Command                 | Description                              |
-| ----------------------- | ---------------------------------------- |
-| `pnpm db:migrate`       | Applies pending Drizzle migrations       |
-| `pnpm db:studio`        | Opens Drizzle Studio                     |
-| `pnpm db:check`         | Check for an ungenerated migration       |
-| `pnpm db:seed`          | Seeds demo projects and blog posts       |
-| `pnpm db:seed:projects` | Seeds demo projects of every type        |
-| `pnpm db:seed:posts`    | Seeds demo blog posts                    |
-| `pnpm db:seed:admin`    | Promotes a user to a staff role          |
-| `pnpm mc:versions`      | Refreshes the Minecraft version manifest |
-| `pnpm storage:init`     | Prepares the local Garage bucket         |
-| `pnpm docs:check`       | Checks Markdown links and anchors        |
+| Command | Description |
+| --- | --- |
+| `pnpm db:migrate` | Applies pending Drizzle migrations |
+| `pnpm db:studio` | Opens Drizzle Studio |
+| `pnpm db:check` | Check for an ungenerated migration |
+| `pnpm db:seed` | Seeds demo projects and blog posts |
+| `pnpm db:seed:projects` | Seeds demo projects of every type |
+| `pnpm db:seed:posts` | Seeds demo blog posts |
+| `pnpm db:seed:admin` | Promotes a user to a staff role |
+| `pnpm mc:versions` | Refreshes the Minecraft version manifest |
+| `pnpm storage:init` | Prepares the local Garage bucket |
+| `pnpm docs:check` | Checks Markdown links and anchors |
 
 To generate a migration, use the project-local Drizzle binary:
 `./node_modules/.bin/drizzle-kit generate`. There is deliberately no
@@ -386,11 +406,11 @@ The application uses **Better Auth**.
 
 Authorization is a single ladder in `ROLE_RANK` (`src/lib/roles.ts`):
 
-| Role        | Can                                                           |
-| ----------- | ------------------------------------------------------------- |
-| `user`      | Only their own projects. Nothing in the admin panel.          |
-| `moderator` | Review projects, draft blog posts, disable an account.        |
-| `admin`     | Everything, plus publishing posts, deleting users, and roles. |
+| Role | Can |
+| --- | --- |
+| `user` | Only their own projects. Nothing in the admin panel. |
+| `moderator` | Review projects, draft blog posts, disable an account. |
+| `admin` | Everything, plus publishing posts, deleting users, and roles. |
 
 Every check calls `hasRole(role, minimum)` rather than comparing role
 names, so adding a role extends the ladder without touching call sites. The
@@ -467,7 +487,7 @@ operator's name and address:
 * `/legal` legal notes (§ 5 DDG service-provider notice)
 * `/privacy` privacy policy
 * `/cookies` cookie policy
-* `/terms` terms of service  -  the single binding legal document
+* `/terms` terms of service, the single binding legal document
 * `/disclaimer` trademark and content-provenance notes, cross-referencing the
   terms rather than restating them
 
@@ -679,3 +699,4 @@ vulnerability reporting policy.
 
 Please review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before
 participating in the community.
+

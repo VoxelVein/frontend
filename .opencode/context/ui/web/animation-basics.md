@@ -58,19 +58,19 @@ Slow:        500-800ms  (dramatic reveals, storytelling)
 ### Easing Functions
 
 ```css
-/* Entrances - start slow, end fast */
+/* Entrances—start slow, end fast */
 ease-out: cubic-bezier(0, 0, 0.2, 1);
 
-/* Exits - start fast, end slow */
+/* Exits—start fast, end slow */
 ease-in: cubic-bezier(0.4, 0, 1, 1);
 
-/* Both - smooth throughout */
+/* Both—smooth throughout */
 ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-/* Bounce - playful, attention-grabbing */
+/* Bounce—playful, attention-grabbing */
 bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-/* Elastic - spring-like */
+/* Elastic—spring-like */
 elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
 ```
 
@@ -92,6 +92,6 @@ elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
 
 ## Related Files
 
-- [Animation Components](./animation-components.md) - Common UI patterns
-- [Loading Animations](./animation-loading.md) - Loading states
-- [Advanced Animations](./animation-advanced.md) - Recipes & best practices
+- [Animation Components](./animation-components.md), Common UI patterns
+- [Loading Animations](./animation-loading.md), Loading states
+- [Advanced Animations](./animation-advanced.md), Recipes & best practices

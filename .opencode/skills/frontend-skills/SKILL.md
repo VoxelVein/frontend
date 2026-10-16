@@ -6,25 +6,25 @@ author: voxelvein
 type: skill
 category: development
 tags:
-  - frontend
-  - react
-  - tanstack
-  - component-architecture
-  - state-management
-  - testing
-  - routing
+ —frontend
+ —react
+ —tanstack
+ —component-architecture
+ —state-management
+ —testing
+ —routing
 ---
 
 # Frontend Skills
 
-**Purpose**: Consolidate frontend development workflow knowledge for this project  -  React patterns, TanStack conventions, component architecture, and testing strategies.
+**Purpose**: Consolidate frontend development workflow knowledge for this project, React patterns, TanStack conventions, component architecture, and testing strategies.
 
 ## Scope
 
 This skill covers frontend-specific development patterns. It complements (not duplicates):
 
-- **web-design-guidelines**  -  visual design, tokens, a11y review, UI consistency
-- **performance-guidelines**  -  debounce/throttle, virtualization, image optimization
+- **web-design-guidelines**, visual design, tokens, a11y review, UI consistency
+- **performance-guidelines**, debounce/throttle, virtualization, image optimization
 
 Use this skill when the task involves **building or modifying frontend code**, not reviewing visuals or performance.
 
@@ -72,13 +72,13 @@ src/components/
 - **Composition over prop drilling**: use children and render props
 - **Compound components**: for complex UI (e.g., DialogHeader/DialogContent/DialogFooter)
 - **Custom hooks**: extract reusable logic into `src/hooks/` or colocated hooks
-- **Named exports**: use `export { ComponentName }`  -  not default exports
+- **Named exports**: use `export { ComponentName }`, not default exports
 
 ### shadcn/Base UI Primitives
 
 - Always use existing primitives from `src/components/ui/`
 - Never hand-roll a replacement when a shadcn component exists
-- Extend or compose  -  never fork
+- Extend or compose, never fork
 - Never introduce another component library
 
 ---
@@ -89,7 +89,7 @@ src/components/
 - **Server state**: `@tanstack/react-query` for API data
 - **Form state**: `@tanstack/react-form` with Valibot validation
 - **URL state**: TanStack Router search params for shareable state
-- **Global state**: avoid  -  pass via props or context when truly needed
+- **Global state**: avoid, pass via props or context when truly needed
 
 ### Valibot for Validation
 
@@ -103,8 +103,8 @@ src/components/
 ## Testing Patterns
 
 - **Library**: `@testing-library/react` + Vitest
-- **Query by role**: `getByRole`, `getByLabelText`, `getByText`  -  never by CSS class
-- **Assertions in `it()`/`test()` blocks**: no `done` callbacks  -  use async/await
+- **Query by role**: `getByRole`, `getByLabelText`, `getByText`, never by CSS class
+- **Assertions in `it()`/`test()` blocks**: no `done` callbacks, use async/await
 - **No `.only` or `.skip`** in committed code
 - **Flat suites**: avoid excessive `describe` nesting
 - **Mock external dependencies**: auth client, API calls, router
@@ -145,7 +145,7 @@ src/components/
 
 1. Check `src/components/ui/` for existing primitives
 2. Create in the appropriate feature directory
-3. Use shadcn primitives  -  compose, don't hand-roll
+3. Use shadcn primitives, compose, don't hand-roll
 4. Add `aria-*` attributes for accessibility
 5. Test with `getByRole` queries
 

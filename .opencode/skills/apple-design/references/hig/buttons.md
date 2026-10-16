@@ -21,7 +21,7 @@ There are also many button-like components that have distinct appearances and be
 
 When buttons are instantly recognizable and easy to understand, an app tends to feel intuitive and well designed.
 
-**Make buttons easy for people to use.** It’s essential to include enough space around a button so that people can visually distinguish it from surrounding components and content. Giving a button enough space is also critical for helping people select or activate it, regardless of the method of input they use. As a general rule, a button needs a hit region of at least 44x44 pt  -  in visionOS, 60x60 pt  -  to ensure that people can select it easily, whether they use a fingertip, a pointer, their eyes, or a remote.
+**Make buttons easy for people to use.** It’s essential to include enough space around a button so that people can visually distinguish it from surrounding components and content. Giving a button enough space is also critical for helping people select or activate it, regardless of the method of input they use. As a general rule, a button needs a hit region of at least 44x44 pt, in visionOS, 60x60 pt, to ensure that people can select it easily, whether they use a fingertip, a pointer, their eyes, or a remote.
 
 **Always include a press state for a custom button.** Without a press state, a button can feel unresponsive, making people wonder if it’s accepting their input.
 
@@ -31,7 +31,7 @@ System buttons offer a range of styles that support customization while providin
 
 **In general, use a button that has a prominent visual style for the most likely action in a view.** To draw people’s attention to a specific button, use a prominent button style so the system can apply an accent color to the button’s background. Buttons that use color tend to be the most visually distinctive, helping people quickly identify the actions they’re most likely to use. Keep the number of prominent buttons to one or two per view. Presenting too many prominent buttons increases cognitive load, requiring people to spend more time considering options before making a choice.
 
-**Use style  -  not size  -  to visually distinguish the preferred choice among multiple options.** When you use buttons of the same size to offer two or more options, you signal that the options form a coherent set of choices. By contrast, placing two buttons of different sizes near each other can make the interface look confusing and inconsistent. If you want to highlight the preferred or most likely option in a set, use a more prominent button style for that option and a less prominent style for the remaining ones.
+**Use style, not size, to visually distinguish the preferred choice among multiple options.** When you use buttons of the same size to offer two or more options, you signal that the options form a coherent set of choices. By contrast, placing two buttons of different sizes near each other can make the interface look confusing and inconsistent. If you want to highlight the preferred or most likely option in a set, use a more prominent button style for that option and a less prominent style for the remaining ones.
 
 **Avoid applying a similar color to button labels and content layer backgrounds.** If your app already has bright, colorful content in the content layer, prefer using the default monochromatic appearance of button labels. For more guidance, see [Liquid Glass color](color.md#liquid-glass-color).
 
@@ -43,20 +43,20 @@ System buttons offer a range of styles that support customization while providin
 
 **Try to associate familiar actions with familiar icons.** For example, people can predict that a button containing the `square.and.arrow.up` symbol will help them perform share-related activities. If it makes sense to use an icon in your button, consider using an existing or customized [symbol](sf-symbols.md). For a list of symbols that represent common actions, see [Standard icons](icons.md#standard-icons).
 
-**Consider using text when a short label communicates more clearly than an icon.** To use text, write a few words that succinctly describe what the button does. Using [title-style capitalization](https://help.apple.com/applestyleguide/#/apsgb744e4a3?sub=apdca93e113f1d64), consider starting the label with a verb to help convey the button’s action  -  for example, a button that lets people add items to their shopping cart might use the label “Add to Cart.”
+**Consider using text when a short label communicates more clearly than an icon.** To use text, write a few words that succinctly describe what the button does. Using [title-style capitalization](https://help.apple.com/applestyleguide/#/apsgb744e4a3?sub=apdca93e113f1d64), consider starting the label with a verb to help convey the button’s action, for example, a button that lets people add items to their shopping cart might use the label “Add to Cart.”
 
 ## Role
 
 A system button can have one of the following roles:
 
 - **Normal.** No specific meaning.
-- **Primary.** The button is the default button  -  the button people are most likely to choose.
+- **Primary.** The button is the default button, the button people are most likely to choose.
 - **Cancel.** The button cancels the current action.
 - **Destructive.** The button performs an action that can result in data destruction.
 
 A button’s role can have additional effects on its appearance. For example, a primary button uses an app’s accent color, whereas a destructive button uses the system red color.
 
-**Assign the primary role to the button people are most likely to choose.** When a primary button responds to the Return key, it makes it easy for people to quickly confirm their choice. In addition, when the button is in a temporary view  -  like a [sheet](sheets.md), an editable view, or an [alert](alerts.md)  -  assigning it the primary role means that the view can automatically close when people press Return.
+**Assign the primary role to the button people are most likely to choose.** When a primary button responds to the Return key, it makes it easy for people to quickly confirm their choice. In addition, when the button is in a temporary view, like a [sheet](sheets.md), an editable view, or an [alert](alerts.md), assigning it the primary role means that the view can automatically close when people press Return.
 
 **Don’t assign the primary role to a button that performs a destructive action, even if that action is the most likely choice.** Because of its visual prominence, people sometimes choose a primary button without reading it first. Help people avoid losing content by assigning the primary role to nondestructive buttons.
 
@@ -74,17 +74,17 @@ Several specific button types are unique to macOS.
 
 The standard button type in macOS is known as a *push button*. You can configure a push button to display text, a symbol, an icon, or an image, or a combination of text and image content. Push buttons can act as the default button in a view and you can tint them.
 
-**Use a flexible-height push button only when you need to display tall or variable height content.** Flexible-height buttons support the same configurations as regular push buttons  -  and they use the same corner radius and content padding  -  so they look consistent with other buttons in your interface. If you need to present a button that contains two lines of text or a tall icon, use a flexible-height button; otherwise, use a standard push button. For developer guidance, see [NSButton.BezelStyle.flexiblePush](https://developer.apple.com/documentation/appkit/nsbutton/bezelstyle-swift.enum/flexiblepush).
+**Use a flexible-height push button only when you need to display tall or variable height content.** Flexible-height buttons support the same configurations as regular push buttons, and they use the same corner radius and content padding, so they look consistent with other buttons in your interface. If you need to present a button that contains two lines of text or a tall icon, use a flexible-height button; otherwise, use a standard push button. For developer guidance, see [NSButton.BezelStyle.flexiblePush](https://developer.apple.com/documentation/appkit/nsbutton/bezelstyle-swift.enum/flexiblepush).
 
 **Append a trailing ellipsis to the title when a push button opens another window, view, or app.** Throughout the system, an ellipsis in a control title signals that people can provide additional input. For example, the Edit buttons in the AutoFill pane of Safari Settings include ellipses because they open other views that let people modify autofill values.
 
-**Consider supporting spring loading.** On systems with a Magic Trackpad, *spring loading* lets people activate a button by dragging selected items over it and force clicking  -  that is, pressing harder  -  without dropping the selected items. After force clicking, people can continue dragging the items, possibly to perform additional actions.
+**Consider supporting spring loading.** On systems with a Magic Trackpad, *spring loading* lets people activate a button by dragging selected items over it and force clicking, that is, pressing harder, without dropping the selected items. After force clicking, people can continue dragging the items, possibly to perform additional actions.
 
 #### Square buttons
 
 A *square button* (also known as a *gradient button*) initiates an action related to a view, like adding or removing rows in a table.
 
-Square buttons contain symbols or icons  -  not text  -  and you can configure them to behave like push buttons, toggles, or pop-up buttons. The buttons appear in close proximity to their associated view  -  usually within or beneath it  -  so people know which view the buttons affect.
+Square buttons contain symbols or icons, not text, and you can configure them to behave like push buttons, toggles, or pop-up buttons. The buttons appear in close proximity to their associated view, usually within or beneath it, so people know which view the buttons affect.
 
 **Use square buttons in a view, not in the window frame.** Square buttons aren’t intended for use in toolbars or status bars. If you need a button in a [toolbar](toolbars.md), use a toolbar item.
 

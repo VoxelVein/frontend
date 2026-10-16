@@ -3,7 +3,7 @@
 # Core Concept: Registry System
 
 **Purpose**: Understanding how component tracking and distribution works  
-**Priority**: CRITICAL - Load this before working with registry
+**Priority**: CRITICAL, Load this before working with registry
 
 ---
 
@@ -11,11 +11,11 @@
 
 The registry is a centralized catalog (`registry.json`) that tracks all components in OpenAgents Control:
 
-- **Agents** - AI agent prompts
-- **Subagents** - Delegated specialists
-- **Commands** - Slash commands
-- **Tools** - Custom tools
-- **Contexts** - Context files
+- **Agents**, AI agent prompts
+- **Subagents**, Delegated specialists
+- **Commands**, Slash commands
+- **Tools**, Custom tools
+- **Contexts**, Context files
 
 **Location**: `registry.json` (root directory)
 
@@ -104,11 +104,11 @@ The auto-detect system scans `.opencode/` and automatically updates the registry
 
 ### What Gets Detected
 
-✅ **Agents** - `.opencode/agents/{category}/*.md`  
-✅ **Subagents** - `.opencode/agents/subagents/**/*.md`  
-✅ **Commands** - `.opencode/command/**/*.md`  
-✅ **Tools** - `.opencode/tool/**/index.ts`  
-✅ **Contexts** - `.opencode/context/**/*.md`
+✅ **Agents**—`.opencode/agents/{category}/*.md`  
+✅ **Subagents**—`.opencode/agents/subagents/**/*.md`  
+✅ **Commands**—`.opencode/command/**/*.md`  
+✅ **Tools**—`.opencode/tool/**/index.ts`  
+✅ **Contexts**—`.opencode/context/**/*.md`
 
 ### Frontmatter Requirements
 
@@ -139,12 +139,12 @@ tags: ["tag1", "tag2"] # Optional
 
 ### What Gets Validated
 
-✅ **Schema** - Correct JSON structure  
-✅ **Paths** - All paths exist  
-✅ **IDs** - Unique IDs  
-✅ **Categories** - Valid categories  
-✅ **Dependencies** - Dependencies exist  
-✅ **Versions** - Version consistency
+✅ **Schema**, Correct JSON structure  
+✅ **Paths**, All paths exist  
+✅ **IDs**, Unique IDs  
+✅ **Categories**, Valid categories  
+✅ **Dependencies**, Dependencies exist  
+✅ **Versions**, Version consistency
 
 ### Validation Errors
 
@@ -351,9 +351,9 @@ When installing components that already exist:
 
 ### Collision Strategies
 
-1. **Skip** - Keep existing file
-2. **Overwrite** - Replace with new file
-3. **Backup** - Backup existing, install new
+1. **Skip**, Keep existing file
+2. **Overwrite**, Replace with new file
+3. **Backup**, Backup existing, install new
 
 ### Interactive Mode
 
@@ -441,23 +441,23 @@ jq '.version = "0.X.Y"' registry.json > tmp && mv tmp registry.json
 
 ### Adding Components
 
-✅ **Add frontmatter** - Required for auto-detect  
-✅ **Run auto-detect** - Don't manually edit registry  
-✅ **Validate** - Always validate after changes  
-✅ **Test locally** - Use local registry for testing
+✅ **Add frontmatter**, Required for auto-detect  
+✅ **Run auto-detect**, Don't manually edit registry  
+✅ **Validate**, Always validate after changes  
+✅ **Test locally**, Use local registry for testing
 
 ### Maintaining Registry
 
-✅ **Auto-detect first** - Let scripts handle updates  
-✅ **Validate often** - Catch issues early  
-✅ **Version consistency** - Keep versions in sync  
-✅ **CI validation** - Automate validation in CI
+✅ **Auto-detect first**, Let scripts handle updates  
+✅ **Validate often**, Catch issues early  
+✅ **Version consistency**, Keep versions in sync  
+✅ **CI validation**, Automate validation in CI
 
 ### Dependencies
 
-✅ **Explicit dependencies** - List all dependencies  
-✅ **Test resolution** - Verify dependencies resolve  
-✅ **Avoid cycles** - No circular dependencies
+✅ **Explicit dependencies**, List all dependencies  
+✅ **Test resolution**, Verify dependencies resolve  
+✅ **Avoid cycles**, No circular dependencies
 
 ---
 

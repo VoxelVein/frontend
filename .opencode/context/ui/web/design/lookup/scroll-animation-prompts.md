@@ -197,15 +197,15 @@ ffmpeg -i animation.mp4 -vf fps=30 -quality 90 frame_%04d.webp
 
 ## Related
 
-- concepts/scroll-linked-animations.md - Understanding the technique
-- examples/scrollytelling-headphone.md - Full implementation
-- guides/scrollytelling-setup.md - Setup instructions
+- concepts/scroll-linked-animations.md, Understanding the technique
+- examples/scrollytelling-headphone.md, Full implementation
+- guides/scrollytelling-setup.md, Setup instructions
 
 ---
 
 ## Tool References
 
-- [Runway ML](https://runwayml.com) - AI video generation
-- [Pika Labs](https://pika.art) - AI video interpolation
-- [ezgif](https://ezgif.com/split-video) - Frame extraction
-- [FFmpeg](https://ffmpeg.org) - Video processing
+- [Runway ML](https://runwayml.com), AI video generation
+- [Pika Labs](https://pika.art), AI video interpolation
+- [ezgif](https://ezgif.com/split-video), Frame extraction
+- [FFmpeg](https://ffmpeg.org), Video processing

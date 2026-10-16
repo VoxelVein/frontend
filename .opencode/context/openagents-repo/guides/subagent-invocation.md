@@ -3,7 +3,7 @@
 # Guide: Subagent Invocation
 
 **Purpose**: How to correctly invoke subagents using the task tool  
-**Priority**: HIGH - Critical for agent delegation
+**Priority**: HIGH, Critical for agent delegation
 
 ---
 
@@ -29,28 +29,28 @@ Based on the OpenCode CLI registration, use these exact strings for `subagent_ty
 
 **Core Subagents**:
 
-- `"Task Manager"` - Task breakdown and planning
-- `"Documentation"` - Documentation generation
-- `"ContextScout"` - Context file discovery
+- `"Task Manager"`, Task breakdown and planning
+- `"Documentation"`, Documentation generation
+- `"ContextScout"`, Context file discovery
 
 **Code Subagents**:
 
-- `"Coder Agent"` - Code implementation
-- `"TestEngineer"` - Test authoring
-- `"Reviewer"` - Code review
-- `"Build Agent"` - Build validation
+- `"Coder Agent"`, Code implementation
+- `"TestEngineer"`, Test authoring
+- `"Reviewer"`, Code review
+- `"Build Agent"`, Build validation
 
 **System Builder Subagents**:
 
-- `"Domain Analyzer"` - Domain analysis
-- `"Agent Generator"` - Agent generation
-- `"Context Organizer"` - Context organization
-- `"Workflow Designer"` - Workflow design
-- `"Command Creator"` - Command creation
+- `"Domain Analyzer"`, Domain analysis
+- `"Agent Generator"`, Agent generation
+- `"Context Organizer"`, Context organization
+- `"Workflow Designer"`, Workflow design
+- `"Command Creator"`, Command creation
 
 **Utility Subagents**:
 
-- `"Image Specialist"` - Image generation/editing
+- `"Image Specialist"`, Image generation/editing
 
 ---
 
@@ -151,8 +151,8 @@ task(
           Feature: {feature description}
 
           Requirements:
-          - {requirement 1}
-          - {requirement 2}
+         —{requirement 1}
+         —{requirement 2}
 
           Create subtask files in tasks/subtasks/{feature}/"
 )
@@ -167,12 +167,12 @@ task(
   prompt="Update documentation for {feature}:
 
           What changed:
-          - {change 1}
-          - {change 2}
+         —{change 1}
+         —{change 2}
 
           Files to update:
-          - {doc 1}
-          - {doc 2}"
+         —{doc 1}
+         —{doc 2}"
 )
 ```
 
@@ -185,13 +185,13 @@ task(
   prompt="Write comprehensive tests for {feature}:
 
           Files to test:
-          - {file 1}
-          - {file 2}
+         —{file 1}
+         —{file 2}
 
           Test coverage:
-          - Positive cases
-          - Negative cases
-          - Edge cases"
+         —Positive cases
+         —Negative cases
+         —Edge cases"
 )
 ```
 
@@ -204,13 +204,13 @@ task(
   prompt="Review the following implementation:
 
           Files:
-          - {file 1}
-          - {file 2}
+         —{file 1}
+         —{file 2}
 
           Focus areas:
-          - Security
-          - Performance
-          - Code quality"
+         —Security
+         —Performance
+         —Code quality"
 )
 ```
 
@@ -225,11 +225,11 @@ task(
           Subtask: {subtask description}
 
           Files to create/modify:
-          - {file 1}
+         —{file 1}
 
           Requirements:
-          - {requirement 1}
-          - {requirement 2}"
+         —{requirement 1}
+         —{requirement 2}"
 )
 ```
 
@@ -272,8 +272,8 @@ read(
 
 ### Agents That Need Fixing
 
-1. **repo-manager.md** - Uses `ContextScout`
-2. **opencoder.md** - Check if uses incorrect format
+1. **repo-manager.md**, Uses `ContextScout`
+2. **opencoder.md**, Check if uses incorrect format
 
 ### Fix Process
 
@@ -328,14 +328,14 @@ if subagent_type not in available_types:
 
 ## Best Practices
 
-✅ **Use exact names** - Match registry `name` field exactly  
-✅ **Check registry first** - Verify subagent exists before using  
-✅ **Test invocations** - Test delegation before committing  
-✅ **Document dependencies** - List required subagents in agent frontmatter
+✅ **Use exact names**, Match registry `name` field exactly  
+✅ **Check registry first**, Verify subagent exists before using  
+✅ **Test invocations**, Test delegation before committing  
+✅ **Document dependencies**, List required subagents in agent frontmatter
 
-❌ **Don't use paths** - Never use file paths as subagent_type  
-❌ **Don't use IDs** - Don't use kebab-case IDs  
-❌ **Don't assume** - Always verify subagent is registered
+❌ **Don't use paths**, Never use file paths as subagent_type  
+❌ **Don't use IDs**, Don't use kebab-case IDs  
+❌ **Don't assume**, Always verify subagent is registered
 
 ---
 
@@ -376,8 +376,8 @@ if subagent_type not in available_types:
 
 ## Related Files
 
-- **Registry**: `registry.json` - Component catalog
-- **Subagents**: `.opencode/agents/subagents/` - Subagent definitions
+- **Registry**: `registry.json`, Component catalog
+- **Subagents**: `.opencode/agents/subagents/`, Subagent definitions
 - **Validation**: `scripts/registry/validate-registry.sh`
 
 ---

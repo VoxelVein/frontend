@@ -101,7 +101,7 @@ Design system principles, component libraries, and maintaining consistency acros
 
 ### images-guide.md, icons-guide.md, fonts-guide.md, cdn-resources.md
 
-Managing design assets in web applications - split into focused guides.
+Managing design assets in web applications, split into focused guides.
 
 **Key topics**: Placeholder images, icon libraries (Lucide, Heroicons), web fonts, CDN resources
 
@@ -109,9 +109,9 @@ Managing design assets in web applications - split into focused guides.
 
 ## Related Categories
 
-- `ui/terminal/` - Terminal UI patterns
-- `development/` - General development patterns
-- `product/` - Product design and UX strategy
+- `ui/terminal/`, Terminal UI patterns
+- `development/`, General development patterns
+- `product/`, Product design and UX strategy
 
 ---
 

@@ -37,11 +37,11 @@ After people choose your custom keyboard in Settings, they can use it for text e
 
 Custom keyboards make sense when you want to expose unique keyboard functionality systemwide, such as a novel way of inputting text or the ability to type in a language the system doesn’t support. If you want to provide a custom keyboard for people to use only while they’re in your app, consider creating a custom input view instead.
 
-**Provide an obvious and easy way to switch between keyboards.** People know that the Globe key on the standard keyboard  -  which replaces the dedicated Emoji key when multiple keyboards are available  -  quickly switches to other keyboards, and they expect a similarly intuitive experience in your keyboard.
+**Provide an obvious and easy way to switch between keyboards.** People know that the Globe key on the standard keyboard, which replaces the dedicated Emoji key when multiple keyboards are available, quickly switches to other keyboards, and they expect a similarly intuitive experience in your keyboard.
 
 **Avoid duplicating system-provided keyboard features.** On some devices, the Emoji/Globe key and Dictation key automatically appear beneath the keyboard, even when people are using custom keyboards. Your app can’t affect these keys, and it’s likely to be confusing if you repeat them in your keyboard.
 
-**Consider providing a keyboard tutorial in your app.** People are used to the standard keyboard, and learning how to use a new keyboard can take time. You can help make the process easier by providing usage instructions in your app  -  for example, you might tell people how to choose your keyboard, activate it during text entry, use it, and switch back to the standard keyboard. Avoid displaying help content within the keyboard itself.
+**Consider providing a keyboard tutorial in your app.** People are used to the standard keyboard, and learning how to use a new keyboard can take time. You can help make the process easier by providing usage instructions in your app, for example, you might tell people how to choose your keyboard, activate it during text entry, use it, and switch back to the standard keyboard. Avoid displaying help content within the keyboard itself.
 
 ## Platform considerations
 

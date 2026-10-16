@@ -112,8 +112,8 @@ task(
 // Returns: Installation | Integration patterns | Working examples
 
 // 3. Combine and implement
-// - Better Auth patterns (from ExternalScout)
-// - Security standards (from ContextScout)
+//—Better Auth patterns (from ExternalScout)
+//—Security standards (from ContextScout)
 // = Secure, well-structured auth ✅
 ```
 
@@ -132,5 +132,5 @@ task(
 
 ## Related
 
-- `external-libraries-workflow.md` - Core workflow
-- `external-libraries-faq.md` - Troubleshooting FAQ
+- `external-libraries-workflow.md`, Core workflow
+- `external-libraries-faq.md`, Troubleshooting FAQ

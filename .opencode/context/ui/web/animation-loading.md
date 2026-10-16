@@ -145,6 +145,6 @@ status: 2000ms ∞ [α1→0.6→1, S1→1.05→1]
 
 ## Related Files
 
-- [Animation Basics](./animation-basics.md) - Fundamentals
-- [Form Animations](./animation-forms.md) - Form patterns
-- [Advanced Animations](./animation-advanced.md) - Recipes & best practices
+- [Animation Basics](./animation-basics.md), Fundamentals
+- [Form Animations](./animation-forms.md), Form patterns
+- [Advanced Animations](./animation-advanced.md), Recipes & best practices

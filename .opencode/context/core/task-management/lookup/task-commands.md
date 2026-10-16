@@ -54,8 +54,8 @@ task-cli.ts next my-feature
 === Ready Tasks (deps satisfied) ===
 
 [my-feature]
-  02 - Create JWT service  [sequential]
-  03 - Write unit tests    [parallel]
+  02—Create JWT service  [sequential]
+  03—Write unit tests    [parallel]
 ```
 
 ---
@@ -86,10 +86,10 @@ task-cli.ts deps my-feature 04
 ```
 === Dependency Tree: my-feature/04 ===
 
-04 - Integration tests [pending]
-  ├── ✓ 01 - Setup database [completed]
-  └── ○ 02 - Create API [pending]
-      └── ✓ 01 - Setup database [completed]
+04—Integration tests [pending]
+  ├── ✓ 01—Setup database [completed]
+  └── ○ 02—Create API [pending]
+      └── ✓ 01—Setup database [completed]
 ```
 
 ---
@@ -109,8 +109,8 @@ task-cli.ts blocked my-feature
 === Blocked Tasks ===
 
 [my-feature]
-  04 - Integration tests (waiting: 02, 03)
-  05 - Deploy (explicitly blocked)
+  04—Integration tests (waiting: 02, 03)
+  05—Deploy (explicitly blocked)
 ```
 
 ---
@@ -175,12 +175,12 @@ task-cli.ts validate my-feature
 
 The CLI fully supports the enhanced task schema (v2.0) with:
 
-- **Line-number precision** - Context files with specific line ranges
-- **Domain modeling** - bounded_context, module, vertical_slice fields
-- **Contract tracking** - API/interface dependencies
-- **Design artifacts** - Figma, wireframes, mockups
-- **ADR references** - Architecture decision records
-- **Prioritization** - RICE/WSJF scores
+- **Line-number precision**, Context files with specific line ranges
+- **Domain modeling**, bounded_context, module, vertical_slice fields
+- **Contract tracking**, API/interface dependencies
+- **Design artifacts**, Figma, wireframes, mockups
+- **ADR references**, Architecture decision records
+- **Prioritization**, RICE/WSJF scores
 
 All enhanced fields are optional and backward compatible. See `../standards/enhanced-task-schema.md` for details.
 
@@ -206,7 +206,7 @@ See `.opencode/context/core/workflows/multi-stage-orchestration.md` for the comp
 
 ## Related
 
-- `../standards/task-schema.md` - Base JSON schema reference
-- `../standards/enhanced-task-schema.md` - Extended schema with advanced features
-- `../guides/managing-tasks.md` - Workflow guide
-- `../workflows/multi-stage-orchestration.md` - Planning workflow
+- `../standards/task-schema.md`, Base JSON schema reference
+- `../standards/enhanced-task-schema.md`, Extended schema with advanced features
+- `../guides/managing-tasks.md`, Workflow guide
+- `../workflows/multi-stage-orchestration.md`, Planning workflow

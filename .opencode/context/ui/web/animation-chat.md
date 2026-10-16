@@ -9,7 +9,7 @@ Animation patterns for message entrances, typing indicators, and chat interactio
 ## Message Entrance
 
 ```css
-/* User message - slide from right */
+/* User message—slide from right */
 .message-user {
   animation: slideInRight 400ms ease-out;
 }
@@ -26,7 +26,7 @@ Animation patterns for message entrances, typing indicators, and chat interactio
   }
 }
 
-/* AI message - slide from left with bounce */
+/* AI message—slide from left with bounce */
 .message-ai {
   animation: slideInLeft 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
   animation-delay: 200ms;
@@ -118,6 +118,6 @@ msgSelect: 200ms [bg→accent, S1→1.02]
 
 ## Related Files
 
-- [Animation Basics](./animation-basics.md) - Fundamentals
-- [Component Animations](./animation-components.md) - UI components
-- [Loading Animations](./animation-loading.md) - Loading states
+- [Animation Basics](./animation-basics.md), Fundamentals
+- [Component Animations](./animation-components.md), UI components
+- [Loading Animations](./animation-loading.md), Loading states

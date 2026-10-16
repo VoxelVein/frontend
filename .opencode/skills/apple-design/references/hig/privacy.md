@@ -15,7 +15,7 @@ When you submit a new or updated app, you must provide details about your privac
 
 ## Best practices
 
-**Request access only to data that you actually need.** Asking for more data than a feature needs  -  or asking for data before a person shows interest in the feature  -  can make it hard for people to trust your app. Give people precise control over their data by making your permission requests as specific as possible.
+**Request access only to data that you actually need.** Asking for more data than a feature needs, or asking for data before a person shows interest in the feature, can make it hard for people to trust your app. Give people precise control over their data by making your permission requests as specific as possible.
 
 **Be transparent about how your app collects and uses people’s data.** People are less likely to be comfortable sharing data with your app if they don’t understand exactly how you plan to use it. Always respect people’s choices to use system features like Hide My Email and Mail Privacy Protection, and be sure you understand your obligations with regard to app tracking. To learn more about Apple privacy features, see [Privacy](https://www.apple.com/privacy/); for developer guidance, see [User privacy and data use](https://developer.apple.com/app-store/user-privacy-and-data-use/).
 
@@ -34,7 +34,7 @@ Here are several examples of the things you must request permission to access:
 - In a visionOS app running in a Full Space, ARKit data, such as hand tracking, plane estimation, image anchoring, and world tracking
 - The device’s advertising identifier, which supports app tracking
 
-The system provides a standard alert that lets people view each request you make. You supply copy that describes why your app needs access, and the system displays your description in the alert. People can also view the description  -  and update their choice  -  in Settings > Privacy.
+The system provides a standard alert that lets people view each request you make. You supply copy that describes why your app needs access, and the system displays your description in the alert. People can also view the description, and update their choice, in Settings > Privacy.
 
 **Request permission only when your app clearly needs access to the data or resource.** It’s natural for people to be suspicious of a request for personal information or access to a device capability, especially if there’s no obvious need for it. Ideally, wait to request permission until people actually use an app feature that requires access. For example, you can use the [location button](#location-button) to give people a way to share their location after they indicate interest in a feature that needs that information.
 
@@ -58,7 +58,7 @@ Ideally, the current context helps people understand why you’re requesting the
 
 **Include only one button and make it clear that it opens the system alert.** People can feel manipulated when a custom screen or window also includes a button that doesn’t open the alert because the experience diverts them from making their choice. Another type of manipulation is using a term like “Allow” to title the custom screen’s button. If the custom button seems similar in meaning and visual weight to the allow button in the alert, people can be more likely to choose the alert’s allow button without meaning to. Use a term like “Continue” or “Next” to title the single button in your custom screen or window, clarifying that its action is to open the system alert.
 
-**Don’t include additional actions in your custom screen or window.** For example, don’t provide a way for people to leave the screen or window without viewing the system alert  -  like offering an option to close or cancel.
+**Don’t include additional actions in your custom screen or window.** For example, don’t provide a way for people to leave the screen or window without viewing the system alert, like offering an option to close or cancel.
 
 ### Tracking requests
 
@@ -89,7 +89,7 @@ After people confirm their understanding of the button’s action, simply tappin
 - Select a background color and a color for the title and glyph.
 - Adjust the button’s corner radius.
 
-To help people recognize and trust location buttons, you can’t customize the button’s other visual attributes. The system also ensures a location button remains legible by warning you about problems like low-contrast color combinations or too much translucency. In addition to fixing such problems, you’re responsible for making sure the text fits in the button  -  for example, button text needs to fit without truncation at all accessibility text sizes and when translated into other languages.
+To help people recognize and trust location buttons, you can’t customize the button’s other visual attributes. The system also ensures a location button remains legible by warning you about problems like low-contrast color combinations or too much translucency. In addition to fixing such problems, you’re responsible for making sure the text fits in the button, for example, button text needs to fit without truncation at all accessibility text sizes and when translated into other languages.
 
 > **Important:** If the system identifies consistent problems with your customized location button, it won’t give your app access to the device location when people tap it. Although such a button can perform other app-specific actions, people may lose trust in your app if your location button doesn’t work as they expect.
 

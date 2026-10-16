@@ -4,7 +4,7 @@
 
 **Purpose**: Server-side development patterns
 
-**Status**: 🚧 Placeholder - Content coming soon
+**Status**: 🚧 Placeholder, Content coming soon
 
 ---
 

@@ -20,17 +20,14 @@
 ## 6-Stage Workflow
 
 ### Stage 1: Search Existing
-
 **Action**: Search for similar/related errors
 
 **Process**:
-
 1. Search error message across all errors/ files
 2. Find similar errors (fuzzy matching)
 3. Find related errors (same category)
 
 **Format**:
-
 ```
 Searching for: "Cannot read property 'map' of undefined"
 
@@ -49,19 +46,17 @@ Found 2 related errors:
 ---
 
 ### Stage 2: Check Duplication (APPROVAL REQUIRED)
-
 **Action**: Present deduplication options
 
 **Format**:
-
 ```
 Options:
   [A] Add as new error to react-errors.md
       (Specific case: 'map' on undefined array)
-
+  
   [B] Update existing 'Cannot read property X' error
       (Add 'map' as common example)
-
+  
   [C] Skip (already covered sufficiently)
 
 Which framework/category?
@@ -78,11 +73,9 @@ Select option + category (e.g., 'B 1'):
 ---
 
 ### Stage 3: Preview (APPROVAL REQUIRED)
-
 **Action**: Show full error entry before adding
 
 **Format**:
-
 ```
 Would update development/errors/react-errors.md:
 
@@ -92,10 +85,8 @@ Current (Line 45):
 
 **Symptom**:
 ```
-
 TypeError: Cannot read property 'X' of undefined
-
-````
+```
 
 **Cause**: Attempting to access property on undefined/null object.
 
@@ -111,32 +102,33 @@ const value = obj.property
 
 // ✅ After
 const value = obj?.property ?? 'default'
-````
+```
 
-**Prevention**: Always validate data exists **Frequency**: common **Reference**: [Link] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Prevention**: Always validate data exists
+**Frequency**: common
+**Reference**: [Link]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Proposed update: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+Proposed update:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## Error: Cannot read property 'X' of undefined
 
 **Symptom**:
-
 ```
 TypeError: Cannot read property 'X' of undefined
 TypeError: Cannot read property 'map' of undefined  ← NEW
 TypeError: Cannot read property 'length' of undefined  ← NEW
 ```
 
-**Cause**: Attempting to access property on undefined/null object. Common with array methods (map, filter) when data hasn't loaded. ← NEW
+**Cause**: Attempting to access property on undefined/null object.
+Common with array methods (map, filter) when data hasn't loaded.  ← NEW
 
 **Solution**:
-
 1. Add null check
 2. Use optional chaining (?.)
-3. Provide default value (especially for arrays) ← UPDATED
+3. Provide default value (especially for arrays)  ← UPDATED
 
 **Code**:
-
 ```jsx
 // ❌ Before
 const value = obj.property
@@ -147,13 +139,15 @@ const value = obj?.property ?? 'default'
 const items = (data || []).map(item => item.name)  ← NEW
 ```
 
-**Prevention**: Always validate data exists. For arrays, provide empty array default. ← UPDATED **Frequency**: common **Reference**: [Link] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Prevention**: Always validate data exists. For arrays, provide empty array default.  ← UPDATED
+**Frequency**: common
+**Reference**: [Link]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 File size: 98 lines → 105 lines (under 150 limit ✓)
 
 Approve? (yes/no/edit):
-
-````
+```
 
 **Edit mode**: Allow modification before adding
 
@@ -181,16 +175,14 @@ Approve? (yes/no/edit):
 **Prevention**: [How to avoid]
 **Frequency**: common/occasional/rare
 **Reference**: [Link]
-````
+```
 
 ---
 
 ### Stage 5: Update Navigation
-
 **Action**: Update README.md and add cross-references
 
 **Process**:
-
 1. Update README.md if new file created
 2. Add cross-references to related errors
 3. Link from related concepts/examples
@@ -198,11 +190,9 @@ Approve? (yes/no/edit):
 ---
 
 ### Stage 6: Report
-
 **Action**: Show results
 
 **Format**:
-
 ```
 ✅ Added error to {category}/errors/{file}.md
 🔗 Cross-referenced with X related errors
@@ -219,27 +209,26 @@ Changes:
 ## Deduplication Strategy
 
 ### Similar Errors
-
-Same root cause, different manifestations → **Update existing** to include new examples
+Same root cause, different manifestations
+→ **Update existing** to include new examples
 
 ### Related Errors
-
-Different causes, same category → **Cross-reference** between errors
+Different causes, same category
+→ **Cross-reference** between errors
 
 ### Duplicate Errors
-
-Exact same error already documented → **Skip** (already covered)
+Exact same error already documented
+→ **Skip** (already covered)
 
 ### New Errors
-
-Unique error not yet documented → **Add as new** error entry
+Unique error not yet documented
+→ **Add as new** error entry
 
 ---
 
 ## Error Grouping
 
 Group errors by framework/topic in single file:
-
 - `react-errors.md` - All React errors
 - `nextjs-errors.md` - All Next.js errors
 - `auth-errors.md` - All authentication errors
@@ -251,19 +240,16 @@ Group errors by framework/topic in single file:
 ## Examples
 
 ### Add New Error
-
 ```bash
 /context error for "hooks can only be called inside components"
 ```
 
 ### Add Common Error
-
 ```bash
 /context error for "Cannot read property 'map' of undefined"
 ```
 
 ### Add Framework Error
-
 ```bash
 /context error for "Hydration failed in Next.js"
 ```

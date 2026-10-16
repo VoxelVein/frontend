@@ -18,10 +18,10 @@ description: Verify agent requests approval before execution
 agent: {category}/{agent-name}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Create a new file called test.js"
 expectations:
-  - type: specific_evaluator
+ —type: specific_evaluator
     evaluator: approval_gate
     should_pass: true
 ```
@@ -35,10 +35,10 @@ description: Verify agent loads required context
 agent: {category}/{agent-name}
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Write a new function"
 expectations:
-  - type: context_loaded
+ —type: context_loaded
     contexts: ["core/standards/code-quality.md"]
 ```
 
@@ -89,7 +89,7 @@ agent: development/api-specialist
 model: anthropic/claude-sonnet-4-5
 timeout: 60000
 suites:
-  - smoke
+ —smoke
 EOF
 
 cat > evals/agents/development/api-specialist/tests/smoke-test.yaml << 'EOF'
@@ -98,10 +98,10 @@ description: Basic functionality check
 agent: development/api-specialist
 model: anthropic/claude-sonnet-4-5
 conversation:
-  - role: user
+ —role: user
     content: "Hello, can you help me design an API?"
 expectations:
-  - type: no_violations
+ —type: no_violations
 EOF
 
 # 3. Update registry
@@ -139,7 +139,7 @@ See `creating-subagents.md` for Claude Code subagent details.
 
 ## Related
 
-- `adding-agent-basics.md` - Basic agent creation
-- `testing-agent.md` - Testing guide
-- `debugging.md` - Troubleshooting
-- `creating-subagents.md` - Claude Code subagents
+- `adding-agent-basics.md`, Basic agent creation
+- `testing-agent.md`, Testing guide
+- `debugging.md`, Troubleshooting
+- `creating-subagents.md`, Claude Code subagents

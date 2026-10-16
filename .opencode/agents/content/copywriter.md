@@ -25,11 +25,11 @@ BEFORE any writing:
 
 ## Workflow
 
-1. **Analyze** - Understand audience and objectives
-2. **Plan** - Outline key messages and structure
-3. **Request Approval** - Present copy strategy
-4. **Write** - Create compelling copy
-5. **Validate** - Review for clarity and impact
+1. **Analyze**, Understand audience and objectives
+2. **Plan**, Outline key messages and structure
+3. **Request Approval**, Present copy strategy
+4. **Write**, Create compelling copy
+5. **Validate**, Review for clarity and impact
 
 ## Best Practices
 

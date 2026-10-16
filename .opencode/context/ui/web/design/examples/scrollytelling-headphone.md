@@ -99,7 +99,7 @@ export default function HeadphoneScroll() {
   const frameIndex = useTransform(
     scrollYProgress,
     [0, 1],
-    [0, FRAME_COUNT - 1]
+    [0, FRAME_COUNT—1]
   );
   const [currentFrame, setCurrentFrame] = useState(0);
 
@@ -152,8 +152,8 @@ export default function HeadphoneScroll() {
       canvas.height / img.height
     );
 
-    const x = (canvas.width - img.width * scale) / 2;
-    const y = (canvas.height - img.height * scale) / 2;
+    const x = (canvas.width—img.width * scale) / 2;
+    const y = (canvas.height—img.height * scale) / 2;
 
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
   }, [currentFrame, images]);
@@ -255,9 +255,9 @@ export default function HeadphoneScroll() {
 
 ## Related
 
-- concepts/scroll-linked-animations.md - Understanding the technique
-- guides/scrollytelling-setup.md - Getting started
-- lookup/scroll-animation-prompts.md - Generating image sequences
+- concepts/scroll-linked-animations.md, Understanding the technique
+- guides/scrollytelling-setup.md, Getting started
+- lookup/scroll-animation-prompts.md, Generating image sequences
 
 ---
 

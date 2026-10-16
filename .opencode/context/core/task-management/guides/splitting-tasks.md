@@ -116,6 +116,6 @@ Don't embed descriptions. Reference paths:
 
 ## Related
 
-- `../standards/task-schema.md` - JSON field reference
-- `managing-tasks.md` - Lifecycle workflow
-- `../lookup/task-commands.md` - CLI reference
+- `../standards/task-schema.md`, JSON field reference
+- `managing-tasks.md`, Lifecycle workflow
+- `../lookup/task-commands.md`, CLI reference

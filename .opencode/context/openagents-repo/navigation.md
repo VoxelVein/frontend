@@ -176,12 +176,12 @@ All files follow MVI principle (<200 lines):
 
 ## Related Context
 
-- `../core/` - Core system context (standards, patterns)
-- `../core/context-system/` - Context management system
-- `quick-start.md` - 2-minute repo orientation
-- `../content-creation/navigation.md` - Content creation principles
-- `plugins/context/navigation.md` - Plugin system context
-- `features/navigation.md` - Feature documentation and refactoring guides
+- `../core/`, Core system context (standards, patterns)
+- `../core/context-system/`, Context management system
+- `quick-start.md`—2-minute repo orientation
+- `../content-creation/navigation.md`, Content creation principles
+- `plugins/context/navigation.md`, Plugin system context
+- `features/navigation.md`, Feature documentation and refactoring guides
 
 ---
 
