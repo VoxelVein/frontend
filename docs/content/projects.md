@@ -38,7 +38,7 @@ server is a place you go, not a file you fetch, and renders `ServerDetail`.
 
 Both share one layout: a sidebar on the left from `lg` up, and the
 long-form content beside it. Each sidebar answers the same two questions
-in the same order — *can I use this*, then *how do I get it* — and each
+in the same order  -  *can I use this*, then *how do I get it*  -  and each
 leads the DOM, so the priority holds on mobile and for a screen reader
 alike rather than depending on where the sidebar happens to sit.
 
@@ -51,7 +51,7 @@ The download used to be the last section on the page, below the
 description and the gallery, and the join address below the stats, the
 summary, and the description. In both cases the one thing a visitor came
 for was the last thing on screen. The full version history stays in the
-main column — it does not fit in a card — under the title *Version
+main column  -  it does not fit in a card  -  under the title *Version
 history*, since the sidebar now shows the current version and two
 sections called *Versions* read as a duplicate.
 
@@ -59,7 +59,7 @@ sections called *Versions* read as a duplicate.
 block at all. Resource packs and datapacks have no such axis, so the card
 drops it rather than printing an empty one. The heading reuses
 `LOADER_LABELS`, so a Paper plugin reads *Platforms* and a mod reads
-*Loaders* — the same words the publish form and the browse filter use.
+*Loaders*  -  the same words the publish form and the browse filter use.
 
 ## Subcategories
 
@@ -72,7 +72,7 @@ Top-level types
 
 Subcategories
 : A project type's own `category` column. One list per type in
-  `CATEGORIES_BY_TYPE` (`src/lib/projects.ts`) — `SERVER_CATEGORIES`,
+  `CATEGORIES_BY_TYPE` (`src/lib/projects.ts`)  -  `SERVER_CATEGORIES`,
   `PLUGIN_CATEGORIES`, and so on. Servers carry gamemodes such as `town`
   for CityBuild servers, `plots`, `skyblock`, and `prison`; plugins carry
   purposes such as `economy` and `protection`.
@@ -81,7 +81,7 @@ Subcategories
 different type, so it is used as a Valibot refinement on the publish and
 update schemas rather than checked by hand. The browse filter and the publish
 select both read the same list, and `formatCategory` (`src/lib/format.ts`)
-turns a stored slug into a label in all three places that show one — the
+turns a stored slug into a label in all three places that show one  -  the
 filter, the form, and the project page.
 
 `projects.category` is a plain `text` column validated in app code, not a
@@ -94,7 +94,7 @@ category no filter can select.
 That is also why `formatCategory` looks its labels up in a **`Map`**, not a
 plain object. A `value in LABELS` check walks the prototype chain, so a
 stored category of `constructor` or `toString` matched `Object.prototype`
-and returned the *function* — which reached React as a child and threw. A
+and returned the *function*  -  which reached React as a child and threw. A
 `Map` consults only its own entries, so a hostile slug misses and takes the
 fallback path, which title-cases the slug and turns `-` into a space. Any
 lookup keyed by user-influenced data should follow the same rule.
@@ -117,7 +117,7 @@ Tables are defined in `src/db/schema.ts`:
   25565), and supported game versions.
 * `project_server_links`: mods, modpacks, shaders, resource packs, and
   datapacks a server links to, in any mix, each marked required or
-  recommended. Plugins are excluded — the server itself runs those. A
+  recommended. Plugins are excluded  -  the server itself runs those. A
   server links to at most `MAX_SERVER_LINKS` (20) projects.
 * `project_images` (migration
   `drizzle/0016_add_project_images.sql`): a project's icon and gallery
@@ -164,9 +164,9 @@ releases at once, and snapshots stay hidden until "Show snapshots" is on.
 `/dashboard` is a guard plus an outlet; everything real lives in its
 children:
 
-* `/dashboard/projects` — the creator's projects
-* `/dashboard/projects/new` — create a project
-* `/dashboard/projects/$projectId?tab=` — `details`, `images`, `versions`,
+* `/dashboard/projects`  -  the creator's projects
+* `/dashboard/projects/new`  -  create a project
+* `/dashboard/projects/$projectId?tab=`  -  `details`, `images`, `versions`,
   or `danger`
 
 Both dashboard pages use the landing page's design language rather than the
@@ -221,7 +221,7 @@ cookie alone.
 
 "Staff" means `moderator` or `admin`. Project access is expressed through
 the `ROLE_RANK` ladder in `src/lib/roles.ts`, and the ownership checks in
-`src/lib/project-access.ts` call `hasSessionRole(session, minimum)` —
+`src/lib/project-access.ts` call `hasSessionRole(session, minimum)`  -
 these are genuinely about rank, because "an owner or anyone above a plain
 user" is the whole rule. The moderation decision endpoints instead use
 `requireCapability("reviewProjects")` from `src/lib/role-guards.ts`, which
@@ -276,7 +276,7 @@ are the only two kinds
 
 ### Why `pending` is a status and not a flag
 
-Every public read path already filters on `status = 'published'` — search,
+Every public read path already filters on `status = 'published'`  -  search,
 the public project page, downloads, trending and the search document. A
 project in `pending` therefore disappears from all of them with no change
 to any of those queries, which is why adding the status was enough to make
@@ -293,10 +293,10 @@ Publishing is not always a queue. `needsReview`
 in one expression, so the policy can be read and tested without a
 database:
 
-* **Never published** (`published_at` is null) — queued. A first
+* **Never published** (`published_at` is null)  -  queued. A first
   publication has been judged by nobody.
-* **Published before, no takedown** — **goes straight back up.**
-* **Taken down by staff at some point** — queued, whatever its history
+* **Published before, no takedown**  -  **goes straight back up.**
+* **Taken down by staff at some point**  -  queued, whatever its history
   otherwise says.
 
 A project the owner unpublished goes straight back up. Withdrawing your
@@ -324,12 +324,12 @@ reports whichever did.
 
 ### Audit columns
 
-* `submitted_at` — set when review is requested, cleared by any decision.
-* `reviewed_at` — set by a decision, never cleared.
-* `reviewed_by` — the deciding admin, never cleared.
-* `rejection_reason` — set by a rejection, cleared on resubmission or
+* `submitted_at`  -  set when review is requested, cleared by any decision.
+* `reviewed_at`  -  set by a decision, never cleared.
+* `reviewed_by`  -  the deciding admin, never cleared.
+* `rejection_reason`  -  set by a rejection, cleared on resubmission or
   approval.
-* `taken_down_at` — set by a staff takedown, cleared by a staff
+* `taken_down_at`  -  set by a staff takedown, cleared by a staff
   approval, untouched by anything the owner does.
 
 `reviewed_by` is a soft reference: if the reviewing admin's account is
@@ -449,22 +449,22 @@ publish, edit, upload, or delete. See [Search](../search/postgres.md).
 The home page loads from Postgres too, and all of it is refetched in the
 background rather than on every render:
 
-* **Trending** — the most active published projects, recomputed at most
+* **Trending**  -  the most active published projects, recomputed at most
   once a minute on the server and polled every 60 seconds
   (`TRENDING_REFRESH_MS` in `src/lib/trending.functions.ts`).
-* **Explore** — the six category tiles from `src/lib/categories.ts`.
-* **News** — the latest published blog posts, polled every five minutes
+* **Explore**  -  the six category tiles from `src/lib/categories.ts`.
+* **News**  -  the latest published blog posts, polled every five minutes
   (`POSTS_REFRESH_MS`).
 
 ## Demo data
 
 `pnpm db:seed` runs both seeders against the first admin in the database:
 
-* `pnpm db:seed:projects` — demo projects of every type, each with one
+* `pnpm db:seed:projects`  -  demo projects of every type, each with one
   version and a small generated archive uploaded to storage. Demo servers
   get join details, and two of them link to demo content, one required and
   one with three optional links.
-* `pnpm db:seed:posts` — published demo blog posts, so the blog and the
+* `pnpm db:seed:posts`  -  published demo blog posts, so the blog and the
   home page news section are not empty. Re-running leaves existing posts
   alone.
 
@@ -473,11 +473,11 @@ required first: both seeders attach their content to the first admin.
 
 ## Related
 
-* [Reports](reports.md) — reporting a project or an account
+* [Reports](reports.md)  -  reporting a project or an account
 * [Object Storage](../storage/object-storage.md)
 * [Search](../search/postgres.md)
-* [Discovery](discovery.md) — how trending picks the home page five
-* [Motion](motion.md) — the reveal animation on listing grids
+* [Discovery](discovery.md)  -  how trending picks the home page five
+* [Motion](motion.md)  -  the reveal animation on listing grids
 * [Accounts](../authentication/accounts.md)
 * [Architecture Overview](../architecture/overview.md)
 * [API Server](../architecture/api.md)

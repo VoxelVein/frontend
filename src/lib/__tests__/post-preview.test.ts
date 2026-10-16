@@ -134,8 +134,8 @@ describe(toPreview, () => {
   });
 
   it("handles non-ASCII prose without mangling it", () => {
-    expect(toPreview("Café au lait — naïve résumé ✅")).toBe(
-      "Café au lait — naïve résumé ✅"
+    expect(toPreview("Café au lait  -  naïve résumé ✅")).toBe(
+      "Café au lait  -  naïve résumé ✅"
     );
   });
 });

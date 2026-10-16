@@ -36,7 +36,7 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
  * Whether object storage is configured on this deployment.
  *
  * Read through a server function rather than from the client env, because
- * `env.config.ts` throws when it is imported in a browser bundle — the storage
+ * `env.config.ts` throws when it is imported in a browser bundle  -  the storage
  * secrets have no business in one, and the question is about the *server's*
  * configuration, not the browser's.
  *

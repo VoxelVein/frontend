@@ -12,7 +12,7 @@ const MAIN_CHUNK_PATTERN = /^index-.*\.js$/u;
 // and about 29 kB of it is paid only by routes that render a post.
 //
 // The gzip limit is the one that tracks what a reader downloads, and it is
-// unchanged at 250_000. Raw bytes never tracked that — it counts minified text,
+// unchanged at 250_000. Raw bytes never tracked that  -  it counts minified text,
 // which no reader receives.
 const RAW_LIMIT_BYTES = 780_000;
 const GZIP_LIMIT_BYTES = 250_000;

@@ -25,7 +25,7 @@ export const rateLimitIdentity = (
  *
  * The shape a server function needs: `createServerFn` has no way to set a
  * `Retry-After` header, so it refuses by throwing and the caller turns that
- * into whatever the surface it renders into — a toast, a form error, a render.
+ * into whatever the surface it renders into  -  a toast, a form error, a render.
  * API routes use `rateLimitedResponse` instead, which can set the header.
  */
 export const consumeServerLimit = async (

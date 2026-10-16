@@ -14,20 +14,20 @@ Live-viewing apps need to elevate and prioritize live content. In every screen, 
 
 **Feature live content prominently and make it easy to access.** People come to your app to watch content, so you want to minimize the interval between starting your app and playing content. When live content is in the first tab, people don’t have to tap more than once to start viewing it.
 
-**Let people tap once — or not at all — to start playback.** For example, you might display a Watch Now button on top of featured or recently viewed live content. When people tap this button, it immediately disappears and playback begins, replacing your app’s UI with a full-screen, immersive viewing experience.
+**Let people tap once  -  or not at all  -  to start playback.** For example, you might display a Watch Now button on top of featured or recently viewed live content. When people tap this button, it immediately disappears and playback begins, replacing your app’s UI with a full-screen, immersive viewing experience.
 
-**Make sure live content looks live.** People need to be able to distinguish live content from VOD content. Although simply playing live content is the best way to make it feel live, you can also help people recognize live content by marking it in some way. For example, you might display other channels in a collection row titled “Live” and give each item a visual indicator — such as a badge, symbol, or sash — that identifies it as live.
+**Make sure live content looks live.** People need to be able to distinguish live content from VOD content. Although simply playing live content is the best way to make it feel live, you can also help people recognize live content by marking it in some way. For example, you might display other channels in a collection row titled “Live” and give each item a visual indicator  -  such as a badge, symbol, or sash  -  that identifies it as live.
 
 **Consider indicating the progress of currently playing live content.** People appreciate knowing where they’ll land when they jump into in-progress live content. You can use a progress bar or other indicator to show people how much content remains.
 
-**Give people additional actions and viewing alternatives.** In addition to playback, which always needs to be the primary action, make it easy for people to record, restart, download, and perform other actions that you support. Display these actions in the same order throughout your app — for example, Watch, Start Over, Record, and Favorite. Also, if the currently playing content is playing again at other times, show this information so that people can schedule their viewing.
+**Give people additional actions and viewing alternatives.** In addition to playback, which always needs to be the primary action, make it easy for people to record, restart, download, and perform other actions that you support. Display these actions in the same order throughout your app  -  for example, Watch, Start Over, Record, and Favorite. Also, if the currently playing content is playing again at other times, show this information so that people can schedule their viewing.
 
 **Consider using a content footer for browsing channels during playback.** A content footer lets people browse without taking them out of the live playback experience. If you decide to use a content footer, be sure to:
 
 - Give it a subtle treatment, such as a darkening, to keep text legible and help all items remain visually distinct from the content playing behind it.
 - Make it easy for people to identify the thumbnail that represents the currently playing content by, for example, badging the thumbnail or tinting its progress bar.
 - Match the categories in the content footer to those in your electronic program guide (for related guidance, see [EPG experience](#epg-experience)).
-- Design a simple, predictable way for people to invoke and dismiss the content footer — for example, if swiping up invokes the footer, people would expect swiping down to dismiss it.
+- Design a simple, predictable way for people to invoke and dismiss the content footer  -  for example, if swiping up invokes the footer, people would expect swiping down to dismiss it.
 
 **Provide instant visual feedback when people change channels.** This is essential for two reasons: people need confirmation that they’ve arrived at the channel they want, and providing feedback can give the streaming content some time to load.
 

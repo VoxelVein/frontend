@@ -85,12 +85,12 @@ not at sign-in. See [Accounts](../authentication/accounts.md).
 
 ## Troubleshooting
 
-* **`redirect_uri_mismatch`** — the callback URL in the GitHub OAuth
+* **`redirect_uri_mismatch`**  -  the callback URL in the GitHub OAuth
   App must match `BETTER_AUTH_URL` plus `/api/auth/callback/github`.
-* **Provider not shown** — confirm both `GITHUB_CLIENT_ID` and
+* **Provider not shown**  -  confirm both `GITHUB_CLIENT_ID` and
   `GITHUB_CLIENT_SECRET` are set in `.env.local` and restart the dev
   server.
-* **Name already taken** — the hook falls back to the email local part
+* **Name already taken**  -  the hook falls back to the email local part
   and then the display name, adding a numeric suffix if needed. Land on
   `/welcome` to pick something else.
 

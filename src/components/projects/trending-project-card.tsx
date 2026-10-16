@@ -19,7 +19,7 @@ interface TrendingProjectCardProps {
  * row can be five cards across, so everything here is chosen for reading at
  * roughly 230px wide.
  *
- * Flat by design — a border and `bg-card` do the separating, with no shadow
+ * Flat by design  -  a border and `bg-card` do the separating, with no shadow
  * and no lift on hover, matching the news lead card above it.
  */
 const TrendingProjectCard = ({ project, rank }: TrendingProjectCardProps) => (

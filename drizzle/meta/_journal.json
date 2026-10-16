@@ -162,6 +162,41 @@
       "when": 1791224780063,
       "tag": "0022_index_foreign_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792142876553,
+      "tag": "0023_support_tickets",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792143296301,
+      "tag": "0024_support_tickets_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792143409861,
+      "tag": "0025_support_tickets_message_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792143678469,
+      "tag": "0026_support_tickets_tags",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792147029829,
+      "tag": "0027_drop_posts_author_id",
+      "breakpoints": true
     }
   ]
 }

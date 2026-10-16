@@ -30,8 +30,8 @@ interface BlogLoaderData {
 /**
  * Keeps the posts filed under one category, leaving everything else alone.
  *
- * A category that no longer matches — because a search narrowed the list, or
- * because the last post in it was deleted — yields nothing, and the caller says
+ * A category that no longer matches  -  because a search narrowed the list, or
+ * because the last post in it was deleted  -  yields nothing, and the caller says
  * so rather than quietly falling back to the unfiltered list. Silently ignoring
  * the active filter is the one behaviour that would leave the reader looking at
  * posts they had explicitly ruled out.

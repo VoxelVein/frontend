@@ -50,7 +50,7 @@ const PostAuthors = ({
           // The background ring separates overlapping pictures, so it is always
           // on rather than appearing on hover. It was previously a ring *offset*,
           // which painted a background-coloured disc around whichever avatar was
-          // hovered — read as stray circles sitting behind it, and clipped into
+          // hovered  -  read as stray circles sitting behind it, and clipped into
           // arcs by the neighbouring avatars. An offset has no place on a picture
           // that sits flush against its neighbours.
           <li

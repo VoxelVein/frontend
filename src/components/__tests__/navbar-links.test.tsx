@@ -16,7 +16,7 @@ const { noop } = vi.hoisted(() => ({ noop: () => Promise.resolve() }));
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- `Link` and `useMatchRoute` need a router instance; plain anchors keep these tests on the navbar's own behaviour
 vi.mock("@tanstack/react-router", () => ({
   // Everything but `to` and `preload` is spread through, because Base UI merges
-  // its own props — `role="menuitem"`, handlers, `tabindex` — onto the rendered
+  // its own props  -  `role="menuitem"`, handlers, `tabindex`  -  onto the rendered
   // element. Dropping them would make the menu items unreachable by role.
   Link: ({
     children,
@@ -37,7 +37,7 @@ vi.mock("@tanstack/react-router", () => ({
  * Deriving these from the `alwaysInline` flag would make every assertion below
  * tautological: flipping a section to `alwaysInline` would move it from one
  * list to the other and the test would still pass. Which sections get a flat
- * link is a design decision, so it is pinned here as a literal — and this is
+ * link is a design decision, so it is pinned here as a literal  -  and this is
  * the assertion that fails if the bar starts growing a link per project type
  * again, which is how it reached seven.
  */
@@ -102,7 +102,7 @@ describe(NavbarLinks, () => {
 
   it("keeps every section reachable, flat or not", () => {
     // Guards against a section being dropped from both places when the navbar
-    // is retuned — the failure mode of a collapse that loses an entry.
+    // is retuned  -  the failure mode of a collapse that loses an entry.
     expect(new Set([...FLAT_LABELS, ...MENU_LABELS])).toStrictEqual(
       new Set(ALL_LABELS)
     );
@@ -143,7 +143,7 @@ describe(BrowseMenuItems, () => {
   it("gives each entry a keyboard-reachable link role", () => {
     // Base UI puts `role="menuitem"` on the element it renders into. That only
     // survives because the menu item's `render` target forwards the merged
-    // props — a mock or wrapper that dropped them would strip the role.
+    // props  -  a mock or wrapper that dropped them would strip the role.
     openMenu();
     expect(screen.getAllByRole("menuitem")).toHaveLength(MENU_LABELS.length);
   });

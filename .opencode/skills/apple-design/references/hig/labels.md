@@ -19,7 +19,7 @@ The term *label* refers to uneditable text that can appear in various places. Fo
 
 > **Developer note:** To display uneditable text, SwiftUI defines two components: [Label](https://developer.apple.com/documentation/swiftui/label) and [Text](https://developer.apple.com/documentation/swiftui/text).
 
-The guidance below can help you use a label to display text. In some cases, guidance for specific components — such as [action buttons](buttons.md), [menus](menus.md), and [lists and tables](lists-and-tables.md) — includes additional recommendations for using text.
+The guidance below can help you use a label to display text. In some cases, guidance for specific components  -  such as [action buttons](buttons.md), [menus](menus.md), and [lists and tables](lists-and-tables.md)  -  includes additional recommendations for using text.
 
 ## Best practices
 
@@ -36,7 +36,7 @@ The guidance below can help you use a label to display text. In some cases, guid
 | Tertiary label | Text that describes an unavailable item or behavior | [tertiaryLabel](https://developer.apple.com/documentation/uikit/uicolor/tertiarylabel) | [tertiaryLabelColor](https://developer.apple.com/documentation/appkit/nscolor/tertiarylabelcolor) |
 | Quaternary label | Watermark text | [quaternaryLabel](https://developer.apple.com/documentation/uikit/uicolor/quaternarylabel) | [quaternaryLabelColor](https://developer.apple.com/documentation/appkit/nscolor/quaternarylabelcolor) |
 
-**Make useful label text selectable.** If a label contains useful information — like an error message, a location, or an IP address — consider letting people select and copy it for pasting elsewhere.
+**Make useful label text selectable.** If a label contains useful information  -  like an error message, a location, or an IP address  -  consider letting people select and copy it for pasting elsewhere.
 
 ## Platform considerations
 

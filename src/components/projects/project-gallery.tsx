@@ -15,7 +15,7 @@ import type { ProjectType } from "@/lib/projects";
  *
  * Returns `null` when there are no images. Most projects have no gallery, and
  * an empty section on every project page would be noise rather than
- * information — the absence of the section is the signal. The gallery route
+ * information  -  the absence of the section is the signal. The gallery route
  * throws a 404 for the same reason.
  */
 export const ProjectGallery = ({

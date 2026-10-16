@@ -49,7 +49,7 @@ printing the top twenty packages and the top fifteen files.
 
 Fingerprinting the built chunk for library names instead is guesswork.
 Minified names do not survive, and a chunk can contain a library without
-its name appearing anywhere in it — which is how 33 kB of Drizzle's column
+its name appearing anywhere in it  -  which is how 33 kB of Drizzle's column
 builders sat unnoticed in the client bundle, retained by the client stubs
 of server functions. The sourcemap is the only honest answer.
 

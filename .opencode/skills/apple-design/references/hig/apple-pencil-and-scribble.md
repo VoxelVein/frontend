@@ -21,7 +21,7 @@ For details on Apple Pencil features and compatibility, see [Apple Pencil](https
 
 **Let people make a mark the moment Apple Pencil touches the screen**. You want the experience of putting Apple Pencil to screen to mirror the experience of putting a classic pencil to paper, so it’s essential to avoid requiring people to tap a button or enter a special mode before they can make a mark.
 
-**Help people express themselves by responding to the way they use Apple Pencil.** Apple Pencil may sense tilt (altitude), force (pressure), orientation (azimuth), and [barrel roll](#barrel-roll). Use this information to affect the strokes Apple Pencil makes, such as by varying thickness and intensity. When responding to pressure, keep things simple and intuitive. For example, it feels natural to affect continuous properties — such as ink opacity or brush size — by varying the pressure.
+**Help people express themselves by responding to the way they use Apple Pencil.** Apple Pencil may sense tilt (altitude), force (pressure), orientation (azimuth), and [barrel roll](#barrel-roll). Use this information to affect the strokes Apple Pencil makes, such as by varying thickness and intensity. When responding to pressure, keep things simple and intuitive. For example, it feels natural to affect continuous properties  -  such as ink opacity or brush size  -  by varying the pressure.
 
 **Provide visual feedback to indicate a direct connection with content.** Make sure Apple Pencil appears to directly and immediately manipulate content it touches onscreen. Avoid letting Apple Pencil appear to initiate seemingly disconnected actions, or affect content on other parts of the screen.
 
@@ -31,7 +31,7 @@ For details on Apple Pencil features and compatibility, see [Apple Pencil](https
 
 **Use hover to help people predict what will happen when Apple Pencil touches the screen.** For example, as people hold Apple Pencil above the screen, a hover preview can show the dimensions and color of the mark that the current tool can make. As much as possible, avoid continuously modifying the preview as people move Apple Pencil closer or farther from the screen. A preview that changes according to height is unlikely to clarify the mark Apple Pencil will make, and frequent visual variations can be very distracting to people.
 
-**Avoid using hover to initiate an action.** Unlike tapping a button or marking the screen, hovering is a relatively imprecise motion that doesn’t require people to think about the actual distance between Apple Pencil and the display. You don’t want people to inadvertently perform an action — especially a destructive action that they might want to undo — just because they hold Apple Pencil near the screen.
+**Avoid using hover to initiate an action.** Unlike tapping a button or marking the screen, hovering is a relatively imprecise motion that doesn’t require people to think about the actual distance between Apple Pencil and the display. You don’t want people to inadvertently perform an action  -  especially a destructive action that they might want to undo  -  just because they hold Apple Pencil near the screen.
 
 **Prefer showing a preview value that’s near the middle in a range of dynamic values.** Dynamic properties like opacity or flow can be difficult to depict at the highest or lowest ends of the spectrum. For example, previewing the appearance of a brush mark made with the maximum pressure could occlude the area in which people are marking; in contrast, depicting a mark made with the minimum pressure could be hard for people to detect, making the preview an inaccurate representation of an actual mark or even invisible.
 
@@ -53,7 +53,7 @@ Using Apple Pencil Pro, people can squeeze to perform an action. You can design 
 
 > **Note:** The squeeze gesture is available only when the paired iPad screen is on and while the Apple Pencil Pro is not directly contacting it. Because squeeze works when there’s distance between Apple Pencil Pro and iPad, people might not always be visually aware of the gesture’s onscreen result.
 
-**Treat squeeze as a single, quick gesture that performs a discrete — not continuous — action.** People sometimes squeeze with a lot of force, so holding a squeeze or squeezing several times quickly can be tiring. Help people remain comfortable by responding to a single squeeze and promptly displaying the result.
+**Treat squeeze as a single, quick gesture that performs a discrete  -  not continuous  -  action.** People sometimes squeeze with a lot of force, so holding a squeeze or squeezing several times quickly can be tiring. Help people remain comfortable by responding to a single squeeze and promptly displaying the result.
 
 **If you use squeeze to reveal app UI, like a contextual menu, display it close to Apple Pencil Pro.** Displaying the result of a squeeze near the tip of Apple Pencil Pro strengthens the connection between the device and the gesture, and can help people stay engaged with their task.
 
@@ -67,9 +67,9 @@ While marking with Apple Pencil Pro, people can use a barrel-roll gesture to cha
 
 ## Scribble
 
-With Scribble and Apple Pencil, people can simply write wherever text is accepted in your app — they don’t have to tap or switch modes first. Because Scribble is fully integrated into iPadOS, it’s available to all apps by default.
+With Scribble and Apple Pencil, people can simply write wherever text is accepted in your app  -  they don’t have to tap or switch modes first. Because Scribble is fully integrated into iPadOS, it’s available to all apps by default.
 
-**Make text entry feel fluid and effortless.** By default, Scribble works in all standard text components — such as text fields, text views, search fields, and editable fields in web content — except password fields. If you use a custom text field in your app, avoid making people tap or select it before they can begin writing.
+**Make text entry feel fluid and effortless.** By default, Scribble works in all standard text components  -  such as text fields, text views, search fields, and editable fields in web content  -  except password fields. If you use a custom text field in your app, avoid making people tap or select it before they can begin writing.
 
 **Make Scribble available everywhere people might want to enter text.** Unlike using the keyboard, using Apple Pencil encourages people to treat the screen the way they treat a sheet of paper. Help strengthen this perception in your app by making Scribble consistently available in places where text entry seems natural. For example, in Reminders, it’s natural for people to create a new reminder by writing it in the blank space below the last item, even though the area doesn’t contain a text field. For developer guidance, see [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction-1nfjm).
 

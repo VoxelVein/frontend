@@ -1,8 +1,8 @@
-# VoxelVein Frontend — Agent Standards
+# VoxelVein Frontend  -  Agent Standards
 
 This project uses **Ultracite** (zero-config preset) on **Oxlint + Oxfmt**
 for linting and formatting, and treats **accessibility (a11y)** as a
-first-class requirement — not an afterthought.
+first-class requirement  -  not an afterthought.
 
 ---
 
@@ -33,14 +33,14 @@ code should always be clean before it reaches the hook.
 
 **`oxlint.config.ts`** extends these Ultracite presets:
 
-* `ultracite/oxlint/core` — base JS/TS rules (eslint, typescript, unicorn,
+* `ultracite/oxlint/core`  -  base JS/TS rules (eslint, typescript, unicorn,
   oxc, import, jsdoc, node, promise)
-* `ultracite/oxlint/react` — React-specific rules
-* `ultracite/oxlint/tanstack` — TanStack Router/Start rules
-* `ultracite/oxlint/vitest` — Vitest test rules
-* `ultracite/oxlint/tanstack/js-plugins` — TanStack JS plugin settings
-* `ultracite/oxlint/anti-slop` — anti-pattern rules
-* `eslint-plugin-sonarjs` + `oxlint-plugin-react-doctor` — additional
+* `ultracite/oxlint/react`  -  React-specific rules
+* `ultracite/oxlint/tanstack`  -  TanStack Router/Start rules
+* `ultracite/oxlint/vitest`  -  Vitest test rules
+* `ultracite/oxlint/tanstack/js-plugins`  -  TanStack JS plugin settings
+* `ultracite/oxlint/anti-slop`  -  anti-pattern rules
+* `eslint-plugin-sonarjs` + `oxlint-plugin-react-doctor`  -  additional
   quality checks
 
 **`oxfmt.config.ts`** extends `ultracite/oxfmt` for formatting.
@@ -50,34 +50,34 @@ code should always be clean before it reaches the hook.
 Markdown files are validated with `markdownlint-cli2` using the GitHub
 ruleset (`pnpm lint:md`). Only `MD033` (inline HTML) and `MD041`
 (first-line heading) are disabled. `.opencode/` and `.tmp/` are excluded
-from validation. Fix documentation to pass the rules — do not disable
+from validation. Fix documentation to pass the rules  -  do not disable
 additional rules.
 
 ### Workflow Rules
 
-1. **Run `pnpm check` before committing** — it's read-only and catches
+1. **Run `pnpm check` before committing**  -  it's read-only and catches
    everything the pre-commit hook would.
-2. **Run `pnpm fix` to auto-fix** — most issues are mechanically fixable.
+2. **Run `pnpm fix` to auto-fix**  -  most issues are mechanically fixable.
 3. **Never disable a lint rule** without a strong, documented reason. If a
    rule fires, fix the code, don't silence the rule.
-4. **Respect the formatter** — don't hand-format code to fight Oxfmt.
+4. **Respect the formatter**  -  don't hand-format code to fight Oxfmt.
    Write naturally, let the formatter normalize.
 5. **If `ultracite doctor` reports issues**, fix the setup before writing
    code.
 
 ---
 
-## Accessibility (a11y) — First-Class Requirement
+## Accessibility (a11y)  -  First-Class Requirement
 
 Every component and page must meet **WCAG 2.2 AA**. Accessibility is not a
-feature — it's a baseline. If a change breaks a11y, it's a regression.
+feature  -  it's a baseline. If a change breaks a11y, it's a regression.
 
 ### Semantic HTML & Landmarks
 
 * Use semantic elements: `<header>`, `<nav>`, `<main>`, `<section>`,
   `<article>`, `<aside>`, `<footer>`, `<button>`, `<a>`, `<form>`,
   `<label>`, `<table>`
-* Never use `div` soup — a `<div>` with `role="button"` is worse than a
+* Never use `div` soup  -  a `<div>` with `role="button"` is worse than a
   real `<button>`
 * Use exactly one `<main>` per page
 * Use `<nav aria-label="...">` when multiple nav regions exist
@@ -89,16 +89,16 @@ feature — it's a baseline. If a change breaks a11y, it's a regression.
 
 * All interactive elements must be reachable and operable via keyboard
   (Tab, Enter, Space, Arrow keys)
-* Never trap focus — if a modal/dialog traps focus, provide a clear escape
+* Never trap focus  -  if a modal/dialog traps focus, provide a clear escape
   (Esc to close, focus returns to trigger)
-* Use visible focus indicators — never remove `outline` without a
+* Use visible focus indicators  -  never remove `outline` without a
   replacement
 * Implement proper focus management for: modals, dropdowns, menus, tabs,
   carousels, autocomplete
-* Support `prefers-reduced-motion` — disable or minimize animations for
+* Support `prefers-reduced-motion`  -  disable or minimize animations for
   users who request it
 
-### ARIA — Use Sparingly and Correctly
+### ARIA  -  Use Sparingly and Correctly
 
 * **Prefer native HTML semantics over ARIA.** A real `<button>` beats
   `role="button"` on a `<div>`
@@ -106,10 +106,10 @@ feature — it's a baseline. If a change breaks a11y, it's a regression.
   on disclosure buttons, `aria-current` on active nav items, `role="alert"`
   for live errors)
 * Never override native roles (don't put `role="button"` on an `<a>` that
-  navigates — use a real link)
+  navigates  -  use a real link)
 * Use `aria-label` only when there's no visible text label
 * Use `aria-live` for dynamic content updates (screen reader
-  announcements) — `polite` for non-urgent, `assertive` for urgent
+  announcements)  -  `polite` for non-urgent, `assertive` for urgent
 * Use `aria-describedby` to associate helper text with inputs
 * Use `aria-invalid` + `aria-describedby` together for form validation
   errors
@@ -133,18 +133,18 @@ feature — it's a baseline. If a change breaks a11y, it's a regression.
 * Text contrast must meet **WCAG AA: 4.5:1** for normal text, **3:1** for
   large text (≥18pt or ≥14pt bold)
 * UI component contrast (borders, icons, focus rings): **3:1** minimum
-* Never rely on color alone to convey meaning — pair color with icons,
+* Never rely on color alone to convey meaning  -  pair color with icons,
   text, or patterns
-* Test both light and dark themes — contrast that passes in one may fail
+* Test both light and dark themes  -  contrast that passes in one may fail
   in the other
 * Use the project's OKLCH semantic tokens (`--primary`,
-  `--muted-foreground`, etc.) — never hardcode colors
+  `--muted-foreground`, etc.)  -  never hardcode colors
 
 ### Images & Media
 
-* Every `<img>` needs meaningful `alt` text — empty `alt=""` for
+* Every `<img>` needs meaningful `alt` text  -  empty `alt=""` for
   decorative images, descriptive text for informative ones
-* Don't put critical information in images — use real text
+* Don't put critical information in images  -  use real text
 * Provide captions/transcripts for video and audio content
 * Don't autoplay media with sound
 
@@ -153,19 +153,19 @@ feature — it's a baseline. If a change breaks a11y, it's a regression.
 * All animations must respect `prefers-reduced-motion: reduce`
 * Keep animations under 400ms for UI interactions (see animation
   standards)
-* Use `transform`/`opacity` for animations — never animate
+* Use `transform`/`opacity` for animations  -  never animate
   `width`/`height`/`top`/`left`
-* Don't create flashing content (WCAG 2.3.1 — no more than 3 flashes per
+* Don't create flashing content (WCAG 2.3.1  -  no more than 3 flashes per
   second)
 
 ### Testing a11y
 
-* Test with keyboard only (no mouse) — every flow must work
+* Test with keyboard only (no mouse)  -  every flow must work
 * Test with a screen reader (NVDA, VoiceOver, or axe DevTools)
 * Check contrast at all breakpoints and in both themes
 * Verify heading hierarchy and landmark structure
 * Use `@testing-library/react` queries that mirror user behavior:
-  `getByRole`, `getByLabelText`, `getByText` — never query by CSS class
+  `getByRole`, `getByLabelText`, `getByText`  -  never query by CSS class
 
 ---
 
@@ -181,7 +181,7 @@ Focus on clarity and explicit intent over brevity.
 * Prefer `unknown` over `any` when the type is genuinely unknown
 * Use const assertions (`as const`) for immutable values and literal types
 * Leverage TypeScript's type narrowing instead of type assertions
-* Use meaningful variable names instead of magic numbers — extract
+* Use meaningful variable names instead of magic numbers  -  extract
   constants with descriptive names
 
 ### Modern JavaScript/TypeScript
@@ -197,7 +197,7 @@ Focus on clarity and explicit intent over brevity.
 
 ### Async & Promises
 
-* Always `await` promises in async functions — don't forget to use the
+* Always `await` promises in async functions  -  don't forget to use the
   return value
 * Use `async/await` syntax instead of promise chains for better readability
 * Handle errors appropriately in async code with try-catch blocks
@@ -222,7 +222,7 @@ Focus on clarity and explicit intent over brevity.
   code
 * Throw `Error` objects with descriptive messages, not strings or other
   values
-* Use `try-catch` blocks meaningfully — don't catch errors just to rethrow
+* Use `try-catch` blocks meaningfully  -  don't catch errors just to rethrow
   them
 * Prefer early returns over nested conditionals for error cases
 
@@ -268,10 +268,10 @@ Focus on clarity and explicit intent over brevity.
 ## Testing
 
 * Write assertions inside `it()` or `test()` blocks
-* Avoid done callbacks in async tests — use async/await instead
+* Avoid done callbacks in async tests  -  use async/await instead
 * Don't use `.only` or `.skip` in committed code
-* Keep test suites reasonably flat — avoid excessive `describe` nesting
-* Query like a user: `getByRole`, `getByLabelText`, `getByText` — never by
+* Keep test suites reasonably flat  -  avoid excessive `describe` nesting
+* Query like a user: `getByRole`, `getByLabelText`, `getByText`  -  never by
   CSS class
 * Test both success and failure cases
 * Mock external dependencies
@@ -283,16 +283,16 @@ Focus on clarity and explicit intent over brevity.
 Oxlint + Oxfmt's linter will catch most issues automatically. Focus your
 attention on:
 
-1. **Business logic correctness** — Oxlint + Oxfmt can't validate your
+1. **Business logic correctness**  -  Oxlint + Oxfmt can't validate your
    algorithms
-2. **Meaningful naming** — Use descriptive names for functions, variables,
+2. **Meaningful naming**  -  Use descriptive names for functions, variables,
    and types
-3. **Architecture decisions** — Component structure, data flow, and API
+3. **Architecture decisions**  -  Component structure, data flow, and API
    design
-4. **Edge cases** — Handle boundary conditions and error states
-5. **User experience** — Accessibility, performance, and usability
+4. **Edge cases**  -  Handle boundary conditions and error states
+5. **User experience**  -  Accessibility, performance, and usability
    considerations
-6. **Documentation** — Add comments for complex logic, but prefer
+6. **Documentation**  -  Add comments for complex logic, but prefer
    self-documenting code
 
 ---
@@ -309,7 +309,7 @@ complement the a11y section above.
 
 ### Layout & Spacing
 
-* Use the project's spacing scale (Tailwind `gap-*`, `p-*`, `m-*`) —
+* Use the project's spacing scale (Tailwind `gap-*`, `p-*`, `m-*`)  -
   never arbitrary pixel values
 * Consistent section rhythm: `py-16`/`py-24` for major sections,
   `gap-8`/`gap-12` between blocks
@@ -324,22 +324,22 @@ complement the a11y section above.
 * Heading scale: `text-4xl`/`text-5xl` for hero, `text-2xl`/`text-3xl` for
   section titles, `text-lg`/`text-xl` for card titles
 * Keep line lengths readable: `max-w-prose` for long-form text
-* Use `text-muted-foreground` for secondary/helper text — never hardcode
+* Use `text-muted-foreground` for secondary/helper text  -  never hardcode
   gray
 
 ### Color & Theming
 
 * Always use OKLCH semantic tokens (`--primary`, `--muted`,
-  `--destructive`, etc.) — never raw hex
-* Destructive actions use the `destructive` variant (red) — reserve it for
+  `--destructive`, etc.)  -  never raw hex
+* Destructive actions use the `destructive` variant (red)  -  reserve it for
   irreversible/dangerous actions
 * Use `bg-muted`/`bg-card`/`bg-popover` for surface differentiation, not
   arbitrary grays
-* Respect both light and dark themes — test every new component in both
+* Respect both light and dark themes  -  test every new component in both
 
 ### Visual Effects
 
-* No gradients, shadows, or glows unless explicitly asked — keep
+* No gradients, shadows, or glows unless explicitly asked  -  keep
   surfaces flat with `bg-card`/`bg-muted` and `border` for separation
 * Never add `bg-gradient-*`, `shadow-*`, `drop-shadow`, `blur-*`, or
   glow effects speculatively; only apply them when the user requests
@@ -362,17 +362,17 @@ complement the a11y section above.
 * Forms: label above input, helper text below, inline validation errors
   with `aria-invalid` + `aria-describedby`
 * Empty states: icon + title + description + optional action button
-* Loading states: skeleton placeholders or `aria-busy` spinners — never
+* Loading states: skeleton placeholders or `aria-busy` spinners  -  never
   blank flashes
 
 ### Motion & Interaction
 
 * Keep animations under 400ms; use `transform`/`opacity` only (never
   `width`/`height`/`top`/`left`)
-* Respect `prefers-reduced-motion: reduce` — disable or minimize all
+* Respect `prefers-reduced-motion: reduce`  -  disable or minimize all
   animations
 * Hover states: subtle transitions (`transition-colors`,
-  `hover:bg-muted/50`) — avoid dramatic scale/translate
+  `hover:bg-muted/50`)  -  avoid dramatic scale/translate
 * Use CSS transitions with `EASE_OUT_CSS` from `src/lib/ease.ts` for scroll
   reveals and page transitions, not CSS keyframes
 * Use `usePrefersReducedMotion()` from
@@ -385,7 +385,7 @@ complement the a11y section above.
 * Mobile-first: design for small screens, enhance with `sm:`/`md:`/`lg:`
   breakpoints
 * Touch targets ≥ 44×44px on mobile
-* Use `lg:hidden`/`hidden lg:flex` for responsive nav/menus — never
+* Use `lg:hidden`/`hidden lg:flex` for responsive nav/menus  -  never
   JS-based breakpoint detection
 * Test at 320px, 375px, 768px, 1024px, and 1440px
 
@@ -393,7 +393,7 @@ complement the a11y section above.
 
 * Clear, scannable headings; avoid jargon
 * Action labels are verbs: "Download", "Sign in", "Delete account"
-* Destructive confirmations require a Dialog with explicit warning text —
+* Destructive confirmations require a Dialog with explicit warning text  -
   never a single click
 * Use `sr-only` for icon-only buttons with a descriptive label
 
@@ -418,7 +418,7 @@ and run `pnpm check` to ensure lint/format compliance.
 
 ### MCP servers
 
-MCP servers are **not** free — every tool they expose stays in your
+MCP servers are **not** free  -  every tool they expose stays in your
 context for the whole session. OpenCode and Claude Code read different
 files, so both are committed.
 
@@ -428,7 +428,7 @@ files, so both are committed.
 | `shadcn` | `opencode.json` | few | on | Registry, `components.json` |
 
 **`context7` is the one to use.** Look up API signatures instead of
-recalling them — see the `context7` skill. Set `CONTEXT7_API_KEY` in your
+recalling them  -  see the `context7` skill. Set `CONTEXT7_API_KEY` in your
 environment for a higher rate limit.
 
 ### Skills and commands

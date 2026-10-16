@@ -15,7 +15,7 @@ Menu bar menus on iPad are similar to those on Mac, appearing in the same order 
 
 Keyboard shortcuts in iPadOS use the same patterns as in macOS. For guidance, see [Standard keyboard shortcuts](keyboards.md#standard-keyboard-shortcuts).
 
-Menus in the menu bar share most of the appearance and behavior characteristics that all menu types have. To learn about menus in general — and how to organize and label menu items — see [Menus](menus.md).
+Menus in the menu bar share most of the appearance and behavior characteristics that all menu types have. To learn about menus in general  -  and how to organize and label menu items  -  see [Menus](menus.md).
 
 ## Anatomy
 
@@ -42,7 +42,7 @@ In addition, the macOS menu bar includes the Apple menu on the leading side and 
 
 **Support the keyboard shortcuts defined for the standard menu items you include.** People expect to use the keyboard shortcuts they already know for standard menu items, like Copy, Cut, Paste, Save, and Print. Define custom keyboard shortcuts only when necessary. For guidance, see [Standard keyboard shortcuts](keyboards.md#standard-keyboard-shortcuts).
 
-**Prefer short, one-word menu titles.** Various factors — like different display sizes and the presence of menu bar extras — can affect the spacing and appearance of your menus. One-word menu titles work especially well in the menu bar because they take little space and are easy for people to scan. If you need to use more than one word in the menu title, use title-style capitalization.
+**Prefer short, one-word menu titles.** Various factors  -  like different display sizes and the presence of menu bar extras  -  can affect the spacing and appearance of your menus. One-word menu titles work especially well in the menu bar because they take little space and are easy for people to scan. If you need to use more than one word in the menu title, use title-style capitalization.
 
 ## App menu
 
@@ -149,7 +149,7 @@ The View menu typically contains the following top-level menu items, listed in t
 
 Your app’s custom menus appear in the menu bar between the View menu and the Window menu. For example, Safari’s menu bar includes app-specific History and Bookmarks menus.
 
-**Provide app-specific menus for custom commands.** People look in the menu bar when searching for app-specific commands, especially when using an app for the first time. Even when commands are available elsewhere in your app, it’s important to list them in the menu bar. Putting commands in the menu bar makes them easier for people to find, lets you assign keyboard shortcuts to them, and makes them more accessible to people using Full Keyboard Access. Excluding commands from the menu bar — even infrequently used or advanced commands — risks making them difficult for everyone to find.
+**Provide app-specific menus for custom commands.** People look in the menu bar when searching for app-specific commands, especially when using an app for the first time. Even when commands are available elsewhere in your app, it’s important to list them in the menu bar. Putting commands in the menu bar makes them easier for people to find, lets you assign keyboard shortcuts to them, and makes them more accessible to people using Full Keyboard Access. Excluding commands from the menu bar  -  even infrequently used or advanced commands  -  risks making them difficult for everyone to find.
 
 **As much as possible, reflect your app’s hierarchy in app-specific menus.** For example, Mail lists the Mailbox, Message, and Format menus in an order that mirrors the relationships of these items: mailboxes contain messages, and messages contain formatting.
 
@@ -181,7 +181,7 @@ The Window menu typically contains the following top-level menu items, listed in
 
 ## Help menu
 
-The Help menu — located at the trailing end of the menu bar — provides access to an app’s help documentation. When you use the Help Book format for this documentation, macOS automatically includes a search field at the top of the Help menu.
+The Help menu  -  located at the trailing end of the menu bar  -  provides access to an app’s help documentation. When you use the Help Book format for this documentation, macOS automatically includes a search field at the top of the Help menu.
 
 | Menu item | Action | Guidance |
 | --- | --- | --- |
@@ -246,9 +246,9 @@ When necessary, the system hides menu bar extras to make room for app menus. Sim
 
 **Consider using a symbol to represent your menu bar extra.** You can create an [icon](icons.md) or you can choose one of the [SF Symbols](sf-symbols.md), using it as-is or customizing it to suit your needs. Both interface icons and symbols use black and clear colors to define their shapes; the system can apply other colors to the black areas in each image so it looks good on both dark and light menu bars, and when your menu bar extra is selected. The menu bar’s height is 24 pt.
 
-**Display a menu — not a popover — when people click your menu bar extra.** Unless the app functionality you want to expose is too complex for a menu, avoid presenting it in a [popover](popovers.md).
+**Display a menu  -  not a popover  -  when people click your menu bar extra.** Unless the app functionality you want to expose is too complex for a menu, avoid presenting it in a [popover](popovers.md).
 
-**Let people — not your app — decide whether to put your menu bar extra in the menu bar.** Typically, people add a menu bar extra to the menu bar by changing a setting in an app’s settings window. To ensure discoverability, however, consider giving people the option of doing so during setup.
+**Let people  -  not your app  -  decide whether to put your menu bar extra in the menu bar.** Typically, people add a menu bar extra to the menu bar by changing a setting in an app’s settings window. To ensure discoverability, however, consider giving people the option of doing so during setup.
 
 **Avoid relying on the presence of menu bar extras.** The system hides and shows menu bar extras regularly, and you can’t be sure which other menu bar extras people have chosen to display or predict the location of your menu bar extra.
 

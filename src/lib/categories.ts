@@ -110,7 +110,7 @@ const MINECRAFT_CATEGORIES: readonly MinecraftCategory[] = [
  *
  * "mods, plugins, modpacks, resource packs, shaders, and servers". The hero
  * and the explore section both need this sentence, and both previously carried
- * their own copy — which is how the hero came to advertise a `Datapack` type
+ * their own copy  -  which is how the hero came to advertise a `Datapack` type
  * that does not exist while leaving out `Servers`. Deriving both from here
  * means a category can only be added in one place.
  */

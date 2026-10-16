@@ -9,22 +9,22 @@ directly through server functions.
 
 ## How it works
 
-* `src/lib/search/text.ts` — the shared matching and ranking expressions:
+* `src/lib/search/text.ts`  -  the shared matching and ranking expressions:
   the weighted `tsvector` for each table, the fuzzy/substring predicates,
   and the relevance scores
-* `src/lib/search/projects.ts` — `searchProjectsInDatabase`, which filters,
+* `src/lib/search/projects.ts`  -  `searchProjectsInDatabase`, which filters,
   ranks, sorts, pages, and returns facet counts in one round trip
-* `src/lib/search/posts.ts` — `searchPostsInDatabase` and
+* `src/lib/search/posts.ts`  -  `searchPostsInDatabase` and
   `hasSearchablePosts`
-* `src/lib/project-search.functions.ts` — the `searchProjects` server
+* `src/lib/project-search.functions.ts`  -  the `searchProjects` server
   function; validates filters against the same allowlists the UI offers
-* `src/lib/project-search-cache.ts` — the in-process LRU + TTL cache that
+* `src/lib/project-search-cache.ts`  -  the in-process LRU + TTL cache that
   backs browse pages
-* `src/lib/project-browser-loader.ts` — runs the first, uncached search on
+* `src/lib/project-browser-loader.ts`  -  runs the first, uncached search on
   the server so the first paint has results
-* `src/lib/posts.functions.ts` — `searchPosts`, `searchPostsAdmin`, and
+* `src/lib/posts.functions.ts`  -  `searchPosts`, `searchPostsAdmin`, and
   `postSearchAvailable`
-* `drizzle/0010_postgres_search.sql` — the extension, the trigram
+* `drizzle/0010_postgres_search.sql`  -  the extension, the trigram
   threshold, and the five indexes that back the queries
 
 ## Three matching strategies
@@ -121,7 +121,7 @@ query over drafts as well, and is gated on an admin session.
 ## When search is hidden
 
 The blog hides its search field when `postSearchAvailable` returns false,
-which is the case only when there are no published posts — a search box over
+which is the case only when there are no published posts  -  a search box over
 an empty blog is a dead control. Reading the table cannot get this wrong;
 there is no index that starts out empty after a fresh deploy.
 

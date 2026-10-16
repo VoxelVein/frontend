@@ -87,8 +87,8 @@ const ReadMore = ({ className }: { className?: string }) => (
  * press scales the card down a hair so the click is felt as well as seen.
  */
 const LeadPost = ({ post }: { post: PostSummary }) => (
-  <li className="sm:col-span-2">
-    <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative rounded-2xl border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-7">
+  <li className="min-w-0 sm:col-span-2">
+    <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative max-w-full rounded-3xl border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
       {/* The whole card is the target, but it stays a real link so it is
           reachable by keyboard and announced with the post it leads to. */}
       <Link
@@ -104,11 +104,11 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
         <NewsDate value={post.createdAt} />
         <PostCategoryBadge category={post.category} variant="subtle" />
       </div>
-      <h3 className="text-foreground mt-2 max-w-prose text-xl font-semibold tracking-tight text-balance sm:text-2xl">
+      <h3 className="text-foreground mt-2 max-w-full text-xl font-semibold tracking-tight text-balance break-words sm:text-2xl">
         {post.title}
       </h3>
       {post.preview ? (
-        <p className="text-muted-foreground mt-3 max-w-prose text-sm leading-6 sm:text-base">
+        <p className="text-muted-foreground mt-3 max-w-full text-sm leading-6 break-words sm:text-base">
           {truncate(post.preview, MAX_LEAD_PREVIEW_CHARS)}
         </p>
       ) : null}
@@ -127,7 +127,7 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
  * reveal can wrap the entry without nesting one list item inside another.
  */
 const OlderPost = ({ post }: { post: PostSummary }) => (
-  <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative flex h-full flex-col rounded-xl border p-5 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
+  <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative flex h-full flex-col rounded-2xl border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
     <Link
       className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
       params={{ slug: post.slug }}
@@ -141,7 +141,7 @@ const OlderPost = ({ post }: { post: PostSummary }) => (
       <NewsDate value={post.createdAt} />
       <PostCategoryBadge category={post.category} variant="subtle" />
     </div>
-    <h3 className="text-foreground mt-2 text-base font-semibold tracking-tight text-balance">
+    <h3 className="text-foreground mt-2 max-w-full text-base font-semibold tracking-tight text-balance break-words">
       {post.title}
     </h3>
     {post.preview ? (
@@ -178,10 +178,10 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
       {/* One reveal for the whole section, so the heading and the posts
           arrive together instead of the heading leading on its own. */}
       <Reveal className="mx-auto max-w-5xl">
-        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b pb-6">
           <div>
             <h2
-              className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
+              className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl"
               id="news-heading"
             >
               News
@@ -220,14 +220,14 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
           // section a clear hierarchy rather than one big card plus a list.
           <ol
             aria-label="Latest blog posts"
-            className="mt-8 grid gap-4 sm:grid-cols-2"
+            className="mt-8 grid gap-6 sm:grid-cols-2"
           >
             <LeadPost post={lead} />
             {/* Staggered like the trending row above it, so the grids on the
                 page behave the same way. Capped: the grid is unbounded, and an
                 uncapped delay would leave the last entry waiting seconds. */}
             {rest.map((post, index) => (
-              <li key={post.id} className="flex">
+              <li key={post.id} className="flex min-w-0">
                 <Reveal className="h-full flex-1" delay={staggerDelay(index)}>
                   <OlderPost post={post} />
                 </Reveal>

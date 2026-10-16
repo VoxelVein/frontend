@@ -15,8 +15,6 @@ const RouteError = ({ error, reset }: ErrorComponentProps) => {
 
   useEffect(() => {
     if (isChunkError) {
-      // Does nothing when it already reloaded moments ago; the message and
-      // the reload button below cover that case.
       reloadForChunkError(window.location.href);
     }
   }, [isChunkError]);
@@ -29,39 +27,46 @@ const RouteError = ({ error, reset }: ErrorComponentProps) => {
   return (
     <section
       aria-labelledby="route-error-heading"
-      className="mx-auto max-w-2xl px-4 py-16 sm:px-6"
+      className="mx-auto max-w-5xl px-4 py-16 sm:px-6"
     >
-      <div role="alert" className="bg-card rounded-xl border p-6">
-        <h1
-          id="route-error-heading"
-          className="text-foreground text-lg font-semibold"
-        >
-          This page could not be loaded
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          {isChunkError
-            ? "Loading the latest version of this page… If nothing happens, check your connection and reload."
-            : "Something went wrong while loading this page."}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          {isChunkError ? null : (
+      <div className="bg-card grid gap-6 rounded-xl border p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-center">
+        <div>
+          <h1
+            id="route-error-heading"
+            className="text-foreground text-2xl font-semibold tracking-tight"
+          >
+            This page could not be loaded
+          </h1>
+          <p className="text-muted-foreground mt-3 text-sm">
+            {isChunkError
+              ? "Loading the latest version of this page… If nothing happens, check your connection and reload."
+              : "Something went wrong while loading this page."}
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            {isChunkError ? null : (
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11"
+                onClick={handleRetry}
+              >
+                Try again
+              </Button>
+            )}
             <Button
               type="button"
-              variant="outline"
               className="min-h-11"
-              onClick={handleRetry}
+              onClick={() => window.location.reload()}
             >
-              Try again
+              Reload page
             </Button>
-          )}
-          <Button
-            type="button"
-            className="min-h-11"
-            onClick={() => window.location.reload()}
-          >
-            Reload page
-          </Button>
+          </div>
         </div>
+        <img
+          src="https://media1.tenor.com/m/f-Yg-hPcN5UAAAAd/this-is-fine.gif"
+          alt="This is fine: a cartoon dog sits in a burning room."
+          className="mx-auto w-full max-w-[280px] rounded-lg"
+        />
       </div>
     </section>
   );

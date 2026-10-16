@@ -90,7 +90,7 @@
      arriving rather than sliding. */
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Every overlay — dialog, alert dialog, dropdown, select, cookie banner —
+  /* Every overlay  -  dialog, alert dialog, dropdown, select, cookie banner  - 
      animates through tw-animate-css, which reads its curve from `--tw-ease` and
      its duration from `--tw-duration`.
 
@@ -102,7 +102,7 @@
      Worth knowing when editing one of those components: an `ease-*` utility on
      the animated element overrides this, because tw-animate redefines those
      utilities to write `--tw-ease` rather than `transition-timing-function`. So
-     `ease-smooth` on a keyframe animation does work — it just is not reaching
+     `ease-smooth` on a keyframe animation does work  -  it just is not reaching
      the animation through the property its name suggests. */
   --tw-ease: var(--motion-ease);
 
@@ -129,7 +129,7 @@
 
      The background is the exception and no longer follows that rule: it is the
      specified #F8F8FF, stored as the OKLCH value that round-trips to it. That
-     puts it on hue 286 at chroma 0.0093 — cool and visibly tinted, where the
+     puts it on hue 286 at chroma 0.0093  -  cool and visibly tinted, where the
      ladder below is warm and nearly neutral. The two no longer share a hue, so
      a `bg-muted` or `bg-card` surface reads faintly warm against the page.
      That is the intended look rather than a rounding error, but it does mean
@@ -204,7 +204,7 @@
      Same hue and chroma as light, lightness raised to 0.605. The dark
      background is near-black, so the light theme's 0.5712 lands at 4.12:1 and
      fails AA as text; 0.605 clears it at 4.74:1. One brand colour, two
-     lightnesses — the alternative is a dark theme whose brand stops being
+     lightnesses  -  the alternative is a dark theme whose brand stops being
      readable. */
   --background: oklch(0.101 0.0084 165.234);
   --foreground: oklch(0.985 0.0041 91.4457);
@@ -342,7 +342,7 @@
    hover states decelerate the same way.
 
    Two escape hatches below matter more than they look. The resting state is
-   hidden, and both of these force it visible — without them, content is stranded
+   hidden, and both of these force it visible  -  without them, content is stranded
    invisible whenever the observer cannot run. */
 .reveal {
   --reveal-delay: 0ms;

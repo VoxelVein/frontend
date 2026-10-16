@@ -244,7 +244,7 @@ permissions:
 
 ## Quick Reference
 
-**Library Registry**: `.opencode/skills/context7/library-registry.md` — Supported libraries, IDs, and official docs links
+**Library Registry**: `.opencode/skills/context7/library-registry.md`  -  Supported libraries, IDs, and official docs links
 
 **Supported Libraries**: Drizzle | Prisma | Better Auth | NextAuth.js | Clerk | Next.js | React | TanStack Query/Router | Cloudflare Workers | AWS Lambda | Vercel | Shadcn/ui | Radix UI | Tailwind CSS | Zustand | Jotai | Zod | React Hook Form | Vitest | Playwright
 

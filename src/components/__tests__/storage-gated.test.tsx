@@ -41,7 +41,7 @@ const renderGated = () =>
 
 /**
  * The check resolves after first paint, so the control renders enabled for a
- * moment before the greying-out appears — which is also exactly what a reader
+ * moment before the greying-out appears  -  which is also exactly what a reader
  * sees if they click inside that window, and why the server still has to
  * refuse the action rather than trusting the client.
  *
@@ -116,7 +116,7 @@ describe(StorageGated, () => {
     // Failing open on purpose: a cached `false` never expires, so a flaky check
     // would otherwise leave every upload greyed out permanently on a site whose
     // storage is fine. The action is sent instead, and the server's refusal is
-    // what the reader sees — which is honest.
+    // what the reader sees  -  which is honest.
     await flush();
     expect(screen.getByRole("button", { name: "Upload" })).toBeEnabled();
   });

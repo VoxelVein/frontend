@@ -4,7 +4,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
  * Layout for `/blog`.
  *
  * This route is the parent of `/blog/$slug`, so it renders an `Outlet` rather
- * than page content — the listing itself is the index route, `blog.index.tsx`.
+ * than page content  -  the listing itself is the index route, `blog.index.tsx`.
  *
  * When a parent with children renders its own content instead of an `Outlet`,
  * the child never mounts: navigating to `/blog/$slug` swaps the URL and runs

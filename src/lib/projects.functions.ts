@@ -516,8 +516,8 @@ export const deleteProject = createServerFn({ method: "POST" })
  * decision can be reviewed or reverted in the database.
  *
  * Stamps `takenDownAt` alongside the status, because the status alone cannot carry
- * the fact. Once the project is live again — by a review decision, or by an
- * admin reverting this in the database — `status` has moved on and the record
+ * the fact. Once the project is live again  -  by a review decision, or by an
+ * admin reverting this in the database  -  `status` has moved on and the record
  * that staff pulled this is gone. That record is what decides whether putting it
  * back up goes straight out or waits for a moderator, so it has to outlive the
  * status change.

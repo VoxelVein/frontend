@@ -42,7 +42,7 @@ const BROWSE_OPEN_DELAY_MS = 200;
  *
  * Base UI bridges the gap to the portalled popup with a Floating UI safe
  * polygon, so this is not what makes the diagonal move from trigger to menu
- * work. It is forgiveness for the fumbled exit — drifting off the trigger
+ * work. It is forgiveness for the fumbled exit  -  drifting off the trigger
  * should not snap the menu shut mid-decision.
  */
 const BROWSE_CLOSE_DELAY_MS = 100;

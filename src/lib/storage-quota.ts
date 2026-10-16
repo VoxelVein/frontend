@@ -148,7 +148,7 @@ type AvatarValues = typeof userImages.$inferInsert;
  * generalisation of it: that one deletes the superseded row and inserts into
  * `project_images`, so sharing it would have meant writing a user id into the
  * project table. What is shared is the discipline, and it is the part that
- * matters — the quota is checked inside the same transaction as the insert, and
+ * matters  -  the quota is checked inside the same transaction as the insert, and
  * both take the same `QUOTA_LOCK_KEY`, so a project upload and an avatar upload
  * cannot each see room for themselves and overshoot together.
  *

@@ -15,7 +15,7 @@ import { object, optional, parse, picklist } from "valibot";
  *
  * `resolveTab` must only ever return one of these values. Returning anything
  * else renders a tab list where nothing is selected and every panel is hidden,
- * which is a blank-looking page rather than an error — the kind of failure that
+ * which is a blank-looking page rather than an error  -  the kind of failure that
  * ships. The legacy `passkeys` alias is the reason this is worth asserting
  * separately: it is a name the schema accepts that is deliberately not a tab.
  */
@@ -69,14 +69,14 @@ export type SettingsSearch = ReturnType<typeof parseSettingsSearch>;
  *
  * 1. The legacy `passkeys` alias, folded into the tab it was renamed to.
  * 2. An explicit `tab`, so a shared or bookmarked link lands where it was aimed.
- * 3. Otherwise `confirm=delete` — the return from re-authenticating to delete
- *    an account — which lands on the Danger Zone, and everything else on
+ * 3. Otherwise `confirm=delete`  -  the return from re-authenticating to delete
+ *    an account  -  which lands on the Danger Zone, and everything else on
  *    Profile.
  *
  * Note that `confirm` is only consulted when `tab` is absent. `REAUTH_CALLBACK_URL`
  * always sends both, so the app never hits the disagreement, but a hand-edited
  * or stale bookmark of `/settings?tab=profile&confirm=delete` resolves to
- * `profile` while the Danger Zone would still be told to resume — and because
+ * `profile` while the Danger Zone would still be told to resume  -  and because
  * hidden tab panels unmount, the resume cannot fire until that tab is clicked.
  * `settings-tabs.test.ts` pins this so the behaviour is a decision rather than
  * an accident.

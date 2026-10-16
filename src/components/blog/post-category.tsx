@@ -19,9 +19,9 @@ interface PostCategoryBadgeProps {
 /**
  * A post's category as a small label.
  *
- * A label and not a link. There is no per-category page to link to — the
+ * A label and not a link. There is no per-category page to link to  -  the
  * category filter on the blog index is client-side over the posts already loaded
- * — so a chip that looked clickable would be a dead control, and the blog index
+ *  -  so a chip that looked clickable would be a dead control, and the blog index
  * filter is what a category is actually for.
  *
  * An uncategorised post renders no chip rather than "Uncategorised". Half the

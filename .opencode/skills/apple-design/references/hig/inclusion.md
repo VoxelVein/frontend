@@ -37,17 +37,17 @@ As you examine your app or game through different perspectives, avoid framing th
 
 ## Welcoming language
 
-Using plain, inclusive language welcomes everyone and helps them understand your app or game. Carefully review the writing in your experience to make sure that your tone and words don’t exclude people. Here are a few tips for writing text — also known as *copy* — that’s direct, easy to understand, and inclusive.
+Using plain, inclusive language welcomes everyone and helps them understand your app or game. Carefully review the writing in your experience to make sure that your tone and words don’t exclude people. Here are a few tips for writing text  -  also known as *copy*  -  that’s direct, easy to understand, and inclusive.
 
 **Consider the tone of your copy from different perspectives.** The style of your writing communicates almost as much as the words you use. Although different apps use different communication styles, make sure the tone you use doesn’t send messages you don’t intend. For example, an academic tone can make an app or game seem like it welcomes only high levels of education. As you seek the style that’s right for your experience, be clear, direct, and respectful.
 
 **Pay attention to how you refer to people.** It typically works well to use *you* and *your* to address people directly. Referring to people indirectly as *the user* or *the player* can make your experience feel distant and unwelcoming. Also, consider reserving words like *we* and *our* to represent your software or company; otherwise, these terms can suggest a personal relationship with people that might be interpreted as insulting or condescending.
 
-**Avoid using specialized or technical terms without defining them.** Using specialized or technical terms can make your writing more succinct, but doing so excludes people who don’t know what the terms mean. If you must use such terms, be sure to define them first and make the definitions easy for people to look up. Even when people know the definition of a specialized or technical term in a sentence, the sentence is easier to read — and translate — when it uses plain language instead.
+**Avoid using specialized or technical terms without defining them.** Using specialized or technical terms can make your writing more succinct, but doing so excludes people who don’t know what the terms mean. If you must use such terms, be sure to define them first and make the definitions easy for people to look up. Even when people know the definition of a specialized or technical term in a sentence, the sentence is easier to read  -  and translate  -  when it uses plain language instead.
 
 **Replace colloquial expressions with plain language.** Colloquial expressions are often culture-specific and can be difficult to translate. Worse, some colloquial phrases have exclusionary meanings you might not know. For example, the phrases *peanut gallery* and *grandfathered in* both arose from oppressive contexts and continue to exclude people. Even when a colloquial phrase doesn’t have an exclusionary meaning, it can still exclude everyone who doesn’t understand it.
 
-**Consider carefully before including humor.** Humor is highly subjective and — similar to colloquial expressions — difficult to translate from one culture to another. Including humor in your experience risks confusing people who donʼt understand it, irritating people who tire of repeatedly encountering it, and insulting people who interpret it differently. For additional writing guidance, see [Writing inclusively](https://help.apple.com/applestyleguide/#/apdcb2a65d68).
+**Consider carefully before including humor.** Humor is highly subjective and  -  similar to colloquial expressions  -  difficult to translate from one culture to another. Including humor in your experience risks confusing people who donʼt understand it, irritating people who tire of repeatedly encountering it, and insulting people who interpret it differently. For additional writing guidance, see [Writing inclusively](https://help.apple.com/applestyleguide/#/apdcb2a65d68).
 
 ## Being approachable
 
@@ -66,7 +66,7 @@ In addition, you can often avoid referencing a specific gender in an avatar, emo
 
 If you need to depict a generic person or people, use a nongendered human image to reinforce the message that *generic person* means *human*, not *man* or *woman*. SF Symbols provides many nongendered glyphs you can use, such as the figure and person symbols shown here:
 
-Most apps and games don’t need to know a person’s gender, but if you require this information — such as for health or legal reasons — consider providing inclusive options, such as *nonbinary*, *self-identify*, and *decline to state*. In this situation, you could also let people specify the pronouns they use so you can address them properly when necessary.
+Most apps and games don’t need to know a person’s gender, but if you require this information  -  such as for health or legal reasons  -  consider providing inclusive options, such as *nonbinary*, *self-identify*, and *decline to state*. In this situation, you could also let people specify the pronouns they use so you can address them properly when necessary.
 
 ## People and settings
 
@@ -78,9 +78,9 @@ Also review the settings and objects you show. For example, showing high levels 
 
 ## Avoiding stereotypes
 
-Everyone holds biases and stereotypes — often unconsciously — and it can be challenging to discover how they affect your thoughts. A goal of inclusive design is to become aware of your biases and generalizations so you can recognize where they might influence your design decisions.
+Everyone holds biases and stereotypes  -  often unconsciously  -  and it can be challenging to discover how they affect your thoughts. A goal of inclusive design is to become aware of your biases and generalizations so you can recognize where they might influence your design decisions.
 
-For example, consider an app that helps people manage account access for various family members. If this app uses a stereotypical definition of *family* — such as a woman, a man, and their biological children — it’s likely to communicate this perspective in its copy and images. Because the app assumes that people’s families fit this narrow definition, it excludes everyone whose family is different.
+For example, consider an app that helps people manage account access for various family members. If this app uses a stereotypical definition of *family*  -  such as a woman, a man, and their biological children  -  it’s likely to communicate this perspective in its copy and images. Because the app assumes that people’s families fit this narrow definition, it excludes everyone whose family is different.
 
 Although the assumption made in the account-access app might seem like an obvious mistake, it’s important to realize that not all assumptions are so easy to spot. For example, consider an app or game that requires people to choose security questions they can answer for future identity confirmation, such as:
 
@@ -98,14 +98,14 @@ Basing design decisions on stereotypes or assumptions inevitably leads to exclus
 
 ## Accessibility
 
-An inclusive app or game is accessible to everyone. People rely on Apple’s accessibility features — such as VoiceOver, Display Accommodations, closed captioning, Switch Control, and Speak Screen — to customize their devices for their individual needs, so it’s essential to support these features.
+An inclusive app or game is accessible to everyone. People rely on Apple’s accessibility features  -  such as VoiceOver, Display Accommodations, closed captioning, Switch Control, and Speak Screen  -  to customize their devices for their individual needs, so it’s essential to support these features.
 
 It’s also essential to avoid assuming that any disability might prevent someone from wanting to enjoy the experience your software provides. Making an assumption like this can result in designs that limit the potential audience for your app or game. In contrast, when you make each experience accessible, you give everyone the opportunity to benefit from your app or game in ways that work for them.
 
 To help you design an app or game that everyone can enjoy, remember that:
 
 - Each disability is a spectrum. For example, visual disabilities range from low vision to complete blindness, and include things like color blindness, blurry vision, light sensitivity, and peripheral vision loss.
-- Everyone can experience disabilities. In addition to disabilities that most people experience as they age, there are *temporary disabilities* — like short-term hearing loss due to an infection — and *situational disabilities* — like being unable to hear while on a noisy train — that can affect everyone at various times.
+- Everyone can experience disabilities. In addition to disabilities that most people experience as they age, there are *temporary disabilities*  -  like short-term hearing loss due to an infection  -  and *situational disabilities*  -  like being unable to hear while on a noisy train  -  that can affect everyone at various times.
 
 As you design content that welcomes people of all abilities, consider the following tips.
 
@@ -119,7 +119,7 @@ To learn more about making your app or game accessible, see [Accessibility](acce
 
 ## Languages
 
-People expect to customize their device by choosing a language for text and a region for formatting values like date, time, and money. To welcome a global audience, first prepare your software to handle languages and regions other than your own — a process called *internationalization* — and provide translated text and resources for specific locales. For an overview of internationalization, see [Expanding your app to new markets](https://developer.apple.com/localization/); for developer guidance on localization, see [Localization](https://developer.apple.com/documentation/xcode/localization).
+People expect to customize their device by choosing a language for text and a region for formatting values like date, time, and money. To welcome a global audience, first prepare your software to handle languages and regions other than your own  -  a process called *internationalization*  -  and provide translated text and resources for specific locales. For an overview of internationalization, see [Expanding your app to new markets](https://developer.apple.com/localization/); for developer guidance on localization, see [Localization](https://developer.apple.com/documentation/xcode/localization).
 
 Creating an inclusive experience can also help you prepare for localization. For example, using plain language, avoiding unnecessary gender references, representing a variety of people, and avoiding stereotypes and culture-specific content, can put you in a good position to create versions of your software localized into more languages. Using [SF Symbols](sf-symbols.md) for the glyphs in your app or game can also help streamline localization. In addition to providing many language-specific glyphs, SF Symbols includes glyphs you can use in both left-to-right and right-to-left contexts; for guidance, see [Right to left](right-to-left.md).
 

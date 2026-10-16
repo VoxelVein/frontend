@@ -333,7 +333,7 @@ describe(SettingsProfile, () => {
     });
 
     // The baseline is read off the session, so the dirty state clears only once
-    // the session reports what was stored — which is what refreshSession causes
+    // the session reports what was stored  -  which is what refreshSession causes
     // in the app.
     rerenderAs({ ...baseUser, name: "Ada Lovelace" });
 

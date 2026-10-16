@@ -13,7 +13,7 @@ Text views can be any height and allow scrolling when the content extends outsid
 
 ## Best practices
 
-**Use a text view when you need to display text that’s long, editable, or in a special format.** Text views differ from [text fields](text-fields.md) and [labels](labels.md) in that they provide the most options for displaying specialized text and receiving text input. If you need to display a small amount of text, it’s simpler to use a label or — if the text is editable — a text field.
+**Use a text view when you need to display text that’s long, editable, or in a special format.** Text views differ from [text fields](text-fields.md) and [labels](labels.md) in that they provide the most options for displaying specialized text and receiving text input. If you need to display a small amount of text, it’s simpler to use a label or  -  if the text is editable  -  a text field.
 
 **Keep text legible.** Although you can use multiple fonts, colors, and alignments in creative ways, it’s essential to maintain the readability of your content. It’s a good idea to adopt Dynamic Type so your text still looks good if people change text size on their device. Be sure to test your content with accessibility options turned on, such as bold text. For guidance, see [Accessibility](accessibility.md) and [Typography](typography.md).
 

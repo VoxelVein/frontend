@@ -145,7 +145,7 @@ describe(AvatarCard, () => {
   it("offers the two sources as tabs rather than two stacked forms", async () => {
     renderCard({ image: null, name: "Hedi Zandi" });
 
-    // Uploading and linking are alternatives — a picture comes from one of them —
+    // Uploading and linking are alternatives  -  a picture comes from one of them  -
     // and showing both at once gave the URL field the weight of a second
     // primary action.
     expect(screen.getByRole("tab", { name: /upload/iu })).toBeInTheDocument();

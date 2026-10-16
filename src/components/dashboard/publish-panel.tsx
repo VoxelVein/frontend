@@ -82,7 +82,7 @@ const RejectionNotice = ({ reason }: { reason: string }) => (
 /**
  * Discriminated rather than one shape with an optional field, because the
  * publish transition reports *which* of two different things happened and the
- * others report nothing at all — and a `run` typed as "maybe a value" would push
+ * others report nothing at all  -  and a `run` typed as "maybe a value" would push
  * that uncertainty onto every caller.
  */
 type Transition =

@@ -1,4 +1,4 @@
-name: Reusable — Quality
+name: Reusable  -  Quality
 
 # Single definition of the quality gate, called by the Main, Pull Request and
 # Deploy workflows. This used to be copy-pasted into all three, so a change to

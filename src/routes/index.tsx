@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { ComparisonSection } from "@/components/comparison-section";
 import { ExploreSection } from "@/components/explore-section";
 import { Hero } from "@/components/hero";
 import { NewsSection } from "@/components/news-section";
@@ -55,6 +56,7 @@ const HomePage = () => {
       <Hero />
       <TrendingProjects initialProjects={trending} />
       <ExploreSection />
+      <ComparisonSection />
       <NewsSection initialPosts={latestPosts} />
     </>
   );
@@ -64,13 +66,28 @@ export const Route = createFileRoute("/")({
   pendingComponent: HomeSkeleton,
   component: HomePage,
   // Both lists are read from Postgres in parallel, so the home page never waits
-  // on a search index that may not be built yet.
+  // on a search index that may not be built yet. A missing or unreachable
+  // database is reported by the loaders' errors but must not take the whole
+  // route down: the page's static sections still render, and the data-backed
+  // sections simply show their empty state.
   loader: async () => {
-    const [latestPosts, trending] = await Promise.all([
+    const [latestPostsResult, trendingResult] = await Promise.allSettled([
       getLatestPosts(),
       getTrendingProjects(),
     ]);
 
-    return { latestPosts, trending };
+    if (latestPostsResult.status === "rejected") {
+      console.error("Failed to load latest posts:", latestPostsResult.reason);
+    }
+    if (trendingResult.status === "rejected") {
+      console.error("Failed to load trending projects:", trendingResult.reason);
+    }
+
+    return {
+      latestPosts:
+        latestPostsResult.status === "fulfilled" ? latestPostsResult.value : [],
+      trending:
+        trendingResult.status === "fulfilled" ? trendingResult.value : [],
+    };
   },
 });

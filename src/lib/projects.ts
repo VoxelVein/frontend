@@ -30,7 +30,7 @@ import type { ProjectImageView } from "@/lib/project-images";
  * Every project type, in the order the browse sections appear.
  *
  * Adding one here means adding a matching key to each `Record<ProjectType, …>`
- * below — the compiler will list every one it finds missing, so the registry
+ * below  -  the compiler will list every one it finds missing, so the registry
  * cannot be extended halfway. The columns are `text` validated in app code, not
  * database enums, so a new type needs no migration.
  */
@@ -49,7 +49,7 @@ export const PROJECT_TYPES = [
  * Lives here rather than beside the table in `db/schema.ts` because it is plain
  * vocabulary, not a column definition. `schema.ts` reaches into drizzle's column
  * builders at runtime, so a client component importing one constant from there
- * pulled the whole table module — and about 33 kB of query builder — into the
+ * pulled the whole table module  -  and about 33 kB of query builder  -  into the
  * browser bundle. The type is what `schema.ts` needs for its column, and a type
  * import costs nothing.
  */
@@ -138,7 +138,7 @@ export const SHADER_CATEGORIES = [
 /**
  * Datapack categories, named after what the pack actually changes.
  *
- * A datapack is JSON in `world/datapacks/<name>/` — dimensions, biomes, loot
+ * A datapack is JSON in `world/datapacks/<name>/`  -  dimensions, biomes, loot
  * tables, advancements, recipes, enchantments, functions. So unlike the
  * visual types there is no "pack format" axis to sort on, and the categories
  * that matter are the game systems a pack touches. These are the six that
@@ -157,7 +157,7 @@ export const DATAPACK_CATEGORIES = [
  * Server gamemodes.
  *
  * `category` is a free-text column validated against this list in app code
- * rather than a database enum, so extending it needs no migration — existing
+ * rather than a database enum, so extending it needs no migration  -  existing
  * rows stay valid, since every prior value is still here.
  *
  * Order is roughly by how commonly a listing site labels a server this way,
@@ -231,7 +231,7 @@ export const CATEGORIES_BY_TYPE = {
  * versions (servers).
  *
  * A datapack is empty here because the game loads one from a world's own
- * `datapacks` folder — there is no mod loader in the picture, so there is
+ * `datapacks` folder  -  there is no mod loader in the picture, so there is
  * nothing for a player to pick.
  */
 export const LOADERS_BY_TYPE = {
@@ -320,7 +320,7 @@ export const SLUG_MAX_LENGTH = 64;
  *
  * One term, defined once, because the flag was previously called a "large
  * project" in the account-deletion flow and a "protected project" in the admin
- * notification about the same event — two names for one thing, neither defined
+ * notification about the same event  -  two names for one thing, neither defined
  * anywhere a user could read. "Protected" is also the honest word: it names
  * exactly what happens (the project survives its owner's account) without
  * implying a download threshold that nothing enforces.
@@ -376,8 +376,8 @@ const VERSION_NUMBER_MAX_LENGTH = 32;
  * One phrasing for every character limit.
  *
  * Three different sentences were in use for the same fact: "Use at most 64
- * characters." on some fields, "The description is too long." on others — with
- * no number, so the user had to guess how much room was left — and "Tags are at
+ * characters." on some fields, "The description is too long." on others  -  with
+ * no number, so the user had to guess how much room was left  -  and "Tags are at
  * most 24 characters.", which reads as though the whole list shared one budget
  * rather than each tag having its own. Every limit is now the same sentence
  * with the number in it.
@@ -515,7 +515,7 @@ export const isServerAddress = (value: string): boolean =>
 /**
  * Project types a server can ask or suggest players to install.
  *
- * Plugins are excluded because the server itself runs them — a player never
+ * Plugins are excluded because the server itself runs them  -  a player never
  * installs one. Datapacks are included because the common case is the reverse:
  * the server ships a datapack for its own world (custom dimensions, loot
  * tables) and needs every connecting client to have it too.

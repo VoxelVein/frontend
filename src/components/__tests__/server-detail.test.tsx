@@ -88,7 +88,7 @@ const PROJECT: ProjectView = {
  * The nearest ancestor that holds a heading and the rows under it.
  *
  * `parentElement` rather than a wrapper lookup because the requirement groups
- * are plain `<div>`s, not regions — and `SAFETY:` because the heading is
+ * are plain `<div>`s, not regions  -  and `SAFETY:` because the heading is
  * rendered by this same file's component tree, so a heading always has a parent.
  */
 const groupFor = (heading: HTMLElement): HTMLElement => {
@@ -106,7 +106,7 @@ const groupFor = (heading: HTMLElement): HTMLElement => {
  *
  * `vi.stubGlobal("clipboard", …)` does not work here: jsdom exposes the
  * clipboard on `navigator`, and stubbing the bare global leaves
- * `navigator.clipboard` undefined — so the component's write throws and the
+ * `navigator.clipboard` undefined  -  so the component's write throws and the
  * "copied" branch can never be reached. That is also why the failure case below
  * needs an explicit rejection rather than relying on the absence.
  */
@@ -146,7 +146,7 @@ describe(ServerDetail, () => {
     render(<ServerDetail project={PROJECT} />);
 
     // The old page put the address in a "Join" section below the stats, the
-    // summary, the description, and the gallery — the one thing a visitor came
+    // summary, the description, and the gallery  -  the one thing a visitor came
     // for was last on the screen. Compared over document order, because that is
     // what decides both the visual order below `lg` and the reading order
     // above it.

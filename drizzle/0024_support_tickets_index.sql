@@ -1,0 +1,1 @@
+CREATE INDEX "support_tickets_closedById_idx" ON "support_tickets" USING btree ("closed_by_id");

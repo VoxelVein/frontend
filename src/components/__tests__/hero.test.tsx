@@ -54,7 +54,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 
 const BROWSE_PROJECTS = /browse projects/iu;
 // Built from the registry so the assertion tracks the category list instead of
-// freezing a copy of it — the old literal silently went stale when a category
+// freezing a copy of it  -  the old literal silently went stale when a category
 // was added or reordered.
 const HEADLINE_PREFIX = "find your next";
 const HEADING = new RegExp(

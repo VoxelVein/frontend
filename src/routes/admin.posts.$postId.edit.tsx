@@ -12,7 +12,7 @@ interface EditPostLoaderData {
  *
  * The post is fetched in the loader rather than in an effect on mount, so the
  * editor is populated on first paint instead of flashing empty fields and then
- * filling them in — which is what the modal did, since it could only start
+ * filling them in  -  which is what the modal did, since it could only start
  * fetching after it was already open.
  */
 const EditPostPage = () => {

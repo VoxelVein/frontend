@@ -15,6 +15,7 @@ import { AdminReports } from "@/components/admin/admin-reports";
 import { AdminReviews } from "@/components/admin/admin-reviews";
 import { AdminSessions } from "@/components/admin/admin-sessions";
 import { AdminStorage } from "@/components/admin/admin-storage";
+import { AdminTickets } from "@/components/admin/admin-tickets";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { PageHeader } from "@/components/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +39,7 @@ const adminSearchSchema = object({
       "reviews",
       "sessions",
       "storage",
+      "tickets",
       "users",
     ])
   ),
@@ -149,8 +151,8 @@ const AdminPage = () => {
    *
    * `beforeLoad` already resolved the session and handed it back as context, so
    * reading it from there is free on the server. The client hook resolved
-   * *after* first paint, which meant `role` was "user" during SSR — nobody sees
-   * every tab — and the panel rendered with no tab strip at all. This also
+   * *after* first paint, which meant `role` was "user" during SSR  -  nobody sees
+   * every tab  -  and the panel rendered with no tab strip at all. This also
    * removes the empty-tab state that used to crash on `visibleTabs[0]`.
    */
   const { session } = useRouteContext({ from: "/admin" });
@@ -273,6 +275,7 @@ const AdminPage = () => {
             {entry.value === "reports" ? (
               <AdminReports onResolved={refreshOpenReports} />
             ) : null}
+            {entry.value === "tickets" ? <AdminTickets /> : null}
           </TabsContent>
         ))}
       </Tabs>

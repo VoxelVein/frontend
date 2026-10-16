@@ -218,18 +218,18 @@ const setAvatarUrlSchema = object({ url: string() });
  * Writes `users.image` rather than a new column. That column is already the one
  * every avatar surface reads, and Better Auth's `overrideUserInfoOnSignIn`
  * defaults to false, so a later Google or GitHub sign-in will not overwrite the
- * choice — which is the whole reason a second column was not needed.
+ * choice  -  which is the whole reason a second column was not needed.
  *
  * An empty field clears the picture, so the field can unset what it set.
  *
  * Setting an external URL supersedes any uploaded avatar, so the stored object
  * and its `user_images` row are dropped here. Leaving them would charge the
  * account storage quota for an object nothing references, and the only way to
- * reclaim it would be the Remove button — which would also discard the URL the
+ * reclaim it would be the Remove button  -  which would also discard the URL the
  * user just chose.
  *
  * Validation is `parseAvatarUrl` rather than a valibot schema so that the
- * boundary deciding what gets stored can report the specific reason — a schema
+ * boundary deciding what gets stored can report the specific reason  -  a schema
  * that only knows valid or not would collapse "that is not https" and "remove
  * the password from that URL" into one message.
  */

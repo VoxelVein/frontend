@@ -21,7 +21,7 @@ import { ALLOWED_EXTENSIONS_BY_TYPE } from "@/lib/upload-validation";
  *
  * That second one is how the landing page came to advertise a `Datapack` type
  * that had no browse route while omitting `Servers`. Both registries are keyed
- * differently — `href` by string, `type` by slug — so nothing but this test
+ * differently  -  `href` by string, `type` by slug  -  so nothing but this test
  * compares them.
  */
 describe("project type registry", () => {

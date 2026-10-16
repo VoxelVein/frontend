@@ -4,6 +4,7 @@ import {
   IconSearch,
   IconShield,
   IconTrash,
+  IconPencil,
   IconUser,
   IconUsers,
   IconX,
@@ -22,6 +23,7 @@ import type { ReactNode } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
+import { FormField } from "@/components/form-field";
 import { RowIcon } from "@/components/row-icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +34,14 @@ import {
   Card,
 } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -55,6 +65,7 @@ interface AdminUser {
   image?: string | null;
   name: string;
   role?: string;
+  username?: string | null;
 }
 
 interface UsersState {
@@ -81,6 +92,13 @@ type UsersAction =
   | { type: "BAN_SUCCESS"; userId: string }
   | { type: "UNBAN_SUCCESS"; userId: string }
   | { type: "REMOVE_SUCCESS"; userId: string }
+  | {
+      type: "UPDATE_SUCCESS";
+      userId: string;
+      name: string;
+      email: string;
+      username: string | null;
+    }
   | { type: "ACTION_ERROR"; error: string };
 
 const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
@@ -135,6 +153,22 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         users: state.users.filter((user) => user.id !== action.userId),
       };
     }
+    case "UPDATE_SUCCESS": {
+      return {
+        ...state,
+        failure: null,
+        users: state.users.map((user) =>
+          user.id === action.userId
+            ? {
+                ...user,
+                email: action.email,
+                name: action.name,
+                username: action.username,
+              }
+            : user
+        ),
+      };
+    }
     case "ACTION_ERROR": {
       return {
         ...state,
@@ -160,7 +194,7 @@ const formatDate = (value: Date | string) =>
  * How many accounts one search returns.
  *
  * Matches the sessions panel. There is no pagination here, so this is the whole
- * result set an admin sees for a query — deliberately small enough to render
+ * result set an admin sees for a query  -  deliberately small enough to render
  * without the virtualizer, which a fixed 50-row list does not need.
  */
 const USER_SEARCH_LIMIT = 50;
@@ -314,6 +348,7 @@ interface AdminUserRowProps {
   isOutranked: boolean;
   user: AdminUser;
   onBan: (user: AdminUser) => void;
+  onEdit: (user: AdminUser) => void;
   onRemove: (user: AdminUser) => void;
   onRoleChange: (userId: string, role: Role) => void;
   onUnban: (userId: string) => void;
@@ -326,6 +361,7 @@ const AdminUserRow = ({
   isSelf,
   user,
   onBan,
+  onEdit,
   onRemove,
   onRoleChange,
   onUnban,
@@ -367,6 +403,7 @@ const AdminUserRow = ({
           />
         </p>
         <p className="text-muted-foreground truncate text-xs">
+          {user.username ? `@${user.username} · ` : null}
           {user.email} · Joined {formatDate(user.createdAt)}
         </p>
       </div>
@@ -417,6 +454,20 @@ const AdminUserRow = ({
             variant="ghost"
             size="icon-sm"
             className="min-h-11 min-w-11"
+            aria-label={`Edit account: rename or change email or username for ${user.name}`}
+            disabled={isInert}
+            onClick={() => onEdit(user)}
+          >
+            <IconPencil size={16} stroke={1.8} />
+          </Button>
+        ) : null}
+
+        {canManageUsers ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="min-h-11 min-w-11"
             aria-label={`Remove ${user.name}`}
             disabled={isInert}
             onClick={() => onRemove(user)}
@@ -443,8 +494,8 @@ const AdminUserRow = ({
 /**
  * Why a removal cannot proceed, or null when it can.
  *
- * Named rather than inlined in JSX because the three cases are a ladder —
- * yourself, then someone above you, then anyone — and a nested ternary in a
+ * Named rather than inlined in JSX because the three cases are a ladder  -
+ * yourself, then someone above you, then anyone  -  and a nested ternary in a
  * prop buries that order under punctuation.
  */
 const removalBlockReason = (
@@ -590,6 +641,10 @@ const AdminUsers = () => {
   } | null>(null);
   const [pendingBan, setPendingBan] = useState<AdminUser | null>(null);
   const [pendingRemove, setPendingRemove] = useState<AdminUser | null>(null);
+  const [pendingEdit, setPendingEdit] = useState<AdminUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editUsername, setEditUsername] = useState("");
   const [isMutating, setIsMutating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<Role | "all">("all");
@@ -612,7 +667,7 @@ const AdminUsers = () => {
 
     // Search the database rather than paging a fixed list into the DOM. The
     // previous version loaded the first 100 accounts once, which quietly made
-    // every user past that row unreachable — there was no way to look them up
+    // every user past that row unreachable  -  there was no way to look them up
     // at all. An empty term lists the most recent accounts.
     const query = term
       ? {
@@ -745,6 +800,41 @@ const AdminUsers = () => {
     dispatch({ type: "REMOVE_SUCCESS", userId: user.id });
   };
 
+  const handleEditSubmit = async () => {
+    if (!pendingEdit) {
+      return;
+    }
+    setIsMutating(true);
+
+    const { error: updateError } = await authClient.admin.updateUser({
+      data: {
+        email: editEmail.trim(),
+        name: editName.trim(),
+        username: editUsername.trim(),
+      },
+      userId: pendingEdit.id,
+    });
+
+    setIsMutating(false);
+
+    if (updateError) {
+      dispatch({
+        error: updateError.message ?? "Could not update this user.",
+        type: "ACTION_ERROR",
+      });
+      return;
+    }
+
+    dispatch({
+      email: editEmail.trim(),
+      name: editName.trim(),
+      type: "UPDATE_SUCCESS",
+      userId: pendingEdit.id,
+      username: editUsername.trim() || null,
+    });
+    setPendingEdit(null);
+  };
+
   /**
    * The role chips narrow what came back, rather than re-querying.
    *
@@ -809,6 +899,12 @@ const AdminUsers = () => {
               isSelf={currentUserId !== undefined && user.id === currentUserId}
               user={user}
               onBan={setPendingBan}
+              onEdit={(target) => {
+                setPendingEdit(target);
+                setEditName(target.name);
+                setEditEmail(target.email);
+                setEditUsername(target.username ?? "");
+              }}
               onRemove={setPendingRemove}
               onRoleChange={(userId, role) => setPendingRole({ role, userId })}
               onUnban={handleUnban}
@@ -930,6 +1026,86 @@ const AdminUsers = () => {
             onRemove={handleRemove}
             onRoleChange={handleRoleChange}
           />
+
+          <Dialog
+            open={pendingEdit !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPendingEdit(null);
+              }
+            }}
+          >
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Edit account</DialogTitle>
+                <DialogDescription>
+                  {pendingEdit
+                    ? `Rename ${pendingEdit.name} or change their email or username.`
+                    : ""}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4">
+                <FormField
+                  id="edit-user-name"
+                  label="Name"
+                  type="text"
+                  value={editName}
+                  onChange={(event) => setEditName(event.target.value)}
+                  disabled={isMutating}
+                  required
+                />
+                <FormField
+                  id="edit-user-username"
+                  label="Username"
+                  type="text"
+                  autoComplete="username"
+                  value={editUsername}
+                  onChange={(event) => setEditUsername(event.target.value)}
+                  disabled={isMutating}
+                  required
+                />
+                <FormField
+                  id="edit-user-email"
+                  label="Email"
+                  type="email"
+                  autoComplete="email"
+                  value={editEmail}
+                  onChange={(event) => setEditEmail(event.target.value)}
+                  disabled={isMutating}
+                  required
+                />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11"
+                  disabled={isMutating}
+                  onClick={() => setPendingEdit(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="default"
+                  className="min-h-11"
+                  disabled={
+                    isMutating ||
+                    editName.trim().length === 0 ||
+                    editEmail.trim().length === 0 ||
+                    editUsername.trim().length === 0
+                  }
+                  onClick={() => {
+                    void handleEditSubmit();
+                  }}
+                >
+                  {isMutating ? "Saving…" : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </section>

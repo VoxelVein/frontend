@@ -8,7 +8,7 @@ locally.
 * Node.js 24 or newer (pinned in `mise.toml`, the Dockerfile, and CI)
 * pnpm 11.3.0, via the `packageManager` field and Corepack
 * PostgreSQL 16 or newer (the images use `postgres:18`)
-* Docker, for local object storage — optional
+* Docker, for local object storage  -  optional
 
 ## 1. Install dependencies
 
@@ -138,28 +138,28 @@ the auth origins are pinned to 3000.
 
 ## 8. Verify
 
-* `http://localhost:3000` — the homepage renders, with trending projects
+* `http://localhost:3000`  -  the homepage renders, with trending projects
   and the news section once content exists.
-* `http://localhost:3000/mods` — search works straight from Postgres, with
+* `http://localhost:3000/mods`  -  search works straight from Postgres, with
   filters for category, game version, and loader. The other five browse
   pages behave the same.
-* `http://localhost:3000/servers` — the client-requirement filter appears,
+* `http://localhost:3000/servers`  -  the client-requirement filter appears,
   because it is specific to servers.
-* `http://localhost:3002/api/health` — the API server responds.
+* `http://localhost:3002/api/health`  -  the API server responds.
 * Send a test mod event and watch the live banner on any browse page:
 
   ```bash
   pnpm send:webhook mod.created "My Mod"
   ```
 
-* `http://localhost:3000/signup` — create an account, then
+* `http://localhost:3000/signup`  -  create an account, then
   `http://localhost:3000/settings` to manage the profile, username, bio,
   sign-in methods, passkeys, and sessions.
-* `http://localhost:3000/dashboard/projects` — the creator dashboard.
+* `http://localhost:3000/dashboard/projects`  -  the creator dashboard.
   Without object storage configured, the upload step returns `503`.
-* `http://localhost:3000/blog` — the blog, with search once a post is
+* `http://localhost:3000/blog`  -  the blog, with search once a post is
   published.
-* `http://localhost:3000/admin` — the admin panel, as an admin.
+* `http://localhost:3000/admin`  -  the admin panel, as an admin.
 
 ## Troubleshooting
 
@@ -169,18 +169,18 @@ the auth origins are pinned to 3000.
 * **"Could not reach the server"** on a browse page. That search call was
   the page's request to the app server itself, so the server likely
   restarted mid-session (a deploy); reloading usually clears it.
-* **Password sign-in returns `503`** — Turnstile is enabled but
+* **Password sign-in returns `503`**  -  Turnstile is enabled but
   misconfigured, or unconfigured entirely. The widget is hidden without
   `VITE_TURNSTILE_SITE_KEY` and the endpoint fails closed. See
   [Cloudflare Turnstile](../authentication/turnstile.md).
-* **The API server exits at startup** — `WEBHOOK_SECRET` is missing,
+* **The API server exits at startup**  -  `WEBHOOK_SECRET` is missing,
   shorter than 32 characters, or still a placeholder value.
-* **Uploads return `503`** — storage is not configured. See
+* **Uploads return `503`**  -  storage is not configured. See
   [Object Storage](../storage/object-storage.md).
-* **No live banner on a browse page** — `VITE_API_URL` is unset. The
+* **No live banner on a browse page**  -  `VITE_API_URL` is unset. The
   development fallback is `http://localhost:3002`; a production build has
   no fallback.
-* **Port 3000 already in use** — change `PORT` and `BETTER_AUTH_URL`
+* **Port 3000 already in use**  -  change `PORT` and `BETTER_AUTH_URL`
   together, or stop whatever is on 3000.
 
 ## Related

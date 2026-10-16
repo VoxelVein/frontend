@@ -8,7 +8,7 @@ interface AvatarProps {
    * Whether the image is meaningful on its own.
    *
    * Decorative is the default because the usual case is an avatar sitting beside
-   * the name it belongs to — announcing "Hedi Zandi's avatar" immediately before
+   * the name it belongs to  -  announcing "Hedi Zandi's avatar" immediately before
    * "Hedi Zandi" makes a screen reader say the name twice. Pass `false` only
    * where the avatar is the only representation of the person, such as inside an
    * icon-only control.
@@ -48,7 +48,7 @@ const initialOf = (name: string): string => {
  *
  * `isSafeAvatarSrc` decides whether the stored value is rendered at all. An
  * account can now point its picture at an external URL, and a provider profile
- * can supply one, so this is the one place every avatar — bylines included —
+ * can supply one, so this is the one place every avatar  -  bylines included  -
  * passes through. A value that is neither one of our `/api/avatar/...` paths nor
  * an `https:` URL renders as initials rather than as whatever scheme it names.
  */

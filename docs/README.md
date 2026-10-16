@@ -5,84 +5,89 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 ## Architecture
 
-* [Overview](architecture/overview.md) — how the pieces fit together,
+* [Overview](architecture/overview.md)  -  how the pieces fit together,
   including the page and route map
 
 ## Authentication
 
-* [Accounts](authentication/accounts.md) — usernames, sign-in methods,
+* [Accounts](authentication/accounts.md)  -  usernames, sign-in methods,
   and account deletion
-* [Email and Password](authentication/email-password.md) — configure
+* [Email and Password](authentication/email-password.md)  -  configure
   email/password sign-up and sign-in
-* [Passkeys](authentication/passkeys.md) — add passwordless passkey
+* [Passkeys](authentication/passkeys.md)  -  add passwordless passkey
   authentication
-* [Sessions](authentication/sessions.md) — session lifetime, sliding
+* [Sessions](authentication/sessions.md)  -  session lifetime, sliding
   expiration, and sign-out
-* [Cloudflare Turnstile](authentication/turnstile.md) — bot protection
+* [Cloudflare Turnstile](authentication/turnstile.md)  -  bot protection
   for password sign-in and sign-up
-* [Bootstrapping the First Admin](authentication/first-admin.md) — grant
+* [Bootstrapping the First Admin](authentication/first-admin.md)  -  grant
   the first `admin` role on a live deployment with no admin yet
 
 ## Social Providers
 
-* [Google](social-providers/google.md) — set up Google Sign-In
-* [GitHub](social-providers/github.md) — set up GitHub Sign-In
+* [Google](social-providers/google.md)  -  set up Google Sign-In
+* [GitHub](social-providers/github.md)  -  set up GitHub Sign-In
 
 ## Database
 
-* [Migrations](database/migrations.md) — generate and apply Drizzle
+* [Migrations](database/migrations.md)  -  generate and apply Drizzle
   migrations
 
 ## Development
 
-* [Setup](development/setup.md) — install dependencies and run the dev
+* [Setup](development/setup.md)  -  install dependencies and run the dev
   server
-* [Commands](development/commands.md) — reference for the pnpm scripts
-* [Resilience](development/resilience.md) — chunk-reload recovery,
+* [Commands](development/commands.md)  -  reference for the pnpm scripts
+* [Resilience](development/resilience.md)  -  chunk-reload recovery,
   download counting, and connection caps
 
 ## Deployment
 
-* [Docker](deployment/docker.md) — build and run the production image
-* [Dokploy](deployment/dokploy.md) — deploy the stack on Dokploy
+* [Docker](deployment/docker.md)  -  build and run the production image
+* [Dokploy](deployment/dokploy.md)  -  deploy the stack on Dokploy
+* [Podman](deployment/podman.md)  -  run the Compose stack with Podman
+* [Vercel](deployment/vercel.md)  -  deploy the web app on Vercel
+* [Netlify](deployment/netlify.md)  -  deploy the web app on Netlify
+* [Cloudflare Workers](deployment/cloudflare-workers.md)  -  deploy on
+  Cloudflare Workers with Wrangler
 
 ## Content
 
-* [Projects and Files](content/projects.md) — all six project types,
+* [Projects and Files](content/projects.md)  -  all six project types,
   versions, uploads, downloads, permissions, and the review workflow
-* [Discovery](content/discovery.md) — the trending ranking and the
+* [Discovery](content/discovery.md)  -  the trending ranking and the
   category registry
-* [Motion](content/motion.md) — the scroll-reveal and easing system
-* [Blog](content/blog.md) — posts, admin post management, and post search
-* [Admin Panel](content/admin-panel.md) — users, sessions, storage,
+* [Motion](content/motion.md)  -  the scroll-reveal and easing system
+* [Blog](content/blog.md)  -  posts, admin post management, and post search
+* [Admin Panel](content/admin-panel.md)  -  users, sessions, storage,
   notifications, account deletions, and the review queue
-* [Object Storage](storage/object-storage.md) — how the app uses S3
+* [Object Storage](storage/object-storage.md)  -  how the app uses S3
   storage, and the quota rules
-* [RustFS](storage/rustfs.md) — local development storage, set up through
+* [RustFS](storage/rustfs.md)  -  local development storage, set up through
   its web console
-* [Cloudflare R2](storage/cloudflare-r2.md) — the production provider
+* [Cloudflare R2](storage/cloudflare-r2.md)  -  the production provider
 
 ## Security
 
-* [Hardening](security/hardening.md) — response headers, CSRF scope,
+* [Hardening](security/hardening.md)  -  response headers, CSRF scope,
   upload gates, open-redirect protection, and rate limits
 
 ## Search
 
-* [Search](search/postgres.md) — fuzzy and full-text search over
+* [Search](search/postgres.md)  -  fuzzy and full-text search over
   Postgres, with no separate service
 
 ## API
 
-* [API Server](architecture/api.md) — ElysiaJS endpoints, webhooks, and
+* [API Server](architecture/api.md)  -  ElysiaJS endpoints, webhooks, and
   real-time SSE events
 
 ## Theming
 
-* [Custom Theme](theming/custom-theme.md) — apply a theme from
+* [Custom Theme](theming/custom-theme.md)  -  apply a theme from
   tweakcn.com
 
 ## Accessibility
 
-* [Standards](accessibility/standards.md) — WCAG 2.2 AA requirements for
+* [Standards](accessibility/standards.md)  -  WCAG 2.2 AA requirements for
   components and pages

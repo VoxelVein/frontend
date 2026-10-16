@@ -6,17 +6,17 @@ searchable through Postgres like projects are.
 
 ## Pages
 
-* `/blog` — the index, in `blog.index.tsx`. A `PageHeader`, a search
+* `/blog`  -  the index, in `blog.index.tsx`. A `PageHeader`, a search
   field when search is available, a category filter, and a responsive
   card grid of `PostCard`s.
-* `/blog` (layout) — `blog.tsx`. Renders `<Outlet />` and nothing else.
-* `/blog/$slug` — a single post. The category, title, a `Blog /
+* `/blog` (layout)  -  `blog.tsx`. Renders `<Outlet />` and nothing else.
+* `/blog/$slug`  -  a single post. The category, title, a `Blog /
   CATEGORY` breadcrumb, the byline, the date (`dateStyle: "long"`),
   excerpt, and the body rendered from Markdown.
 
 The index has its own file because `blog.tsx` is the *parent* of
 `/$slug`. A parent route with children must render an `Outlet`; when one
-renders its own content instead, the child never mounts — the URL changes
+renders its own content instead, the child never mounts  -  the URL changes
 and the child's loader runs, but the parent keeps painting the list. That
 is exactly the bug this split fixed: `/blog/$slug` was reachable, looked
 correct in the URL bar, and silently showed the index.
@@ -39,7 +39,7 @@ from looking like a site error.
 A post carries at most one category, drawn from `POST_CATEGORIES` in
 `src/lib/posts.ts`: Engineering, Community, Company News, Customers,
 Security, Changelog. `posts.category` is nullable and null is a real
-state, not a placeholder — a post is filed under a category or it is
+state, not a placeholder  -  a post is filed under a category or it is
 not, and most posts are not.
 
 Two rules follow from that, and both are enforced in the UI rather than
@@ -48,8 +48,8 @@ documented as a convention:
 * **No chip for an uncategorised post.** A chip reading "Uncategorised"
   on half the archive says less than its absence, so
   `PostCategoryBadge` renders nothing when the category is null.
-* **No chip is a link.** There is no per-category page — the index
-  filter is client-side over the posts already loaded — so a chip that
+* **No chip is a link.** There is no per-category page  -  the index
+  filter is client-side over the posts already loaded  -  so a chip that
   looked clickable would be a dead control.
 
 The filter on the index is a row of `aria-pressed` toggle buttons in a
@@ -59,7 +59,7 @@ that do not exist. Categories with no posts are not offered, and a
 single category hides the control entirely, because a filter that can
 only confirm what is already shown is noise. Each button carries an
 explicit `aria-label` (`"Engineering, 3 posts"`) because JSX drops the
-whitespace between the label and the count — the gap is CSS, so reading
+whitespace between the label and the count  -  the gap is CSS, so reading
 the name off the children gives `"Engineering3"`.
 
 Search and category compose. A reader who picked Engineering and then
@@ -75,7 +75,7 @@ A post can have several authors, listed in byline order.
 primary key on `(post_id, user_id)`, a `position` column that fixes
 the byline order, and an index on `user_id`. `src/lib/post-authors.ts`
 is the only module that touches it, which exists specifically to break
-the import cycle between `posts.functions.ts` and `search/posts.ts` —
+the import cycle between `posts.functions.ts` and `search/posts.ts`  -
 both need it and it needs neither.
 
 Selection order in the picker is the byline order: ticking authors in
@@ -96,8 +96,8 @@ of the byline.
 
 ## Markdown
 
-Every Markdown surface — the post body, the editor preview, project
-descriptions, and profile bios — renders through `MarkdownBody`
+Every Markdown surface  -  the post body, the editor preview, project
+descriptions, and profile bios  -  renders through `MarkdownBody`
 (`src/components/markdown-body.tsx`), so the four places that show
 author-written content cannot disagree about what a newline means, or
 about what counts as safe to render.
@@ -112,14 +112,14 @@ and a trailing backslash works but makes authors type a hidden character
 for a visible result.
 
 Scoping it to `p` is what keeps code fences, lists, and tables intact, and
-keeps stored Markdown CommonMark-clean and portable — nothing rewrites
+keeps stored Markdown CommonMark-clean and portable  -  nothing rewrites
 the author's text. The trade is that runs of spaces and paragraph
 indentation are now preserved rather than collapsed, which is what GitHub,
 Discord, and every modern comment box already do.
 
 ### HTML in post bodies is allowed, and sanitized
 
-A post body may contain raw HTML alongside the Markdown — that is how
+A post body may contain raw HTML alongside the Markdown  -  that is how
 authors embed a `<figure>`, a `<table>`, or an inline image that
 Markdown cannot express. `allowHtml` is therefore **on**, set in both
 of the two places it matters, and they are not the same place:
@@ -151,7 +151,7 @@ what that rejects and why.
 | `content`                  | Required Markdown body, may contain HTML |
 | `published`                | Drafts are invisible publicly            |
 | `category`                 | Nullable, from `POST_CATEGORIES`         |
-| `author_id`                | Deprecated — nullable, see below         |
+| `author_id`                | Deprecated - nullable, see below         |
 | `created_at`, `updated_at` | Timestamps                               |
 
 Indexes: `posts_authorId_idx`, `posts_published_idx`,
@@ -219,7 +219,7 @@ Validation and the card-preview machinery live in `src/lib/posts.ts`:
 list of authors, and each entry is flagged `isCurrentUser` so a new
 post's byline seeds to whoever is writing it without a second round
 trip. `requireAuthorIds` rejects the whole request if any id is not
-staff — it throws rather than toasts, because it runs in a server
+staff  -  it throws rather than toasts, because it runs in a server
 module where there is no user-facing channel, and a partial write that
 silently dropped one author would be worse than a failure.
 
@@ -273,7 +273,7 @@ Besides title, slug, excerpt, body, and the publish flag, the form has
 a **category select** (any category or none) and an **author picker**
 (a checkbox group of every admin and moderator). Both are ordinary form
 fields on `PostInput`, so the same schema validates the create, the
-update, and the public read path — there is no second validation to
+update, and the public read path  -  there is no second validation to
 drift.
 
 `submitPost`, `defaultValuesFor`, and `EditorSkeleton` are extracted from
@@ -291,7 +291,7 @@ this existed are covered too.
 Writing a post and publishing one are different decisions, so they are
 different capabilities: `managePosts` covers drafts, `publishPosts` covers
 the flag. **Both are admin-only today**, so the split is not currently
-reachable — no role can draft without being able to publish. It is kept
+reachable  -  no role can draft without being able to publish. It is kept
 apart anyway so that the day drafting is opened up to moderators,
 publishing does not follow by accident.
 
@@ -301,7 +301,7 @@ than in the form, so the UI cannot be bypassed:
 * `createPost` requires `managePosts` and forces `published: false` for
   anyone without `publishPosts`, whatever the request asked for.
 * `updatePost` requires `managePosts` and gives a non-publisher no
-  control over the flag in **either** direction — publishing a draft and
+  control over the flag in **either** direction  -  publishing a draft and
   unpublishing a live post are both publishing decisions, so the stored
   value wins either way.
 * `deletePost` and `getPostById` require `publishPosts`. The second is why
@@ -312,7 +312,7 @@ while `document.visibilityState !== "hidden"`, catches up immediately when
 the tab becomes visible again, and guards against overlapping requests
 with an in-flight ref and a mutation counter, so a response from before a
 create or delete cannot overwrite newer state. A background refresh never
-shows a loading state and never reports an error — the list already on
+shows a loading state and never reports an error  -  the list already on
 screen beats interrupting an admin over a refresh they never asked for.
 
 A separate `POSTS_REFRESH_MS` (5 minutes) governs the home page news

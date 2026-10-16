@@ -48,8 +48,8 @@ const ProfileSkeleton = () => (
 /**
  * The account's avatar, or their initial in a letter tile.
  *
- * Same tile treatment as a project's icon on its detail page — same size, same
- * radius, same fallback colours — so a profile and the projects under it read as
+ * Same tile treatment as a project's icon on its detail page  -  same size, same
+ * radius, same fallback colours  -  so a profile and the projects under it read as
  * one set of surfaces.
  */
 const ProfileAvatar = ({
@@ -140,7 +140,7 @@ const ProfileRoute = () => {
 
   // Compared on the normalised username, which is what a profile URL is keyed
   // on, so casing cannot make someone look like a stranger to themselves. The
-  // session is already in the cache — the navbar reads it on every page.
+  // session is already in the cache  -  the navbar reads it on every page.
   const { data: session } = authClient.useSession();
   const isOwnProfile = session?.user.username === profile.username;
 
@@ -185,8 +185,8 @@ const ProfileRoute = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14">
-      {/* The identity card reuses the project's header treatment — avatar tile
-          beside the title — so a profile and the projects it lists are visibly
+      {/* The identity card reuses the project's header treatment  -  avatar tile
+          beside the title  -  so a profile and the projects it lists are visibly
           the same kind of thing. */}
       <div className="border-border bg-card rounded-2xl border p-6">
         <div className="flex items-start gap-4 sm:gap-5">

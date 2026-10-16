@@ -1,0 +1,1 @@
+CREATE INDEX "support_ticket_messages_authorUserId_idx" ON "support_ticket_messages" USING btree ("author_user_id");

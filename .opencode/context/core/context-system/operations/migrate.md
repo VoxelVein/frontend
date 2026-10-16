@@ -83,11 +83,11 @@ Global files:                              Local files:
     Version: 1.1, Updated: 2026-01-12
 
 Options:
-  1. Skip existing — only copy files that don't exist locally
+  1. Skip existing  -  only copy files that don't exist locally
      → Will copy: business-domain.md
      → Will skip: technical-domain.md, navigation.md (local kept)
 
-  2. Overwrite all — replace local with global versions
+  2. Overwrite all  -  replace local with global versions
      → Will overwrite: technical-domain.md, navigation.md
      → Will copy: business-domain.md
      → Local backup created first
@@ -227,6 +227,6 @@ If you installed to a custom location, set OPENCODE_INSTALL_DIR:
 
 ## Related
 
-- `/add-context` — Create new project intelligence (interactive wizard)
-- `/context harvest` — Extract knowledge from summaries
+- `/add-context`  -  Create new project intelligence (interactive wizard)
+- `/context harvest`  -  Extract knowledge from summaries
 - Context path resolution: `.opencode/context/core/system/context-paths.md`

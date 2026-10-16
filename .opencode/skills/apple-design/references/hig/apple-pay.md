@@ -23,7 +23,7 @@ For developer guidance, see [Apple Pay](https://developer.apple.com/documentatio
 
 **Offer Apple Pay on all devices and browsers that support it.** If the device doesn’t support Apple Pay, don’t present Apple Pay as a payment option. For developer guidance, see [PKPaymentAuthorizationController](https://developer.apple.com/documentation/passkit/pkpaymentauthorizationcontroller) (iOS, watchOS) and [applePayCapabilities](https://developer.apple.com/documentation/applepayontheweb/applepaysession/applepaycapabilities) (web).
 
-**Make Apple Pay the primary payment option when credentials are available.** If you use Apple Pay APIs to find out whether someone has an active card in Wallet, you must make Apple Pay the primary — but not necessarily sole — payment option everywhere you use the APIs. Don’t separate Apple Pay into a different step or flow. For example, you might pre-select Apple Pay when displaying it alongside other options. For developer guidance, see [Offering Apple Pay in Your App](https://developer.apple.com/documentation/passkit/offering-apple-pay-in-your-app) (iOS, watchOS) and [Checking for Apple Pay availability](https://developer.apple.com/documentation/applepayontheweb/checking-for-apple-pay-availability) (web).
+**Make Apple Pay the primary payment option when credentials are available.** If you use Apple Pay APIs to find out whether someone has an active card in Wallet, you must make Apple Pay the primary  -  but not necessarily sole  -  payment option everywhere you use the APIs. Don’t separate Apple Pay into a different step or flow. For example, you might pre-select Apple Pay when displaying it alongside other options. For developer guidance, see [Offering Apple Pay in Your App](https://developer.apple.com/documentation/passkit/offering-apple-pay-in-your-app) (iOS, watchOS) and [Checking for Apple Pay availability](https://developer.apple.com/documentation/applepayontheweb/checking-for-apple-pay-availability) (web).
 
 **Use Apple Pay buttons only to initiate payment or, when appropriate, the Apple Pay setup process.** When people choose an Apple Pay button to make a purchase, but their device doesn’t have Apple Pay set up, they’re given the opportunity to set up Apple Pay. Don’t use Apple Pay buttons in any other way.
 
@@ -49,9 +49,9 @@ For developer guidance, see [Apple Pay](https://developer.apple.com/documentatio
 
 **Support coupons and promotional codes in the payment sheet.** If you offer a coupon or promotional code, let people enter it directly on the payment sheet rather than requiring a separate step. This is especially important for express checkout flows, where people bypass the standard checkout experience.
 
-**Collect necessary information, like color and size options, before people reach the Apple Pay button.** When information is missing at checkout time — perhaps because someone forgot to choose an option — gracefully point out the problem and help them correct it. Use highlighting or warning text to identify missing information, and automatically navigate to the problematic field so people can correct it quickly and complete their purchase.
+**Collect necessary information, like color and size options, before people reach the Apple Pay button.** When information is missing at checkout time  -  perhaps because someone forgot to choose an option  -  gracefully point out the problem and help them correct it. Use highlighting or warning text to identify missing information, and automatically navigate to the problematic field so people can correct it quickly and complete their purchase.
 
-**Collect optional information before checkout begins.** There’s no way to input optional data — like gift messages or delivery instructions — on the payment sheet, so collect this information ahead of time or even after the purchase is complete.
+**Collect optional information before checkout begins.** There’s no way to input optional data  -  like gift messages or delivery instructions  -  on the payment sheet, so collect this information ahead of time or even after the purchase is complete.
 
 **Gather multiple shipping methods and destinations before showing the payment sheet.** The payment sheet lets people select a single shipping method and destination for an entire order. If people can choose different shipping methods and destinations for individual items in an order, collect those details before Apple Pay checkout.
 
@@ -71,7 +71,7 @@ For developer guidance, see [Apple Pay](https://developer.apple.com/documentatio
 
 **Display the active coupon or promotional code, or let people enter one.** If people can enter a code before the payment sheet appears, show it on the sheet to reassure them that you applied the code. Consider allowing code entry on the payment sheet as well, particularly in an express checkout flow.
 
-**Let people choose the shipping method in the payment sheet.** To the extent space permits, show a clear description, a cost, and, optionally, an estimated delivery or pickup date — or range of dates — for each available option. Leverage the shipping method’s calendar and time-zone support to provide accurate delivery or pickup information, regardless of the person’s current location. For developer guidance, see [PKDateComponentsRange](https://developer.apple.com/documentation/passkit/pkdatecomponentsrange).
+**Let people choose the shipping method in the payment sheet.** To the extent space permits, show a clear description, a cost, and, optionally, an estimated delivery or pickup date  -  or range of dates  -  for each available option. Leverage the shipping method’s calendar and time-zone support to provide accurate delivery or pickup information, regardless of the person’s current location. For developer guidance, see [PKDateComponentsRange](https://developer.apple.com/documentation/passkit/pkdatecomponentsrange).
 
 **For in-store pickup, consider letting people choose a pickup window that works for them.** You can use the shipping method to supply a range of dates and times from which people can choose.
 
@@ -93,7 +93,7 @@ For developer guidance, see [Apple Pay](https://developer.apple.com/documentatio
 
 ## Displaying a website icon
 
-Many websites provide an icon that appears with bookmarks, in URL fields, and on a device’s Home Screen. Websites that support Apple Pay can also use this icon during payment authorization — most notably during Handoff, when a person authorizes payment on a connected device — to provide visual reassurance that payment is going to the right place. For subscription payment flows, the icon can also appear in Wallet.
+Many websites provide an icon that appears with bookmarks, in URL fields, and on a device’s Home Screen. Websites that support Apple Pay can also use this icon during payment authorization  -  most notably during Handoff, when a person authorizes payment on a connected device  -  to provide visual reassurance that payment is going to the right place. For subscription payment flows, the icon can also appear in Wallet.
 
 If your website supports Apple Pay, provide an icon in the following sizes:
 
@@ -117,7 +117,7 @@ For developer guidance, see [PKPaymentAuthorizationViewControllerDelegate](https
 
 > **Note:** For privacy reasons, your app or website has limited access to data until people attempt to authorize a transaction. Before authorization, only the card type and a redacted shipping address are accessible. It’s critical to display errors when authorization fails, but to the extent possible, you also need to attempt to validate available information and report problems before authorization.
 
-**Avoid forcing compliance with your business logic.** Design a data validation process that’s intelligent enough to ignore irrelevant data and infer missing data whenever possible. For example, if your app requires a five-digit zip code but someone enters a Zip+4 code, ignore the additional digits rather than asking for a correction. Let people enter phone numbers in multiple formats — such as with and without dashes, and with and without a country code — without producing an error.
+**Avoid forcing compliance with your business logic.** Design a data validation process that’s intelligent enough to ignore irrelevant data and infer missing data whenever possible. For example, if your app requires a five-digit zip code but someone enters a Zip+4 code, ignore the additional digits rather than asking for a correction. Let people enter phone numbers in multiple formats  -  such as with and without dashes, and with and without a country code  -  without producing an error.
 
 **Accurately report problems to the system.** When a problem occurs, provide a custom error message and the correct status code so the system can show the most relevant error on the payment sheet. For developer guidance, see [PKPaymentError](https://developer.apple.com/documentation/passkit/pkpaymenterror) (iOS, watchOS) and [Apple Pay Status Codes](https://developer.apple.com/documentation/applepayontheweb/apple-pay-status-codes) (web).
 
@@ -129,7 +129,7 @@ For developer guidance, see [PKPaymentAuthorizationViewControllerDelegate](https
 
 ## Supporting subscriptions
 
-Your app or website can use Apple Pay to request authorization for recurring payments. A recurring payment can be a fixed amount, such as a monthly movie ticket subscription, or — when local regulations allow — a variable amount like a weekly grocery order. The initial authorization can also include discounts and additional fees.
+Your app or website can use Apple Pay to request authorization for recurring payments. A recurring payment can be a fixed amount, such as a monthly movie ticket subscription, or  -  when local regulations allow  -  a variable amount like a weekly grocery order. The initial authorization can also include discounts and additional fees.
 
 *Illustrated: iOS, Web.*
 
@@ -180,7 +180,7 @@ Use the buttons below to initiate payment. In some contexts, the system automati
 | Payment button type | Example usage |
 | --- | --- |
 | *image: button buy with* | An area in an app or website where people can make a purchase, such as a product detail page or shopping cart page. |
-| *image: button pay with* | An app or website that lets people pay bills or invoices, such as those for a utility — like cable or electricity — or a service like plumbing or car repair. |
+| *image: button pay with* | An app or website that lets people pay bills or invoices, such as those for a utility  -  like cable or electricity  -  or a service like plumbing or car repair. |
 | *image: button check out with* | An app or website offering a shopping cart or purchase experience that includes other payment buttons that start with the text *Check Out*. |
 | *image: button continue with* | An app or website offering a shopping cart or purchase experience that includes other payment buttons that start with the text *Continue*. |
 | *image: button book with* | An app or website that helps people book flights, trips, or other experiences. |
@@ -254,7 +254,7 @@ Download the Apple Pay mark graphic and full usage guidelines from the [Apple Pa
 
 ## Referring to Apple Pay
 
-You can use plain text to promote Apple Pay and indicate that Apple Pay is a payment option. As with all Apple product names, use Apple Pay exactly as shown in [Apple Trademark List](https://www.apple.com/legal/intellectual-property/trademark/appletmlist.html) — never make it plural or possessive — and adhere to [Guidelines for Using Apple Trademarks](https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html).
+You can use plain text to promote Apple Pay and indicate that Apple Pay is a payment option. As with all Apple product names, use Apple Pay exactly as shown in [Apple Trademark List](https://www.apple.com/legal/intellectual-property/trademark/appletmlist.html)  -  never make it plural or possessive  -  and adhere to [Guidelines for Using Apple Trademarks](https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html).
 
 **Capitalize Apple Pay in text as it appears in the Apple Trademark List.** Use two words with an uppercase *A*, an uppercase *P*, and lowercase for all other letters. Display Apple Pay entirely in uppercase only when doing so is necessary for conforming to an established typographic style that capitalizes all letters.
 

@@ -40,7 +40,7 @@ const COPY_MESSAGES: Record<"idle" | "copied" | "failed", string> = {
  * This is the reason a server page exists, so it gets the largest type on the
  * page and sits above the description rather than below it. The old layout put
  * it in a "Join" section under the fold, below the stats, summary, and
- * description — the one thing a visitor came for was the last thing on screen.
+ * description  -  the one thing a visitor came for was the last thing on screen.
  *
  * The address is `select-all` as well as copyable, because the clipboard write
  * can fail (an insecure origin, a denied permission) and selecting the text is
@@ -125,7 +125,7 @@ const ServerAddress = ({ server }: { server: ProjectServerView }) => {
  *
  * Pills rather than the comma-separated sentence the old page used. A version
  * is something a player matches against their own launcher, so it has to be
- * scannable at a glance — "can I join with what I have?" is the question, and
+ * scannable at a glance  -  "can I join with what I have?" is the question, and
  * reading a run of text does not answer it.
  */
 const ServerVersions = ({ versions }: { versions: string[] }) => {
@@ -257,7 +257,7 @@ const ServerRequirements = ({ server }: { server: ProjectServerView }) => {
  *
  * The `h2` is not decoration. The requirement groups below it are `h3`s, so
  * without a heading of their own to sit under they would jump straight from the
- * page's `h1` — a broken outline for anyone navigating by heading. It also
+ * page's `h1`  -  a broken outline for anyone navigating by heading. It also
  * names the column, which is what makes a two-column page legible: this side is
  * how to join, the other side is what the server is.
  */

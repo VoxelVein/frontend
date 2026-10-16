@@ -8,8 +8,8 @@ import { LegalPage } from "@/components/legal/legal-page";
  * This page used to restate the warranty disclaimer and the liability cap that
  * `/terms` already covers, in slightly different words, so the two pages could
  * be read against each other and neither was clearly the operative one. It now
- * carries only what it adds — the trademark position and a caution about
- * user-submitted metadata — and links to the Terms for everything binding.
+ * carries only what it adds  -  the trademark position and a caution about
+ * user-submitted metadata  -  and links to the Terms for everything binding.
  */
 const DisclaimerPage = () => (
   <LegalPage

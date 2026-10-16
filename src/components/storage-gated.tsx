@@ -23,14 +23,14 @@ interface StorageGatedProps {
  * and is that check still loading", and they would have disagreed.
  *
  * **The control is genuinely disabled, not just dimmed.** A dimmed button that
- * still submits is worse than an honest one — the reader finds out it is broken
+ * still submits is worse than an honest one  -  the reader finds out it is broken
  * by trying.
  *
  * The trigger is a wrapper `<span>` rather than the control, because a disabled
  * button swallows the pointer events a tooltip needs. The span is deliberately
  * not focusable: a non-interactive element in the tab order is worse than one
  * that is skipped, and the reason reaches a keyboard user as visible helper text
- * beside the control, which is where it has to be anyway — a tooltip alone
+ * beside the control, which is where it has to be anyway  -  a tooltip alone
  * would leave the explanation unreachable without a mouse.
  */
 const StorageGated = ({ children, reason }: StorageGatedProps) => {

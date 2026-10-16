@@ -234,7 +234,7 @@ export const auth = betterAuth({
     // NOT `"database"` either: that path runs Better Auth's runtime schema
     // check, which rejected the table this project declares and 500s every
     // `/api/auth/*` request. Getting it to pass needs the adapter's exact
-    // expected column set, which is not documented — see the note in
+    // expected column set, which is not documented  -  see the note in
     // docs/security/hardening.md.
     //
     // So the tradeoff stands: these limits are per-process, and on N replicas

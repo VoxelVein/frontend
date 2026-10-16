@@ -53,7 +53,7 @@ AS $$ SELECT array_to_string(array_value, separator) $$;
 -- expression index is only used when the query repeats the expression exactly,
 -- so the SQL here and the sql template there must stay identical: same
 -- functions, same order, same 'english'::regconfig casts. Divergence does not
--- error — it silently falls back to a sequential scan, which is why the search
+-- error  -  it silently falls back to a sequential scan, which is why the search
 -- query's index usage is asserted in src/lib/__tests__/search-index.test.ts.
 -- The extra parentheses around the concatenated expression are required: without
 -- them Postgres reads the first `||` as a syntax error in the index definition.

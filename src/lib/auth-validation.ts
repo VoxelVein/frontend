@@ -8,8 +8,8 @@ import { getUsernameProblem, USERNAME_PROBLEM_MESSAGES } from "@/lib/usernames";
  * and sign-up forms, and neither input caps its length. The unbounded form,
  * `[^\s@]+@[^\s@]+\.[^\s@]+$`, is quadratic on a long string with no `@` in
  * it: the engine retries each start position and rescans the rest of the
- * input every time. The bounds below are the RFC 5321 ones — a 64-octet
- * local part and 63-octet domain labels — so the cost is linear and the
+ * input every time. The bounds below are the RFC 5321 ones  -  a 64-octet
+ * local part and 63-octet domain labels  -  so the cost is linear and the
  * accepted set barely moves.
  *
  * Kept in step by hand with the copies in `login.tsx` and `signup.tsx`, which
@@ -100,7 +100,7 @@ const validateProfileInput = (
     // module previously kept its own copies of the length bounds, the pattern,
     // and the wording, so the profile form said "3-30 characters. Letters,
     // numbers, underscores, and periods." while this said "3-30 characters"
-    // and "Use letters, numbers, underscores, or periods." — three sentences
+    // and "Use letters, numbers, underscores, or periods."  -  three sentences
     // for one rule, and the one on screen was not this one.
     const problem = getUsernameProblem(username);
     if (problem) {

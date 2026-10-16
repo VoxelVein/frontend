@@ -12,7 +12,7 @@ tags:
   - dependencies
 ---
 
-# Context7 — Live Library Documentation
+# Context7  -  Live Library Documentation
 
 ## Why this exists
 
@@ -25,7 +25,7 @@ typecheck-fail or, worse, silently misbehave.
 **Look it up. Don't guess.** If you are writing code that calls a
 third-party API you have not read in this session, resolve it first.
 
-## Step 1 — Resolve the library ID
+## Step 1  -  Resolve the library ID
 
 Context7 addresses docs by ID, not by name. Always resolve first:
 
@@ -33,10 +33,10 @@ Context7 addresses docs by ID, not by name. Always resolve first:
 { "libraryName": "TanStack Router", "query": "file-based routing createFileRoute" }
 ```
 
-## Step 2 — Query the docs
+## Step 2  -  Query the docs
 
 Scope **one question per call.** The index degrades badly when you bundle
-several topics — you get a shallow answer for each instead of one good
+several topics  -  you get a shallow answer for each instead of one good
 answer.
 
 ```json
@@ -68,7 +68,7 @@ up the right version.
 | Tests | Vitest, Testing Library |
 | Agent tooling | OpenCode plugins, skills, commands |
 
-Not on this stack — do not reach for these: Next.js, Sentry, Vercel,
+Not on this stack  -  do not reach for these: Next.js, Sentry, Vercel,
 Supabase, Firebase, Redux, Jest.
 
 ## When to use it
@@ -93,7 +93,7 @@ already read in this session.
 free key, set `CONTEXT7_API_KEY` and add the header to the server entry
 in `opencode.json` and `.mcp.json`.
 
-## Fallback — HTTP API
+## Fallback  -  HTTP API
 
 If the MCP server is unavailable, the same data is reachable directly.
 This path needs `curl` and `jq`:

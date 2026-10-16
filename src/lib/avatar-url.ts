@@ -1,8 +1,8 @@
 /**
  * Rules for a user-supplied external profile-picture URL.
  *
- * `users.image` is read by every avatar surface — the navbar, the account menu,
- * the public profile, and every blog byline — so whatever lands there is
+ * `users.image` is read by every avatar surface  -  the navbar, the account menu,
+ * the public profile, and every blog byline  -  so whatever lands there is
  * rendered in an `<img src>` on pages other people visit. This module is the one
  * place that decides what may be stored.
  */
@@ -24,7 +24,7 @@ const AVATAR_URL_HINT = "Enter an https:// image URL.";
  * * a root-relative path, which is what an upload produces (`/api/avatar/$id`).
  *
  * Everything else falls back to the letter tile. An `<img src>` will not execute
- * `javascript:` or `data:`, so this is not the control that stops script — the
+ * `javascript:` or `data:`, so this is not the control that stops script  -  the
  * allowlist below is. It is here so that a value which somehow reached the
  * column by another route (a provider profile, an older row) still renders as a
  * picture or as initials, and never as a third scheme nobody intended to allow.
@@ -65,7 +65,7 @@ const isExternalAvatarSrc = (value: string | null | undefined): boolean =>
  * `https` only, deliberately:
  *
  * * `http:` would be blocked as mixed content on an HTTPS site anyway, so
- *   accepting it would store a value that never renders — and would send the
+ *   accepting it would store a value that never renders  -  and would send the
  *   visitor's IP address to a third party in plaintext if the site were ever
  *   served over HTTP.
  * * `javascript:` and `data:` cannot execute from an `<img src>`, but a `data:`

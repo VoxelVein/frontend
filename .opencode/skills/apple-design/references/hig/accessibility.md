@@ -61,7 +61,7 @@ The people who use your interface may be deaf or hard of hearing. They may also 
 
 For developer guidance, see [Selecting subtitles and alternative audio tracks](https://developer.apple.com/documentation/avfoundation/selecting-subtitles-and-alternative-audio-tracks).
 
-**Use haptics in addition to audio cues.** If your interface conveys information through audio cues — such as a success chime, error sound, or game feedback — consider pairing that sound with matching haptics for people who can’t perceive the audio or have their audio turned off. In iOS and iPadOS, you can also use [Music Haptics](https://developer.apple.com/documentation/mediaaccessibility/music-haptics) and [Audio graphs](https://developer.apple.com/documentation/accessibility/audio-graphs) to let people experience music and infographics through vibration and texture. For guidance, see [Playing haptics](playing-haptics.md).
+**Use haptics in addition to audio cues.** If your interface conveys information through audio cues  -  such as a success chime, error sound, or game feedback  -  consider pairing that sound with matching haptics for people who can’t perceive the audio or have their audio turned off. In iOS and iPadOS, you can also use [Music Haptics](https://developer.apple.com/documentation/mediaaccessibility/music-haptics) and [Audio graphs](https://developer.apple.com/documentation/accessibility/audio-graphs) to let people experience music and infographics through vibration and texture. For guidance, see [Playing haptics](playing-haptics.md).
 
 **Augment audio cues with visual cues.** This is especially important for games and spatial apps where important content might be taking place off screen. When using audio to guide people towards a specific action, also add in visual indicators that point to where you want people to interact.
 
@@ -78,7 +78,7 @@ Ensure your interface offers a comfortable experience for people with limited de
 
 **Consider spacing between controls as important as size.** Include enough padding between elements to reduce the chance that someone taps the wrong control. In general, it works well to add about 12 points of padding around elements that include a bezel. For elements without a bezel, about 24 points of padding works well around the element’s visible edges.
 
-**Support simple gestures for common interactions.** For many people, with or without disabilities, complex gestures can be challenging. For interactions people do frequently in your app or game, use the simplest gesture possible — avoid custom multifinger and multihand gestures — so repetitive actions are both comfortable and easy to remember.
+**Support simple gestures for common interactions.** For many people, with or without disabilities, complex gestures can be challenging. For interactions people do frequently in your app or game, use the simplest gesture possible  -  avoid custom multifinger and multihand gestures  -  so repetitive actions are both comfortable and easy to remember.
 
 **Offer alternatives to gestures.** Make sure your UI’s core functionality is accessible through more than one type of physical interaction. Gestures can be less comfortable for people who have limited dexterity, so offer onscreen ways to achieve the same outcome. For example, if you use a swipe gesture to dismiss a view, also make a button available so people can tap or use an assistive device.
 

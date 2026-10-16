@@ -10,8 +10,8 @@ import { sanitize as purify } from "isomorphic-dompurify";
  * `dangerouslySetInnerHTML`, so the only safe place to intervene is the author
  * HTML itself, before it reaches the renderer. `sanitizeMarkdownDocument` is
  * that intervention, and it is applied to the parsed tree rather than to the
- * final markup so that everything Markdown itself produced — links, images,
- * emphasis — keeps its own escaping and styling.
+ * final markup so that everything Markdown itself produced  -  links, images,
+ * emphasis  -  keeps its own escaping and styling.
  *
  * Two independent checks apply, because the two halves of a post arrive by
  * different routes:
@@ -30,7 +30,7 @@ import { sanitize as purify } from "isomorphic-dompurify";
  * anything added to HTML since this list was written. Inline formatting,
  * structure, tables, figures, and the details/summary pair are allowed because
  * posts legitimately use them. `script`, `style`, `link`, `iframe`, `object`,
- * `embed`, `form`, `input`, `button`, `base`, and `meta` are absent — the first
+ * `embed`, `form`, `input`, `button`, `base`, and `meta` are absent  -  the first
  * two execute code, the next three load or embed foreign documents, and the
  * rest either execute code or let a post impersonate a page control.
  */
@@ -275,7 +275,7 @@ const markdownUrlTransform: UrlTransform = (url, kind) =>
  *
  * Structural rather than the library's node union, and that is deliberate. The
  * union would say exactly which node types exist today, but a walk written
- * against it silently stops covering anything a later release adds — and for a
+ * against it silently stops covering anything a later release adds  -  and for a
  * security boundary, "not covered" means "trusted". Naming the child collections
  * instead means a new node is walked as long as it hangs off one of them.
  *
@@ -288,7 +288,7 @@ interface MarkdownTreeNode {
   header?: MarkdownTreeNode[];
   items?: MarkdownTreeNode[];
   rows?: MarkdownTreeNode[][];
-  /** Optional because `FootnoteItemNode` has none — it is a container only. */
+  /** Optional because `FootnoteItemNode` has none  -  it is a container only. */
   type?: string;
   value?: string;
 }
@@ -299,7 +299,7 @@ interface MarkdownTreeNode {
  * Both are needed and they are easy to conflate: the renderer switches on `'html'`
  * for block-level markup and `'inlineHtml'` for markup inside a paragraph, and
  * each reaches `dangerouslySetInnerHTML` separately. Missing the second one leaves
- * every inline tag — the common case in prose — completely unsanitized.
+ * every inline tag  -  the common case in prose  -  completely unsanitized.
  */
 const RAW_HTML_NODE_TYPES = new Set(["html", "inlineHtml"]);
 

@@ -58,7 +58,7 @@ export const auth = betterAuth({
 });
 ```
 
-No extra package is required — Google is built into Better Auth core.
+No extra package is required  -  Google is built into Better Auth core.
 
 ## 4. Sign in from the client
 
@@ -93,14 +93,14 @@ nothing dead is rendered. `env.config.ts` derives that value from
 
 ## Troubleshooting
 
-* **`redirect_uri_mismatch`** — the redirect URI in Google Cloud must
+* **`redirect_uri_mismatch`**  -  the redirect URI in Google Cloud must
   match `BETTER_AUTH_URL` plus `/api/auth/callback/google`.
-* **Provider not shown** — confirm both `GOOGLE_CLIENT_ID` and
+* **Provider not shown**  -  confirm both `GOOGLE_CLIENT_ID` and
   `GOOGLE_CLIENT_SECRET` are set in `.env.local` and restart the dev
   server.
-* **Landed on `/welcome` instead of `/`** — expected for a brand-new
+* **Landed on `/welcome` instead of `/`**  -  expected for a brand-new
   account; that is the generated-username step.
-* **Production** — use the production origin in the redirect URI, for
+* **Production**  -  use the production origin in the redirect URI, for
   example `https://example.com/api/auth/callback/google`.
 
 ## Related

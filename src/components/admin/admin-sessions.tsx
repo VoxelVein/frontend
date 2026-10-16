@@ -312,7 +312,7 @@ const AdminSessions = () => {
    * Looks users up server-side rather than paging a fixed list into the DOM.
    *
    * The previous version loaded the first 100 users once, which quietly made
-   * every account past that unreachable — an admin investigating a report had
+   * every account past that unreachable  -  an admin investigating a report had
    * no way to reach them. `searchValue` searches the database, so the ceiling
    * no longer decides who is inspectable.
    */
@@ -536,7 +536,7 @@ const AdminSessions = () => {
             </h2>
             <CardDescription>
               {selectedUser
-                ? `${userLabel(selectedUser)} — signed in on ${sessionCount} ${countLabel}.`
+                ? `${userLabel(selectedUser)}  -  signed in on ${sessionCount} ${countLabel}.`
                 : "Search for a user, then review or sign them out of their devices."}
             </CardDescription>
           </div>

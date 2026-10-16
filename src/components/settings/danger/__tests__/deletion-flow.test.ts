@@ -43,7 +43,7 @@ const open = () =>
  * The shape of an action before the union narrows it.
  *
  * `DeletionAction` is a closed union, so its `default` branch is unreachable
- * from typed code — which is exactly why the branch has to exist. This is the
+ * from typed code  -  which is exactly why the branch has to exist. This is the
  * one place that admits an action the union cannot describe.
  */
 interface ActionEnvelope {
@@ -87,7 +87,7 @@ describe(deletionReducer, () => {
 
     // `close` deliberately only flips the flag; the reset is `open`'s job,
     // because `open` rebuilds from `closedDeletionState`. So the property that
-    // matters is that a reopened wizard carries nothing over — asserted
+    // matters is that a reopened wizard carries nothing over  -  asserted
     // against the reducer's actual contract, not an assumed one.
     const reopened = deletionReducer(closed, { type: "open", userId: USER });
 

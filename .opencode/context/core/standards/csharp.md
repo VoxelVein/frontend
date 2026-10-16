@@ -783,7 +783,7 @@ public class OrderServiceTests
 
 **Why NSubstitute?**
 
-- ✅ Fluent, readable syntax — substitutes ARE the interfaces, no `.Object` indirection
+- ✅ Fluent, readable syntax  -  substitutes ARE the interfaces, no `.Object` indirection
 - ✅ Lower ceremony, less noise in tests
 - ✅ `Arg.Any<T>()` is cleaner than `It.IsAny<T>()`
 - ✅ `Received()` reads naturally as "verify it received this call"

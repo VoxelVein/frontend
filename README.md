@@ -78,6 +78,8 @@ VoxelVein platform but does not include the full infrastructure stack.
 * Admin panel: users, sessions, posts, storage, notifications, pending
   account deletions, and the publishing review queue, with each tab
   hidden from roles that cannot use it
+* Support tickets: members open tickets, admins reply, tag, and filter
+  them; members may have at most 5 open tickets at a time
 * Notification bell with per-item and bulk mark-as-read
 * Public legal pages and a cookie consent banner
 
@@ -465,7 +467,7 @@ operator's name and address:
 * `/legal` legal notes (§ 5 DDG service-provider notice)
 * `/privacy` privacy policy
 * `/cookies` cookie policy
-* `/terms` terms of service — the single binding legal document
+* `/terms` terms of service  -  the single binding legal document
 * `/disclaimer` trademark and content-provenance notes, cross-referencing the
   terms rather than restating them
 

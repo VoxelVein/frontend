@@ -125,7 +125,7 @@ UI code:
 * Use semantic HTML and landmarks (`header`, `nav`, `main`, `section`,
   `footer`, and so on).
 * Ensure keyboard operability with visible focus indicators.
-* Use ARIA sparingly and correctly — prefer native semantics.
+* Use ARIA sparingly and correctly  -  prefer native semantics.
 * Keep text contrast at WCAG AA (4.5:1 normal text, 3:1 large text).
 * Respect `prefers-reduced-motion`.
 * Test with keyboard only and with a screen reader.
@@ -136,7 +136,7 @@ UI code:
   ruleset (`pnpm lint:md`).
 * Only `MD041` (first-line heading) is disabled on top of the GitHub
   ruleset, which already relaxes a few GitHub-specific rules. Do not
-  disable additional rules to make documentation pass — fix the
+  disable additional rules to make documentation pass  -  fix the
   documentation instead.
 * Lines are capped at 80 characters and tables must stay aligned within
   the file, so keep table cells short.
@@ -177,21 +177,21 @@ the required checks already answer.
 Unlike issues, GitHub does not show a chooser for pull request templates, so
 pick one with its link:
 
-* **General change** — anything that does not fit below. This is the
+* **General change**  -  anything that does not fit below. This is the
   default, so a plain compare URL already loads it.
   [1-general.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=1-general.yml)
-* **Bug fix** — a defect with an identifiable root cause.
+* **Bug fix**  -  a defect with an identifiable root cause.
   [2-bug-fix.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=2-bug-fix.yml)
-* **New feature** — new user-facing capability.
+* **New feature**  -  new user-facing capability.
   [3-feature.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=3-feature.yml)
-* **UI or accessibility** — a component, page, or anything affecting
+* **UI or accessibility**  -  a component, page, or anything affecting
   accessibility.
   [4-ui-accessibility.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=4-ui-accessibility.yml)
-* **Database, migration, or search** — schema, migration, query, or index.
+* **Database, migration, or search**  -  schema, migration, query, or index.
   [5-database-search.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=5-database-search.yml)
-* **Dependency, build, or CI** — dependencies, Docker, or workflows.
+* **Dependency, build, or CI**  -  dependencies, Docker, or workflows.
   [6-dependencies-tooling.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=6-dependencies-tooling.yml)
-* **Documentation** — Markdown only, no code change.
+* **Documentation**  -  Markdown only, no code change.
   [7-docs.yml](https://github.com/VoxelVein/frontend/compare/main?quick_pull=1&template=7-docs.yml)
 
 Templates are filled in by the person opening the pull request. Dependabot

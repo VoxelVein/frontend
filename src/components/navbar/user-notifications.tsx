@@ -272,7 +272,7 @@ const NotificationGroupBlock = ({
  *
  * Deliberately *not* the empty state. The list loads on open, so rendering
  * "Nothing here yet" during that gap tells a user with twenty unread
- * notifications that they have none, for as long as the request takes — the
+ * notifications that they have none, for as long as the request takes  -  the
  * single cheapest-feeling thing this panel could do.
  */
 const LoadingRows = () => (
@@ -453,7 +453,7 @@ export const UserNotifications = () => {
    *
    * They belong together: "4 minutes ago" is only meaningful against a fixed
    * reference time, and holding the two separately lets one move without the
-   * other. Stamping on load also makes the reference honest — it is when the
+   * other. Stamping on load also makes the reference honest  -  it is when the
    * list was true, not when the panel happened to render.
    */
   const [panel, setPanel] = useState<Panel | null>(null);

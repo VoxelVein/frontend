@@ -15,17 +15,17 @@ Apple platforms feature two types of materials: Liquid Glass, and standard mater
 
 ## Liquid Glass
 
-Liquid Glass forms a distinct functional layer for controls and navigation elements — like tab bars and sidebars — that floats above the content layer, establishing a clear visual hierarchy between functional elements and content. Liquid Glass allows content to scroll and peek through from beneath these elements to give the interface a sense of dynamism and depth, all while maintaining legibility for controls and navigation.
+Liquid Glass forms a distinct functional layer for controls and navigation elements  -  like tab bars and sidebars  -  that floats above the content layer, establishing a clear visual hierarchy between functional elements and content. Liquid Glass allows content to scroll and peek through from beneath these elements to give the interface a sense of dynamism and depth, all while maintaining legibility for controls and navigation.
 
 **Don’t use Liquid Glass in the content layer.** Liquid Glass works best when it provides a clear distinction between interactive elements and content, and including it in the content layer can result in unnecessary complexity and a confusing visual hierarchy. Instead, use [standard materials](#standard-materials) for elements in the content layer, such as app backgrounds. An exception to this is for controls in the content layer with a transient interactive element like [sliders](sliders.md) and [toggles](toggles.md); in these cases, the element takes on a Liquid Glass appearance to emphasize its interactivity when a person activates it.
 
 **Use Liquid Glass effects sparingly.** Standard components from system frameworks pick up the appearance and behavior of this material automatically. If you apply Liquid Glass effects to a custom control, do so sparingly. Liquid Glass seeks to bring attention to the underlying content, and overusing this material in multiple custom controls can provide a subpar user experience by distracting from that content. Limit these effects to the most important functional elements in your app. For developer guidance, see [Applying Liquid Glass to custom views](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views).
 
-**Only use clear Liquid Glass for components that appear over visually rich backgrounds.** Liquid Glass provides two variants — [regular](https://developer.apple.com/documentation/swiftui/glass/regular) and [clear](https://developer.apple.com/documentation/swiftui/glass/clear) — that you can choose when building custom components or styling some system components. The appearance of these variants can differ in response to certain system settings, like if people choose a preferred look for Liquid Glass in their device’s settings, or turn on accessibility settings that reduce transparency or increase contrast in the interface.
+**Only use clear Liquid Glass for components that appear over visually rich backgrounds.** Liquid Glass provides two variants  -  [regular](https://developer.apple.com/documentation/swiftui/glass/regular) and [clear](https://developer.apple.com/documentation/swiftui/glass/clear)  -  that you can choose when building custom components or styling some system components. The appearance of these variants can differ in response to certain system settings, like if people choose a preferred look for Liquid Glass in their device’s settings, or turn on accessibility settings that reduce transparency or increase contrast in the interface.
 
 The *regular* variant blurs and adjusts the luminosity of background content to maintain legibility of text and other foreground elements. Scroll edge effects further enhance legibility by blurring and reducing the opacity of background content. Most system components use this variant. Use the regular variant when background content might create legibility issues, or when components have a significant amount of text, such as alerts, sidebars, or popovers.
 
-The *clear* variant is highly translucent, which is ideal for prioritizing the visibility of the underlying content and ensuring visually rich background elements remain prominent. Use this variant for components that float above media backgrounds — such as photos and videos — to create a more immersive content experience.
+The *clear* variant is highly translucent, which is ideal for prioritizing the visibility of the underlying content and ensuring visually rich background elements remain prominent. Use this variant for components that float above media backgrounds  -  such as photos and videos  -  to create a more immersive content experience.
 
 For optimal contrast and legibility, determine whether to add a dimming layer behind components with clear Liquid Glass:
 
@@ -36,7 +36,7 @@ For guidance about the use of color, see [Liquid Glass color](color.md#liquid-gl
 
 ## Standard materials
 
-Use standard materials and effects — such as [blur](https://developer.apple.com/documentation/uikit/uiblureffect), [vibrancy](https://developer.apple.com/documentation/uikit/uivibrancyeffect), and [blending modes](https://developer.apple.com/documentation/appkit/nsvisualeffectview/blendingmode-swift.enum) — to convey a sense of structure in the content beneath Liquid Glass.
+Use standard materials and effects  -  such as [blur](https://developer.apple.com/documentation/uikit/uiblureffect), [vibrancy](https://developer.apple.com/documentation/uikit/uivibrancyeffect), and [blending modes](https://developer.apple.com/documentation/appkit/nsvisualeffectview/blendingmode-swift.enum)  -  to convey a sense of structure in the content beneath Liquid Glass.
 
 **Choose materials and effects based on semantic meaning and recommended usage.** Avoid selecting a material or effect based on the apparent color it imparts to your interface, because system settings can change its appearance and behavior. Instead, match the material or vibrancy style to your specific use case.
 
@@ -53,7 +53,7 @@ For developer guidance, see [Material](https://developer.apple.com/documentation
 
 ### Mobile (iOS, iPadOS)
 
-In addition to Liquid Glass, iOS and iPadOS continue to provide four standard materials — ultra-thin, thin, regular (default), and thick — which you can use in the content layer to help create visual distinction.
+In addition to Liquid Glass, iOS and iPadOS continue to provide four standard materials  -  ultra-thin, thin, regular (default), and thick  -  which you can use in the content layer to help create visual distinction.
 
 iOS and iPadOS also define vibrant colors for labels, fills, and separators that are specifically designed to work with each material. Labels and fills both have several levels of vibrancy; separators have one level. The name of a level indicates the relative amount of contrast between an element and the background: The default level has the highest contrast, whereas quaternary (when it exists) has the lowest contrast.
 

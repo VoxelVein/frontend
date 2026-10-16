@@ -57,7 +57,7 @@ Add critical rules section at top of agent prompt:
   <rule id="tool_usage">
     ONLY use: glob, read, grep, list
     NEVER use: bash, write, edit, task
-    You're read-only—no modifications allowed
+    You're read-only - no modifications allowed
   </rule>
   <rule id="always_use_tools">
     ALWAYS use tools to discover files

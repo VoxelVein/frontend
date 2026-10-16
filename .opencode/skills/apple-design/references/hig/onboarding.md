@@ -9,7 +9,7 @@ Onboarding can help people get a quick start using your app or game.
 
 ---
 
-Ideally, people can understand your app or game simply by experiencing it, but if onboarding is necessary, design a flow that’s fast, fun, and optional. When available, onboarding occurs after [launching](launching.md) is complete — it isn’t part of the launch experience.
+Ideally, people can understand your app or game simply by experiencing it, but if onboarding is necessary, design a flow that’s fast, fun, and optional. When available, onboarding occurs after [launching](launching.md) is complete  -  it isn’t part of the launch experience.
 
 ## Best practices
 

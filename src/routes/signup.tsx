@@ -99,6 +99,10 @@ const SignupPage = () => {
 
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
+  const hasSocialProviders =
+    (import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? "").length > 0 ||
+    (import.meta.env.VITE_GITHUB_CLIENT_ID?.trim() ?? "").length > 0;
+
   return (
     <div className="flex min-h-svh items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
@@ -109,18 +113,22 @@ const SignupPage = () => {
           Join VoxelVein to publish and discover Minecraft content.
         </p>
 
-        <div className="mt-6">
-          <GoogleSignInButton />
-          <GitHubSignInButton />
-        </div>
+        {hasSocialProviders ? (
+          <div className="mt-6">
+            <GoogleSignInButton />
+            <GitHubSignInButton />
+          </div>
+        ) : null}
 
-        <div className="mt-6 flex items-center gap-3">
-          <hr className="bg-border h-px flex-1 border-0" />
-          <span className="text-muted-foreground text-xs tracking-wide uppercase">
-            or
-          </span>
-          <hr className="bg-border h-px flex-1 border-0" />
-        </div>
+        {hasSocialProviders ? (
+          <div className="mt-6 flex items-center gap-3">
+            <hr className="bg-border h-px flex-1 border-0" />
+            <span className="text-muted-foreground text-xs tracking-wide uppercase">
+              or
+            </span>
+            <hr className="bg-border h-px flex-1 border-0" />
+          </div>
+        ) : null}
 
         <form
           onSubmit={(event) => {

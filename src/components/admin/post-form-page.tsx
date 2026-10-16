@@ -104,7 +104,7 @@ const submitPost = async (
  * The editor's starting values.
  *
  * An existing post starts from what is stored. A new one starts blank apart
- * from the author, which is seeded once the author list resolves — see
+ * from the author, which is seeded once the author list resolves  -  see
  * `PostFormPage`. Nothing else here can be derived, so it is a plain read of the
  * post rather than a branch per field inside the component.
  */
@@ -163,7 +163,7 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
   // already right and adding a co-author is a tick rather than a setup step.
   //
   // Seeded in an effect rather than in `defaultValuesFor` because the author list
-  // is fetched, and the editor renders before it arrives — a default computed
+  // is fetched, and the editor renders before it arrives  -  a default computed
   // then would always be empty. Guarded by a ref so it cannot overwrite an
   // author the editor picked or unticked in the meantime, and skipped entirely
   // for an existing post, whose byline is already decided.

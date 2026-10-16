@@ -6,7 +6,7 @@
  * feeling like one page.
  *
  * Small on purpose. A grid can be five across, and a per-item delay large enough
- * to read on a single card becomes a noticeable wait on the last one — the row
+ * to read on a single card becomes a noticeable wait on the last one  -  the row
  * appears to hang rather than arrive.
  */
 const STAGGER_SECONDS = 0.05;

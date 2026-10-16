@@ -22,11 +22,11 @@ The current theme is a custom VoxelVein red palette maintained directly
 in `src/styles.css`. Re-applying a tweakcn theme overwrites these
 values, so re-check them afterwards:
 
-* `--primary` — the specified `#DC143C`, stored as light
+* `--primary`  -  the specified `#DC143C`, stored as light
   `oklch(0.5712 0.2219 20.0874)` and dark `oklch(0.605 0.2219 20.0874)`
-* `--destructive` — light `oklch(0.55 0.17 40)`, dark
+* `--destructive`  -  light `oklch(0.55 0.17 40)`, dark
   `oklch(0.7 0.19 40)`
-* `--background` — light `oklch(0.9811 0.0093 286.2277)`, which is
+* `--background`  -  light `oklch(0.9811 0.0093 286.2277)`, which is
   exactly `#F8F8FF`; dark `oklch(0.101 0.0084 165.234)`, exactly
   `#020403`
 
@@ -48,7 +48,7 @@ destructive colour pass AA as text on the page background and with their
 `-foreground` colour on top.
 
 Both backgrounds are specified hexes, so both are stored as the OKLCH
-value that round-trips to them rather than as raw hexes — every token in
+value that round-trips to them rather than as raw hexes  -  every token in
 the file is OKLCH, and a lone `#F8F8FF` or `#020403` would be the only
 thing a reader could not check by eye. Deriving one is a mechanical
 conversion: `sRGB → linear → XYZ → OKLab → OKLCH`, then back to confirm
@@ -56,7 +56,7 @@ it lands on the same eight-bit triple.
 
 ### The light background is off-ladder on purpose
 
-The light neutral ladder — `--secondary`, `--muted`, `--border` — is a
+The light neutral ladder  -  `--secondary`, `--muted`, `--border`  -  is a
 constant chroma `0.002` on hue 70, so it reads as warm paper. The
 background is deliberately **not** part of that ladder: at hue 286 and
 chroma `0.0093` it is cool and visibly tinted, four and a half times the
@@ -90,7 +90,7 @@ that is very nearly invisible. Raise `--border`/`--input` toward
 
 `--sidebar` mirrors `--background` in both themes, and in dark mode still
 holds the old `oklch(0.1398 0 0)`. It is currently referenced by no
-component, so nothing renders differently — but it is defined and would
+component, so nothing renders differently  -  but it is defined and would
 not match the page if a sidebar is ever built from it.
 
 ## What the theme changes
@@ -123,7 +123,7 @@ Inter is already installed as `@fontsource-variable/inter`.
 
 `src/components/motion/theme-toggle.tsx` is a view-transition theme
 switch, not a class swap. It injects one `<style>` tag with four
-variants — `rectangle`, `circle`, `blinds`, and `pixel` — and the navbar
+variants  -  `rectangle`, `circle`, `blinds`, and `pixel`  -  and the navbar
 uses `pixel`. The `pixel` variant drives `src/components/motion/pixel-reveal.ts`,
 which masks `::view-transition-new(root)` frame by frame from
 `requestAnimationFrame`.
@@ -137,7 +137,7 @@ After applying a theme:
 
 1. Run `pnpm check` to confirm lint and format compliance.
 2. Test components in both light and dark themes.
-3. Check contrast at all breakpoints — a theme that passes in light
+3. Check contrast at all breakpoints  -  a theme that passes in light
    mode may fail in dark mode.
 4. Check the theme toggle still animates, and that it does not animate
    with `prefers-reduced-motion: reduce`.

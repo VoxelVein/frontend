@@ -81,7 +81,7 @@ For design guidance, see [StandBy presentation](#standby-presentation).
 
 **Don’t add elements to your app that draw attention to the Dynamic Island.** Your Live Activity appears in the Dynamic Island while your app isn’t in use, and other items can appear in the Dynamic Island when your app is open.
 
-**Ensure text is easy to read.** Use large, heavier-weight text — a medium weight or higher. Use small text sparingly and make sure key information is legible at a glance.
+**Ensure text is easy to read.** Use large, heavier-weight text  -  a medium weight or higher. Use small text sparingly and make sure key information is legible at a glance.
 
 ### Creating Live Activity layouts
 
@@ -103,11 +103,11 @@ Keep content compact and snug within a margin that’s concentric to the outer e
 
 ### Choosing colors
 
-**Carefully consider using a custom background color and opacity.** You can’t customize background colors for compact, minimal, and expanded presentations. However, you can use a custom background color for the Lock Screen presentation. If you set a custom background color or image for the Lock Screen presentation, ensure sufficient contrast — especially for tint colors on devices that feature an Always-On display with reduced luminance.
+**Carefully consider using a custom background color and opacity.** You can’t customize background colors for compact, minimal, and expanded presentations. However, you can use a custom background color for the Lock Screen presentation. If you set a custom background color or image for the Lock Screen presentation, ensure sufficient contrast  -  especially for tint colors on devices that feature an Always-On display with reduced luminance.
 
 **Use color to express the character and identity of your app.** Live Activities in the Dynamic Island use a black opaque background. Consider using bold colors for text and objects to convey the personality and brand of your app. Bold colors make your Live Activity recognizable at a glance, stand out from other Live Activities, and feel like a small, glanceable part of your app. Additionally, bold colors can help reinforce the relationship between elements in the Live Activity itself.
 
-**Tint your Live Activity’s key line color so that it matches your content.** When the background is dark — for example, in Dark Mode — a key line appears around the Dynamic Island to distinguish it from other content. Choose a key line color that’s consistent with the color of other elements in your Live Activity. For developer guidance, see [Creating custom views for Live Activities](https://developer.apple.com/documentation/activitykit/creating-custom-views-for-live-activities).
+**Tint your Live Activity’s key line color so that it matches your content.** When the background is dark  -  for example, in Dark Mode  -  a key line appears around the Dynamic Island to distinguish it from other content. Choose a key line color that’s consistent with the color of other elements in your Live Activity. For developer guidance, see [Creating custom views for Live Activities](https://developer.apple.com/documentation/activitykit/creating-custom-views-for-live-activities).
 
 ### Adding transitions and animating content updates
 
@@ -115,7 +115,7 @@ In addition to extending and contracting transitions, Live Activities use system
 
 **Use animations to reinforce the information you’re communicating and to bring attention to updates.** In addition to moving the position of elements, you can animate elements in and out with the default content-replace transition, or create custom transitions using scale, opacity, and movement. For example, a sports app might use numeric content transitions for score changes or fade a timer in and out when it reaches zero.
 
-**Animate layout changes.** Content updates can require a change to your Live Activity layout — for example, when it expands to fill the screen in StandBy or when more information becomes available. During the transition to a new layout, preserve as much of the existing layout as possible by animating existing elements to their new positions rather than removing and animating them back in.
+**Animate layout changes.** Content updates can require a change to your Live Activity layout  -  for example, when it expands to fill the screen in StandBy or when more information becomes available. During the transition to a new layout, preserve as much of the existing layout as possible by animating existing elements to their new positions rather than removing and animating them back in.
 
 **Try to avoid overlapping elements.** Sometimes, it’s best to animate out certain elements and then re-animate them in at a new position to avoid colliding with other parts of your transition. For example, when animating items in lists, only animate the element that moves to a new position and use fade-in-and-out transitions for the other list items.
 
@@ -123,7 +123,7 @@ For developer guidance, see [Animating data updates in widgets and Live Activiti
 
 ### Offering interactivity
 
-**Make sure tapping the Live Activity opens your app at the right location.** Take people directly to related details and actions  — don’t make them navigate to find relevant information. For developer guidance on SwiftUI views that support deep linking to specific screens, see [Linking to specific app scenes from your widget or Live Activity](https://developer.apple.com/documentation/widgetkit/linking-to-specific-app-scenes-from-your-widget-or-live-activity).
+**Make sure tapping the Live Activity opens your app at the right location.** Take people directly to related details and actions   -  don’t make them navigate to find relevant information. For developer guidance on SwiftUI views that support deep linking to specific screens, see [Linking to specific app scenes from your widget or Live Activity](https://developer.apple.com/documentation/widgetkit/linking-to-specific-app-scenes-from-your-widget-or-live-activity).
 
 **Focus on simple, direct actions.** Buttons or toggles take up space that might otherwise display useful information. Only include interactive elements for essential functionality that’s directly related to your Live Activity and that people activate once or temporarily pause and resume, like music playback, workouts, or apps that access the microphone to record live audio. If you offer interactivity, prefer limiting it to a single element to help people avoid accidentally tapping the wrong control.
 
@@ -223,7 +223,7 @@ The system may scale your Live Activity to best fit a vehicle’s screen size an
 | 240x100 |
 | 170x78 |
 
-Test your designs with the CarPlay simulator and the following configurations for Smart Display Zoom  — available in in Settings > Display in CarPlay:
+Test your designs with the CarPlay simulator and the following configurations for Smart Display Zoom   -  available in in Settings > Display in CarPlay:
 
 | Configuration | Resolution (pt) |
 | --- | --- |

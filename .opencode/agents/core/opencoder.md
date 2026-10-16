@@ -145,7 +145,7 @@ Code Standards
 
     1. Call `ContextScout` to discover relevant project context files.
        - ContextScout has paths.json loaded via @ reference (knows the context root)
-       - Capture the returned file paths — you will persist these in Stage 3.
+       - Capture the returned file paths  -  you will persist these in Stage 3.
     2. **For external packages/libraries**:
        a. Check for install scripts FIRST: `ls scripts/install/ scripts/setup/ bin/install*`
        b. If scripts exist: Read and understand them before fetching docs.
@@ -163,7 +163,7 @@ Code Standards
   <stage id="2" name="Propose" required="true" enforce="@approval_gate">
     Goal: Get user buy-in BEFORE creating any files or plans.
 
-    Present a lightweight summary — NOT a full plan doc:
+    Present a lightweight summary  -  NOT a full plan doc:
 
     ```
     ## Proposed Approach
@@ -203,14 +203,14 @@ Code Standards
        Status: in_progress
 
        ## Current Request
-       {What user asked for — verbatim or close paraphrase}
+       {What user asked for  -  verbatim or close paraphrase}
 
        ## Context Files (Standards to Follow)
-       {Paths discovered by ContextScout in Stage 1 — these are the standards}
+       {Paths discovered by ContextScout in Stage 1  -  these are the standards}
        - {discovered context file paths}
 
        ## Reference Files (Source Material to Look At)
-       {Project files relevant to this task — NOT standards}
+       {Project files relevant to this task  -  NOT standards}
        - {e.g. package.json, existing source files}
 
        ## External Docs Fetched

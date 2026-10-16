@@ -14,7 +14,7 @@ By default, a box uses a visible border or background color to separate its cont
 
 **Prefer keeping a box relatively small in comparison with its containing view.** As a box’s size gets close to the size of the containing window or screen, it becomes less effective at communicating the separation of grouped content, and it can crowd other content.
 
-**Consider using padding and alignment to communicate additional grouping within a box.** A box’s border is a distinct visual element — adding nested boxes to define subgroups can make your interface feel busy and constrained.
+**Consider using padding and alignment to communicate additional grouping within a box.** A box’s border is a distinct visual element  -  adding nested boxes to define subgroups can make your interface feel busy and constrained.
 
 ## Content
 

@@ -51,7 +51,7 @@ const seedPost = async (demo: DemoPost, authorId: string, now: Date) => {
     .returning({ id: posts.id });
 
   // Authorship is a separate table, so a seeded post needs its byline written
-  // too — without this it would render with no author at all.
+  // too  -  without this it would render with no author at all.
   await db.insert(postAuthors).values({
     position: 0,
     postId: row.id,

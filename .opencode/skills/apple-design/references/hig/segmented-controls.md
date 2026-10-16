@@ -29,7 +29,7 @@ In addition to representing the state of a single or multiple-choice selection, 
 
 ## Content
 
-**Prefer using either text or images — not a mix of both — in a single segmented control.** Although individual segments can contain text labels or images, mixing the two in a single control can lead to a disconnected and confusing interface.
+**Prefer using either text or images  -  not a mix of both  -  in a single segmented control.** Although individual segments can contain text labels or images, mixing the two in a single control can lead to a disconnected and confusing interface.
 
 **As much as possible, use content with a similar size in each segment.** Because all segments typically have equal width, it doesn’t look good if content fills some segments but not others.
 
@@ -47,7 +47,7 @@ In addition to representing the state of a single or multiple-choice selection, 
 
 **Consider using introductory text to clarify the purpose of a segmented control.** When the control uses symbols or interface icons, you could also add a label below each segment to clarify its meaning. If your app includes tooltips, provide one for each segment in a segmented control.
 
-**Use a tab view in the main window area — instead of a segmented control — for view switching.** A [tab view](tab-views.md) supports efficient view switching and is similar in appearance to a [box](boxes.md) combined with a segmented control. Consider using a segmented control to help people switch views in a toolbar or inspector pane.
+**Use a tab view in the main window area  -  instead of a segmented control  -  for view switching.** A [tab view](tab-views.md) supports efficient view switching and is similar in appearance to a [box](boxes.md) combined with a segmented control. Consider using a segmented control to help people switch views in a toolbar or inspector pane.
 
 **Consider supporting spring loading.** On a Mac equipped with a Magic Trackpad, spring loading lets people activate a segment by dragging selected items over it and force clicking without dropping the selected items. People can also continue dragging the items after a segment activates.
 

@@ -107,7 +107,7 @@ describe(PublishPanel, () => {
     ).toBeInTheDocument();
     // Labelled by what it does, not by which route it takes. Whether it queues
     // is the server's decision from stored state, and this panel cannot know
-    // which it will be — so it must not promise either in the label.
+    // which it will be  -  so it must not promise either in the label.
     expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
     expect(
       screen.getByText(

@@ -31,7 +31,7 @@ If it enhances your app or game, you can provide a custom image to use as the de
 
 **Customize the default indicator image only when it enhances the page control’s overall meaning.** For example, if every page you list contains bookmarks, you might use the `bookmark.fill` symbol as the default indicator image.
 
-**Avoid using more than two different indicator images in a page control.** If your list contains one page with special meaning — like the current-location page in Weather — you can make the page easy to find by giving it a unique indicator image. In contrast, a page control that uses several unique images to mark several important pages is hard to use because people must memorize the meaning of each image. A page control that displays more than two types of indicator images tends to look messy and haphazard, even when each image is clear.
+**Avoid using more than two different indicator images in a page control.** If your list contains one page with special meaning  -  like the current-location page in Weather  -  you can make the page easy to find by giving it a unique indicator image. In contrast, a page control that uses several unique images to mark several important pages is hard to use because people must memorize the meaning of each image. A page control that displays more than two types of indicator images tends to look messy and haphazard, even when each image is clear.
 
 **Avoid coloring indicator images.** Custom colors can reduce the contrast that differentiates the current-page indicator and makes the page control visible on the screen. To ensure that your page control is easy to use and looks good in different contexts, let the system automatically color the indicators.
 
@@ -51,9 +51,9 @@ People interact with page controls by tapping or scrubbing (to *scrub*, people t
 
 A page control can include a translucent, rounded-rectangle background appearance that provides visual contrast for the indicators. You can choose one of the following background styles:
 
-- Automatic — Displays the background only when people interact with the control. Use this style when the page control isn’t the primary navigational element in the UI.
-- Prominent — Always displays the background. Use this style only when the control is the primary navigational control in the screen.
-- Minimal — Never displays the background. Use this style when you just want to show the position of the current page in the list and you don’t need to provide visual feedback during scrubbing.
+- Automatic  -  Displays the background only when people interact with the control. Use this style when the page control isn’t the primary navigational element in the UI.
+- Prominent  -  Always displays the background. Use this style only when the control is the primary navigational control in the screen.
+- Minimal  -  Never displays the background. Use this style when you just want to show the position of the current page in the list and you don’t need to provide visual feedback during scrubbing.
 
 For developer guidance, see [backgroundStyle](https://developer.apple.com/documentation/uikit/uipagecontrol/backgroundstyle-swift.property).
 

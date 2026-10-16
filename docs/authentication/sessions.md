@@ -16,16 +16,16 @@ session: {
 },
 ```
 
-* `expiresIn` — how long a session lives, in seconds. The default is
+* `expiresIn`  -  how long a session lives, in seconds. The default is
   30 days.
-* `updateAge` — how often the session expiry is refreshed, in seconds.
+* `updateAge`  -  how often the session expiry is refreshed, in seconds.
   An active user's session keeps sliding forward, but the database is
   written at most once per day instead of on every request.
-* `freshAge` — how recently the session must have been created for
+* `freshAge`  -  how recently the session must have been created for
   sensitive actions. Listing sessions, registering a passkey, and
   unlinking a social account require a session younger than one day;
   otherwise the user has to sign in again. Deleting the account is
-  stricter — a session created in the last 10 minutes, or a correct
+  stricter  -  a session created in the last 10 minutes, or a correct
   password. See [Accounts](accounts.md).
 
 ## How sessions work

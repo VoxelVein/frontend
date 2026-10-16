@@ -147,7 +147,7 @@ Check each finding against the layer the code actually lives in.
 - The two `tsvector` expressions are written out in both
   `drizzle/0010_postgres_search.sql` and `src/lib/search/text.ts`. A GIN
   expression index is only used when the query repeats the expression
-  exactly, so divergence does not error — it silently degrades to a
+  exactly, so divergence does not error  -  it silently degrades to a
   sequential scan. A new searchable field needs a matching migration, and
   `src/lib/__tests__/search-index.test.ts` asserts index usage.
 

@@ -71,7 +71,7 @@ export const requireStaff = async (
  *
  * The guard a new staff endpoint should reach for. It reads the minimum from
  * `CAPABILITY_MINIMUM` rather than taking a role, so the endpoint names the job
- * it protects — `requireCapability("manageUsers")` says why the check exists —
+ * it protects  -  `requireCapability("manageUsers")` says why the check exists  -
  * and the minimum rank is stated once, in one place, instead of being repeated
  * as `"admin"` at every guard.
  *

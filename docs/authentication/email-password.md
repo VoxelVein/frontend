@@ -14,8 +14,8 @@ emailAndPassword: {
 },
 ```
 
-* `enabled` — turns the email/password endpoints on.
-* `requireEmailVerification` — when `true`, users must verify their
+* `enabled`  -  turns the email/password endpoints on.
+* `requireEmailVerification`  -  when `true`, users must verify their
   email before a session is created. Verification emails are not
   configured yet, so keep this `false` until an email provider is
   added.
@@ -55,8 +55,8 @@ await authClient.signIn.username({ username, password });
 
 The field is deliberately not `type="email"` and uses
 `autoComplete="username"`, the token that pairs with a password field.
-Both branches report the same message on failure — "Invalid email,
-username, or password" — so the response does not reveal whether an
+Both branches report the same message on failure  -  "Invalid email,
+username, or password"  -  so the response does not reveal whether an
 account exists.
 
 Both `/login` and `/signup` redirect to `/` when a session already
@@ -91,7 +91,7 @@ existing one.
 
 ## Password reset
 
-Password reset is not wired up yet, and neither is email verification —
+Password reset is not wired up yet, and neither is email verification  -
 which is why a password account cannot become a verified uploader. To add
 either, configure an email provider, enable the corresponding Better Auth
 flow, and add a "Forgot password" link to the login page. See

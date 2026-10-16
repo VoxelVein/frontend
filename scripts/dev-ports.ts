@@ -1,5 +1,5 @@
 /**
- * Reports on — and optionally stops — whatever holds the local dev ports.
+ * Reports on  -  and optionally stops  -  whatever holds the local dev ports.
  *
  * `vite.config.ts` sets `strictPort: true` on purpose: the dev origins are
  * hardcoded in better-auth's `trustedOrigins` and in the CORS setup, so a server
@@ -122,7 +122,7 @@ const stop = (holder: PortHolder): void => {
     process.kill(holder.pid, "SIGTERM");
   } catch (error) {
     // Gone between the scan and the signal: nothing to do. Anything else is a
-    // real failure — most likely EPERM, meaning we do not own the pid.
+    // real failure  -  most likely EPERM, meaning we do not own the pid.
     if (error instanceof Error && !isAlreadyGone(error)) {
       throw error;
     }

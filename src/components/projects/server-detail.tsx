@@ -25,7 +25,7 @@ const badgeClassName =
  * files and its whole purpose is an address, an address's supported versions,
  * and what to install before joining. Fitting that into the download layout
  * meant the address sat in a "Join" section below the stats, the summary, and
- * the description — last on the screen, for the only thing the visitor came for.
+ * the description  -  last on the screen, for the only thing the visitor came for.
  *
  * So the page is a sidebar: the join panel on the left at `lg` and up, because
  * it is the answer to "can I play here"; the description, gallery, and tags on

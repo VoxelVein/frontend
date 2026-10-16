@@ -37,7 +37,7 @@ import env from "../../../env.config";
  *
  * The object is written to `users/{userId}/avatar/{uuid}.{ext}` and served
  * from `/api/avatar/$avatarId`. `users.image` is written with that URL, which
- * is the field Better Auth already reads for an avatar — so the navbar, the
+ * is the field Better Auth already reads for an avatar  -  so the navbar, the
  * account menu, and the public profile all pick it up with no per-surface
  * change.
  */

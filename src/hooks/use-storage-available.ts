@@ -15,7 +15,7 @@ const STORAGE_QUERY_KEY = ["storage", "configured"] as const;
  * **Fails open.** A failed check reports "available", so the controls stay
  * enabled and the action is sent. The server then refuses it and the reader is
  * told what happened, which is a better outcome than a permanently greyed-out
- * upload button on a site whose storage is perfectly fine — the failure mode of
+ * upload button on a site whose storage is perfectly fine  -  the failure mode of
  * a cached `false` is that it never expires.
  */
 export const useStorageAvailable = () => {

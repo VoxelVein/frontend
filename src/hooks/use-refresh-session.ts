@@ -6,7 +6,7 @@ import { authClient } from "@/lib/auth-client";
 /**
  * Tells the rest of the app that the signed-in account changed.
  *
- * Settings writes to the account — the name, the bio, the profile picture — and
+ * Settings writes to the account  -  the name, the bio, the profile picture  -  and
  * every one of those is read from `users.image` or the session user by surfaces
  * that are not the settings page: the navbar, the account menu, and the public
  * profile. Refetching inside the settings component is not enough, because those
@@ -16,7 +16,7 @@ import { authClient } from "@/lib/auth-client";
  *
  * * `notify("$sessionSignal")` is what invalidates that cache. Calling
  *   `authClient.getSession()` directly fetches the fresh session and then throws
- *   it away — the nanostore the navbar's `useSession()` subscribed to is never
+ *   it away  -  the nanostore the navbar's `useSession()` subscribed to is never
  *   told, so the avatar stayed stale until a reload.
  * * `router.invalidate()` re-runs the loaders, so server-rendered surfaces pick
  *   the change up on the next navigation rather than the next full page load.

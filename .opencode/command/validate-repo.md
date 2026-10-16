@@ -1,5 +1,5 @@
 ---
-description: Validate the .opencode/ setup — check skills, commands, context files, and references for consistency
+description: Validate the .opencode/ setup  -  check skills, commands, context files, and references for consistency
 tags: [validation, structure, skills, commands]
 ---
 
@@ -69,13 +69,13 @@ Report in sections:
 ## OpenCode Setup Validation
 
 ### Skills (N found)
-✅ frontend-design — SKILL.md present, frontmatter valid
-✅ apple-design — SKILL.md present, 122 reference files
+✅ frontend-design  -  SKILL.md present, frontmatter valid
+✅ apple-design  -  SKILL.md present, 122 reference files
 ✅ ...
 
 ### Commands (N found)
-✅ test.md — references valid
-⚠️ optimize.md — generic, no project-specific references
+✅ test.md  -  references valid
+⚠️ optimize.md  -  generic, no project-specific references
 ✅ ...
 
 ### Context

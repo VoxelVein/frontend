@@ -29,17 +29,17 @@ Pickers help people enter information by letting them choose single or multipart
 
 A date picker is an efficient interface for selecting a specific date, time, or both, using touch, a keyboard, or a pointing device. You can display a date picker in one of the following styles:
 
-- Compact — A button that displays editable date and time content in a modal view.
-- Inline — For time only, a button that displays wheels of values; for dates and times, an inline calendar view.
-- Wheels — A set of scrolling wheels that also supports data entry through built-in or external keyboards.
-- Automatic — A system-determined style based on the current platform and date picker mode.
+- Compact  -  A button that displays editable date and time content in a modal view.
+- Inline  -  For time only, a button that displays wheels of values; for dates and times, an inline calendar view.
+- Wheels  -  A set of scrolling wheels that also supports data entry through built-in or external keyboards.
+- Automatic  -  A system-determined style based on the current platform and date picker mode.
 
 A date picker has four modes, each of which presents a different set of selectable values.
 
-- Date — Displays months, days of the month, and years.
-- Time — Displays hours, minutes, and (optionally) an AM/PM designation.
-- Date and time — Displays dates, hours, minutes, and (optionally) an AM/PM designation.
-- Countdown timer — Displays hours and minutes, up to a maximum of 23 hours and 59 minutes. This mode isn’t available in the inline or compact styles.
+- Date  -  Displays months, days of the month, and years.
+- Time  -  Displays hours, minutes, and (optionally) an AM/PM designation.
+- Date and time  -  Displays dates, hours, minutes, and (optionally) an AM/PM designation.
+- Countdown timer  -  Displays hours and minutes, up to a maximum of 23 hours and 59 minutes. This mode isn’t available in the inline or compact styles.
 
 The exact values shown in a date picker, and their order, depend on the device location.
 

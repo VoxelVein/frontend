@@ -18,7 +18,7 @@ import {
  * The reason a value was refused, or an empty string when it was accepted.
  *
  * Reading the message out of the result rather than branching on it inside each
- * test keeps every assertion unconditional — a test that only asserts on the
+ * test keeps every assertion unconditional  -  a test that only asserts on the
  * failure branch passes silently when the value turns out to be valid.
  */
 const errorFor = (value: string): string => {
@@ -50,7 +50,7 @@ describe(parseAvatarUrl, () => {
 
   it("reads an empty field as 'no picture' rather than as an error", () => {
     // Emptying a field is how a person clears a picture, so this must not be
-    // refused — otherwise the field could set what it could not unset.
+    // refused  -  otherwise the field could set what it could not unset.
     expect(parseAvatarUrl("")).toStrictEqual({ ok: true, url: null });
     expect(parseAvatarUrl("   ")).toStrictEqual({ ok: true, url: null });
   });

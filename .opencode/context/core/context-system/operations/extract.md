@@ -105,9 +105,9 @@ ADD TO (existing files):
 ⚠️  CONFLICT (file already exists):
   concepts/use-memo.md already exists (42 lines)
     Options:
-      [A] Skip — keep existing file
-      [B] Overwrite — replace with extracted version
-      [C] Merge — add new content to existing file (42 → 58 lines)
+      [A] Skip  -  keep existing file
+      [B] Overwrite  -  replace with extracted version
+      [C] Merge  -  add new content to existing file (42 → 58 lines)
     Choose [A/B/C]: _
 
 NAVIGATION UPDATE:

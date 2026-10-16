@@ -32,15 +32,15 @@ export default defineConfig({
      * negated class plus an end anchor fires, while a bare star does not, so
      * the trigger is the trailing anchor rather than the repetition.
      *
-     * Twelve existing patterns tripped it, all with bounded inputs — post
+     * Twelve existing patterns tripped it, all with bounded inputs  -  post
      * bodies and usernames are length-capped, the doc-link checker only ever
      * reads this repository, and the storage URL is one env var. Rewriting
      * them to satisfy the rule meant either changing what a valid address is
      * or moving work out of regex entirely, which costs more than it buys.
      *
-     * The one pattern that genuinely was super-linear — the sign-in address
+     * The one pattern that genuinely was super-linear  -  the sign-in address
      * check, quadratic on a long string with no `@` and no length cap on the
-     * input — is bounded to the RFC 5321 limits instead. So the real exposure
+     * input  -  is bounded to the RFC 5321 limits instead. So the real exposure
      * is closed, and this stays a warning that surfaces the shape in new code
      * without failing the build over patterns that cannot misbehave.
      */

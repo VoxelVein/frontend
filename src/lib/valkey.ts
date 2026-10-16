@@ -59,8 +59,8 @@ export const getValkey = async (): Promise<RedisClientType> => {
     url: readUrl(),
     socket: {
       // Bounded, and no reconnect: the default retries a refused connection
-      // with backoff indefinitely, which would leave the caller — and the
-      // request waiting on it — pending long past any useful answer. A failed
+      // with backoff indefinitely, which would leave the caller  -  and the
+      // request waiting on it  -  pending long past any useful answer. A failed
       // connect throws into the caller instead, and the next request builds a
       // fresh client, so an outage self-heals.
       connectTimeout: 2000,

@@ -128,8 +128,8 @@ const ilikeBranches = (predicate: string): string[] =>
 /**
  * A rendered fragment with its parameter placeholders collapsed.
  *
- * Each `ILIKE` branch binds its own parameter — `$3` for a project's name, `$5`
- * for its summary — so a chain can only be compared by shape. Normalising here
+ * Each `ILIKE` branch binds its own parameter  -  `$3` for a project's name, `$5`
+ * for its summary  -  so a chain can only be compared by shape. Normalising here
  * beats matching a regex, which would be a second regex to keep reading.
  */
 const withoutPlaceholders = (fragment: string): string =>
@@ -160,7 +160,7 @@ describe("wildcard escaping in the substring branches", () => {
    * template, where `'\''` and `'\%'` are JavaScript escape sequences: the
    * function emitted `replace(x, '%', '%')`, a no-op that escaped nothing, and
    * every test that only checked "does an `ILIKE` branch exist" still passed.
-   * A query with a live wildcard does not raise — it just matches too much.
+   * A query with a live wildcard does not raise  -  it just matches too much.
    */
   it("escapes the percent sign instead of leaving it a wildcard", () => {
     const [name] = ilikeBranches(

@@ -82,7 +82,7 @@ describe("a tab and the deletion flag that disagree", () => {
    * `/settings?tab=profile&confirm=delete` therefore lands on Profile while the
    * deletion wizard is still armed.
    *
-   * Nothing breaks outright, and it is not reachable from the app — the only
+   * Nothing breaks outright, and it is not reachable from the app  -  the only
    * writer of `confirm=delete` is `REAUTH_CALLBACK_URL`, which always sends
    * `tab=danger` with it. But Base UI's `Tabs.Panel` defaults `keepMounted` to
    * false, so the Danger Zone is not in the tree while Profile is showing: the

@@ -5,7 +5,7 @@ for the longer-term plan.
 
 ## Before Production
 
-* [ ] Legal pages — real operator name and address. `/legal` still
+* [ ] Legal pages  -  real operator name and address. `/legal` still
       renders `Unknown` for both, which is a § 5 DDG compliance gap. The
       contact address is now `admin@vomlabs.com` everywhere.
 * [ ] Legal review by a qualified professional before production
@@ -48,6 +48,9 @@ for the longer-term plan.
 
 ## Planned
 
+* [ ] FastStats integration: downloads (from us and some other providers,
+      if possible), Total Servers and Plugin Versions and Game Versions
+      being used
 * [ ] A sitemap
 * [ ] `/status` and `/changelog` pages (the footer reserves the slots)
 * [ ] Creator analytics
@@ -62,7 +65,7 @@ for the longer-term plan.
 * [x] Public author profiles with a Markdown bio
 * [x] Postgres search replacing Meilisearch
 * [x] Account deletion flow with grace period and hourly purge task
-* [x] Admin panel with seven tabs
+* [x] Admin panel with nine tabs
 * [x] Docker multi-stage build, Compose dev/prod/host-port overrides
 * [x] justfile and mise.toml (Node 24)
 * [x] Navbar polish (active states, user menu, mobile drawer)
@@ -84,10 +87,10 @@ for the longer-term plan.
 * [x] Indexes on the seven foreign keys that had none. Postgres never creates
       these, so deleting a project was scanning every notification and report
       ever filed about it. `foreign-key-indexes.test.ts` now fails on any new
-      one, in either direction — unindexed key, or an index left behind by a
+      one, in either direction  -  unindexed key, or an index left behind by a
       dropped column
 * [x] Settings tab resolution extracted to `src/lib/settings-tabs.ts` and
-      tested — the `tab` / legacy `passkeys` / `confirm=delete` interaction,
+      tested  -  the `tab` / legacy `passkeys` / `confirm=delete` interaction,
       plus the case where a tab and `confirm` disagree
 * [x] Account deletion wizard: reducer, `sessionStorage` handshake, and the
       return-from-re-authentication resume

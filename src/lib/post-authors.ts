@@ -8,7 +8,7 @@ import type { PostAuthor } from "@/lib/posts";
  * Everything that reads or writes the `post_authors` table lives here.
  *
  * The blog listing, the search index, and the post page all need the byline, and
- * search is imported *by* the module that serves the listing — so a shared
+ * search is imported *by* the module that serves the listing  -  so a shared
  * query placed in either would be an import cycle. One module owning the table
  * keeps that from being tempting.
  */
@@ -19,7 +19,7 @@ import type { PostAuthor } from "@/lib/posts";
  * A byline names a person taking responsibility for what is published under the
  * VoxelVein name, so it is restricted to staff rather than left open to any
  * account. Enforced here rather than in the editor form because the form is not
- * the boundary — a crafted request reaches the server function directly.
+ * the boundary  -  a crafted request reaches the server function directly.
  */
 export const AUTHOR_ROLES = ["admin", "moderator"] as const;
 
@@ -69,7 +69,7 @@ export const resolveAuthors = async (
  * Validates a requested byline and returns it de-duplicated in the given order.
  *
  * The whole request is rejected rather than silently dropping the offending ids,
- * so a bad id cannot quietly publish a post with fewer authors than asked for —
+ * so a bad id cannot quietly publish a post with fewer authors than asked for  -
  * which would look like the site lost credit for someone's work.
  */
 export const requireAuthorIds = async (

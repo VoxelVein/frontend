@@ -13,7 +13,7 @@ Snippets are compact views that appear in response to an action that someone tak
 
 You can present a snippet related to one of your app’s actions by including it with an [app intent](https://developer.apple.com/documentation/appintents) that you design to meet the specific needs of a task. For example, you might design a snippet for checking the weather forecast or updating progress toward a daily goal.
 
-There are two snippet types: confirmation and result. A *confirmation* snippet lets people confirm or cancel an action, and may include options that affect the result. By contrast, a *result* snippet provides information — possibly as the outcome of a confirmation — that doesn’t require further action. An app intent that displays a snippet always shows a result, while the confirmation step is optional.
+There are two snippet types: confirmation and result. A *confirmation* snippet lets people confirm or cancel an action, and may include options that affect the result. By contrast, a *result* snippet provides information  -  possibly as the outcome of a confirmation  -  that doesn’t require further action. An app intent that displays a snippet always shows a result, while the confirmation step is optional.
 
 For developer guidance, see [Displaying static and interactive snippets](https://developer.apple.com/documentation/appintents/displaying-static-and-interactive-snippets).
 

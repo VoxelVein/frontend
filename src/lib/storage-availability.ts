@@ -13,7 +13,7 @@
  * Carries the code alongside the message so callers react to *why* rather than
  * to wording. A reader-facing string is all that survives an HTTP round trip by
  * default, and a client that string-matches "could not reach" stops recognising
- * a broken file server the moment somebody rewords it — at which point the
+ * a broken file server the moment somebody rewords it  -  at which point the
  * reader gets a generic failure and no prompt to report anything.
  */
 export class StorageRequestError extends Error {
@@ -32,7 +32,7 @@ export class StorageRequestError extends Error {
  * It names no variables and no endpoint. The reader can act on neither, and a
  * tooltip that reads like a log line is one people learn to skip. "The admins
  * have not configured the file server" is the part that is both true and worth
- * reporting — it tells the reader this is not their fault and not their
+ * reporting  -  it tells the reader this is not their fault and not their
  * connection either.
  */
 export const STORAGE_UNAVAILABLE_REASON =
@@ -42,7 +42,7 @@ export const STORAGE_UNAVAILABLE_REASON =
  * The same reason as helper text, for beside the control.
  *
  * Plainer, and it names the fix, because this one is read by people who want to
- * do something about it — including whoever ends up telling the admins.
+ * do something about it  -  including whoever ends up telling the admins.
  */
 export const storageUnavailableNote = (noun = "Uploads"): string =>
   `${noun} need the file server, which this site does not have configured.`;
@@ -56,7 +56,7 @@ export const storageUnavailableNote = (noun = "Uploads"): string =>
  * all three unsaid.
  */
 export const STORAGE_UNREACHABLE_TOAST =
-  "Could not reach the file server, so nothing was saved. This is a server problem rather than yours — please report it.";
+  "Could not reach the file server, so nothing was saved. This is a server problem rather than yours  -  please report it.";
 
 /**
  * Picks the message for a failed storage action.

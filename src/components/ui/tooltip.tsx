@@ -11,7 +11,7 @@ import type { ComponentProps } from "react";
  *
  * **A tooltip is never the only way to know something.** It is unreachable by
  * keyboard on most implementations and disappears on touch, so anything a
- * tooltip says must also be reachable elsewhere — as helper text, a label, or a
+ * tooltip says must also be reachable elsewhere  -  as helper text, a label, or a
  * disabled control that explains itself. Used here to say why an upload control
  * is unavailable, never to carry information that exists nowhere else.
  *

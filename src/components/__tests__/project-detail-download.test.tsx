@@ -207,7 +207,7 @@ describe(ProjectDetail, () => {
     render(<ProjectDetail project={project({ type: "resourcepack" })} />);
 
     // Resource packs and datapacks are dropped into a folder by hand, so
-    // there is no loader axis to show — the same predicate the publish form
+    // there is no loader axis to show  -  the same predicate the publish form
     // uses decides.
     expect(
       within(panel()).queryByText("Loaders", { selector: "p" })

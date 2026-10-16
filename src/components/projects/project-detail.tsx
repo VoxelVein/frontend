@@ -231,8 +231,8 @@ const ProjectHeader = ({
  * The sidebar exists because of where the download used to be. The versions
  * table was the last section on the page, under the description and the
  * gallery, so someone who came to install a mod had to read past everything
- * else before finding a file. It is still there — the full history is more than
- * one card can hold — but the newest version is now the first thing after the
+ * else before finding a file. It is still there  -  the full history is more than
+ * one card can hold  -  but the newest version is now the first thing after the
  * summary.
  */
 export const ProjectDetail = ({ project }: { project: ProjectView }) => {

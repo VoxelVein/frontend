@@ -9,7 +9,7 @@ import type { ComponentProps } from "react";
  * and this project's primitives are Base UI. Adding a second UI library for a
  * list of links would cost more than the twenty lines below.
  *
- * A breadcrumb is pure markup — there is no behaviour to abstract — so what
+ * A breadcrumb is pure markup  -  there is no behaviour to abstract  -  so what
  * matters is the semantics, which are the accessibility contract here:
  *
  * * `Breadcrumb` is the `<nav>` landmark, so it is the one region named
@@ -56,7 +56,7 @@ const BreadcrumbItem = ({ className, ...props }: ComponentProps<"li">) => (
  *
  * There is deliberately no `BreadcrumbLink` here. A wrapper that forwards props
  * to an `<a>` cannot declare its own children, so every caller would have to
- * restyle the router's `Link` at the call site anyway — and the router `Link`
+ * restyle the router's `Link` at the call site anyway  -  and the router `Link`
  * renders the anchor itself, which is what actually needs navigating.
  */
 const BreadcrumbCurrent = ({ className, ...props }: ComponentProps<"span">) => (

@@ -5,7 +5,7 @@ import { getValkey } from "@/lib/valkey";
  *
  * Counters live in Valkey rather than in process memory because both the web
  * app and the API enforce limits, and because a per-process counter would be
- * enforced separately by every replica — multiplying the real limit by the
+ * enforced separately by every replica  -  multiplying the real limit by the
  * number of them.
  */
 
@@ -67,6 +67,10 @@ export const RATE_LIMITS = {
    * above what a member reporting a genuine problem needs.
    */
   report: { limit: 5, windowMs: 3_600_000 },
+  /** Opening a support ticket. */
+  ticketOpen: { limit: 10, windowMs: 3_600_000 },
+  /** Replying to a support ticket. */
+  ticketReply: { limit: 30, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimit>;
 
 /**

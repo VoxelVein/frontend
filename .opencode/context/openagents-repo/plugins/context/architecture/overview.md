@@ -2,7 +2,7 @@
 
 # OpenCode Plugins Overview
 
-OpenCode plugins are JavaScript or TypeScript modules that hook into **25+ events** across the entire OpenCode lifecycle—from when you type a prompt, to when tools execute, to when sessions complete.
+OpenCode plugins are JavaScript or TypeScript modules that hook into **25+ events** across the entire OpenCode lifecycle - from when you type a prompt, to when tools execute, to when sessions complete.
 
 ## Key Concepts
 

@@ -235,13 +235,13 @@ Skipped (no valuable content):
 
 How should we handle these source files?
 
-  1. Archive (safe) — move to .tmp/archive/harvested/{date}/
+  1. Archive (safe)  -  move to .tmp/archive/harvested/{date}/
      → Can restore later if needed
 
-  2. Delete — permanently remove harvested files
+  2. Delete  -  permanently remove harvested files
      → Frees disk space, no undo
 
-  3. Keep — leave source files in place
+  3. Keep  -  leave source files in place
      → No cleanup, files remain where they are
 
 Choose [1/2/3] (default: 1): _

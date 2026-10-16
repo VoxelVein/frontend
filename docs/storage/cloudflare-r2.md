@@ -2,7 +2,7 @@
 
 [Cloudflare R2](https://developers.cloudflare.com/r2/) is the production
 object store for VoxelVein. R2 is S3-compatible, so the app talks to it
-through the same `STORAGE_*` variables as any other provider — only the
+through the same `STORAGE_*` variables as any other provider  -  only the
 values change.
 
 R2 is chosen because it has **no egress fees**. Downloads are most of this
@@ -23,7 +23,7 @@ For local development, see [RustFS](rustfs.md).
 In the Cloudflare dashboard: **R2 object storage** → **Create bucket**.
 
 Pick a name. R2 bucket names are globally unique across all of R2, not
-just your account, so `voxelvein` is likely taken — append something
+just your account, so `voxelvein` is likely taken  -  append something
 account-specific. The name must be DNS-compatible: lowercase letters,
 digits, and hyphens.
 
@@ -53,7 +53,7 @@ next to **API Tokens** → **Create Account API token**.
 
 Choose:
 
-* **Object Read & Write** — read, write, and list objects. This is what
+* **Object Read & Write**  -  read, write, and list objects. This is what
   the app needs: it uploads, reads, and deletes objects, and never
   creates or configures buckets.
 * Scoped to **the one bucket**, not "any bucket in this account".
@@ -64,7 +64,7 @@ goes inactive if they leave the account, so it is the wrong choice for a
 deployed service.
 
 > [!IMPORTANT] Cloudflare shows the **Secret Access Key** exactly once,
-> on the page right after creation. There is no way to view it again —
+> on the page right after creation. There is no way to view it again  -
 > if you lose it, delete the token and create another.
 
 Use **Object Read & Write**, not Admin. The Admin permissions also allow
@@ -170,10 +170,10 @@ Then, on a deployed environment:
 
 ## Cost and limits
 
-* **Storage** — billed per GB-month, with a free tier
-* **Operations** — Class A (writes, listings) and Class B (reads) are
+* **Storage**  -  billed per GB-month, with a free tier
+* **Operations**  -  Class A (writes, listings) and Class B (reads) are
   billed separately per million
-* **Egress** — free, which is the reason for using R2 here
+* **Egress**  -  free, which is the reason for using R2 here
 
 The free tier's limits are in the [R2 pricing
 documentation](https://developers.cloudflare.com/r2/pricing/). Exceeding
@@ -208,16 +208,16 @@ them does not hard-fail; the request is billed. That is exactly why
   account.
 
 Rotating the token means creating a new one in the dashboard, updating the
-two `STORAGE_*` credentials, and restarting the app — it builds its
+two `STORAGE_*` credentials, and restarting the app  -  it builds its
 `S3Client` once and caches it, so it will not pick up a change to the
 environment. Delete the old token once the new one is confirmed working.
 
 ## Related
 
-* [Object Storage](object-storage.md) — how the app uses storage, and the
+* [Object Storage](object-storage.md)  -  how the app uses storage, and the
   quota rules
-* [RustFS](rustfs.md) — the local development provider
-* [Deploying with Dokploy](../deployment/dokploy.md) — where these
+* [RustFS](rustfs.md)  -  the local development provider
+* [Deploying with Dokploy](../deployment/dokploy.md)  -  where these
   variables go in a deploy
-* [Projects and Files](../content/projects.md) — the upload and download
+* [Projects and Files](../content/projects.md)  -  the upload and download
   flows

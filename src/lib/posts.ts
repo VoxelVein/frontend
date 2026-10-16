@@ -189,7 +189,7 @@ const EMPHASIS_ASTERISK = /\*(?<text>\S(?:[^*]*\S)?)\*/gu;
 const EMPHASIS_UNDERSCORE =
   /(?<lead>^|[\s(])_(?<text>\S(?:[^_]*\S)?)_(?=$|[\s).,!?:;])/gu;
 const WHITESPACE = /\s+/gu;
-const TRAILING_NOISE = /[\s.,;:!?—–-]+$/gu;
+const TRAILING_NOISE = /[\s.,;:!? - –-]+$/gu;
 
 /** Replaces block syntax with nothing, keeping the inline word text. */
 const stripBlockSyntax = (text: string): string =>

@@ -20,7 +20,7 @@ import type { Capability } from "@/lib/roles";
  * The policy, in prose, so a reviewer can check it without reading the code.
  *
  * `CAPABILITY_MINIMUM` is the machine-readable source of truth and this mirrors
- * it — `it("matches the capability table")` below fails if the two drift. The
+ * it  -  `it("matches the capability table")` below fails if the two drift. The
  * duplication is deliberate: a permissions change should be a thing you can
  * see is wrong, not a thing you have to reconstruct from a table of ranks.
  */
@@ -33,6 +33,7 @@ const EXPECTED = {
     "manageReports",
     "manageSessions",
     "manageStorage",
+    "manageTickets",
     "manageUsers",
     "publishPosts",
     "reviewProjects",
@@ -46,7 +47,7 @@ const EXPECTED = {
  * What a role actually holds, sorted, for comparison against `EXPECTED`.
  *
  * `ALL_CAPABILITIES` is already in table order, and `EXPECTED` is written in
- * the same order, so the arrays compare directly with no sorting — which also
+ * the same order, so the arrays compare directly with no sorting  -  which also
  * avoids `toSorted`, unavailable at this file's ES2022 target.
  */
 const held = (role: string): Capability[] =>

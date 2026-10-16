@@ -25,6 +25,7 @@ export const ADMIN_TABS = [
   // After Reviews: both are moderation queues, so they sit together rather than
   // stranding the newest one next to Storage.
   { label: "Reports", value: "reports" },
+  { label: "Support", value: "tickets" },
 ] as const;
 
 export type AdminTab = (typeof ADMIN_TABS)[number]["value"];
@@ -35,6 +36,7 @@ export const TAB_CAPABILITY = {
   notifications: "manageNotifications",
   posts: "managePosts",
   reports: "manageReports",
+  tickets: "manageTickets",
   reviews: "reviewProjects",
   sessions: "manageSessions",
   storage: "manageStorage",
@@ -54,8 +56,8 @@ export const visibleTabsFor = (role: string) =>
  * Prefers the one in the URL so a shared link lands where it was aimed, and
  * otherwise falls back to the first the role can see.
  *
- * Total by construction: with no visible tab at all — which is what a resolved
- * "user" role produces — it still returns a defined tab instead of throwing.
+ * Total by construction: with no visible tab at all  -  which is what a resolved
+ * "user" role produces  -  it still returns a defined tab instead of throwing.
  * The panel renders a skeleton until the session resolves, so this is a
  * belt-and-braces guard rather than the primary defence.
  */

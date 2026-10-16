@@ -85,7 +85,7 @@ export class StorageError extends Error {
 
 /** What the reader is told when the endpoint did not answer. */
 export const STORAGE_UNREACHABLE_MESSAGE =
-  "Could not reach the file server. This is a server problem, not yours — please report it.";
+  "Could not reach the file server. This is a server problem, not yours  -  please report it.";
 
 /**
  * Connection codes the AWS SDK and Node surface when a request never completes.
@@ -105,7 +105,7 @@ const CONNECTION_ERROR_NAMES = new Set([
   "EHOSTDOWN",
   "EHOSTUNREACH",
   // A name that does not resolve is the endpoint being unreachable, which is
-  // exactly what a mistyped STORAGE_ENDPOINT produces — a very easy mistake to
+  // exactly what a mistyped STORAGE_ENDPOINT produces  -  a very easy mistake to
   // make, and one this list used to miss.
   "ENOTFOUND",
   "ENETUNREACH",
@@ -126,7 +126,7 @@ const isConnectionName = (name: string): boolean =>
  * Runs a storage call, reporting an unreachable endpoint as such.
  *
  * Without this the SDK's own error reaches the API route, which answers 503
- * with a generic "storage is unavailable" — true, but it loses the difference
+ * with a generic "storage is unavailable"  -  true, but it loses the difference
  * between "misconfigured" and "broken", which is the difference between a
  * message that reassures the reader and one that asks them to report something.
  */

@@ -84,7 +84,7 @@ interface LiveModEvent {
  *
  * Deliberately type-neutral. The stream is a single global feed that every
  * browse page subscribes to, and the webhook payload carries only `id` and
- * `name` — no project type. The labels previously said "New mod added", so a
+ * `name`  -  no project type. The labels previously said "New mod added", so a
  * shader publish announced itself as a mod on the Shaders page, next to a
  * "Refresh results" button that would not show it. Naming the object "project"
  * is what the payload actually supports; the surrounding page supplies the type.
@@ -243,7 +243,7 @@ const GameVersionFilter = ({
  *
  * A filtered page that matched nothing is a search that failed, so it gets the
  * search glyph. An unfiltered empty page is simply a section with nothing in it
- * yet, and gets that section's own icon from the category registry — the same
+ * yet, and gets that section's own icon from the category registry  -  the same
  * one its navbar entry, explore tile, and footer link already use. A generic
  * "nothing found" mark on a page nobody searched reads as an error.
  *

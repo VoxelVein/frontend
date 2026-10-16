@@ -15,7 +15,7 @@ request middleware.
 : `same-origin`, isolating the browsing context.
 
 `Permissions-Policy`
-: `camera=(), geolocation=(), microphone=()` — denies three APIs the app
+: `camera=(), geolocation=(), microphone=()`  -  denies three APIs the app
   never uses.
 
 `Referrer-Policy`
@@ -46,7 +46,7 @@ on plain HTTP. That makes it safe behind a TLS-terminating proxy like the
 one Dokploy fronts the stack with.
 
 Headers are applied to a **fresh `Response`** rather than mutated in place,
-because some responses — `Response.redirect` among them — have immutable
+because some responses  -  `Response.redirect` among them  -  have immutable
 headers and `headers.set` would throw.
 
 ## CSRF scope
@@ -62,7 +62,7 @@ are outside this check by design.
 includes `http://localhost:3000` and every comma-separated entry in
 `BETTER_AUTH_TRUSTED_ORIGINS` (`src/lib/auth.ts:192`).
 
-Set that variable when the app is reached at more than one origin — a
+Set that variable when the app is reached at more than one origin  -  a
 preview deployment, or a staging host sharing a database. It is accepted
 by `env.config.ts` and documented nowhere else, which is the only reason
 it is mentioned here.
@@ -95,7 +95,7 @@ returns the target when it passes, otherwise the caller's default.
 The check is three conditions, not a general URL parser: the target must
 be a string, must start with `/`, and must not start with `//` or `/\`.
 Those last two are the interesting ones, because both are absolute URLs
-to another origin once a browser normalises them — `//` as a
+to another origin once a browser normalises them  -  `//` as a
 protocol-relative URL, and `\` as a forward slash. A relative value with
 no leading slash, such as `dashboard`, is also rejected.
 
@@ -117,7 +117,7 @@ already-cleaned document to the renderer. Sanitizing the rendered markup
 instead would strip the class names on code blocks and the ids the
 renderer adds for footnote links. Render-time sanitizing also means posts
 written before this existed are covered, and the admin preview is
-protected by the same code as the public page — there is no second path
+protected by the same code as the public page  -  there is no second path
 to get wrong.
 
 **The allowlist is deny-by-default.** `ALLOWED_TAGS` and `ALLOWED_ATTR`
@@ -130,7 +130,7 @@ inferred from the absence of an entry. All `aria-*` attributes are off
 **`inlineHtml` is handled explicitly.** The renderer has separate
 injection sites for block `html`, inline `inlineHtml`, and a syntax
 highlighter. A sanitizer that only knew the first would leave every piece
-of inline author HTML in the document unsanitized — which in practice is
+of inline author HTML in the document unsanitized  -  which in practice is
 most of the HTML anyone writes. The tree also has four child collections,
 not one: `children`, `items`, `header`, and `rows`. Table cells live in
 `header` and `rows`, so a walk that only recurses through `children`
@@ -142,7 +142,7 @@ node and so never reaches `sanitizeHtml`:
 * `sanitizeHtml` handles URLs inside embedded HTML;
 * `markdownUrlTransform` handles `[a](b)` and `![a](b)` at parse time.
 
-Both reject `javascript:` however it is spelled — mixed case, leading
+Both reject `javascript:` however it is spelled  -  mixed case, leading
 whitespace, or with control characters injected into the scheme, which
 browsers strip before resolving it. `data:` URLs are allowed on `img`
 only, restricted to base64 raster types (`avif`, `gif`, `jpeg`, `jpg`,
@@ -170,7 +170,7 @@ Two layers, and both live on the server.
 formats: PNG, JPEG, GIF, and WebP. **SVG is rejected on purpose**, since it
 is a document format that can carry script.
 
-Each format has a hand-written dimension reader — PNG big-endian `uint32`
+Each format has a hand-written dimension reader  -  PNG big-endian `uint32`
 at offsets 16 and 20, GIF little-endian `uint16` at 6 and 8, a JPEG SOF
 marker walk, and the three WebP chunk types `VP8X`, `VP8L`, and the
 lossy `VP8` chunk (which carries a trailing space in its four-character
@@ -181,7 +181,7 @@ The stored object name is **regenerated**, never taken from the client:
 `<kind>-<uuid>.<ext>`. A client-supplied name never reaches storage.
 
 `src/lib/image-limits.ts` exports just the two ceilings a client
-component needs — `IMAGE_MAX_BYTES` (8 MB) and `GALLERY_MAX_COUNT` (12).
+component needs  -  `IMAGE_MAX_BYTES` (8 MB) and `GALLERY_MAX_COUNT` (12).
 The split is on purpose: the byte-parsing helpers in
 `image-validation.ts` are server-only, and importing them from a client
 component to read these two numbers would pull the whole parser into the
@@ -214,7 +214,7 @@ avatar too would leave the byline's picture suddenly broken.
 
 `users.image` is written with the new `/api/avatar/$id` URL. That is
 Better Auth's existing avatar field, so the navbar, the account menu, and
-the public profile all pick the upload up with no per-surface change — and
+the public profile all pick the upload up with no per-surface change  -  and
 there is only one copy of the URL rather than one per component.
 
 #### External picture URLs
@@ -227,7 +227,7 @@ GitHub sign-in: Better Auth's `overrideUserInfoOnSignIn` defaults to
 `false`, so provider data is only used when the user record is created.
 
 An external URL skips every upload gate above, because there are no bytes
-to sniff — nothing is fetched, stored, or proxied, and the image is loaded
+to sniff  -  nothing is fetched, stored, or proxied, and the image is loaded
 straight from the third party by the reader's browser. What replaces those
 gates is `src/lib/avatar-url.ts`:
 
@@ -246,8 +246,8 @@ validator, so the boundary that decides what is stored reports the specific
 reason. An empty field clears the picture rather than failing, so the field
 can unset what it set.
 
-`isSafeAvatarSrc` is the render-time half. Every `Avatar` — including the
-ones in post bylines, which show a value the viewer did not choose — passes
+`isSafeAvatarSrc` is the render-time half. Every `Avatar`  -  including the
+ones in post bylines, which show a value the viewer did not choose  -  passes
 through it, and anything that is neither an `/api/avatar/...` path nor an
 `https:` URL renders as initials instead. That is not the control that
 stops script; the allowlist above is. It exists so a value that reached
@@ -257,7 +257,7 @@ as a picture or as initials and never as a scheme nobody intended to allow.
 Setting an external URL supersedes any uploaded avatar, so the stored
 object and its `user_images` row are deleted in the same call. Leaving
 them would charge the account quota for an object nothing references, and
-the only way to reclaim it would be Remove — which would also discard the
+the only way to reclaim it would be Remove  -  which would also discard the
 URL just chosen.
 
 ### A file server that is missing, or down
@@ -276,14 +276,14 @@ honest one, because the reader finds out it is broken by trying.
 **Configured but unreachable.** `withStorageErrors` wraps every call that
 talks to the endpoint and turns a connection failure into
 `STORAGE_ERROR.unreachable`, matching on the error names Node and the AWS
-SDK use — including `ENOTFOUND`, which is what a mistyped
+SDK use  -  including `ENOTFOUND`, which is what a mistyped
 `STORAGE_ENDPOINT` produces. A `StorageError` is never relabelled, so a
 misconfiguration cannot be reported as an outage.
 
 The API routes answer both with a machine-readable `code` alongside the
 message. That is what lets the client choose its own wording instead of
 string-matching "could not reach", which would quietly stop working the
-moment somebody reworded the message — leaving the reader with a generic
+moment somebody reworded the message  -  leaving the reader with a generic
 failure and no prompt to report anything.
 
 The client's own availability check **fails open**: a failed check leaves
@@ -311,12 +311,12 @@ reason the store is shared: `web` and `api` both enforce limits, and a
 per-process counter would be enforced separately by each replica,
 multiplying the real limit by the number of them. Valkey is the
 BSD-licensed Linux Foundation fork of Redis and speaks the same protocol,
-so the client is the standard `redis` package — see
+so the client is the standard `redis` package  -  see
 [Docker deployment](../deployment/docker.md) for the service and
 `VALKEY_URL`.
 
 The budget is deliberately coarse. The point is to stop a runaway client
-or a script, not to enforce a product quota — nobody typing in a search
+or a script, not to enforce a product quota  -  nobody typing in a search
 box comes near these numbers, while a loop over them does.
 
 | Bucket        | Budget  | Where                                             |
@@ -348,7 +348,7 @@ becoming a hang:
 
 * `getValkey` sets a bounded `connectTimeout` and disables reconnection.
   node-redis retries a refused connection with backoff by default, which
-  would leave the caller — and the request waiting on it — pending long
+  would leave the caller  -  and the request waiting on it  -  pending long
   past any useful answer.
 * A failed connect throws into the caller, and the next request builds a
   fresh client, so an outage self-heals without a restart.
@@ -373,7 +373,7 @@ Its counters are in **process memory**, which is a real limitation and
 worth stating plainly: on N replicas the effective limit is N times those
 numbers. They still stop one runaway client, which is the job.
 
-**Known gap — two tempting transports, both refused.** Everything outside
+**Known gap  -  two tempting transports, both refused.** Everything outside
 Better Auth's own endpoints uses Valkey, so it is natural to want it here
 too. Both alternatives were tried and both broke sign-in:
 
@@ -404,17 +404,17 @@ schema is confirmed against the installed adapter.
 After a failed check the limiter stops calling Valkey for ten seconds and
 allows everything in the meantime. Without it, one broken dependency would
 cost **every** request on the site a connect attempt against a server that
-is not answering — the opposite of what a rate limiter is for. A single
+is not answering  -  the opposite of what a rate limiter is for. A single
 successful call closes it again, so recovery needs no restart.
 
 ## Related
 
-* [Blog](../content/blog.md) — author-written HTML, and what it may contain
-* [Resilience](../development/resilience.md) — chunk recovery, download
+* [Blog](../content/blog.md)  -  author-written HTML, and what it may contain
+* [Resilience](../development/resilience.md)  -  chunk recovery, download
   counting, and connection caps
-* [Docker deployment](../deployment/docker.md) — the Valkey service and
+* [Docker deployment](../deployment/docker.md)  -  the Valkey service and
   `VALKEY_URL`
-* [Object Storage](../storage/object-storage.md) — buckets, keys, quotas
-* [Email and Password](../authentication/email-password.md) — why email
+* [Object Storage](../storage/object-storage.md)  -  buckets, keys, quotas
+* [Email and Password](../authentication/email-password.md)  -  why email
   verification is off, and what that means for account linking
 * [Accessibility Standards](../accessibility/standards.md)

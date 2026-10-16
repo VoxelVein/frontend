@@ -10,8 +10,8 @@ import type { ProjectVersionView, ProjectView } from "@/lib/projects";
 /**
  * A short factual value as a chip, or a note when there is none.
  *
- * An empty compatibility list is information — "we don't know what this supports"
- * and "this supports nothing" are different answers — so it gets words rather
+ * An empty compatibility list is information  -  "we don't know what this supports"
+ * and "this supports nothing" are different answers  -  so it gets words rather
  * than an empty row.
  */
 const ValuePills = ({ label, values }: { label: string; values: string[] }) => (
@@ -108,7 +108,7 @@ const DownloadLinks = ({ version }: { version: ProjectVersionView }) => {
  * Minecraft versions it targets.
  *
  * The loaders block is omitted entirely for resource packs and datapacks,
- * which have no such axis — `hasLoaders` is the same predicate the publish form
+ * which have no such axis  -  `hasLoaders` is the same predicate the publish form
  * and the browse filters use, so a type that stops needing loaders loses the
  * block here too.
  */
@@ -138,7 +138,7 @@ const Compatibility = ({
  *
  * The download action leads the page in DOM order, exactly as the server page's
  * join panel does. Before this the versions table was the last thing on the
- * screen, under the description and the gallery — a visitor who came to install
+ * screen, under the description and the gallery  -  a visitor who came to install
  * a mod had to scroll past everything else to find the file.
  */
 const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
@@ -202,7 +202,7 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
   if (versions.length === 0) {
     return (
       <EmptyState
-        description="No downloads available yet. This project is still being set up — check back soon."
+        description="No downloads available yet. This project is still being set up  -  check back soon."
         icon={<IconVersions size={24} aria-hidden="true" />}
         title="No versions yet"
         variant="inline"

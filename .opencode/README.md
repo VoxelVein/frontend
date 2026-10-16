@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 Agents load YOUR patterns before generating code. Code matches your project from the start. No refactoring needed.
 
 **📝 Editable Agents (Not Baked-In Plugins)**  
-Full control over agent behavior. Edit markdown files directly—no compilation, no vendor lock-in. Change workflows, add constraints, customize for your team.
+Full control over agent behavior. Edit markdown files directly - no compilation, no vendor lock-in. Change workflows, add constraints, customize for your team.
 
 **✋ Approval Gates (Human-Guided AI)**  
 Agents ALWAYS request approval before execution. Propose → Approve → Execute. You stay in control. No "oh no, what did the AI just do?" moments.
@@ -508,10 +508,10 @@ ContextScout discovers context files using a **local-first** approach:
 
 **Key rules:**
 
-- **Local always wins** — if you installed locally, global is never checked
-- **Global fallback is only for `core/`** (standards, workflows, guides) — universal files that are the same across projects
-- **Project intelligence is always local** — your tech stack, patterns, and naming conventions live in `.opencode/context/project-intelligence/` and are never loaded from global
-- **One-time check** — ContextScout resolves the core location once at startup (max 2 glob checks), not per-file
+- **Local always wins**  -  if you installed locally, global is never checked
+- **Global fallback is only for `core/`** (standards, workflows, guides)  -  universal files that are the same across projects
+- **Project intelligence is always local**  -  your tech stack, patterns, and naming conventions live in `.opencode/context/project-intelligence/` and are never loaded from global
+- **One-time check**  -  ContextScout resolves the core location once at startup (max 2 glob checks), not per-file
 
 **Common setups:**
 
@@ -786,7 +786,7 @@ A: Bash 3.2+ (macOS default works). Run `bash scripts/tests/test-compatibility.s
 A: No, they're optional. Only install if you want Telegram notifications or Gemini AI features.
 
 **Q: Where should I install - globally or per-project?**  
-A: Local (`.opencode/` in your project) is recommended — patterns are committed to git and shared with your team. Global (`~/.config/opencode/`) is good for personal defaults across all projects. The installer asks you to choose. See [OpenCode Config Docs](https://opencode.ai/docs/config/) for how configs merge.
+A: Local (`.opencode/` in your project) is recommended  -  patterns are committed to git and shared with your team. Global (`~/.config/opencode/`) is good for personal defaults across all projects. The installer asks you to choose. See [OpenCode Config Docs](https://opencode.ai/docs/config/) for how configs merge.
 
 ---
 

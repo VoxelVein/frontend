@@ -6,7 +6,7 @@ which it streams to the browser over Server-Sent Events (SSE).
 
 Search is not part of this server: the web app queries Postgres for that
 directly. See [Search](../search/postgres.md). Uploads, downloads, and the
-Better Auth HTTP surface are also not here — they are web-app routes under
+Better Auth HTTP surface are also not here  -  they are web-app routes under
 `src/routes/api/`. See
 [Projects and Files](../content/projects.md).
 
@@ -85,15 +85,15 @@ source.addEventListener("mod.created", handleEvent);
 
 In the app this lives in `src/components/projects/project-browser.tsx`,
 which every browse page renders. The URL comes from `VITE_API_URL`, with a
-`http://localhost:3002` fallback **in development only** — a production
+`http://localhost:3002` fallback **in development only**  -  a production
 build without `VITE_API_URL` silently loses the live banner.
 
 ### `POST /api/webhooks/mods`
 
 Receives mod events from external publishers. The request must include:
 
-* `x-webhook-timestamp` — current Unix time in seconds
-* `x-webhook-signature` — hex HMAC-SHA256 of `${timestamp}.${rawBody}`,
+* `x-webhook-timestamp`  -  current Unix time in seconds
+* `x-webhook-signature`  -  hex HMAC-SHA256 of `${timestamp}.${rawBody}`,
   signed with `WEBHOOK_SECRET`
 
 ```ts
@@ -121,9 +121,9 @@ The payload is validated with a Valibot schema before broadcasting:
 
 Responses:
 
-* `200` — signature valid and payload accepted, event broadcast to SSE
-* `400` — invalid JSON or payload shape
-* `401` — invalid signature or stale timestamp
+* `200`  -  signature valid and payload accepted, event broadcast to SSE
+* `400`  -  invalid JSON or payload shape
+* `401`  -  invalid signature or stale timestamp
 
 Send a test event with:
 
@@ -164,7 +164,7 @@ client IP, which is why the `api` Docker stage copies the whole of
 
 `server/index.ts` sets a strict `default-src 'none'` CSP, `no-referrer`,
 and `nosniff` on every response. The web app's own CSP is deliberately
-looser, because SSR hydration needs inline scripts — see `src/start.ts`.
+looser, because SSR hydration needs inline scripts  -  see `src/start.ts`.
 
 ## The web app's own HTTP routes
 

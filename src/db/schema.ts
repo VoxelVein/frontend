@@ -163,20 +163,6 @@ export const passkeys = pgTable(
 export const posts = pgTable(
   "posts",
   {
-    /**
-     * @deprecated Superseded by the `postAuthors` table; nothing reads it.
-     *
-     * Kept only because a migration drops columns automatically at merge time
-     * while the previous version is still serving, and the previous version
-     * still inserts into this column. Dropping it in the same deploy would fail
-     * those inserts. Once this version is live everywhere, the follow-up is a
-     * single migration: drop `author_id` and `posts_authorId_idx`, then delete
-     * this field.
-     *
-     * Nullable rather than NOT NULL so this version can insert without naming
-     * it — the original constraint would have rejected every new post.
-     */
-    authorId: text("author_id"),
     // One of `POST_CATEGORIES` in src/lib/posts.ts, or null for "none". Stored as
     // text rather than a Postgres enum so a category can be added without a
     // migration, matching how `projects.category` works. Null rather than the
@@ -198,7 +184,6 @@ export const posts = pgTable(
       .notNull(),
   },
   (table) => [
-    index("posts_authorId_idx").on(table.authorId),
     index("posts_published_idx").on(table.published),
     // listPosts filters on `published` and orders by `createdAt` descending.
     // A single-column index on `published` cannot supply the sort, so Postgres
@@ -212,8 +197,8 @@ export const posts = pgTable(
 /**
  * Who a post is written by, in display order.
  *
- * A post can credit several people — an engineering write-up usually has more
- * than one author — so authorship cannot live on `posts` itself. This is the
+ * A post can credit several people  -  an engineering write-up usually has more
+ * than one author  -  so authorship cannot live on `posts` itself. This is the
  * only record of a post's authors: an earlier `posts.authorId` column was
  * backfilled into here and dropped, because two places naming the author can
  * disagree about who the author is.
@@ -257,7 +242,7 @@ export const projects = pgTable(
      *
      * The column exists because `status` alone cannot answer the question. A takedown
      * sets the status to `removed`, and by the time the project is live again that
-     * fact has been overwritten by whatever came next — so without this there is no
+     * fact has been overwritten by whatever came next  -  so without this there is no
      * way to tell a project staff pulled from one the author simply unpublished, and
      * the two need opposite treatment on the way back up.
      *
@@ -456,8 +441,8 @@ export const projectFiles = pgTable(
  * One row per account. The partial unique index enforces that in the database,
  * so two concurrent uploads cannot leave two live avatars.
  *
- * Avatars count against the same site-wide quota as project files — see
- * `insertFileWithinQuota` — so a few thousand accounts cannot quietly displace
+ * Avatars count against the same site-wide quota as project files  -  see
+ * `insertFileWithinQuota`  -  so a few thousand accounts cannot quietly displace
  * the mods that are the point of the site.
  */
 export const userImages = pgTable(
@@ -492,7 +477,7 @@ export const userImages = pgTable(
  * One table for both target kinds rather than two, so the inbox, the ordering,
  * and the resolution flow are written once. `targetKind` says which of the two
  * nullable id columns is the subject, and a CHECK constraint enforces that
- * exactly one is set — an application-level "only set one" rule would be a
+ * exactly one is set  -  an application-level "only set one" rule would be a
  * request the next write path forgets.
  *
  * The reporter is `set null` on delete rather than cascading: a report is
@@ -594,6 +579,55 @@ export const projectImages = pgTable(
       table.projectId,
       table.createdAt
     ),
+  ]
+);
+
+export const supportTickets = pgTable(
+  "support_tickets",
+  {
+    closedAt: timestamp("closed_at"),
+    closedById: text("closed_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    status: text("status").default("open").notNull(),
+    subject: text("subject").notNull(),
+    tags: text("tags").array().default([]).notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("support_tickets_closedById_idx").on(table.closedById),
+    index("support_tickets_userId_idx").on(table.userId),
+    index("support_tickets_status_idx").on(table.status),
+    index("support_tickets_createdAt_idx").on(table.createdAt),
+  ]
+);
+
+export const supportTicketMessages = pgTable(
+  "support_ticket_messages",
+  {
+    authorUserId: text("author_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    internal: boolean("internal").default(false).notNull(),
+    ticketId: uuid("ticket_id")
+      .notNull()
+      .references(() => supportTickets.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("support_ticket_messages_authorUserId_idx").on(table.authorUserId),
+    index("support_ticket_messages_ticketId_idx").on(table.ticketId),
+    index("support_ticket_messages_createdAt_idx").on(table.createdAt),
   ]
 );
 
@@ -699,7 +733,7 @@ export const projectVersionsRelations = relations(
  * report, and has no project to link to. Those rows carry no destination and
  * are read in place. It was NOT NULL before report outcomes existed, which
  * meant the only way to notify a reporter was to attach the notification to
- * some arbitrary project — a link to somewhere unrelated.
+ * some arbitrary project  -  a link to somewhere unrelated.
  */
 export const userNotifications = pgTable(
   "user_notifications",

@@ -22,7 +22,7 @@ services:
 
   # Valkey, not Redis: same wire protocol, BSD licence under the Linux
   # Foundation. Holds rate-limit counters and other short-lived shared state.
-  # No volume and persistence off — every key carries a TTL, so a restart costs
+  # No volume and persistence off  -  every key carries a TTL, so a restart costs
   # nothing but a momentary reset of the limits.
   valkey:
     image: valkey/valkey:8

@@ -1,7 +1,7 @@
 /**
  * When a draft has to be looked at by a person before it goes public.
  *
- * Separated from `project-moderation.ts` — which reaches the database — so the
+ * Separated from `project-moderation.ts`  -  which reaches the database  -  so the
  * policy can be read and tested on its own. The rule is two stored timestamps
  * and one boolean, and it is the part worth pinning down: it decides whether
  * someone gets a listing or a queue.
@@ -30,7 +30,7 @@ interface PublicationHistory {
  * A project the owner unpublished goes straight back up. Withdrawing your own
  * listing is not a moderation event, and making someone queue for review to undo
  * a decision they just made would put the review step in charge of a self-service
- * action — and make "unpublish then publish again" a slow round trip for no
+ * action  -  and make "unpublish then publish again" a slow round trip for no
  * reason.
  *
  * A project staff took down goes into the queue, whatever its history

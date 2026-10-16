@@ -28,7 +28,7 @@ const TYPE_SENTENCE = categoryLabelSentence();
  * "Find your next" is deliberately the visitor's half of the sentence rather
  * than the site's: it says what the reader is here to do, and it survives every
  * category the rotation can land on. The subhead below it no longer repeats
- * this list — two seven-item lists inside one screen read as a wall of text
+ * this list  -  two seven-item lists inside one screen read as a wall of text
  * and buried the actual promise.
  */
 const HEADLINE_PREFIX = "Find your next";
@@ -42,7 +42,7 @@ const HEADLINE_PREFIX = "Find your next";
  *
  * While the session is still loading it renders nothing rather than guessing.
  * The signed-out button is a real link, so rendering it first would show "Join
- * free" to a signed-in visitor and then swap it out — the same trade the
+ * free" to a signed-in visitor and then swap it out  -  the same trade the
  * navbar's AuthSkeleton makes, minus the skeleton's visual noise here because
  * the browse button already holds the row.
  */
@@ -102,12 +102,12 @@ const Hero = () => {
         </h1>
 
         <p className="text-muted-foreground mx-auto mb-10 max-w-2xl text-lg leading-relaxed sm:mb-12 sm:text-xl">
-          Every kind of Minecraft project in one place — published by the people
+          Every kind of Minecraft project in one place - published by the people
           who build it, free and open source, forever.
         </p>
 
         {/* Two calls to action, not one. The old hero offered browsing only, so
-            half the audience — the people who make these things — had no way in
+            half the audience  -  the people who make these things  -  had no way in
             from here even though publishing is the other half of the site's
             job. The second one follows the reader: signed out it opens
             registration, signed in it opens the dashboard they'd publish from.

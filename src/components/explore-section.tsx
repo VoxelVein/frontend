@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 /**
  * Marks a category whose browse route does not exist yet.
  *
- * Nothing is currently unavailable — every entry in `MINECRAFT_CATEGORIES` has
- * `available: true` — so the badge is dormant. It stays because the registry
+ * Nothing is currently unavailable  -  every entry in `MINECRAFT_CATEGORIES` has
+ * `available: true`  -  so the badge is dormant. It stays because the registry
  * carries the flag as part of its contract, and a category added with
  * `available: false` should read as "Soon" without a second edit here.
  */
@@ -29,7 +29,7 @@ const SoonBadge = () => (
  * **No "Browse →" footer.** The whole tile is already one link, so the footer
  * said the same thing twice on every card and gave each one a dead strip at the
  * bottom. The affordance is now the icon, which fills with the accent colour on
- * hover, plus the title taking the accent — the same treatment the browse page's
+ * hover, plus the title taking the accent  -  the same treatment the browse page's
  * cards use.
  *
  * **A larger icon tile.** At `size-12` the glyph was smaller than the title
@@ -47,7 +47,7 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
   return (
     <article
       className={cn(
-        "border-border ease-smooth relative flex h-full flex-col rounded-xl border p-6",
+        "border-border ease-smooth relative flex h-full flex-col rounded-2xl border p-7",
         "transition-colors duration-200 motion-reduce:transition-none",
         available
           ? "group bg-card hover:border-primary/30 focus-within:border-primary/30"
@@ -101,22 +101,20 @@ const ExploreSection = () => (
     className="px-4 py-16 sm:px-6 lg:px-8"
   >
     <div className="mx-auto max-w-7xl">
-      <Reveal className="mx-auto max-w-3xl text-center">
-        {/* The filled pill echoes the hero's rotating-text pill, which anchors
-            this page's accent treatment. */}
+      <Reveal className="max-w-3xl">
         <h2
-          className="text-foreground mx-auto text-3xl font-bold tracking-tight text-balance sm:text-4xl"
+          className="text-foreground text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl"
           id="browse-heading"
         >
           Explore <FilledPill>Minecraft</FilledPill>
         </h2>
 
-        <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8">
-          {`${MINECRAFT_CATEGORIES.length} ways into the community's work — pick one and start digging.`}
+        <p className="text-muted-foreground mt-5 max-w-prose text-lg leading-8">
+          {`${MINECRAFT_CATEGORIES.length} ways into the community's work  -  pick one and start digging.`}
         </p>
       </Reveal>
 
-      <ul className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {MINECRAFT_CATEGORIES.map((category, index) => (
           <li className="h-full" key={category.href}>
             <Reveal className="h-full" delay={staggerDelay(index)}>

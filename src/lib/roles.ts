@@ -76,13 +76,13 @@ export const isModerator = (role: string | null | undefined): boolean =>
  * spread across eighteen files the answer drifts; naming the job instead makes
  * each site self-documenting and puts every minimum in this one table.
  *
- * `satisfies` keeps the minimums honest at compile time — a minimum naming a
+ * `satisfies` keeps the minimums honest at compile time  -  a minimum naming a
  * role the ladder does not have is a type error, not a grant to nobody that
  * reads as a permission bug at runtime.
  *
  * A moderator holds `reviewProjects` and `viewAdminPanel` and nothing else.
  * Account and session handling is admin-only, so a moderator cannot list,
- * ban, or delete an account — including an admin's.
+ * ban, or delete an account  -  including an admin's.
  */
 export const CAPABILITY_MINIMUM = {
   manageDeletions: "admin",
@@ -96,6 +96,7 @@ export const CAPABILITY_MINIMUM = {
   manageReports: "moderator",
   manageSessions: "admin",
   manageStorage: "admin",
+  manageTickets: "admin",
   manageUsers: "admin",
   // Split from `managePosts` because publishing makes a post public, which is a
   // different decision from writing one. Same minimum today, kept separate so
@@ -111,7 +112,7 @@ export type Capability = keyof typeof CAPABILITY_MINIMUM;
  * Every capability, in table order.
  *
  * Written out rather than derived from `Object.keys`, which returns `string[]`
- * and so would force an assertion on anyone iterating the table — including
+ * and so would force an assertion on anyone iterating the table  -  including
  * the startup checks and the tests. Order matches `CAPABILITY_MINIMUM`.
  */
 export const ALL_CAPABILITIES = [
@@ -122,6 +123,7 @@ export const ALL_CAPABILITIES = [
   "manageReports",
   "manageSessions",
   "manageStorage",
+  "manageTickets",
   "manageUsers",
   "publishPosts",
   "reviewProjects",
@@ -139,16 +141,16 @@ export const can = (
  *
  * The rule is seniority, not identity: you may act on anyone you are at least
  * as senior as. An admin therefore reaches every account *including another
- * admin's* — two admins need to be able to clean up a compromised peer, and
- * only a handful of people hold the role — while a moderator can never touch
+ * admin's*  -  two admins need to be able to clean up a compromised peer, and
+ * only a handful of people hold the role  -  while a moderator can never touch
  * an admin.
  *
  * This is a **UI** predicate, not an authorization check: it decides which
  * buttons are inert, and it is always paired with `can(role, "manageUsers")`.
  * Do not use it to guard a server function. It compares ranks only, so it
  * cannot know whether the caller holds the capability, and it deliberately
- * permits admin-on-admin. The rank it enforces is the plugin's own — Better
- * Auth has no notion of outranking a target — so `admin → admin` has to be
+ * permits admin-on-admin. The rank it enforces is the plugin's own  -  Better
+ * Auth has no notion of outranking a target  -  so `admin → admin` has to be
  * allowed here or the panel would block a legitimate action the server permits.
  *
  * A target whose role is unrecognised outranks everyone, so it fails closed

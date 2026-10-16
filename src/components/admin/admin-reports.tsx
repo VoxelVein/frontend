@@ -37,7 +37,7 @@ const describeQueue = (openCount: number): string => {
  * What the confirmation says.
  *
  * Both outcomes close the report and neither tells the reporter, so the dialog
- * has to be explicit about which one is happening — a generic "are you sure?"
+ * has to be explicit about which one is happening  -  a generic "are you sure?"
  * would leave a moderator guessing whether they are about to action or dismiss.
  */
 const describeResolution = (resolution: ReportResolution): string =>

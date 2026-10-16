@@ -295,7 +295,7 @@ export const getPostById = createServerFn({ method: "GET" })
  * Everyone a post may credit, for the editor's author picker.
  *
  * Returned in the same shape the published byline renders, so the editor shows
- * an author exactly as the post page will — including which accounts have no
+ * an author exactly as the post page will  -  including which accounts have no
  * avatar and therefore fall back to initials.
  *
  * Staff-only, because the picker is part of writing a post. Ordered by name so

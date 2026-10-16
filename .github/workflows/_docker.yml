@@ -1,4 +1,4 @@
-name: Reusable — Docker build
+name: Reusable  -  Docker build
 
 # Single definition of the Docker build, called by the Main and Pull Request
 # workflows. Both only build (push: false), so this checks that the image still

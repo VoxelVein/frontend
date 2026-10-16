@@ -27,7 +27,7 @@ interface PostAuthorPickerProps {
  * ceremony. Checkboxes also make the current selection state visible without
  * opening anything, which a token-style multi-select does not.
  *
- * Toggling sets the byline order — the first person ticked leads. Reordering
+ * Toggling sets the byline order  -  the first person ticked leads. Reordering
  * therefore means unticking and reticking, which is why the chosen ones are
  * numbered: without a visible order the editor cannot tell who leads.
  */

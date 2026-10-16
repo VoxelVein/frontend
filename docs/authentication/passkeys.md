@@ -25,10 +25,10 @@ plugins: [
 ],
 ```
 
-* `rpID` — the WebAuthn relying party ID. It is derived from the
+* `rpID`  -  the WebAuthn relying party ID. It is derived from the
   `BETTER_AUTH_URL` hostname, so it is `localhost` in development.
-* `origin` — the allowed origin for WebAuthn requests.
-* `rpName` — the name shown in the browser's passkey prompt.
+* `origin`  -  the allowed origin for WebAuthn requests.
+* `rpName`  -  the name shown in the browser's passkey prompt.
 
 The plugin order matters and is: `username()`, `accountRules`, `admin()`,
 `passkey()`, then `tanstackStartCookies()`. The cookie plugin has to stay
@@ -54,7 +54,7 @@ export const authClient = createAuthClient({
 
 The `passkeys` table is defined in `src/db/schema.ts` and created by the
 `drizzle/0002_quick_kylun.sql` migration. There is no `lastUsedAt` column
-yet. After changing the schema, generate and apply a migration — see
+yet. After changing the schema, generate and apply a migration  -  see
 [Migrations](../database/migrations.md).
 
 ## Settings UI
@@ -67,14 +67,14 @@ below the sign-in methods
 
 It supports:
 
-* **Listing** — a TanStack Query over the `listPasskeys` server function
+* **Listing**  -  a TanStack Query over the `listPasskeys` server function
   (`src/lib/auth.functions.ts`) with the `["passkeys"]` query key. The
   server function strips `publicKey`, `counter`, `transports`, and
   `aaguid` before returning, so no credential material reaches the
   client.
-* **Adding** — `authClient.passkey.addPasskey({ name })` triggers the
+* **Adding**  -  `authClient.passkey.addPasskey({ name })` triggers the
   browser's WebAuthn registration prompt, then invalidates the query.
-* **Removing** — the client does not expose a delete method, so the
+* **Removing**  -  the client does not expose a delete method, so the
   component calls the endpoint directly behind a `ConfirmDialog`:
 
 ```ts

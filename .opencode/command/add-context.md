@@ -97,7 +97,7 @@ Determine where project intelligence files should be saved. This runs BEFORE any
 1. If `--global` flag → `$CONTEXT_DIR = ~/.config/opencode/context/project-intelligence/`
 2. Otherwise → `$CONTEXT_DIR = .opencode/context/project-intelligence/` (always local)
 
-**If `.opencode/context/` doesn't exist yet**, create it silently — no prompt needed. The directory structure is part of the output shown in Stage 4.
+**If `.opencode/context/` doesn't exist yet**, create it silently  -  no prompt needed. The directory structure is part of the output shown in Stage 4.
 
 **Variable**: `$CONTEXT_DIR` is set here and used in all subsequent stages.
 
@@ -161,7 +161,7 @@ Ready to harvest? [y/n]: _
 
 ### Stage 1: Detect Existing Context
 
-Check: `$CONTEXT_DIR` (set in Stage 0.5 — either `.opencode/context/project-intelligence/` or `~/.config/opencode/context/project-intelligence/`)
+Check: `$CONTEXT_DIR` (set in Stage 0.5  -  either `.opencode/context/project-intelligence/` or `~/.config/opencode/context/project-intelligence/`)
 
 **If exists**:
 

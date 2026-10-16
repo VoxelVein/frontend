@@ -16,8 +16,8 @@ import type { Capability, Role } from "@/lib/roles";
  * `mod` and `report` used to be declared here. Nothing read them: no `/admin/*`
  * endpoint in the plugin names either resource, and no `hasPermission` call
  * exists outside this file. They were documentation that looked like
- * enforcement. Both are now enforced where they actually run — as
- * `requireCapability` guards in server functions — so they are gone from here
+ * enforcement. Both are now enforced where they actually run  -  as
+ * `requireCapability` guards in server functions  -  so they are gone from here
  * rather than left to imply a boundary that was never there.
  */
 export const ac = createAccessControl({
@@ -60,7 +60,7 @@ const CAPABILITY_RESOURCE: Readonly<Partial<Record<Capability, string>>> = {
  * ladder. This way the table that *grants* is the table that is *verified*.
  *
  * Adding a statement means naming the capability that covers it, and naming
- * the capability means holding it — see `assertCapabilitiesAgree`.
+ * the capability means holding it  -  see `assertCapabilitiesAgree`.
  */
 const ROLE_STATEMENTS: Record<
   Role,
@@ -91,7 +91,7 @@ const statementsFor = (role: Role) => {
       throw new Error(
         `${capability} is granted ${role} statements, but it maps to no Better ` +
           `resource in CAPABILITY_RESOURCE. Add it there if the plugin has an ` +
-          `endpoint for it, or drop the statements — otherwise the grant looks ` +
+          `endpoint for it, or drop the statements  -  otherwise the grant looks ` +
           `enforced by the plugin but is enforced by nothing.`
       );
     }
@@ -106,7 +106,7 @@ const statementsFor = (role: Role) => {
  *
  * `CAPABILITY_MINIMUM` and these statements are two independent expressions of
  * the same policy, and a drift between them fails **open**, not closed. The
- * admin panel is explicitly not the security boundary — it hides tabs — so a
+ * admin panel is explicitly not the security boundary  -  it hides tabs  -  so a
  * stray `user: ["ban"]` on `moderator` would hand back a power no UI shows,
  * and nothing else would notice. This is the check that makes the capability
  * table worth having.

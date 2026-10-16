@@ -65,7 +65,7 @@ const files = [
  *
  * A document that explains Markdown has to write things like `[a](b)`. Without
  * this, the link pattern matches that example and reports it as a broken link to
- * a file called `b` — a false positive that would otherwise force such
+ * a file called `b`  -  a false positive that would otherwise force such
  * documentation to be written less precisely.
  *
  * Fenced blocks are handled by the same substitution, since a fence is just a

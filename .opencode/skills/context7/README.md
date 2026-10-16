@@ -4,7 +4,7 @@
 
 Fetches **live, version-specific documentation** for external libraries and frameworks using the Context7 API. Ensures you always get current API patterns instead of potentially outdated training data.
 
-**Golden Rule**: Always fetch live docs for external libraries—training data may be outdated.
+**Golden Rule**: Always fetch live docs for external libraries - training data may be outdated.
 
 ## Quick Start
 

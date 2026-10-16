@@ -66,7 +66,7 @@ You can also display place cards for other places on a map, such as points of in
 The system defines several place card styles, which specify the size, appearance, and information included in a place card.
 
 - The *automatic* style lets the system determine the place card style based on the size of your map view.
-- The *callout* style displays a place card in a popover style next to the selected place. You can further specify the style of a callout — the *full* callout style displays a large, detailed place card, and the *compact* callout style displays a space-saving, more concise place card. If you don’t specify a callout style, the system defaults to the *automatic* callout style, which determines the callout style based on your map’s view size.
+- The *callout* style displays a place card in a popover style next to the selected place. You can further specify the style of a callout  -  the *full* callout style displays a large, detailed place card, and the *compact* callout style displays a space-saving, more concise place card. If you don’t specify a callout style, the system defaults to the *automatic* callout style, which determines the callout style based on your map’s view size.
 - The *caption* style displays an “Open in Apple Maps” link.
 - The *sheet* style displays a place card in a [sheet](sheets.md).
 
@@ -102,7 +102,7 @@ Apps connected with specific venues like shopping malls and stadiums can design 
 
 **Use distinctive styling to differentiate the features of your map.** Using color along with icons can help distinguish different types of areas, stores, and services, and make it easy for people to quickly find what they’re looking for.
 
-**Offer a floor picker if your venue includes multiple levels.** A floor picker lets people quickly jump between floors. If you implement this feature, keep floor numbers concise for simplicity. In most cases, a list of floor numbers — rather than floor names — is sufficient.
+**Offer a floor picker if your venue includes multiple levels.** A floor picker lets people quickly jump between floors. If you implement this feature, keep floor numbers concise for simplicity. In most cases, a list of floor numbers  -  rather than floor names  -  is sufficient.
 
 **Include surrounding areas to provide context.** Adjacent streets, playgrounds, and other nearby locations can all help orient people when they use your map. If these areas are noninteractive, use dimming and a distinct color to make them appear supplemental.
 

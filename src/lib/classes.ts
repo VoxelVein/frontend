@@ -24,8 +24,8 @@ export const MICRO_LABEL_CLASS =
  * server platform.
  *
  * Used by the server page's supported-versions list and the download page's
- * compatibility list. Both answer the same question — "is this compatible with
- * what I have?" — by asking the reader to match a short string against something
+ * compatibility list. Both answer the same question  -  "is this compatible with
+ * what I have?"  -  by asking the reader to match a short string against something
  * on their own machine, so the two must render identically or one of them reads
  * as a different kind of fact.
  *

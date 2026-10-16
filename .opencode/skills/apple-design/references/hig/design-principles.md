@@ -95,7 +95,7 @@ People remember how a product makes them feel. Think about the emotions that are
 
 **Preserve a person’s context.** Help people feel at home as your design adapts across platforms and configurations. Keep content and controls in consistent, predictable positions, and use natural animations to ease transitions.
 
-**Consider a variety of input methods.** People interact with their devices in different ways. Designing for as many inputs as possible — including voice, touch, keyboard, and more — means more people can use your product the way that works best for them.
+**Consider a variety of input methods.** People interact with their devices in different ways. Designing for as many inputs as possible  -  including voice, touch, keyboard, and more  -  means more people can use your product the way that works best for them.
 
 **Approach every platform with intention.** Your software should feel polished and at home wherever it runs. Give each platform you support the same level of care.
 

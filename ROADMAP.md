@@ -1,12 +1,12 @@
-# VoxelVein Frontend — Roadmap
+# VoxelVein Frontend  -  Roadmap
 
 > [!NOTE]
 > This roadmap reflects the current state of the repository. It is a living
-> document — update it as work lands or plans change.
+> document  -  update it as work lands or plans change.
 
 ## Current Focus
 
-* **Server-side image resizing** — images are now downscaled in the
+* **Server-side image resizing**  -  images are now downscaled in the
   browser before upload (512px for an icon, 1920px for a gallery image), so
   the full-size original never reaches the bucket. The gap is that this is
   client-side only, so a direct `PUT` to `/api/projects/$id/images` stores
@@ -14,17 +14,17 @@
   which costs a native dependency and CPU per upload, or Cloudflare Image
   Resizing, which only works with R2 behind a Cloudflare-proxied zone on the
   paid add-on and so does not help local development.
-* **Legal review** — the six legal pages need a real operator name and
+* **Legal review**  -  the six legal pages need a real operator name and
   address, a single consistent contact address, and review by a qualified
   professional.
-* **Accessibility and quality sweep** — route-level tests for `/admin`,
+* **Accessibility and quality sweep**  -  route-level tests for `/admin`,
   `/settings`, and `/dashboard`; skeletons and empty states on any
   remaining page.
 
 ## In Progress
 
 * Legal pages (Impressum, Privacy, Cookies, ToS, ToU, Disclaimer,
-  Legal Notes) — placeholder content pending review before production
+  Legal Notes)  -  placeholder content pending review before production
 
 ## Planned
 
@@ -40,8 +40,8 @@
 * A status page and a public changelog page, both of which the footer
   already reserves a "Soon" slot for
 * RBAC beyond the current `user` / `moderator` / `admin` ladder. The roles are
-  strictly ordered, so a role that needs some admin powers but not others —
-  a moderator who may manage sessions but not delete users — cannot be
+  strictly ordered, so a role that needs some admin powers but not others  -
+  a moderator who may manage sessions but not delete users  -  cannot be
   expressed. That is the point to switch to permission checks rather than
   extend the ladder.
 * Loading skeletons and empty states across any remaining page
@@ -57,8 +57,8 @@
 
 ## Completed
 
-* All six project types end to end — mods, modpacks, plugins, resource
-  packs, shaders, and servers — each with a browse page, a detail page,
+* All six project types end to end  -  mods, modpacks, plugins, resource
+  packs, shaders, and servers  -  each with a browse page, a detail page,
   creator forms, filters, and search
 * Server listings with join address, port, linked content, and a derived
   client requirement (`required` / `recommended` / `vanilla`) that the

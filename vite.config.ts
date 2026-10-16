@@ -17,7 +17,7 @@ const config = defineConfig({
       // Keep `isomorphic-dompurify` out of the server bundle so Node loads it
       // from node_modules instead.
       //
-      // Nitro 3 inlines every dependency unless it is listed here — the
+      // Nitro 3 inlines every dependency unless it is listed here  -  the
       // externals plugin is a no-op with an empty `traceDeps`, not an
       // allowlist-by-default. That inlining is what broke Markdown rendering
       // in production: the Node build of the package constructs a JSDOM window
@@ -28,7 +28,7 @@ const config = defineConfig({
       // and every SSR request 500'd. Loading the real package lets Node
       // evaluate jsdom as CommonJS, where `__dirname` exists.
       //
-      // The browser build is unaffected — the client resolves the `browser`
+      // The browser build is unaffected  -  the client resolves the `browser`
       // export condition, which is plain DOMPurify with no jsdom, so this adds
       // nothing to the client bundle.
       traceDeps: ["isomorphic-dompurify"],
@@ -58,9 +58,9 @@ const config = defineConfig({
       // each `.functions.ts` module down to its client RPC stubs, but with
       // `verbatimModuleSyntax` the module's `@/db/schema` import is preserved
       // even once nothing references it. Because a `pgTable(...)` module looks
-      // side-effectful, tree-shaking kept the whole file in the entry chunk —
+      // side-effectful, tree-shaking kept the whole file in the entry chunk  -
       // about 11 kB of column builders plus the ~33 kB of `drizzle-orm` they
-      // pull in — for a module the browser never calls.
+      // pull in  -  for a module the browser never calls.
       //
       // Declaring it side-effect-free lets the unused module be dropped.
       // Exports a client bridge genuinely used are still kept, so this only

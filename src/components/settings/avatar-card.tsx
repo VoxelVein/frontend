@@ -138,7 +138,7 @@ const UrlPreview = ({ url }: { url: string }) => {
  * Upload, link, or remove the account's profile picture.
  *
  * The two sources are **tabs** rather than two stacked forms. They are
- * alternatives — a picture comes from exactly one of them — and showing both at
+ * alternatives  -  a picture comes from exactly one of them  -  and showing both at
  * once gave the URL field the visual weight of a second primary action while
  * making it unclear which one the card was asking about.
  *
@@ -421,7 +421,7 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
           </Tabs>
 
           {/* Removing an uploaded picture deletes the stored object, so it is
-              confirmed rather than done on one click — and the dialog says which
+              confirmed rather than done on one click  -  and the dialog says which
               of the two sources is being removed, because the consequences
               differ: an uploaded picture is destroyed, a linked one is simply
               unlinked. */}

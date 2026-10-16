@@ -1,0 +1,13 @@
+[build]
+command = "pnpm build"
+publish = ".output/public"
+
+[build.environment]
+NODE_VERSION = "24"
+NITRO_PRESET = "netlify"
+
+# Secrets and public URLs are configured in the Netlify UI (Site settings ->
+# Environment variables), not here: they include VITE_API_URL, VITE_SITE_URL,
+# DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, API_URL, CORS_ORIGIN, and
+# any storage or OAuth settings. VITE_* values are baked in at build time, so
+# changing one needs a new deploy.

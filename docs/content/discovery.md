@@ -115,13 +115,13 @@ Each entry carries two flags:
   sit in the navbar's **More** menu until then, which keeps every category
   reachable at every width.
 
-Array order is the display order — the navbar and the explore grid both
+Array order is the display order  -  the navbar and the explore grid both
 render the list in sequence, so reordering the array moves entries in both
 places at once.
 
 ## Related
 
-* [Projects and Files](projects.md) — the six project types these
+* [Projects and Files](projects.md)  -  the six project types these
   categories group
-* [Search](../search/postgres.md) — the other discovery surface
-* [Motion](motion.md) — the reveal animation on these sections
+* [Search](../search/postgres.md)  -  the other discovery surface
+* [Motion](motion.md)  -  the reveal animation on these sections

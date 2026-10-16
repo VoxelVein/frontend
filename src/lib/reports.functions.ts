@@ -48,7 +48,7 @@ const requireModerator = (): Promise<StaffSession> =>
  *
  * Deliberately weaker than `requireUploader`: reporting is a safety valve, and
  * gating it behind a verified email would mean the people most likely to need
- * it — a banned or unverified account — could not use it.
+ * it  -  a banned or unverified account  -  could not use it.
  */
 const requireMember = async (): Promise<StaffSession> => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
@@ -84,7 +84,7 @@ const requireReportQuota = async (session: StaffSession): Promise<void> => {
  * minutes forever and the moderator sees twenty identical rows instead of one.
  *
  * Checked rather than enforced by a unique index, because the constraint only
- * applies while a report is open — a resolved report must not block reporting
+ * applies while a report is open  -  a resolved report must not block reporting
  * the same thing again later.
  */
 const alreadyReported = async (
@@ -112,7 +112,7 @@ const alreadyReported = async (
 /**
  * Resolves the named target to an id, or refuses the report.
  *
- * A user is looked up by username because that is all a profile URL carries —
+ * A user is looked up by username because that is all a profile URL carries  -
  * `PublicProfile` deliberately omits the account id, so the client has nothing
  * else to send. A project is looked up by the id its document already carries.
  *
@@ -266,7 +266,7 @@ interface ResolutionInput {
  * cannot end up closed with nobody told. It carries no project: a report is
  * about a project or an account, and the reporter's own project would be an
  * unrelated thing to link them to. The row is read in place and leads nowhere,
- * which is honest — there is no page showing "your report" to send them to.
+ * which is honest  -  there is no page showing "your report" to send them to.
  *
  * A reporter whose account has been deleted is skipped, since `reporterId` is
  * null and the row would have nobody to show.

@@ -14,7 +14,7 @@ import { CookieBanner } from "@/components/cookie-banner";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
@@ -42,7 +42,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
         </ThemeProvider>
       </TooltipProvider>
       <CookieBanner />
-      <Toaster richColors position="bottom-right" />
+      <Toaster />
       <TanStackDevtools
         config={{
           position: "bottom-left",
@@ -208,21 +208,30 @@ export const Route = createRootRoute({
     ],
   }),
   notFoundComponent: () => (
-    <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6">
-      <p className="text-primary text-sm font-semibold tracking-wide uppercase">
-        404
-      </p>
-      <h1 className="text-foreground mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-        Page not found
-      </h1>
-      <p className="text-muted-foreground mt-3 max-w-md text-sm sm:text-base">
-        The page you are looking for does not exist or has been moved. Check the
-        URL or head back to the homepage.
-      </p>
-      <Button render={<Link to="/" />} className="mt-8 min-h-11 px-6">
-        <IconHome size={16} aria-hidden="true" />
-        Back to homepage
-      </Button>
+    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
+      <div className="bg-card grid gap-6 rounded-xl border p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-center">
+        <div>
+          <p className="text-primary text-sm font-semibold tracking-wide uppercase">
+            404
+          </p>
+          <h1 className="text-foreground mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Page not found
+          </h1>
+          <p className="text-muted-foreground mt-3 max-w-md text-sm sm:text-base">
+            The page you are looking for does not exist or has been moved. Check
+            the URL or head back to the homepage.
+          </p>
+          <Button render={<Link to="/" />} className="mt-8 min-h-11 px-6">
+            <IconHome size={16} aria-hidden="true" />
+            Back to homepage
+          </Button>
+        </div>
+        <img
+          src="https://media1.tenor.com/m/f-Yg-hPcN5UAAAAd/this-is-fine.gif"
+          alt="This is fine: a cartoon dog sits in a burning room."
+          className="mx-auto w-full max-w-[280px] rounded-lg"
+        />
+      </div>
     </div>
   ),
   shellComponent: RootDocument,

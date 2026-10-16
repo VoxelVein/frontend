@@ -25,7 +25,7 @@ interface TrendingProjectsProps {
  *
  * A fixed column count would leave four empty cells beside a single project.
  * Dividing by the actual count instead means one project fills the row, two
- * split it, five fill it — and every card is the same width, which is what
+ * split it, five fill it  -  and every card is the same width, which is what
  * makes the row read as a ranking rather than an arbitrary slice of a grid.
  *
  * The count goes in a custom property rather than an inline `grid-template-columns`
@@ -84,7 +84,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
     >
       <div className="mx-auto max-w-7xl">
         {/* The heading lands first and the cards follow it, rather than one
-            block revealing together — a title that arrives with its list gives
+            block revealing together  -  a title that arrives with its list gives
             the eye nowhere to start. */}
         <Reveal>
           <div className="mb-8 flex items-end justify-between gap-4">
@@ -127,7 +127,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
           <EmptyState
             // No action here: the section header already carries a link to
             // /mods directly above, and this state used to render a second one
-            // labelled "Browse mods" — two buttons, two names, one destination.
+            // labelled "Browse mods"  -  two buttons, two names, one destination.
             description="Once projects are published, the most popular ones show up here. In the meantime, browse everything on the site."
             icon={<IconFlame aria-hidden size={24} />}
             title="Nothing trending yet"

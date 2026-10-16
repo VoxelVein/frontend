@@ -40,8 +40,8 @@ const requireReviewer = (): Promise<Session> =>
 /**
  * Caps the moderation decisions one account can make.
  *
- * Reviewing is the highest-value staff action here — approving publishes a
- * project — so it gets its own bucket rather than sharing the post-write one.
+ * Reviewing is the highest-value staff action here  -  approving publishes a
+ * project  -  so it gets its own bucket rather than sharing the post-write one.
  */
 const requireReviewQuota = async (session: Session): Promise<void> => {
   const quota = await consumeServerLimit(
@@ -105,7 +105,7 @@ export const rejectProject = createServerFn({ method: "POST" })
  * down goes into the queue, because putting it back up is the thing that
  * judgement is for.
  *
- * The outcome comes back so the owner can be told the truth — "published" and
+ * The outcome comes back so the owner can be told the truth  -  "published" and
  * "submitted for review" are different news, and reporting the second for the
  * first would leave them waiting for a decision that already happened.
  */

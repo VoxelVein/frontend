@@ -14,7 +14,7 @@ const MS_PER_SECOND = 1000;
  * a row and would otherwise keep two copies of the same thresholds.
  *
  * `now` is passed in rather than read from the clock so a list renders every
- * row against one instant — otherwise rows computed either side of a second
+ * row against one instant  -  otherwise rows computed either side of a second
  * boundary disagree with each other.
  */
 export const relativeTime = (

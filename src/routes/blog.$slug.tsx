@@ -32,7 +32,7 @@ const formatDate = (value: Date | string) =>
  * Whether a post has been revised since it was first published.
  *
  * Two timestamps within the same second are the same instant as far as a reader
- * is concerned, so the comparison is truncated to whole seconds — otherwise
+ * is concerned, so the comparison is truncated to whole seconds  -  otherwise
  * every freshly created post would immediately advertise an update.
  */
 const wasEdited = (
@@ -55,7 +55,7 @@ interface BlogPostLoaderData {
  * Where this post sits: the blog, then the category it is filed under.
  *
  * The trail carries no link to the category itself. There is no per-category
- * page — the index filters client-side over the posts it already has — so a
+ * page  -  the index filters client-side over the posts it already has  -  so a
  * crumb that looked clickable would go nowhere. It is marked as the current page
  * instead, which is what it actually is.
  *

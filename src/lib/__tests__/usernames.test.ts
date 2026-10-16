@@ -135,8 +135,8 @@ describe(getNextUsernameChange, () => {
 
   it("does not read a malformed timestamp as a live cooldown", () => {
     // `new Date("not a date").getTime()` is NaN, so `next` is an Invalid Date
-    // and every comparison against it is false. That yields null — the account
-    // is treated as renameable — rather than a thrown error on a settings page.
+    // and every comparison against it is false. That yields null  -  the account
+    // is treated as renameable  -  rather than a thrown error on a settings page.
     expect(getNextUsernameChange("not a date", NOW)).toBeNull();
   });
 });

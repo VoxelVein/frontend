@@ -7,7 +7,7 @@ import type { StorageError } from "@/lib/storage";
  * The `code` is as important as the message. A reader-facing string is the only
  * thing that survives an HTTP round trip by default, and a client that has to
  * string-match "could not reach" to recognise a broken file server will
- * silently stop recognising it the moment someone rewords the message — at which
+ * silently stop recognising it the moment someone rewords the message  -  at which
  * point the reader gets a generic failure and no prompt to report anything.
  */
 

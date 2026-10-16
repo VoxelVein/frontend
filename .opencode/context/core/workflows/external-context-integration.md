@@ -217,18 +217,18 @@ These are live documentation files fetched from external libraries. Subagents sh
 
 ### Drizzle ORM
 
-- `.tmp/external-context/drizzle-orm/modular-schemas.md` — Schema organization patterns for modular architecture
-- `.tmp/external-context/drizzle-orm/postgresql-setup.md` — PostgreSQL configuration and setup
+- `.tmp/external-context/drizzle-orm/modular-schemas.md`  -  Schema organization patterns for modular architecture
+- `.tmp/external-context/drizzle-orm/postgresql-setup.md`  -  PostgreSQL configuration and setup
 
 ### Better Auth
 
-- `.tmp/external-context/better-auth/nextjs-integration.md` — Integration guide for Next.js App Router
-- `.tmp/external-context/better-auth/drizzle-adapter.md` — Drizzle adapter setup and configuration
+- `.tmp/external-context/better-auth/nextjs-integration.md`  -  Integration guide for Next.js App Router
+- `.tmp/external-context/better-auth/drizzle-adapter.md`  -  Drizzle adapter setup and configuration
 
 ### Next.js
 
-- `.tmp/external-context/next.js/app-router-setup.md` — App Router basics and configuration
-- `.tmp/external-context/next.js/server-actions.md` — Server Actions patterns for mutations
+- `.tmp/external-context/next.js/app-router-setup.md`  -  App Router basics and configuration
+- `.tmp/external-context/next.js/server-actions.md`  -  Server Actions patterns for mutations
 
 **Important**: These files are read-only and cached for reference. Do not modify them.
 

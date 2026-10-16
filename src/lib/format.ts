@@ -20,7 +20,7 @@ export const formatCount = (value: number): string =>
 /**
  * Subcategories whose label is not just a capitalised word.
  *
- * `pvp` and `rpg` are the two that title-casing gets wrong — "Pvp" and "Rpg"
+ * `pvp` and `rpg` are the two that title-casing gets wrong  -  "Pvp" and "Rpg"
  * both read as typos, and they appear in the browse filter, the publish form,
  * and on every project card, so the mistake is everywhere at once.
  */
@@ -29,7 +29,7 @@ export const formatCount = (value: number): string =>
  *
  * `CATEGORY_LABELS[value]` on a plain object also matches `Object.prototype`
  * keys, so a category of `"constructor"` or `"toString"` returned the native
- * function instead of a label — a value typed as `string` that React then threw
+ * function instead of a label  -  a value typed as `string` that React then threw
  * on. `Map.get` looks only at its own entries, so any unknown slug simply
  * misses and falls through to the title-casing below.
  */

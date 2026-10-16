@@ -77,7 +77,7 @@ describe(presentationFor, () => {
 
   it("does not give approval and rejection the same tone", () => {
     // The row's background and icon come from the tone, so sharing one would
-    // make the two outcomes look identical at a glance — which is the exact
+    // make the two outcomes look identical at a glance  -  which is the exact
     // moment a reader most needs to tell them apart.
     expect(presentationFor("project-approved").tone).not.toBe(
       presentationFor("project-rejected").tone

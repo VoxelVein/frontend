@@ -11,8 +11,8 @@ id: context-paths name: Context File Path Resolution
 
 Context files are resolved in this order (later sources override earlier ones for conflicting keys):
 
-1. **Global context** (`~/.config/opencode/context/`) — user-wide defaults
-2. **Local context** (`.opencode/context/` in project root) — project-specific, highest priority
+1. **Global context** (`~/.config/opencode/context/`)  -  user-wide defaults
+2. **Local context** (`.opencode/context/` in project root)  -  project-specific, highest priority
 
 This mirrors OpenCode's own config merging behavior (see [OpenCode Config Docs](https://opencode.ai/docs/config/)).
 

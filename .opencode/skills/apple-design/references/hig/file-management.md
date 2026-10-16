@@ -9,7 +9,7 @@ Some apps can support documents and files that people expect to manage throughou
 
 ---
 
-Document-based apps — such as Pages, Keynote, Photos, and Preview — help people create, edit, and save documents and files, often providing customized ways for people to browse for content they want to open in the app.
+Document-based apps  -  such as Pages, Keynote, Photos, and Preview  -  help people create, edit, and save documents and files, often providing customized ways for people to browse for content they want to open in the app.
 
 People also expect to browse documents without first opening a document-based app. On a Mac, for example, people use the Finder to access the macOS file system; on iPhone, iPad, and Apple Vision Pro, people use the Files app to manage the documents and files on their device. In watchOS and tvOS, people don’t typically create, edit, or manage documents, so these systems don’t provide a document-browsing interface.
 
@@ -17,7 +17,7 @@ People also expect to browse documents without first opening a document-based ap
 
 **Use app menus and keyboard shortcuts to give people convenient ways to create and open documents.** In iPadOS and macOS, people expect to create new documents or open existing ones using familiar menu commands. When you provide commands like New or Open, iPadOS presents them in the shortcuts interface that displays when people hold the Command key on a connected hardware keyboard, and macOS presents them in the menu bar File menu. Regardless of the availability of keyboard shortcuts, include an Add (+) button to help people create a new document. In a macOS app, you put the add action in the File menu (for guidance, see [File menu](the-menu-bar.md#file-menu)).
 
-**If your app requires a custom file browser, support people’s understanding of the platform’s file system.** People who are familiar with the Finder and Files apps already understand the basic layout of their device’s file system. Although you might want to show the most relevant part of the file system when your custom file browser opens — for example, a Documents or iCloud folder or the most recently selected location — let people use your browser to view the rest of the file system if they want.
+**If your app requires a custom file browser, support people’s understanding of the platform’s file system.** People who are familiar with the Finder and Files apps already understand the basic layout of their device’s file system. Although you might want to show the most relevant part of the file system when your custom file browser opens  -  for example, a Documents or iCloud folder or the most recently selected location  -  let people use your browser to view the rest of the file system if they want.
 
 ## Saving work
 
@@ -31,7 +31,7 @@ Quick Look helps you create previews of the files your app handles so that peopl
 
 **Use a Quick Look viewer to let people preview a file even when your app can’t open it.** If your app lets people attach or otherwise interact with files that it doesn’t support, implementing a Quick Look viewer lets people preview those files without leaving your app.
 
-**Consider implementing a Quick Look generator if your app produces custom file types.** A Quick Look generator lets other apps — including the Finder, Files, and Spotlight — display previews of your documents, making it easier for people to find them.
+**Consider implementing a Quick Look generator if your app produces custom file types.** A Quick Look generator lets other apps  -  including the Finder, Files, and Spotlight  -  display previews of your documents, making it easier for people to find them.
 
 ## Platform considerations
 
@@ -44,7 +44,7 @@ Starting in iOS 18 and iPadOS 18, document-based apps can use the system’s doc
 The document launcher consists of three main parts:
 
 - A *title card* that displays the app title and two app-specific buttons
-- A background image that appears behind the title card and additional images — called *accessories* — that can appear around it
+- A background image that appears behind the title card and additional images  -  called *accessories*  -  that can appear around it
 - A sheet that contains a file browser and optional app-specific controls
 
 You can customize all three parts of the document launcher. Although the system automatically displays your app name in the title card, you specify the text and functions of the card’s primary and secondary buttons. You can also create a custom background image, one or more accessory images to surround the title card, and provide some custom controls that can appear in the file browser’s toolbar.
@@ -75,7 +75,7 @@ Your app can also let people browse and open files from other apps. For develope
 
 People have strong associations with the familiar file browsing experience of the Finder and most document-based apps. Use the default file browser unless you have an important reason to create a custom one.
 
-**Make your custom file-opening interface convenient.** For example, people might appreciate an “open recent” action in addition to the simple “open” action. You might also want to let people choose criteria on which to filter the file-browsing experience, or select multiple documents to open at once. In a macOS open panel, you can customize the title of the Open button to reflect the task — for example, if your app lets people insert a file’s contents into the current document, you might change the title to Insert.
+**Make your custom file-opening interface convenient.** For example, people might appreciate an “open recent” action in addition to the simple “open” action. You might also want to let people choose criteria on which to filter the file-browsing experience, or select multiple documents to open at once. In a macOS open panel, you can customize the title of the Open button to reflect the task  -  for example, if your app lets people insert a file’s contents into the current document, you might change the title to Insert.
 
 **Provide a save interface to let people change a file’s name, format, or location.** By default, a new document’s title is “Untitled” until people choose a custom name. As with a document-opening interface, a save view can also provide a browsing experience that defaults to a logical location to help people place the saved document where they want. If you support saving content in different formats, also give people a way to choose a specific file format.
 

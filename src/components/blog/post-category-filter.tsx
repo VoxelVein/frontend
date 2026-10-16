@@ -4,7 +4,7 @@ import type { PostSummary } from "@/lib/posts";
 import { POST_CATEGORIES, postCategoryLabel } from "@/lib/posts";
 
 interface PostCategoryFilterProps {
-  /** The posts the counts are taken from — the full listing, not search hits. */
+  /** The posts the counts are taken from  -  the full listing, not search hits. */
   posts: PostSummary[];
   activeCategory: string | null;
   onCategoryChange: (category: string | null) => void;
@@ -66,7 +66,7 @@ const countClass = (isActive: boolean) =>
  *
  * JSX drops the whitespace between the label and the count, so reading the
  * name off the rendered children gives "Engineering2" while the button looks
- * like "Engineering 2" — the gap is `gap-2`. Naming the button explicitly keeps
+ * like "Engineering 2"  -  the gap is `gap-2`. Naming the button explicitly keeps
  * what is announced identical to what is shown, and is the only chance to say
  * that the number means posts rather than leaving a bare digit.
  */
@@ -77,7 +77,7 @@ const categoryButtonLabel = (label: string, count: number): string =>
  * Narrows the blog to one category at a time.
  *
  * Toggle buttons rather than tabs: filtering a list does not change what page
- * you are on, so the tab pattern — which claims to move focus between panels —
+ * you are on, so the tab pattern  -  which claims to move focus between panels  -
  * would be describing something that is not happening. `aria-pressed` on each
  * button inside a `fieldset` says exactly what is true.
  *

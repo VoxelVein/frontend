@@ -7,7 +7,7 @@ import { consumeRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
  *
  * No mocking here on purpose. `VALKEY_URL` is unset in this file's
  * environment, so `getValkey` points at a loopback default with nothing
- * listening — which is exactly the production scenario worth covering, reached
+ * listening  -  which is exactly the production scenario worth covering, reached
  * without a stub that could drift from the real failure. In CI, where something
  * *is* listening on 6379, these cases are skipped rather than silently
  * asserting nothing.

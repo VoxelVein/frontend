@@ -125,7 +125,7 @@ describe("capability statements", () => {
    */
   const claimsFor = (resource: string): readonly Capability[] => {
     // SAFETY: `resource` comes from `Object.keys` over a role's `statements`,
-    // which the case above proves only ever holds `user` or `session` — the
+    // which the case above proves only ever holds `user` or `session`  -  the
     // exact key list of `CAPABILITIES_BY_RESOURCE`.
     const claims = CAPABILITIES_BY_RESOURCE[resource as Resource];
     if (!claims) {
@@ -142,8 +142,8 @@ describe("capability statements", () => {
       for (const [resource, actions] of Object.entries(
         staffRoles[role].statements
       )) {
-        // The action names do not matter here — only which resource was
-        // granted — so the count is what gets asserted, not the strings.
+        // The action names do not matter here  -  only which resource was
+        // granted  -  so the count is what gets asserted, not the strings.
         expect(actions.length).toBeGreaterThan(0);
         for (const capability of claimsFor(resource)) {
           expect(
@@ -170,6 +170,7 @@ describe("capability statements", () => {
         "manageReports",
         "manageSessions",
         "manageStorage",
+        "manageTickets",
         "manageUsers",
         "publishPosts",
         "reviewProjects",

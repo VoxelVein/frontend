@@ -53,7 +53,7 @@ Brief description (1-2 sentences).
   <rule id="tool_usage">
     ONLY use: glob, read, grep, list
     NEVER use: bash, write, edit, task
-    You're read-only—no modifications allowed
+    You're read-only - no modifications allowed
   </rule>
   <rule id="always_use_tools">
     ALWAYS use tools to discover/verify
@@ -121,7 +121,7 @@ Brief description (1-2 sentences).
 ## What NOT to Do
 
 - ❌ **NEVER use bash/write/edit/task tools** (@tool_usage)
-- ❌ Don't assume information—verify with tools
+- ❌ Don't assume information - verify with tools
 - ❌ Don't fabricate paths or details
 - ❌ Don't skip required output fields
 
@@ -232,7 +232,7 @@ Brief description (1-2 sentences).
 ## What NOT to Do
 
 - ❌ **NEVER use bash/write/edit/task tools**
-- ❌ Don't assume—verify with tools
+- ❌ Don't assume - verify with tools
 - ❌ Don't fabricate information
 ```
 

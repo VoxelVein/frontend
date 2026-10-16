@@ -62,7 +62,7 @@ const BIO_HELPER = "Markdown is supported. Shown on your public profile.";
  * The bio field's helper, with the remaining characters counted in.
  *
  * The cap is a hard 500 enforced on change, so the error appears the moment it
- * is passed — but an error only says "too long" after the fact. The count says
+ * is passed  -  but an error only says "too long" after the fact. The count says
  * how close the limit is while there is still room to act on it.
  */
 const bioHelper = (value: string): string => {
@@ -421,8 +421,8 @@ const ProfileGroup = ({
  * Display name, bio, email and username, in one card.
  *
  * One card rather than two, because they are one thing a person is doing:
- * describing themselves. Splitting them sent the username — which appears
- * beside their name on every project and every byline — off to its own screen
+ * describing themselves. Splitting them sent the username  -  which appears
+ * beside their name on every project and every byline  -  off to its own screen
  * to be dealt with separately.
  */
 const SettingsProfile = ({ user }: SettingsProfileProps) => (

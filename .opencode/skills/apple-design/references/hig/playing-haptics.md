@@ -22,7 +22,7 @@ In addition to built-in haptic capabilities, some external input devices can als
 
 **Use haptics consistently throughout your app or game.** It’s important to build a clear, causal relationship between each haptic and the action that causes it so people learn to associate certain haptic patterns with certain experiences. If a haptic doesn’t reinforce a cause-and-effect relationship, it can be confusing and seem gratuitous. For example, if your game plays a specific haptic pattern when a character fails to finish a mission, people associate that pattern with a negative outcome. If you use the same haptic pattern for a positive outcome like a level completion, people will be confused.
 
-**Prefer using haptics to complement other feedback in your app or game.** When visual, auditory, and tactile feedback are in harmony — as they generally are in the physical world — the user experience is more coherent and can seem more natural. For example, you generally want to match the intensity and sharpness of a haptic with the intensity and sharpness of the animation it accompanies. You can also synchronize sound with haptics; for developer guidance, see [Delivering Rich App Experiences with Haptics](https://developer.apple.com/documentation/corehaptics/delivering-rich-app-experiences-with-haptics).
+**Prefer using haptics to complement other feedback in your app or game.** When visual, auditory, and tactile feedback are in harmony  -  as they generally are in the physical world  -  the user experience is more coherent and can seem more natural. For example, you generally want to match the intensity and sharpness of a haptic with the intensity and sharpness of the animation it accompanies. You can also synchronize sound with haptics; for developer guidance, see [Delivering Rich App Experiences with Haptics](https://developer.apple.com/documentation/corehaptics/delivering-rich-app-experiences-with-haptics).
 
 **Avoid overusing haptics.** Sometimes a haptic can feel just right when it happens occasionally, but become tiresome when it plays frequently. Doing user testing can help you discover a balance that most people appreciate. Often, the best haptic experience is one that people may not be conscious of, but miss when it’s turned off.
 
@@ -36,7 +36,7 @@ In addition to built-in haptic capabilities, some external input devices can als
 
 Games often use custom haptics to enhance gameplay. Although it’s less common, nongame apps might also use custom haptics to provide a richer, more delightful experience.
 
-You can design custom haptic patterns that vary dynamically, based on user input or context. For example, the impact players feel when a game character jumps from a tree can be stronger than when the character jumps in place, and substantial experiences — like a collision or a hit — can feel very different from subtle experiences like the approach of footsteps or a looming danger.
+You can design custom haptic patterns that vary dynamically, based on user input or context. For example, the impact players feel when a game character jumps from a tree can be stronger than when the character jumps in place, and substantial experiences  -  like a collision or a hit  -  can feel very different from subtle experiences like the approach of footsteps or a looming danger.
 
 There are two basic building blocks you can use to generate custom haptic patterns.
 
@@ -53,7 +53,7 @@ By combining transient and continuous events, varying sharpness and intensity, a
 
 On supported iPhone models, you can add haptics to your experience in the following ways:
 
-- Use standard UI components — like [toggles](toggles.md), [sliders](sliders.md), and [pickers](pickers.md) — that play Apple-designed system haptics by default.
+- Use standard UI components  -  like [toggles](toggles.md), [sliders](sliders.md), and [pickers](pickers.md)  -  that play Apple-designed system haptics by default.
 - When it makes sense, use a feedback generator to play one of several predefined haptic patterns in the categories of [notification](#notification), [impact](#impact), and [selection](#selection) (for developer guidance, see [UIFeedbackGenerator](https://developer.apple.com/documentation/uikit/uifeedbackgenerator)).
 
 #### Notification

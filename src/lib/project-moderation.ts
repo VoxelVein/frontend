@@ -197,8 +197,8 @@ export const hasServerDetails = async (projectId: string): Promise<boolean> => {
  * is: two clicks cannot both succeed, because only the update that changed a row
  * reports back.
  *
- * `publishedAt` is stamped exactly as an approval stamps it — on a first
- * publication, preserved on a republish — so the two paths cannot disagree about
+ * `publishedAt` is stamped exactly as an approval stamps it  -  on a first
+ * publication, preserved on a republish  -  so the two paths cannot disagree about
  * a project's original date.
  *
  * `takenDownAt` is left alone deliberately. Reaching this function already means
@@ -256,7 +256,7 @@ export type PublicationOutcome = "pending" | "published";
  * Puts a draft back in front of the public, or into the review queue.
  *
  * Which of the two is decided here rather than by the caller, so every entry
- * point — the dashboard, anything added later — gets the same answer and the
+ * point  -  the dashboard, anything added later  -  gets the same answer and the
  * rule lives in one place.
  *
  * The immediate path stamps `publishedAt` exactly as an approval does: on a first

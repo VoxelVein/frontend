@@ -36,8 +36,8 @@ const tables: readonly (readonly [string, PgTable])[] = Object.entries(
 /**
  * The column an index or foreign key refers to.
  *
- * Both accept an expression as readily as a column — a GIN index over
- * `to_tsvector(...)` names no single column — so the name is optional and the
+ * Both accept an expression as readily as a column  -  a GIN index over
+ * `to_tsvector(...)` names no single column  -  so the name is optional and the
  * expression cases simply do not count towards covering anything.
  */
 const columnName = (
@@ -61,7 +61,7 @@ const foreignKeys = tables.flatMap(([table, definition]) =>
  *
  * Primary keys count, and there are two ways to declare one. A table-level
  * `primaryKey({ columns: [...] })` appears in `config.primaryKeys`; a
- * column-level `.primaryKey()` — `project_servers.project_id` — does not, and
+ * column-level `.primaryKey()`  -  `project_servers.project_id`  -  does not, and
  * is read off the column's own `primary` flag instead. Either way the column is
  * backed by a unique index, so it serves a lookup as well as any declared index
  * does.
