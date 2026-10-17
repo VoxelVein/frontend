@@ -1,5 +1,8 @@
 <p align="center">
-  <img alt="header" src="https://shieldcn.dev/header/gradient.svg?title=VoxelVein+Frontend&amp;subtitle=The+frontend+of+a+modern%2C+open-source+marketplace+for+Minecraft+creators.&amp;mode=dark&amp;image=https%3A%2F%2Fi.postimg.cc%2FC5MrrnwD%2Fvscode.jpg" />
+  <img
+    alt="header"
+    src="https://shieldcn.dev/header/gradient.svg?title=VoxelVein+Frontend&amp;subtitle=The+frontend+of+a+modern%2C+open-source+marketplace+for+Minecraft+creators.&amp;mode=dark&amp;image=https%3A%2F%2Fi.postimg.cc%2FC5MrrnwD%2Fvscode.jpg"
+  />
 </p>
 
 <p align="center">
@@ -9,37 +12,316 @@
 </p>
 
 <p align="center">
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary" /><img alt="GitHub Stars" src="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary" /><img alt="GitHub Forks" src="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary" /><img alt="Watchers" src="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost" /><img alt="Branches" src="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald" /><img alt="Contributors" src="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary" /><img alt="Last commit" src="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary" /><img alt="Commits" src="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary" /><img alt="Open issues" src="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost" /><img alt="Closed issues" src="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary" /><img alt="Open PRs" src="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost" /><img alt="Closed PRs" src="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost" /><img alt="Merged PRs" src="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/release/VoxelVein/frontend.svg" /><img alt="Release" src="https://shieldcn.dev/github/release/VoxelVein/frontend.svg?mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary" /><img alt="CI" src="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost" /><img alt="License" src="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;logo=pnpm" /><img alt="Package mgr · pnpm" src="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;mode=light&amp;logo=pnpm" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;logo=docker" /><img alt="Container · Docker" src="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;mode=light&amp;logo=docker" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;logo=typescript" /><img alt="Language · TypeScript" src="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;mode=light&amp;logo=typescript" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;logo=vite" /><img alt="Bundler · Vite" src="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;mode=light&amp;logo=vite" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;logo=vitest" /><img alt="Tests · Vitest" src="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;mode=light&amp;logo=vitest" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;logo=reactquery" /><img alt="TanStack Query" src="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;mode=light&amp;logo=reactquery" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;logo=ri%3ARiShieldKeyholeFill" /><img alt="Better Auth" src="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;mode=light&amp;logo=ri%3ARiShieldKeyholeFill" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;logo=drizzle" /><img alt="Drizzle" src="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;mode=light&amp;logo=drizzle" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;logo=postgresql" /><img alt="PostgreSQL" src="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;mode=light&amp;logo=postgresql" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;logo=react" /><img alt="React" src="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;mode=light&amp;logo=react" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;logo=redis" /><img alt="Redis" src="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;mode=light&amp;logo=redis" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;logo=tailwindcss" /><img alt="Tailwind CSS" src="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;mode=light&amp;logo=tailwindcss" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;logo=valibot" /><img alt="Valibot" src="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;mode=light&amp;logo=valibot" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;logo=husky" /><img alt="Husky" src="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;mode=light&amp;logo=husky" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary" /><img alt="ESM only" src="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary&amp;mode=light" /></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary" /><img alt="Agent-friendly AGENTS.md" src="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary&amp;mode=light" /></picture>
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="GitHub Stars"
+      src="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="GitHub Forks"
+      src="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="Watchers"
+      src="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost"
+    />
+    <img
+      alt="Branches"
+      src="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald"
+    />
+    <img
+      alt="Contributors"
+      src="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="Last commit"
+      src="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="Commits"
+      src="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="Open issues"
+      src="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost"
+    />
+    <img
+      alt="Closed issues"
+      src="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="Open PRs"
+      src="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost"
+    />
+    <img
+      alt="Closed PRs"
+      src="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost"
+    />
+    <img
+      alt="Merged PRs"
+      src="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/release/VoxelVein/frontend.svg"
+    />
+    <img
+      alt="Release"
+      src="https://shieldcn.dev/github/release/VoxelVein/frontend.svg?mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary"
+    />
+    <img
+      alt="CI"
+      src="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost"
+    />
+    <img
+      alt="License"
+      src="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;logo=pnpm"
+    />
+    <img
+      alt="Package mgr · pnpm"
+      src="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;mode=light&amp;logo=pnpm"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;logo=docker"
+    />
+    <img
+      alt="Container · Docker"
+      src="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;mode=light&amp;logo=docker"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;logo=typescript"
+    />
+    <img
+      alt="Language · TypeScript"
+      src="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;mode=light&amp;logo=typescript"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;logo=vite"
+    />
+    <img
+      alt="Bundler · Vite"
+      src="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;mode=light&amp;logo=vite"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;logo=vitest"
+    />
+    <img
+      alt="Tests · Vitest"
+      src="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;mode=light&amp;logo=vitest"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;logo=reactquery"
+    />
+    <img
+      alt="TanStack Query"
+      src="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;mode=light&amp;logo=reactquery"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;logo=ri%3ARiShieldKeyholeFill"
+    />
+    <img
+      alt="Better Auth"
+      src="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;mode=light&amp;logo=ri%3ARiShieldKeyholeFill"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;logo=drizzle"
+    />
+    <img
+      alt="Drizzle"
+      src="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;mode=light&amp;logo=drizzle"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;logo=postgresql"
+    />
+    <img
+      alt="PostgreSQL"
+      src="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;mode=light&amp;logo=postgresql"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;logo=react"
+    />
+    <img
+      alt="React"
+      src="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;mode=light&amp;logo=react"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;logo=redis"
+    />
+    <img
+      alt="Redis"
+      src="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;mode=light&amp;logo=redis"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;logo=tailwindcss"
+    />
+    <img
+      alt="Tailwind CSS"
+      src="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;mode=light&amp;logo=tailwindcss"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;logo=valibot"
+    />
+    <img
+      alt="Valibot"
+      src="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;mode=light&amp;logo=valibot"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;logo=husky"
+    />
+    <img
+      alt="Husky"
+      src="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;mode=light&amp;logo=husky"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary"
+    />
+    <img
+      alt="ESM only"
+      src="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
+    <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary"
+    />
+    <img
+      alt="Agent-friendly AGENTS.md"
+      src="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary&amp;mode=light"
+    />
+  </picture>
 </p>
 
 ## Overview
@@ -63,11 +345,14 @@ VoxelVein platform but does not include the full infrastructure stack.
   separate search service
 * Filter by category, Minecraft version, loader or platform, and client
   requirement; sort by downloads, activity, or name
-* Trending projects and a news section on the home page
+* Trending projects, a redesigned news section, and an interactive
+  platform comparison section on the home page
 * S3-compatible object storage for uploads, with per-file and site-wide
   quota enforcement
-* Project icons and gallery images in the same bucket, with a web console
-  for local development
+* Project icons and gallery images in the same bucket, with client-side
+  image resizing before upload
+* Project reporting with predefined reason codes and a moderator review
+  inbox
 * Versioned releases with release channels, changelogs, and game-version
   and loader metadata
 * Server listings with join address, port, client requirement, and links
@@ -76,14 +361,15 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 #### Creators and community
 
-* Creator dashboard: create projects, upload versions, manage images and
-  server details
+* Creator dashboard: create projects, upload versions with live progress,
+  manage images, and server details
 * Moderated publishing: a project goes `draft` to `pending` to `published`
   through a review queue
-* Blog with Markdown posts, admin post management, and post search
+* Blog with Markdown posts, category filtering, multiple co-authors, admin
+  editor shortcuts, and post search
 * Public author profiles at `/u/<username>` with a Markdown bio
-* Public profiles for every project type, with a version picker and
-  download links
+* Public profiles for every project type, with download-first detail pages,
+  a version picker, and download links
 
 #### Accounts and administration
 
@@ -93,13 +379,17 @@ VoxelVein platform but does not include the full infrastructure stack.
   account. Publishing a post, deleting a user, changing roles, and storage
   settings stay admin-only
 * Cloudflare Turnstile on password sign-in and sign-up
-* Settings for profile, username, bio, sign-in methods, passkeys,
-  sessions, and a guided account-deletion flow
-* Admin panel: users, sessions, posts, storage, notifications, pending
-  account deletions, and the publishing review queue, with each tab
-  hidden from roles that cannot use it
-* Support tickets: members open tickets, admins reply, tag, and filter
-  them; members may have at most 5 open tickets at a time
+* Rate limiting with Valkey / Redis and an automatic in-memory fallback
+* Settings for profile, username availability checking (with cooldown and
+  reservation window), bio, sign-in methods, passkeys, sessions, and a
+  guided account-deletion flow
+* Admin panel with nine feature tabs: users, sessions, posts, storage,
+  notifications, pending account deletions, reports, support tickets, and
+  the publishing review queue, with each tab hidden from roles that cannot
+  use it
+* Support tickets: members open tickets at `/support`, admins reply, tag,
+  and filter them; members may have at most 5 open tickets at a time
+* Dedicated `/404` and `/error` error boundaries
 * Notification bell with per-item and bulk mark-as-read
 * Public legal pages and a cookie consent banner
 
@@ -107,6 +397,7 @@ VoxelVein platform but does not include the full infrastructure stack.
 
 * Server-rendered with progressive enhancement
 * Light and dark themes with a view-transition theme switch
+* Toast notification system with action buttons and status feedback
 * Responsive, mobile-first layout
 * WCAG 2.2 AA accessibility as a baseline requirement
 * Scroll reveals that respect `prefers-reduced-motion`
@@ -123,6 +414,7 @@ VoxelVein platform but does not include the full infrastructure stack.
 * Base UI and shadcn-style components
 * Better Auth (authentication, passkeys, admin plugin)
 * Drizzle ORM and PostgreSQL
+* Redis and Valkey (caching and rate limiting)
 * ElysiaJS (standalone API server with signed webhooks and SSE)
 * Valibot (validation shared by client and server)
 * Nitro (production server runtime and scheduled tasks)
@@ -148,6 +440,7 @@ VoxelVein platform but does not include the full infrastructure stack.
 | **Better Auth** | Authentication, passkeys, admin plugin |
 | **Drizzle ORM** | Database access and schema management |
 | **PostgreSQL** | Relational database and search |
+| **Redis / Valkey** | Caching, session store, and rate limiting |
 | **ElysiaJS** | Standalone API server (webhooks, SSE) |
 | **Valibot** | Validation schemas shared across the stack |
 | **Vite** | Development and build tooling |
@@ -169,6 +462,7 @@ Before starting development, ensure you have:
 * **pnpm 11.3.0**, pinned through the `packageManager` field in
   `package.json`
 * **PostgreSQL** for local server-side database integration
+* **Redis or Valkey** (optional in development, used for rate limiting)
 * Git
 
 Node 24 is also pinned in [`mise.toml`](mise.toml), the Dockerfile, and CI.
@@ -246,6 +540,8 @@ pnpm dev:api    # API server on http://localhost:3002
 | `pnpm dev:web` | Starts only the Vite app (port 3000) |
 | `pnpm dev:api` | Starts the ElysiaJS API server (watch) |
 | `pnpm dev:all` | Runs the app and API server together |
+| `pnpm dev:status` | Reports what holds the dev ports (3000 and 3002) |
+| `pnpm dev:stop` | Safely ends processes holding the local dev ports |
 | `pnpm start:api` | Starts the API server (no watch) |
 | `pnpm send:webhook` | Sends a test mod webhook to the API |
 | `pnpm build` | Builds the production bundle |
@@ -316,18 +612,18 @@ The repository contains two servers and one shared library tree:
 ```text
 src/
 ├── components/     # UI components, grouped by feature
-│   ├── admin/      # Admin panel tabs
-│   ├── blog/       # Blog cards and search
+│   ├── admin/      # Admin panel tabs (users, tickets, reports, etc.)
+│   ├── blog/       # Blog cards, post authors, and search
 │   ├── dashboard/  # Creator project, version, server, and image forms
 │   ├── legal/      # Shared legal-document renderer
 │   ├── motion/     # Theme toggle, rotating text, view transitions
 │   ├── navbar/     # Navbar, mobile drawer, user menu, notifications
 │   ├── projects/   # Project browser, card, detail, image, gallery
-│   ├── settings/   # Settings tabs
-│   └── ui/         # Base UI and shadcn primitives
-├── db/             # Drizzle client and schema
+│   ├── settings/   # Settings tabs (profile, sessions, passkeys, danger)
+│   └── ui/         # Base UI, toasts, and shadcn primitives
+├── db/             # Drizzle client, schema, and migrations
 ├── hooks/          # Reduced motion, username availability, post search
-├── lib/            # Auth, roles, projects, search, storage, server functions
+├── lib/            # Auth, roles, tickets, search, storage, rate limiting
 ├── routes/         # TanStack Start file-based routes
 ├── tasks/          # Nitro scheduled tasks
 ├── test/           # Vitest setup
@@ -676,8 +972,26 @@ Changes merged from `main` into `prod` are deployed automatically. The
 `deploy` workflow builds the web, API, and migration images, pushes them to
 `ghcr.io` tagged with the `package.json` version and the commit SHA, and
 fails unless the `VITE_API_URL` and `VITE_SITE_URL` repository variables
-are set. See [docs/deployment/dokploy.md](docs/deployment/dokploy.md) for
-the Dokploy setup.
+are set.
+
+### Supported Platforms
+
+VoxelVein supports multiple deployment strategies and hosting targets:
+
+* **Dokploy / Docker Compose**: Production multi-container stack with
+  Traefik reverse proxy. See
+  [docs/deployment/dokploy.md](docs/deployment/dokploy.md).
+* **Docker / Podman**: Standalone multi-stage containers with dev, prod,
+  and host-port overrides. See
+  [docs/deployment/docker.md](docs/deployment/docker.md) and
+  [docs/deployment/podman.md](docs/deployment/podman.md).
+* **Vercel**: Deploy the web app on Vercel using `vercel.json` and Nitro's
+  Vercel preset. See [docs/deployment/vercel.md](docs/deployment/vercel.md).
+* **Netlify**: Deploy on Netlify using `netlify.toml` and Nitro's Netlify
+  preset. See [docs/deployment/netlify.md](docs/deployment/netlify.md).
+* **Cloudflare Workers**: Deploy to Cloudflare Workers using Nitro and
+  `wrangler.toml`. See
+  [docs/deployment/cloudflare-workers.md](docs/deployment/cloudflare-workers.md).
 
 ---
 
@@ -699,4 +1013,3 @@ vulnerability reporting policy.
 
 Please review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before
 participating in the community.
-
