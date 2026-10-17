@@ -54,6 +54,7 @@ for the longer-term plan.
 * [ ] A sitemap
 * [ ] `/status` and `/changelog` pages (the footer reserves the slots)
 * [ ] Creator analytics
+* [ ] Migrate shadcn/ui theme to `pnpm dlx shadcn@latest add https://tweakcn.com/r/themes/claymorphism.json`
 
 ## Completed
 
