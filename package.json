@@ -81,7 +81,7 @@
   },
   "devDependencies": {
     "@github/markdownlint-github": "^0.8.4",
-    "@opencode/plugin": "2.0.26",
+    "@opencode/plugin": "2.0.32",
     "@tanstack/devtools-vite": "latest",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
@@ -99,7 +99,7 @@
     "markdown-it": "^15.0.3",
     "markdownlint-cli2": "^0.23.3",
     "markdownlint-cli2-formatter-pretty": "^0.0.10",
-    "oxfmt": "^0.72.0",
+    "oxfmt": "^0.73.0",
     "oxlint": "^1.88.0",
     "oxlint-plugin-react-doctor": "^0.9.18",
     "shadcn": "^4.22.1",
