@@ -120,6 +120,45 @@ pnpm format
 pnpm build
 ```
 
+## Git conventions
+
+- Follow Conventional Commits whenever committing and pushing changes.
+- Use the following commit message format:
+
+  ```markdown
+  <type>[optional scope]: <short description>
+
+  [optional body]
+
+  [optional footer(s)]
+  ```
+
+- Write a short, descriptive summary in the imperative mood that clearly communicates the change.
+- Choose an appropriate type:
+    - `feat`: Introduce a new feature
+    - `fix`: Fix a bug.
+    - `refactor`: Restructure code without changing its behavior.
+    - `docs`: Add, remove or update documentation.
+    - `test`. Add, remove or update tests.
+    - `chore`: Perform maintenance tasks, such as updating dependencies.
+    - `style`: Make formatting or stylistic changes that do not affect behavior.
+
+- Use an optional scope to identify the affected area when it adds calrity, such as `feat(api): add project search enpoint`.
+- Keep commit messages concise and focused. Add a body when additional context is needed, and use footers for references to issues or other relevant metadata.
+- Indicate breaking changes by appending `!` to the type or scope (for example, `feat(api)!: change project response format`) and include a `BREAKING CHANGE:` footer when additional explanation is needed.
+- Avoid vague commit messages such as `update`, `changes`, or `fix stuff`.
+
+Example commit messages:
+
+```markdown
+feat: add project search
+fix(auth): handle expired sessions
+refactor: simplify project validation
+docs: update API conventions
+test: cover project creation
+chore: update dependencies
+```
+
 ## Delivery
 
 Update documentation when behavior changes. Summarize the implementation, tests, and any follow-up work. If a full check fails for a  reason unrelated to the change, note it and rely on the focused package checks.
