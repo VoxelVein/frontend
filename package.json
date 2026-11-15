@@ -7,7 +7,7 @@
     "dev": "pnpm dev:all",
     "dev:web": "vite dev",
     "dev:api": "tsx watch server/index.ts",
-    "dev:all": "pnpm run \"/^dev:(web|api)$/\"",
+    "dev:all": "tsx scripts/dev.ts",
     "dev:status": "tsx scripts/dev-ports.ts status",
     "dev:stop": "tsx scripts/dev-ports.ts stop",
     "start:api": "tsx server/index.ts",
