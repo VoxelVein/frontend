@@ -94,6 +94,7 @@ const splitTags = (value: string): string[] => [
  * children of their own.
  */
 const FIELD_WIDTH = "max-w-xl";
+const OTHER_CATEGORY = "__other__";
 
 export const ProjectForm = ({
   initialValues = EMPTY_VALUES,
@@ -102,6 +103,11 @@ export const ProjectForm = ({
   submitLabel,
 }: ProjectFormProps) => {
   const [values, setValues] = useState(initialValues);
+  const [categoryIsCustom, setCategoryIsCustom] = useState(
+    Boolean(initialValues.category) &&
+      !isCategoryForType(initialValues.type, initialValues.category)
+  );
+  const [customCategory, setCustomCategory] = useState(initialValues.category);
   // Once the slug is typed by hand, stop deriving it from the name.
   const slugEditedRef = useRef(mode === "edit");
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
@@ -122,15 +128,17 @@ export const ProjectForm = ({
       slug: slugEditedRef.current ? current.slug : slugify(name),
     }));
 
-  const changeType = (type: ProjectType) =>
+  const changeType = (type: ProjectType) => {
     setValues((current) => ({
       ...current,
-      // Categories differ per type; keep the choice only if it still fits.
       category: isCategoryForType(type, current.category)
         ? current.category
         : "",
       type,
     }));
+    setCategoryIsCustom(false);
+    setCustomCategory("");
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -225,19 +233,35 @@ export const ProjectForm = ({
           Category
         </RequiredLabel>
         <Select
-          items={CATEGORIES_BY_TYPE[values.type].map((category) => ({
-            label: formatCategory(category),
-            value: category,
-          }))}
-          value={values.category}
-          onValueChange={(value) => update("category", value ?? "")}
+          items={[
+            ...CATEGORIES_BY_TYPE[values.type].map((category) => ({
+              label: formatCategory(category),
+              value: category,
+            })),
+            { label: "Other…", value: OTHER_CATEGORY },
+          ]}
+          value={categoryIsCustom ? OTHER_CATEGORY : values.category}
+          onValueChange={(value) => {
+            const custom = value === OTHER_CATEGORY;
+            setCategoryIsCustom(custom);
+            if (!custom) {
+              setCustomCategory("");
+              update("category", value ?? "");
+              return;
+            }
+            const nextCustom = categoryIsCustom ? customCategory : "";
+            setCustomCategory(nextCustom);
+            update("category", nextCustom);
+          }}
         >
           <SelectTrigger
             id="project-category"
             className="min-h-11 w-full max-w-xl"
             aria-invalid={errors.get("category") ? true : undefined}
             aria-describedby={
-              errors.get("category") ? "project-category-error" : undefined
+              errors.get("category") && !categoryIsCustom
+                ? "project-category-error"
+                : undefined
             }
           >
             <SelectValue placeholder="Choose a category" />
@@ -248,9 +272,26 @@ export const ProjectForm = ({
                 {formatCategory(category)}
               </SelectItem>
             ))}
+            <SelectItem value={OTHER_CATEGORY}>Other…</SelectItem>
           </SelectContent>
         </Select>
-        {errors.get("category") ? (
+        {categoryIsCustom ? (
+          <FormField
+            id="project-custom-category"
+            label="Your category"
+            value={customCategory}
+            onChange={(event) => {
+              const next = event.target.value;
+              setCustomCategory(next);
+              update("category", next);
+            }}
+            error={errors.get("category")}
+            helperText="This category will also appear in the category filter."
+            maxLength={40}
+            required
+          />
+        ) : null}
+        {!categoryIsCustom && errors.get("category") ? (
           <p
             id="project-category-error"
             role="alert"

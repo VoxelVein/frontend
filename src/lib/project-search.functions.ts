@@ -3,7 +3,6 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { readTrustProxy } from "@/lib/client-key";
 import {
-  CATEGORIES_BY_TYPE,
   GAME_VERSIONS as ALL_GAME_VERSIONS,
   isClientRequirement,
   isProjectType,
@@ -88,7 +87,6 @@ export const searchProjects = createServerFn({ method: "GET" })
       throw new Error(RATE_LIMIT_MESSAGE);
     }
 
-    const categories = new Set<string>(CATEGORIES_BY_TYPE[data.type]);
     const loaders = new Set<string>(LOADERS_BY_TYPE[data.type]);
     // SAFETY: SORTS is a readonly tuple of strings; widening to readonly
     // string[] is safe for the membership check below.
@@ -97,10 +95,8 @@ export const searchProjects = createServerFn({ method: "GET" })
       : DEFAULT_SORT;
 
     return searchProjectsInDatabase({
-      category:
-        data.category && categories.has(data.category)
-          ? data.category
-          : undefined,
+      sort,
+      category: data.category?.trim() || undefined,
       // Only servers have a client requirement.
       clientRequirement:
         data.type === "server" &&
@@ -115,7 +111,6 @@ export const searchProjects = createServerFn({ method: "GET" })
       loader: data.loader && loaders.has(data.loader) ? data.loader : undefined,
       page: data.page,
       query: data.query,
-      sort,
       type: data.type,
     });
   });

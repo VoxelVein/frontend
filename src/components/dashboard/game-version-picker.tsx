@@ -30,6 +30,8 @@ const describeVersion = (id: string): string | null => {
   return getMinecraftVersion(id)?.update || null;
 };
 
+const [LATEST_RELEASE] = filterGameVersions("", false, false);
+
 interface GameVersionPickerProps {
   error?: string;
   id: string;
@@ -83,6 +85,18 @@ export const GameVersionPicker = ({
           {label}
         </label>
         <div className="flex items-center gap-1">
+          {LATEST_RELEASE ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-9"
+              disabled={values.includes(LATEST_RELEASE)}
+              onClick={() => onChange(newestFirst([...values, LATEST_RELEASE]))}
+            >
+              Add latest ({LATEST_RELEASE})
+            </Button>
+          ) : null}
           <label
             htmlFor={snapshotToggleId}
             className="text-muted-foreground flex min-h-11 cursor-pointer items-center gap-2 px-2 text-sm"
@@ -175,8 +189,8 @@ export const GameVersionPicker = ({
 
       <p id={helpId} className="text-muted-foreground text-sm">
         {values.length === 0
-          ? "Search to find a version. Enter a line like 1.20 to add every release in it."
-          : `${values.length} selected. Search to add more.`}
+          ? "Search or add the latest release. Enter a line like 1.20 to add every release in it."
+          : `${values.length} ${values.length === 1 ? "version" : "versions"} selected. Search to add more.`}
       </p>
       {error ? (
         <p id={errorId} role="alert" className="text-destructive text-sm">

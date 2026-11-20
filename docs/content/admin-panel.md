@@ -6,16 +6,16 @@ review queue. One panel, eight URL-driven tabs.
 
 ## Routes
 
-TanStack Router nests by longest matching filename prefix, so the five
-files under `src/routes/admin*.tsx` form two branches:
+TanStack Router follows the route folder hierarchy, so the admin routes live
+under `src/routes/admin/`:
 
-| Route                       | File                           |
-| --------------------------- | ------------------------------ |
-| `/admin`                    | `admin.index.tsx`              |
-| `/admin` (layout)           | `admin.tsx`                    |
-| `/admin/posts/*` (layout)   | `admin.posts.tsx`              |
-| `/admin/posts/new`          | `admin.posts.new.tsx`          |
-| `/admin/posts/$postId/edit` | `admin.posts.$postId.edit.tsx` |
+| Route                       | File                                  |
+| --------------------------- | ------------------------------------- |
+| `/admin` (layout)           | `admin.tsx`                            |
+| `/admin`                    | `admin/index.tsx`                      |
+| `/admin/posts/*` (layout)   | `admin/posts.tsx`                      |
+| `/admin/posts/new`          | `admin/posts/new.tsx`                  |
+| `/admin/posts/$postId/edit` | `admin/posts/$postId/edit.tsx`         |
 
 The panel is the **index** route; the two `*.tsx` files above it are plain
 layouts whose only job is a `beforeLoad` guard, and the two editor pages
@@ -26,7 +26,7 @@ parent keeps painting. The panel used to live in `admin.tsx` and decide at
 render time whether to show tabs or defer to a child, so a disagreement
 between that check and the router silently rendered nothing, taking the
 whole panel with it. A layout cannot fail that way, so the panel moved to
-`admin.index.tsx` and `admin.tsx` became `component: Outlet`.
+`admin/index.tsx` and `admin.tsx` became `component: Outlet`.
 
 The post editor gets the same treatment for the same reason. It also gets
 its own guard, so `/admin/posts/new` and `/admin/posts/$postId/edit`
@@ -59,6 +59,12 @@ Better Auth's admin plugin provides the underlying primitives
 (`listUsers`, `setRole`, `banUser`, `listUserSessions`,
 `revokeUserSession`, impersonation, and the access-control statements in
 `src/lib/permissions.ts`). The panels above it are ours.
+
+In **Reviews**, each queued submission can be opened before a decision. The
+detail view includes the full Markdown description, summary, tags, version
+changelogs, and uploaded files. Pending files are downloadable only to a
+moderator or administrator; these review downloads do not change public
+download counts.
 
 ## Roles
 

@@ -2,6 +2,7 @@ import { IconDownload, IconTag } from "@tabler/icons-react";
 
 import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
+import { ServerPlayerCount } from "@/components/projects/server-player-count";
 import { formatCount } from "@/lib/format";
 import type { ProjectDocument } from "@/lib/projects";
 
@@ -23,13 +24,13 @@ interface TrendingProjectCardProps {
  * and no lift on hover, matching the news lead card above it.
  */
 const TrendingProjectCard = ({ project, rank }: TrendingProjectCardProps) => (
-  <article className="group border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 relative flex h-full flex-col rounded-2xl border p-5 transition-colors duration-200 motion-reduce:transition-none">
+  <article className="group border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 relative flex h-full flex-col rounded-lg border p-5 transition-colors duration-200 motion-reduce:transition-none">
     {/* The whole card is the target, but it stays a real link so it is
         reachable by keyboard and announced with the project it leads to. */}
     <ProjectLink
       type={project.type}
       slug={project.slug}
-      className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-2xl focus-visible:ring-3 focus-visible:outline-none"
+      className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-lg focus-visible:ring-3 focus-visible:outline-none"
     >
       <span className="sr-only">View {project.name}</span>
     </ProjectLink>
@@ -69,14 +70,18 @@ const TrendingProjectCard = ({ project, rank }: TrendingProjectCardProps) => (
     </p>
 
     <div className="border-border/60 text-muted-foreground mt-4 flex items-center justify-between gap-3 border-t pt-3.5 text-xs">
-      <span className="inline-flex items-center gap-1.5 font-medium">
-        <IconDownload
-          aria-hidden="true"
-          className="text-muted-foreground/70"
-          size={14}
-        />
-        {formatCount(project.downloads)}
-      </span>
+      {project.type === "server" ? (
+        <ServerPlayerCount projectId={project.id} />
+      ) : (
+        <span className="inline-flex items-center gap-1.5 font-medium">
+          <IconDownload
+            aria-hidden="true"
+            className="text-muted-foreground/70"
+            size={14}
+          />
+          {formatCount(project.downloads)}
+        </span>
+      )}
 
       {project.gameVersions?.[0] ? (
         <span className="inline-flex min-w-0 items-center gap-1.5 font-medium">

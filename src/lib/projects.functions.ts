@@ -27,7 +27,6 @@ import {
   DELETED_USER_LABEL,
   hasLoaders,
   hasVersions,
-  isCategoryForType,
   isServerLinkType,
   LOADERS_BY_TYPE,
   PROJECT_TYPE_LABELS,
@@ -294,11 +293,8 @@ export const updateProject = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<void> => {
     const session = await getUploader();
     const { projectId, ...fields } = data;
-    const project = await requireEditableProject(session, projectId);
+    await requireEditableProject(session, projectId);
 
-    if (!isCategoryForType(project.type, fields.category)) {
-      throw new Error("Choose a category for this project type.");
-    }
     await db.update(projects).set(fields).where(eq(projects.id, projectId));
   });
 

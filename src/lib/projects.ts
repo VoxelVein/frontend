@@ -2,7 +2,6 @@ import {
   array,
   boolean,
   check,
-  forward,
   integer,
   maxLength,
   maxValue,
@@ -12,7 +11,6 @@ import {
   nullable,
   number,
   object,
-  partialCheck,
   picklist,
   pipe,
   regex,
@@ -371,6 +369,7 @@ const CHANGELOG_MAX_LENGTH = 20_000;
 const MAX_TAGS = 8;
 const TAG_MAX_LENGTH = 24;
 const VERSION_NUMBER_MAX_LENGTH = 32;
+const CATEGORY_MAX_LENGTH = 40;
 
 /**
  * One phrasing for every character limit.
@@ -396,7 +395,13 @@ export const projectSlugSchema = pipe(
 );
 
 const projectFieldsEntries = {
-  category: pipe(string(), nonEmpty("Choose a category.")),
+  category: pipe(
+    string(),
+    trim(),
+    toLowerCase(),
+    nonEmpty("Choose a category."),
+    maxLength(CATEGORY_MAX_LENGTH, maxChars(CATEGORY_MAX_LENGTH))
+  ),
   description: pipe(
     string(),
     maxLength(DESCRIPTION_MAX_LENGTH, maxChars(DESCRIPTION_MAX_LENGTH))
@@ -439,21 +444,11 @@ export const isCategoryForType = (
   // check.
   (CATEGORIES_BY_TYPE[type] as readonly string[]).includes(category);
 
-export const projectInputSchema = pipe(
-  object({
-    ...projectFieldsEntries,
-    slug: projectSlugSchema,
-    type: picklist(PROJECT_TYPES),
-  }),
-  forward(
-    partialCheck(
-      [["category"], ["type"]],
-      (input) => isCategoryForType(input.type, input.category),
-      "Choose a category for this project type."
-    ),
-    ["category"]
-  )
-);
+export const projectInputSchema = object({
+  ...projectFieldsEntries,
+  slug: projectSlugSchema,
+  type: picklist(PROJECT_TYPES),
+});
 
 export type ProjectInput = InferOutput<typeof projectInputSchema>;
 

@@ -7,6 +7,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
@@ -53,6 +54,7 @@ import {
   PROJECT_TYPE_PATHS,
 } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
+import { getMinecraftServerStatuses } from "@/lib/server-status.functions";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SORT = "downloads:desc";
@@ -68,6 +70,10 @@ const DEV_API_URL = "http://localhost:3002";
 const API_URL =
   (import.meta.env.VITE_API_URL as string | undefined) ??
   (import.meta.env.DEV ? DEV_API_URL : undefined);
+
+const noEventCleanup = (): void => {
+  // No EventSource exists when the API URL is not configured.
+};
 
 interface LiveModEventData {
   id: string;
@@ -145,6 +151,7 @@ const SearchBar = ({
 
 interface FiltersProps {
   category: string;
+  categories: readonly string[];
   clientRequirement: string;
   onClientRequirementChange: (value: string | null) => void;
   gameVersion: string;
@@ -264,6 +271,7 @@ const emptyStateIcon = (type: ProjectType, isFiltered: boolean) => {
 
 const Filters = ({
   category,
+  categories,
   clientRequirement,
   onClientRequirementChange,
   gameVersion,
@@ -290,7 +298,7 @@ const Filters = ({
       <Select
         items={[
           { label: "All categories", value: "" },
-          ...CATEGORIES_BY_TYPE[type].map((value) => ({
+          ...categories.map((value) => ({
             label: formatCategory(value),
             value,
           })),
@@ -303,7 +311,7 @@ const Filters = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">All categories</SelectItem>
-          {CATEGORIES_BY_TYPE[type].map((value) => (
+          {categories.map((value) => (
             <SelectItem key={value} value={value}>
               {formatCategory(value)}
             </SelectItem>
@@ -542,36 +550,53 @@ const Results = ({
   result,
   totalPages,
   type,
-}: ResultsProps) => (
-  <>
-    <p className="text-muted-foreground mt-8 text-sm" aria-live="polite">
-      {result.estimatedTotalHits}{" "}
-      {(result.estimatedTotalHits === 1
-        ? PROJECT_TYPE_LABELS[type].singular
-        : PROJECT_TYPE_LABELS[type].plural
-      ).toLowerCase()}{" "}
-      found
-    </p>
+}: ResultsProps) => {
+  const projectIds =
+    type === "server" ? result.hits.map((project) => project.id) : [];
+  const { data: serverStatuses } = useQuery({
+    enabled: projectIds.length > 0,
+    queryFn: () => getMinecraftServerStatuses({ data: { projectIds } }),
+    queryKey: ["minecraft-server-statuses", ...projectIds],
+    refetchOnWindowFocus: false,
+    retry: false,
+    staleTime: 60_000,
+  });
 
-    <ul
-      aria-busy={isSearching}
-      className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-    >
-      {result.hits.map((project) => (
-        <li key={project.id}>
-          <ProjectCard project={project} />
-        </li>
-      ))}
-    </ul>
+  return (
+    <>
+      <p className="text-muted-foreground mt-8 text-sm" aria-live="polite">
+        {result.estimatedTotalHits}{" "}
+        {(result.estimatedTotalHits === 1
+          ? PROJECT_TYPE_LABELS[type].singular
+          : PROJECT_TYPE_LABELS[type].plural
+        ).toLowerCase()}{" "}
+        found
+      </p>
 
-    <Pagination
-      currentPage={currentPage}
-      isSearching={isSearching}
-      onPageChange={onPageChange}
-      totalPages={totalPages}
-    />
-  </>
-);
+      <ul
+        aria-busy={isSearching}
+        className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {result.hits.map((project) => (
+          <li key={project.id}>
+            <ProjectCard
+              project={project}
+              serverStatus={serverStatuses?.[project.id]}
+              serverStatusManaged={type === "server"}
+            />
+          </li>
+        ))}
+      </ul>
+
+      <Pagination
+        currentPage={currentPage}
+        isSearching={isSearching}
+        onPageChange={onPageChange}
+        totalPages={totalPages}
+      />
+    </>
+  );
+};
 
 interface ProjectBrowserProps extends ProjectBrowserData {
   type: ProjectType;
@@ -601,6 +626,13 @@ export const ProjectBrowser = ({
   const requestIdRef = useRef(0);
 
   const { result, error, isSearching } = state;
+  const categories = [
+    ...new Set([
+      ...CATEGORIES_BY_TYPE[type],
+      ...Object.keys(result?.facetDistribution?.category ?? {}),
+      ...(category ? [category] : []),
+    ]),
+  ];
 
   // oxlint-disable-next-line react-doctor/react-compiler-no-manual-memoization -- React Compiler is not enabled in this project; useCallback keeps runSearch stable so the search effect does not re-run on every render
   const runSearch = useCallback(async (params: ProjectSearchParams) => {
@@ -642,12 +674,12 @@ export const ProjectBrowser = ({
     }
 
     runSearch({
+      query: debouncedQuery,
       category,
       clientRequirement,
       gameVersion,
       loader,
       page,
-      query: debouncedQuery,
       sort,
       type,
     });
@@ -665,7 +697,7 @@ export const ProjectBrowser = ({
 
   useEffect(() => {
     if (!API_URL) {
-      return;
+      return noEventCleanup;
     }
     const source = new EventSource(`${API_URL}/api/events`);
 
@@ -772,6 +804,7 @@ export const ProjectBrowser = ({
 
       <Filters
         category={category}
+        categories={categories}
         clientRequirement={clientRequirement}
         onClientRequirementChange={changeFilter(setClientRequirement)}
         gameVersion={gameVersion}

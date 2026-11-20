@@ -1,4 +1,4 @@
-import { IconInbox } from "@tabler/icons-react";
+import { IconDownload, IconInbox, IconSearch } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { RejectReviewDialog } from "@/components/admin/reject-review-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
+import { MarkdownBody } from "@/components/markdown-body";
 import { Button } from "@/components/ui/button";
 import {
   CardAction,
@@ -15,6 +16,13 @@ import {
   Card,
 } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { errorMessage } from "@/lib/form-errors";
 import { formatDate } from "@/lib/format";
@@ -24,6 +32,8 @@ import {
   listPendingReviews,
 } from "@/lib/project-moderation.functions";
 import { PROJECT_TYPE_LABELS } from "@/lib/projects";
+import type { ProjectView } from "@/lib/projects";
+import { getProject } from "@/lib/projects.functions";
 
 interface ListState {
   error: string | null;
@@ -49,11 +59,13 @@ const ReviewRow = ({
   isMutating,
   onApprove,
   onReject,
+  onReview,
   review,
 }: {
   isMutating: boolean;
   onApprove: (review: PendingReview) => void;
   onReject: (review: PendingReview) => void;
+  onReview: (review: PendingReview) => void;
   review: PendingReview;
 }) => (
   <li className="border-border flex flex-wrap items-start justify-between gap-4 border-b py-4 last:border-b-0">
@@ -68,6 +80,16 @@ const ReviewRow = ({
       </p>
     </div>
     <div className="flex shrink-0 gap-2">
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="min-h-11"
+        onClick={() => onReview(review)}
+      >
+        <IconSearch aria-hidden size={16} />
+        Review
+      </Button>
       <Button
         type="button"
         size="sm"
@@ -115,6 +137,33 @@ export const AdminReviews = ({
   const [rejecting, setRejecting] = useState<PendingReview | null>(null);
   const [isMutating, setIsMutating] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [selectedReview, setSelectedReview] = useState<PendingReview | null>(
+    null
+  );
+  const [reviewDetails, setReviewDetails] = useState<ProjectView | null>(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
+
+  const handleReview = async (review: PendingReview) => {
+    setSelectedReview(review);
+    setReviewDetails(null);
+    setDetailsError(null);
+    setIsLoadingDetails(true);
+    try {
+      const project = await getProject({ data: { slug: review.slug } });
+      if (!project) {
+        setDetailsError(
+          "This submission is no longer available. Refresh the queue."
+        );
+      } else {
+        setReviewDetails(project);
+      }
+    } catch {
+      setDetailsError("Could not load project details. Try again.");
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  };
 
   useEffect(() => {
     let isCurrent = true;
@@ -202,6 +251,7 @@ export const AdminReviews = ({
               setActionError(null);
               setRejecting(target);
             }}
+            onReview={(target) => void handleReview(target)}
             review={review}
           />
         ))}
@@ -274,6 +324,95 @@ export const AdminReviews = ({
             }}
             onRejected={handleRejected}
           />
+
+          <Dialog
+            open={selectedReview !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSelectedReview(null);
+                setReviewDetails(null);
+              }
+            }}
+          >
+            <DialogContent className="sm:max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {reviewDetails?.name ??
+                    selectedReview?.name ??
+                    "Project review"}
+                </DialogTitle>
+                <DialogDescription>
+                  {selectedReview
+                    ? `${PROJECT_TYPE_LABELS[selectedReview.type].singular} · ${selectedReview.category} · submitted by ${selectedReview.ownerName} on ${formatDate(selectedReview.submittedAt)}`
+                    : "Submission details"}
+                </DialogDescription>
+              </DialogHeader>
+              {isLoadingDetails ? (
+                <div aria-busy="true" className="grid gap-3 py-3">
+                  <Skeleton className="h-5 w-2/3" />
+                  <Skeleton className="h-24" />
+                  <Skeleton className="h-16" />
+                </div>
+              ) : detailsError ? (
+                <p role="alert" className="text-destructive py-3">
+                  {detailsError}
+                </p>
+              ) : reviewDetails ? (
+                <div className="max-h-[65svh] space-y-5 overflow-y-auto pr-1">
+                  <section>
+                    <h3 className="text-sm font-semibold">Description</h3>
+                    <div className="markdown-body mt-2 text-sm">
+                      <MarkdownBody>{reviewDetails.description}</MarkdownBody>
+                    </div>
+                  </section>
+                  <section>
+                    <h3 className="text-sm font-semibold">Summary</h3>
+                    <p className="text-muted-foreground mt-2 text-sm">
+                      {reviewDetails.summary}
+                    </p>
+                  </section>
+                  {reviewDetails.tags.length > 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      Tags: {reviewDetails.tags.join(", ")}
+                    </p>
+                  ) : null}
+                  <section className="grid gap-3">
+                    <h3 className="text-sm font-semibold">
+                      Versions and files
+                    </h3>
+                    {reviewDetails.versions.map((version) => (
+                      <div
+                        className="border-border rounded-md border p-3"
+                        key={version.id}
+                      >
+                        <p className="font-medium">
+                          {version.name} · {version.versionNumber}
+                        </p>
+                        {version.changelog ? (
+                          <p className="text-muted-foreground mt-1 text-sm whitespace-pre-wrap">
+                            {version.changelog}
+                          </p>
+                        ) : null}
+                        <ul className="mt-2 grid gap-1">
+                          {version.files.map((file) => (
+                            <li key={file.id}>
+                              <a
+                                className="text-primary inline-flex min-h-10 items-center gap-2 text-sm hover:underline"
+                                href={`/api/download/${file.id}`}
+                              >
+                                <IconDownload aria-hidden size={15} />
+                                {file.filename}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </section>
+                </div>
+              ) : null}
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </section>

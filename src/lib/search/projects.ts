@@ -5,6 +5,7 @@ import {
   nullish,
   number,
   object,
+  optional,
   picklist,
   record,
   safeParse,
@@ -110,6 +111,9 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
         projects.category,
         projects.downloads,
         projects.id,
+        project_images.id as "iconId",
+        project_images.width as "iconWidth",
+        project_images.height as "iconHeight",
         projects.name,
         projects.slug,
         projects.summary as description,
@@ -151,6 +155,8 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
       from projects
       -- Left join: a kept project whose owner deleted their account has none.
       left join users on users.id = projects.owner_id
+      left join project_images on project_images.project_id = projects.id
+        and project_images.kind = 'icon'
       left join version_facets on version_facets."projectId" = projects.id
       left join project_servers on project_servers.project_id = projects.id
       where projects.status = 'published'
@@ -215,6 +221,9 @@ const projectHitSchema = object({
   downloads: number(),
   gameVersions: nullish(array(string())),
   id: string(),
+  iconHeight: optional(nullish(number())),
+  iconId: optional(nullish(string())),
+  iconWidth: optional(nullish(number())),
   loaders: nullish(array(string())),
   name: string(),
   slug: string(),
@@ -241,17 +250,25 @@ const projectSearchRowSchema = object({
  */
 const toDocument = ({
   clientRequirement,
+  iconHeight,
+  iconId,
+  iconWidth,
   ...hit
 }: ProjectHit): ProjectDocument => {
   const document: ProjectDocument = {
     ...hit,
     authorUsername: hit.authorUsername ?? null,
-    // Search rows are built by Postgres and do not carry images, so a hit
-    // renders the letter avatar. The full document, which does include them,
-    // backs the project and profile pages.
     gallery: [],
     gameVersions: hit.gameVersions ?? [],
-    icon: null,
+    icon:
+      iconId && iconHeight && iconWidth
+        ? {
+            height: iconHeight,
+            id: iconId,
+            url: `/api/image/${iconId}`,
+            width: iconWidth,
+          }
+        : null,
     loaders: hit.loaders ?? [],
     updatedAt: new Date(hit.updatedAt).toISOString(),
   };
@@ -313,23 +330,23 @@ export const searchProjectsInDatabase = async (
   // browse view still renders.
   if (!parsed.success) {
     return {
+      page,
+      query: q,
       estimatedTotalHits: 0,
       facetDistribution: null,
       hits: [],
-      page,
       pageSize: PAGE_SIZE,
-      query: q,
     };
   }
 
   const { estimatedTotalHits, facetDistribution, hits } = parsed.output;
 
   return {
+    page,
     estimatedTotalHits,
+    query: q,
     facetDistribution: facetDistribution ?? null,
     hits: hits.map(toDocument),
-    page,
     pageSize: PAGE_SIZE,
-    query: q,
   };
 };

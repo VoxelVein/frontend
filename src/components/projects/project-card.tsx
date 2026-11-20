@@ -2,10 +2,22 @@ import { IconDownload, IconTag } from "@tabler/icons-react";
 
 import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
+import { ServerPlayerCount } from "@/components/projects/server-player-count";
 import { formatCount } from "@/lib/format";
 import type { ProjectDocument } from "@/lib/projects";
+import type { MinecraftServerStatus } from "@/lib/server-status.functions";
 
-const ProjectCard = ({ project }: { project: ProjectDocument }) => (
+interface ProjectCardProps {
+  project: ProjectDocument;
+  serverStatus?: MinecraftServerStatus;
+  serverStatusManaged?: boolean;
+}
+
+const ProjectCard = ({
+  project,
+  serverStatus,
+  serverStatusManaged = false,
+}: ProjectCardProps) => (
   <article className="group border-border bg-card hover:border-border/80 focus-within:border-foreground/20 focus-within:ring-ring relative flex h-full flex-col rounded-xl border p-5 shadow-xs transition-[color,box-shadow,transform] duration-200 focus-within:ring-1 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none">
     {/* Full card focus overlay matching card corner radius */}
     <ProjectLink
@@ -55,14 +67,22 @@ const ProjectCard = ({ project }: { project: ProjectDocument }) => (
     {/* Footer Metadata */}
     <div className="border-border/60 text-muted-foreground mt-4 flex items-center justify-between gap-3 border-t pt-3.5 text-xs">
       <div className="flex items-center gap-3.5">
-        <span className="inline-flex items-center gap-1.5 font-medium">
-          <IconDownload
-            size={14}
-            className="text-muted-foreground/70"
-            aria-hidden="true"
+        {project.type === "server" ? (
+          <ServerPlayerCount
+            managed={serverStatusManaged}
+            projectId={project.id}
+            status={serverStatus}
           />
-          {formatCount(project.downloads)}
-        </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <IconDownload
+              size={14}
+              className="text-muted-foreground/70"
+              aria-hidden="true"
+            />
+            {formatCount(project.downloads)}
+          </span>
+        )}
 
         <span className="inline-flex items-center gap-1.5 font-medium">
           <IconTag

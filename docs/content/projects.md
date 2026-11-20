@@ -77,19 +77,26 @@ Subcategories
   for CityBuild servers, `plots`, `skyblock`, and `prison`; plugins carry
   purposes such as `economy` and `protection`.
 
-`isCategoryForType(type, category)` rejects a category that belongs to a
-different type, so it is used as a Valibot refinement on the publish and
-update schemas rather than checked by hand. The browse filter and the publish
-select both read the same list, and `formatCategory` (`src/lib/format.ts`)
-turns a stored slug into a label in all three places that show one, the
-filter, the form, and the project page.
+The project form offers these common values plus **Other…**, which lets a
+creator enter a custom category. Custom categories are trimmed, lowercased,
+and limited to 40 characters. Browse filters combine the common values with
+the categories present in the search facets, so custom values remain
+filterable. `formatCategory` (`src/lib/format.ts`) formats both known slugs and
+custom values for the form, filter, and project page.
 
 `projects.category` is a plain `text` column validated in app code, not a
 database enum. Extending a list therefore needs no migration and cannot
 break existing rows, as long as the old values stay. The trade-off is that a
 list change is invisible to the database: the app is the only thing enforcing
 it, and removing a value is the only edit that can strand a row with a
-category no filter can select.
+category no filter can select. Search values are bound SQL parameters; unlike
+loaders and game versions, categories are not restricted to a fixed allowlist.
+
+Server cards show live player counts when a Java or Bedrock status query
+returns them. Status lookups are batched per page and cached in memory for one
+minute. The app queries [mcstatus.io](https://mcstatus.io/docs); if a server is
+offline, hides its count, or cannot be reached, the card shows an unavailable
+count instead.
 
 That is also why `formatCategory` looks its labels up in a **`Map`**, not a
 plain object. A `value in LABELS` check walks the prototype chain, so a
@@ -347,7 +354,7 @@ from the `0012` DDL precisely so that one step can be held back.
 
 The browser sends the raw file with
 `PUT /api/projects/<projectId>/versions/<versionId>/files?filename=…`
-(`src/routes/api/projects.$projectId.versions.$versionId.files.ts`).
+(`src/routes/api/projects/$projectId/versions/$versionId/files.ts`).
 The route:
 
 1. Rejects requests whose `Origin` is not the app's own origin.
@@ -374,7 +381,7 @@ The route:
 
 ## Download flow
 
-`GET /api/download/<fileId>` (`src/routes/api/download.$fileId.ts`)
+`GET /api/download/<fileId>` (`src/routes/api/download/$fileId.ts`)
 only serves files of published projects. It increments the version and
 project download counters, then redirects (`302`) to the storage URL.
 Download links work without JavaScript or Turnstile, so launchers and
