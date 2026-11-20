@@ -33,41 +33,28 @@ const renderForm = (mode: "create" | "edit" = "edit") =>
     />
   );
 
-describe("project description preview", () => {
-  it("starts hidden, so the form is not taller than it needs to be", () => {
+describe("project description editor", () => {
+  it("shows the rendered description without a toggle", () => {
     renderForm();
 
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
-    expect(screen.queryByText("Description preview")).toBeNull();
-  });
-
-  it("shows the rendered description when toggled", () => {
-    renderForm();
-
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-
-    expect(screen.getByText("Description preview")).toBeInTheDocument();
-    // Rendered Markdown, not the raw source, which is the point of the preview.
+    // The preview is part of the layout rather than a mode: the whole point is
+    // to see the Markdown while writing it.
+    expect(screen.getByText("Preview")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Heading" })
     ).toBeInTheDocument();
     expect(screen.getByText("bold").tagName).toBe("STRONG");
   });
 
-  it("toggles back closed", () => {
+  it("updates the preview as the description changes", () => {
     renderForm();
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Hide preview" }));
+    fireEvent.change(screen.getByLabelText("Description (Markdown)"), {
+      target: { value: "Now with **fresh** words." },
+    });
 
-    expect(screen.queryByText("Description preview")).toBeNull();
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
+    expect(screen.getByText("fresh").tagName).toBe("STRONG");
+    expect(screen.queryByRole("heading", { name: "Heading" })).toBeNull();
   });
 
   it("explains an empty description instead of rendering a blank box", () => {
@@ -88,66 +75,41 @@ describe("project description preview", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-
-    expect(screen.getByText("Nothing to preview yet.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Your description will appear here as you type.")
+    ).toBeInTheDocument();
   });
 
-  it("points aria-controls at the element it toggles", () => {
+  it("puts the editor and preview in one row from large screens up", () => {
     renderForm();
 
-    const toggle = screen.getByRole("button", { name: "Preview" });
-    const controls = toggle.getAttribute("aria-controls");
+    const textarea = screen.getByLabelText("Description (Markdown)");
 
-    expect(controls).toBeTruthy();
-    fireEvent.click(toggle);
-    expect(
-      document.querySelector(`#${CSS.escape(String(controls))}`)
-    ).toBeTruthy();
+    expect(textarea.closest('[class*="lg:grid-cols-2"]')).toBeInTheDocument();
   });
 
-  it("caps the width of every field on the edit form", () => {
-    renderForm("edit");
+  it("keeps identity fields a readable width without constraining the editor", () => {
+    renderForm("create");
 
     for (const id of [
       "project-name",
+      "project-type",
+      "project-slug",
       "project-summary",
-      "project-description",
       "project-tags",
       "project-category",
     ]) {
       const field = document.querySelector(`#${id}`);
       expect(field, `field ${id} should exist`).toBeTruthy();
       expect(field?.className, `field ${id} should be capped`).toContain(
-        "max-w-xl"
+        "max-w-2xl"
       );
     }
-  });
 
-  it("caps the width of the create-only fields too", () => {
-    renderForm("create");
-
-    // Type and slug only render when creating, so they need their own check
-    // rather than riding along with the edit form.
-    for (const id of ["project-type", "project-slug"]) {
-      const field = document.querySelector(`#${id}`);
-      expect(field, `field ${id} should exist`).toBeTruthy();
-      expect(field?.className, `field ${id} should be capped`).toContain(
-        "max-w-xl"
-      );
-    }
-  });
-
-  it("caps the preview so it lines up with the editor", () => {
-    renderForm();
-
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-
-    const controls = screen
-      .getByRole("button", { name: "Hide preview" })
-      .getAttribute("aria-controls");
+    // The Markdown editor spans the form: its column is the writing surface,
+    // so capping it would undo the side-by-side layout on narrow screens.
     expect(
-      document.querySelector(`#${CSS.escape(String(controls))}`)?.className
-    ).toContain("max-w-xl");
+      document.querySelector("#project-description")?.className
+    ).not.toContain("max-w-2xl");
   });
 });

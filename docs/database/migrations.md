@@ -204,6 +204,12 @@ written by hand, and several do this alongside their DDL:
 | `0020_notifications_remake.sql` | Rebuilds `user_notifications` |
 | `0021_project_takedown.sql` | Project takedown audit columns |
 | `0022_index_foreign_keys.sql` | Indexes seven unindexed foreign keys |
+| `0023_support_tickets.sql` | Support tickets and threaded messages |
+| `0024_support_tickets_index.sql` | Closed by and message author indexes |
+| `0025_support_tickets_message_index.sql` | Message author foreign-key index |
+| `0026_support_tickets_tags.sql` | Ticket tags |
+| `0027_drop_posts_author_id.sql` | Removes the unused post author column |
+| `0028_modpack_platform_files.sql` | Per-platform modpack release files |
 
 ## Index every foreign key
 

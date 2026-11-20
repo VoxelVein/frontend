@@ -6,6 +6,8 @@ interface MarkdownPreviewProps {
    * "Preview" when the content is reached.
    */
   labelledBy: string;
+  /** Shown when the Markdown is blank. */
+  emptyMessage?: string;
   /** How tall the scroll region is, so a long document does not push the form down. */
   maxHeightClassName?: string;
   /** Raw Markdown. Rendered as-is; an empty value shows the empty state. */
@@ -20,6 +22,7 @@ interface MarkdownPreviewProps {
  * `markdown-body` usage in the routes, the preview stops being trustworthy.
  */
 export const MarkdownPreview = ({
+  emptyMessage = "Nothing to preview yet.",
   labelledBy,
   maxHeightClassName = "max-h-72 min-h-32",
   value,
@@ -33,7 +36,7 @@ export const MarkdownPreview = ({
         <MarkdownBody>{value}</MarkdownBody>
       </div>
     ) : (
-      <p className="text-muted-foreground text-sm">Nothing to preview yet.</p>
+      <p className="text-muted-foreground text-sm">{emptyMessage}</p>
     )}
   </div>
 );

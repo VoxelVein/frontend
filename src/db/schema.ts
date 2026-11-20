@@ -407,6 +407,7 @@ export const projectFiles = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     filename: text("filename").notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
+    platform: text("platform"),
     primary: boolean("primary").default(false).notNull(),
     sha1: text("sha1").notNull(),
     sha512: text("sha512").notNull(),
@@ -418,10 +419,13 @@ export const projectFiles = pgTable(
   },
   (table) => [
     // Also serves lookups by version, as version_id leads the index.
-    uniqueIndex("project_files_versionId_filename_uidx").on(
-      table.versionId,
-      table.filename
-    ),
+    uniqueIndex("project_files_versionId_filename_uidx")
+      .on(table.versionId, table.filename)
+      .where(sql`${table.platform} is null`),
+    // One downloadable distribution per platform and release.
+    uniqueIndex("project_files_versionId_platform_uidx")
+      .on(table.versionId, table.platform)
+      .where(sql`${table.platform} is not null`),
     // At most one primary file per version.
     uniqueIndex("project_files_versionId_primary_uidx")
       .on(table.versionId)

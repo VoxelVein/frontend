@@ -1,10 +1,10 @@
-import { IconArrowLeft } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
-
+import {
+  ProjectDetailPageFrame,
+  ProjectGalleryBackLink,
+} from "@/components/projects/project-detail-layout";
 import { ProjectImage } from "@/components/projects/project-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ProjectImageView } from "@/lib/project-images";
-import { PROJECT_TYPE_PATHS } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
 
 interface ProjectGalleryPageProps {
@@ -28,41 +28,46 @@ const ProjectGalleryPage = ({
   slug,
   type,
 }: ProjectGalleryPageProps) => (
-  <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
-    <Link
-      to={`${PROJECT_TYPE_PATHS[type]}/$slug`}
-      params={{ slug }}
-      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
-    >
-      <IconArrowLeft size={16} aria-hidden="true" />
-      Back to {projectName}
-    </Link>
+  <ProjectDetailPageFrame>
+    <ProjectGalleryBackLink projectName={projectName} slug={slug} type={type} />
 
-    <header className="mt-4">
-      <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl">
-        {projectName} gallery
-      </h1>
-      <p className="text-muted-foreground mt-2 text-sm">
-        {images.length === 1
-          ? "1 screenshot. Open it for the full-size image."
-          : `${images.length} screenshots. Open any of them for the full-size image.`}
-      </p>
+    <header className="border-border bg-card relative mt-4 overflow-hidden rounded-2xl border p-5 sm:p-8">
+      <div
+        aria-hidden="true"
+        className="from-primary/10 absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l to-transparent"
+      />
+      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
+            Project gallery
+          </p>
+          <h1 className="text-foreground mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            {projectName}
+          </h1>
+          <p className="text-muted-foreground mt-2 text-sm">
+            {images.length === 1
+              ? "1 screenshot · open it for the full-size image"
+              : `${images.length} screenshots · open any for the full-size image`}
+          </p>
+        </div>
+        <span className="border-border bg-background/70 text-muted-foreground inline-flex min-h-9 w-fit items-center rounded-md border px-3 text-sm font-medium tabular-nums">
+          {images.length} {images.length === 1 ? "image" : "images"}
+        </span>
+      </div>
     </header>
 
-    <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {images.map((image, index) => (
         <li key={image.id}>
           <a
             href={image.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="border-border focus-visible:ring-ring block overflow-hidden rounded-xl border focus-visible:ring-3 focus-visible:outline-none"
+            className="border-border focus-visible:ring-ring bg-card block overflow-hidden rounded-xl border shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-3 focus-visible:outline-none motion-reduce:transform-none motion-reduce:transition-none"
           >
             <ProjectImage
               image={image}
               alt={`${projectName} screenshot ${index + 1}`}
-              // The first row is above the fold on every breakpoint, so the
-              // leading images are eager and the rest stay lazy.
               priority={index < 3}
               ratio="square"
             />
@@ -70,14 +75,14 @@ const ProjectGalleryPage = ({
         </li>
       ))}
     </ul>
-  </div>
+  </ProjectDetailPageFrame>
 );
 
 /** Placeholder shown while the gallery loader runs. */
 const ProjectGalleryPageSkeleton = () => (
   <div
     aria-busy="true"
-    className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
+    className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-9 lg:px-8 lg:py-10"
   >
     <Skeleton className="h-11 w-48" />
     <Skeleton className="mt-4 h-9 w-72 max-w-full" />

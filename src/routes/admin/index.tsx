@@ -5,8 +5,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
-import { object, optional, parse, picklist } from "valibot";
+import { object, optional, picklist, safeParse } from "valibot";
 
 import { AdminAccountDeletions } from "@/components/admin/admin-account-deletions";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
@@ -14,18 +13,15 @@ import { AdminPosts } from "@/components/admin/admin-posts";
 import { AdminReports } from "@/components/admin/admin-reports";
 import { AdminReviews } from "@/components/admin/admin-reviews";
 import { AdminSessions } from "@/components/admin/admin-sessions";
+import { AdminMobileNav, AdminSidebar } from "@/components/admin/admin-sidebar";
+import type { AdminTabCounts } from "@/components/admin/admin-sidebar";
 import { AdminStorage } from "@/components/admin/admin-storage";
 import { AdminTickets } from "@/components/admin/admin-tickets";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { PageHeader } from "@/components/page-header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { countUnreadAdminNotifications } from "@/lib/admin-accounts.functions";
-import {
-  ADMIN_TABS,
-  canSeeTab,
-  resolveAdminTab,
-  visibleTabsFor,
-} from "@/lib/admin-tabs";
+import { canSeeTab, resolveAdminTab, visibleTabsFor } from "@/lib/admin-tabs";
+import type { AdminTab } from "@/lib/admin-tabs";
 import { countPendingReviews } from "@/lib/project-moderation.functions";
 import { countOpenReports } from "@/lib/reports.functions";
 
@@ -45,33 +41,12 @@ const adminSearchSchema = object({
   ),
 });
 
-type AdminTab = NonNullable<
-  ReturnType<typeof parse<typeof adminSearchSchema>>["tab"]
->;
-
-/** Three tabs carry a count badge; the rest are plain text. */
-const tabLabel = (
-  tab: AdminTab,
-  counts: { open: number; pending: number; unread: number }
-): ReactNode => {
-  if (tab === "notifications") {
-    return <NotificationsTabLabel unread={counts.unread} />;
-  }
-  if (tab === "reviews") {
-    return <ReviewsTabLabel pending={counts.pending} />;
-  }
-  if (tab === "reports") {
-    return <ReportsTabLabel open={counts.open} />;
-  }
-  return ADMIN_TABS.find((entry) => entry.value === tab)?.label ?? tab;
-};
-
 /** Unread inbox size, or null when it could not be loaded. */
 const fetchUnreadCount = async (): Promise<number | null> => {
   try {
     return await countUnreadAdminNotifications();
   } catch {
-    // The badge is a convenience; the Notifications tab reports load errors.
+    // The badge is a convenience; the Notifications section reports load errors.
     return null;
   }
 };
@@ -81,7 +56,7 @@ const fetchOpenReportCount = async (): Promise<number | null> => {
   try {
     return await countOpenReports();
   } catch {
-    // Same reasoning as the other badges: this tab reports load errors, so a
+    // Same reasoning as the other badges: this section reports load errors, so a
     // failed count must not break the page.
     return null;
   }
@@ -92,86 +67,44 @@ const fetchPendingReviewCount = async (): Promise<number | null> => {
   try {
     return await countPendingReviews();
   } catch {
-    // Same reasoning as the notifications badge: the Reviews tab is the place
-    // that reports load errors, so a failed count must not break the page.
+    // Same reasoning as the notifications badge: Reviews is the place that
+    // reports load errors, so a failed count must not break the page.
     return null;
   }
 };
 
-/**
- * A tab label with an unread/pending count.
- *
- * `srSuffix` supplies the words the screen reader reads after the number, so
- * "3" is announced as "3 unread" or "3 pending" rather than a bare digit.
- */
-const CountBadge = ({
-  count,
-  noun,
-  srSuffix,
-}: {
-  count: number;
-  noun: string;
-  srSuffix: string;
-}) => (
-  <>
-    {noun}
-    {count > 0 ? (
-      <>
-        <span
-          aria-hidden="true"
-          className="bg-primary text-primary-foreground inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold"
-        >
-          {count}
-        </span>
-        <span className="sr-only">
-          , {count} {srSuffix}
-        </span>
-      </>
-    ) : null}
-  </>
-);
-
-const NotificationsTabLabel = ({ unread }: { unread: number }) => (
-  <CountBadge count={unread} noun="Notifications" srSuffix="unread" />
-);
-
-const ReviewsTabLabel = ({ pending }: { pending: number }) => (
-  <CountBadge count={pending} noun="Reviews" srSuffix="pending" />
-);
-
-const ReportsTabLabel = ({ open }: { open: number }) => (
-  <CountBadge count={open} noun="Reports" srSuffix="open" />
-);
-
 const AdminPage = () => {
   const navigate = useNavigate();
-
-  /**
-   * The role from the route context, not from `authClient.useSession()`.
-   *
-   * `beforeLoad` already resolved the session and handed it back as context, so
-   * reading it from there is free on the server. The client hook resolved
-   * *after* first paint, which meant `role` was "user" during SSR  -  nobody sees
-   * every tab  -  and the panel rendered with no tab strip at all. This also
-   * removes the empty-tab state that used to crash on `visibleTabs[0]`.
-   */
   const { session } = useRouteContext({ from: "/admin" });
   // Optional on the session shape, so defaulted once here. `hasRole` fails
-  // closed on an absent value, so a session without one sees no tabs.
+  // closed on an absent value, so a session without one sees no sections.
   const role = session.user.role ?? "user";
   const { tab = "users" } = useSearch({ from: "/admin/" });
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [pendingReviews, setPendingReviews] = useState(0);
-  const [openReports, setOpenReports] = useState(0);
+  const [counts, setCounts] = useState<AdminTabCounts>({
+    open: 0,
+    pending: 0,
+    unread: 0,
+  });
 
-  // A tab is hidden rather than disabled, so a moderator never sees a control
-  // that would fail. Falls back to the first tab they *can* see, so a
+  // A section is hidden rather than disabled, so a moderator never sees a
+  // control that would fail. Falls back to the first one they *can* see, so a
   // bookmarked or shared admin URL lands somewhere usable.
-  //
-  // `resolveAdminTab` is total: it returns a real tab even when the role can
-  // see none, which is what used to crash on `visibleTabs[0].value`.
   const visibleTabs = visibleTabsFor(role);
   const activeTab = resolveAdminTab(tab, role);
+  const activeLabel =
+    visibleTabs.find((entry) => entry.value === activeTab)?.label ??
+    "Admin section";
+
+  const selectTab = (next: AdminTab) => {
+    // The search parameter is still the source of truth, so links to a specific
+    // section keep working and the browser's back button still moves between
+    // them. `replace` keeps the panel from filling history with section hops.
+    void navigate({
+      to: "/admin",
+      search: { tab: next },
+      replace: true,
+    });
+  };
 
   useEffect(() => {
     let isCurrent = true;
@@ -192,15 +125,11 @@ const AdminPage = () => {
       if (!isCurrent) {
         return;
       }
-      if (unread !== null) {
-        setUnreadCount(unread);
-      }
-      if (pending !== null) {
-        setPendingReviews(pending);
-      }
-      if (open !== null) {
-        setOpenReports(open);
-      }
+      setCounts((current) => ({
+        open: open ?? current.open,
+        pending: pending ?? current.pending,
+        unread: unread ?? current.unread,
+      }));
     };
     void loadOnMount();
     return () => {
@@ -211,80 +140,71 @@ const AdminPage = () => {
   const refreshUnreadCount = async () => {
     const unread = await fetchUnreadCount();
     if (unread !== null) {
-      setUnreadCount(unread);
+      setCounts((current) => ({ ...current, unread }));
     }
   };
 
   const refreshPendingReviews = async () => {
     const pending = await fetchPendingReviewCount();
     if (pending !== null) {
-      setPendingReviews(pending);
+      setCounts((current) => ({ ...current, pending }));
     }
   };
 
   const refreshOpenReports = async () => {
     const open = await fetchOpenReportCount();
     if (open !== null) {
-      setOpenReports(open);
+      setCounts((current) => ({ ...current, open }));
     }
   };
 
+  const navProps = {
+    activeTab,
+    counts,
+    onSelectTab: selectTab,
+    tabs: visibleTabs,
+  };
+
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <PageHeader
         title="Admin Panel"
         description="Manage users, account deletions, notifications, blog posts, and file storage."
+        action={<AdminMobileNav {...navProps} />}
       />
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) =>
-          navigate({
-            to: "/admin",
-            search: { tab: value },
-            replace: true,
-          })
-        }
-        className="mt-8"
-      >
-        <TabsList aria-label="Admin sections" className="flex-wrap">
-          {visibleTabs.map((entry) => (
-            <TabsTrigger key={entry.value} value={entry.value}>
-              {tabLabel(entry.value, {
-                open: openReports,
-                pending: pendingReviews,
-                unread: unreadCount,
-              })}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="mt-8 flex flex-col items-start gap-6 lg:flex-row lg:gap-8">
+        <AdminSidebar {...navProps} />
 
-        {visibleTabs.map((entry) => (
-          <TabsContent key={entry.value} value={entry.value}>
-            {entry.value === "users" ? <AdminUsers /> : null}
-            {entry.value === "sessions" ? <AdminSessions /> : null}
-            {entry.value === "posts" ? <AdminPosts /> : null}
-            {entry.value === "storage" ? <AdminStorage /> : null}
-            {entry.value === "notifications" ? (
-              <AdminNotifications onReadStateChange={refreshUnreadCount} />
-            ) : null}
-            {entry.value === "deletions" ? <AdminAccountDeletions /> : null}
-            {entry.value === "reviews" ? (
-              <AdminReviews onDecided={refreshPendingReviews} />
-            ) : null}
-            {entry.value === "reports" ? (
-              <AdminReports onResolved={refreshOpenReports} />
-            ) : null}
-            {entry.value === "tickets" ? <AdminTickets /> : null}
-          </TabsContent>
-        ))}
-      </Tabs>
+        <section aria-label={activeLabel} className="min-w-0 flex-1">
+          {activeTab === "users" ? <AdminUsers /> : null}
+          {activeTab === "sessions" ? <AdminSessions /> : null}
+          {activeTab === "posts" ? <AdminPosts /> : null}
+          {activeTab === "storage" ? <AdminStorage /> : null}
+          {activeTab === "notifications" ? (
+            <AdminNotifications onReadStateChange={refreshUnreadCount} />
+          ) : null}
+          {activeTab === "deletions" ? <AdminAccountDeletions /> : null}
+          {activeTab === "reviews" ? (
+            <AdminReviews onDecided={refreshPendingReviews} />
+          ) : null}
+          {activeTab === "reports" ? (
+            <AdminReports onResolved={refreshOpenReports} />
+          ) : null}
+          {activeTab === "tickets" ? <AdminTickets /> : null}
+        </section>
+      </div>
     </div>
   );
 };
 
 export const Route = createFileRoute("/admin/")({
-  validateSearch: (search: Record<string, string | undefined>) =>
-    parse(adminSearchSchema, search),
+  validateSearch: (search: Record<string, string | undefined>) => {
+    // `safeParse` never throws: an unknown or stale `?tab=` value (for example
+    // from a bookmark after a tab was removed) falls back to the default tab
+    // instead of surfacing a generic "an error occurred" with no detail.
+    const result = safeParse(adminSearchSchema, search);
+    return result.success ? result.output : { tab: "users" };
+  },
   component: AdminPage,
 });

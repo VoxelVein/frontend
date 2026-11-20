@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { toast } from "sonner";
 import { safeParse } from "valibot";
 
 import { FormField } from "@/components/form-field";
-import { FormTextarea } from "@/components/form-textarea";
-import { MarkdownPreview } from "@/components/markdown-preview";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import { RequiredLabel } from "@/components/required-label";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import {
   errorMessage,
   NO_FIELD_ERRORS,
@@ -33,6 +33,7 @@ import {
   SLUG_MAX_LENGTH,
 } from "@/lib/projects";
 import type { ProjectInput, ProjectType } from "@/lib/projects";
+import { cn } from "@/lib/utils";
 
 export interface ProjectFormValues {
   category: string;
@@ -62,9 +63,8 @@ const EMPTY_VALUES: ProjectFormValues = {
   type: "mod",
 };
 
-/** Referenced by aria-controls, so the ids have to be stable across renders. */
-const DESCRIPTION_PREVIEW_ID = "project-description-preview";
-const DESCRIPTION_PREVIEW_LABEL_ID = "project-description-preview-label";
+const FIELD_WIDTH = "max-w-2xl";
+const OTHER_CATEGORY = "__other__";
 
 const slugify = (value: string): string =>
   value
@@ -83,18 +83,21 @@ const splitTags = (value: string): string[] => [
   ),
 ];
 
-/**
- * Width cap applied to every field in this form.
- *
- * A single-line `<input>` cannot wrap: a long value scrolls sideways and runs
- * out of view. Capping the field keeps that scroll inside a box the eye can
- * follow, and stops a short value such as a name stretching the full column
- * on a wide monitor. Applied per field rather than on the form so the cap is
- * visible in the markup and so it reaches the selects, which are not grid
- * children of their own.
- */
-const FIELD_WIDTH = "max-w-xl";
-const OTHER_CATEGORY = "__other__";
+const FormSection = ({
+  children,
+  description,
+  title,
+}: {
+  children: ReactNode;
+  description: string;
+  title: string;
+}) => (
+  <fieldset className="border-border grid gap-4 border-b pb-8 last:border-0 last:pb-0">
+    <legend className="text-foreground text-base font-semibold">{title}</legend>
+    <p className="text-muted-foreground -mt-2 text-sm">{description}</p>
+    {children}
+  </fieldset>
+);
 
 export const ProjectForm = ({
   initialValues = EMPTY_VALUES,
@@ -112,9 +115,6 @@ export const ProjectForm = ({
   const slugEditedRef = useRef(mode === "edit");
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
   const [pending, setPending] = useState(false);
-  // Starts closed: the form is long, and a permanently open preview would
-  // make the fields below it harder to reach.
-  const [showDescriptionPreview, setShowDescriptionPreview] = useState(false);
 
   const update = <Key extends keyof ProjectFormValues>(
     key: Key,
@@ -164,53 +164,60 @@ export const ProjectForm = ({
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="grid gap-6">
-      {mode === "create" ? (
-        <div className="grid gap-2">
-          <RequiredLabel htmlFor="project-type" isRequired>
-            Project type
-          </RequiredLabel>
-          <Select
-            items={PROJECT_TYPES.map((type) => ({
-              label: PROJECT_TYPE_LABELS[type].singular,
-              value: type,
-            }))}
-            value={values.type}
-            onValueChange={(value) => {
-              if (value && isProjectType(value)) {
-                changeType(value);
-              }
-            }}
-          >
-            <SelectTrigger
-              id="project-type"
-              className="min-h-11 w-full max-w-xl"
+    <form noValidate onSubmit={handleSubmit} className="grid gap-8">
+      <FormSection
+        title="Project identity"
+        description="The name people search for and the address where your listing lives."
+      >
+        {mode === "create" ? (
+          <div className="grid gap-2">
+            <RequiredLabel htmlFor="project-type" isRequired>
+              Project type
+            </RequiredLabel>
+            <Select
+              items={PROJECT_TYPES.map((type) => ({
+                label: PROJECT_TYPE_LABELS[type].singular,
+                value: type,
+              }))}
+              value={values.type}
+              onValueChange={(value) => {
+                if (value && isProjectType(value)) {
+                  changeType(value);
+                }
+              }}
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PROJECT_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {PROJECT_TYPE_LABELS[type].singular}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ) : null}
+              <SelectTrigger
+                id="project-type"
+                className={cn("min-h-11 w-full", FIELD_WIDTH)}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PROJECT_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {PROJECT_TYPE_LABELS[type].singular}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-muted-foreground text-sm">
+              A project keeps the type it was created with.
+            </p>
+          </div>
+        ) : null}
 
-      <FormField
-        id="project-name"
-        label="Name"
-        className={FIELD_WIDTH}
-        value={values.name}
-        onChange={(event) => changeName(event.target.value)}
-        error={errors.get("name")}
-        autoComplete="off"
-        required
-      />
+        <FormField
+          id="project-name"
+          label="Name"
+          className={FIELD_WIDTH}
+          value={values.name}
+          onChange={(event) => changeName(event.target.value)}
+          error={errors.get("name")}
+          helperText="Keep it recognizable in search results."
+          autoComplete="off"
+          required
+        />
 
-      {mode === "create" ? (
         <FormField
           id="project-slug"
           label="URL slug"
@@ -221,158 +228,151 @@ export const ProjectForm = ({
             update("slug", event.target.value);
           }}
           error={errors.get("slug")}
-          helperText={`Your page will live at ${PROJECT_TYPE_PATHS[values.type]}/${values.slug || "your-slug"}. It can't be changed later.`}
+          helperText={
+            mode === "create"
+              ? `Your page will live at ${PROJECT_TYPE_PATHS[values.type]}/${values.slug || "your-slug"}.`
+              : `Your page lives at ${PROJECT_TYPE_PATHS[values.type]}/${values.slug || "your-slug"}. Changing it updates the URL and any links to the old address.`
+          }
           autoComplete="off"
           spellCheck={false}
           required
         />
-      ) : null}
 
-      <div className="grid gap-2">
-        <RequiredLabel htmlFor="project-category" isRequired>
-          Category
-        </RequiredLabel>
-        <Select
-          items={[
-            ...CATEGORIES_BY_TYPE[values.type].map((category) => ({
-              label: formatCategory(category),
-              value: category,
-            })),
-            { label: "Other…", value: OTHER_CATEGORY },
-          ]}
-          value={categoryIsCustom ? OTHER_CATEGORY : values.category}
-          onValueChange={(value) => {
-            const custom = value === OTHER_CATEGORY;
-            setCategoryIsCustom(custom);
-            if (!custom) {
-              setCustomCategory("");
-              update("category", value ?? "");
-              return;
-            }
-            const nextCustom = categoryIsCustom ? customCategory : "";
-            setCustomCategory(nextCustom);
-            update("category", nextCustom);
-          }}
-        >
-          <SelectTrigger
-            id="project-category"
-            className="min-h-11 w-full max-w-xl"
-            aria-invalid={errors.get("category") ? true : undefined}
-            aria-describedby={
-              errors.get("category") && !categoryIsCustom
-                ? "project-category-error"
-                : undefined
-            }
-          >
-            <SelectValue placeholder="Choose a category" />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES_BY_TYPE[values.type].map((category) => (
-              <SelectItem key={category} value={category}>
-                {formatCategory(category)}
-              </SelectItem>
-            ))}
-            <SelectItem value={OTHER_CATEGORY}>Other…</SelectItem>
-          </SelectContent>
-        </Select>
-        {categoryIsCustom ? (
-          <FormField
-            id="project-custom-category"
-            label="Your category"
-            value={customCategory}
-            onChange={(event) => {
-              const next = event.target.value;
-              setCustomCategory(next);
-              update("category", next);
+        <div className="grid max-w-2xl gap-2">
+          <RequiredLabel htmlFor="project-category" isRequired>
+            Category
+          </RequiredLabel>
+          <Select
+            items={[
+              ...CATEGORIES_BY_TYPE[values.type].map((category) => ({
+                label: formatCategory(category),
+                value: category,
+              })),
+              { label: "Other…", value: OTHER_CATEGORY },
+            ]}
+            value={categoryIsCustom ? OTHER_CATEGORY : values.category}
+            onValueChange={(value) => {
+              const custom = value === OTHER_CATEGORY;
+              setCategoryIsCustom(custom);
+              if (!custom) {
+                setCustomCategory("");
+                update("category", value ?? "");
+                return;
+              }
+              const nextCustom = categoryIsCustom ? customCategory : "";
+              setCustomCategory(nextCustom);
+              update("category", nextCustom);
             }}
-            error={errors.get("category")}
-            helperText="This category will also appear in the category filter."
-            maxLength={40}
-            required
-          />
-        ) : null}
-        {!categoryIsCustom && errors.get("category") ? (
-          <p
-            id="project-category-error"
-            role="alert"
-            className="text-destructive text-sm"
           >
-            {errors.get("category")}
-          </p>
-        ) : null}
-      </div>
+            <SelectTrigger
+              id="project-category"
+              className={cn("min-h-11 w-full", FIELD_WIDTH)}
+              aria-invalid={errors.get("category") ? true : undefined}
+              aria-describedby={
+                errors.get("category") && !categoryIsCustom
+                  ? "project-category-error"
+                  : undefined
+              }
+            >
+              <SelectValue placeholder="Choose a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES_BY_TYPE[values.type].map((category) => (
+                <SelectItem key={category} value={category}>
+                  {formatCategory(category)}
+                </SelectItem>
+              ))}
+              <SelectItem value={OTHER_CATEGORY}>Other…</SelectItem>
+            </SelectContent>
+          </Select>
+          {categoryIsCustom ? (
+            <FormField
+              id="project-custom-category"
+              label="Your category"
+              value={customCategory}
+              onChange={(event) => {
+                const next = event.target.value;
+                setCustomCategory(next);
+                update("category", next);
+              }}
+              error={errors.get("category")}
+              helperText="This category will also appear in the category filter."
+              maxLength={40}
+              required
+            />
+          ) : null}
+          {!categoryIsCustom && errors.get("category") ? (
+            <p
+              id="project-category-error"
+              role="alert"
+              className="text-destructive text-sm"
+            >
+              {errors.get("category")}
+            </p>
+          ) : null}
+        </div>
+      </FormSection>
 
-      <FormField
-        id="project-summary"
-        label="Summary"
-        className={FIELD_WIDTH}
-        value={values.summary}
-        onChange={(event) => update("summary", event.target.value)}
-        error={errors.get("summary")}
-        helperText="One sentence shown in search results."
-        required
-      />
+      <FormSection
+        title="Listing details"
+        description="The short description and tags people use to decide whether to open your project."
+      >
+        <FormField
+          id="project-summary"
+          label="Summary"
+          className={FIELD_WIDTH}
+          value={values.summary}
+          onChange={(event) => update("summary", event.target.value)}
+          error={errors.get("summary")}
+          helperText="One sentence shown in search results and on project cards."
+          required
+        />
 
-      <div className="grid gap-2">
-        <FormTextarea
+        <FormField
+          id="project-tags"
+          label="Tags"
+          className={FIELD_WIDTH}
+          value={values.tags}
+          onChange={(event) => update("tags", event.target.value)}
+          error={errors.get("tags")}
+          helperText="Comma-separated, up to 8. Use the terms people search for."
+          autoComplete="off"
+        />
+      </FormSection>
+
+      <FormSection
+        title="Description"
+        description="Explain what the project does, how to install it, and anything people should know before downloading."
+      >
+        <MarkdownEditor
           id="project-description"
           label="Description (Markdown)"
-          rows={10}
+          rows={14}
           value={values.description}
           onChange={(event) => update("description", event.target.value)}
           error={errors.get("description")}
-          className={`${FIELD_WIDTH} font-mono text-xs`}
+          helperText="Markdown is supported. The preview uses the same renderer as the public page."
+          previewEmptyMessage="Your description will appear here as you type."
+          previewMaxHeightClassName="max-h-[30rem] min-h-56"
         />
+      </FormSection>
 
-        {/* The description is the longest field in the form, so the preview is
-            behind a toggle rather than always beside the editor. The blog post
-            dialog shows it permanently because it has the room. */}
-        <div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            aria-expanded={showDescriptionPreview}
-            aria-controls={DESCRIPTION_PREVIEW_ID}
-            onClick={() => setShowDescriptionPreview((open) => !open)}
-          >
-            {showDescriptionPreview ? "Hide preview" : "Preview"}
-          </Button>
-
-          {showDescriptionPreview ? (
-            <div className={`mt-2 ${FIELD_WIDTH}`} id={DESCRIPTION_PREVIEW_ID}>
-              <p
-                className="text-foreground text-sm font-medium"
-                id={DESCRIPTION_PREVIEW_LABEL_ID}
-              >
-                Description preview
-              </p>
-              <MarkdownPreview
-                labelledBy={DESCRIPTION_PREVIEW_LABEL_ID}
-                maxHeightClassName="max-h-96 min-h-32"
-                value={values.description}
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <FormField
-        id="project-tags"
-        label="Tags"
-        className={FIELD_WIDTH}
-        value={values.tags}
-        onChange={(event) => update("tags", event.target.value)}
-        error={errors.get("tags")}
-        helperText="Comma-separated, up to 8."
-        autoComplete="off"
-      />
-
-      <div>
+      <div className="flex flex-wrap items-center gap-4">
         <Button type="submit" className="min-h-11" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? (
+            <>
+              <Spinner label="Saving project" />
+              Saving…
+            </>
+          ) : (
+            submitLabel
+          )}
         </Button>
+        <p className="text-muted-foreground text-sm">
+          {mode === "create"
+            ? "Your project starts as a draft. Add a version before publishing."
+            : "Changes go live immediately for published projects."}
+        </p>
       </div>
     </form>
   );

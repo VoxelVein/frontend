@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import { check, pipe, string } from "valibot";
 
 import { FormField } from "@/components/form-field";
-import { FormTextarea } from "@/components/form-textarea";
-import { MarkdownBody } from "@/components/markdown-body";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -74,37 +73,6 @@ const bioHelper = (value: string): string => {
 
   return `${BIO_HELPER} ${remaining} characters left.`;
 };
-
-/**
- * The bio as it will appear on the public profile.
- *
- * Rendered through the same `MarkdownBody` the profile uses, with the same
- * typography wrapper, because the alternative is guessing. The field shows
- * `**bold**` and a raw URL; the profile shows a bold run and a link, and the
- * only way to know which you got was to save and go and look.
- *
- * Rendered even when the field is empty, so the panel does not appear and
- * disappear as the field is filled and cleared.
- */
-const BioPreview = ({ bio }: { bio: string }) => (
-  <div className="grid gap-2">
-    <p className="text-foreground text-sm font-medium">Preview</p>
-    <div className="border-border bg-muted/30 min-h-24 rounded-lg border p-4">
-      {bio.trim().length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          Your bio will appear here. A sentence or two about what you work on is
-          plenty.
-        </p>
-      ) : (
-        // The same class the profile wraps the bio in, so the preview and the
-        // page are not merely similar but identical.
-        <div className="markdown-body max-w-prose">
-          <MarkdownBody>{bio}</MarkdownBody>
-        </div>
-      )}
-    </div>
-  </div>
-);
 
 const USERNAME_CHANGE_NOTE =
   "After changing, you can't change it again for 14 days. Your old username keeps working for sign-in for 14 days.";
@@ -218,19 +186,21 @@ const DisplayNameForm = ({ user }: SettingsProfileProps) => {
         }}
       >
         {(field) => (
-          <>
-            <FormTextarea
-              id="profile-bio"
-              label="Bio (Markdown)"
-              rows={4}
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-              helperText={bioHelper(field.state.value)}
-            />
-            <BioPreview bio={debouncedBio} />
-          </>
+          <MarkdownEditor
+            id="profile-bio"
+            label="Bio (Markdown)"
+            rows={6}
+            value={field.state.value}
+            onChange={(event) => field.handleChange(event.target.value)}
+            onBlur={field.handleBlur}
+            error={field.state.meta.errors[0]?.message}
+            helperText={bioHelper(field.state.value)}
+            // Rendered even when the field is empty, so the panel does not
+            // appear and disappear as the field is filled and cleared.
+            previewValue={debouncedBio}
+            previewEmptyMessage="Your bio will appear here. A sentence or two about what you work on is plenty."
+            previewMaxHeightClassName="max-h-56 min-h-24"
+          />
         )}
       </form.Field>
 

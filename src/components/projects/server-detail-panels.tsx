@@ -1,7 +1,6 @@
 import {
   IconCheck,
   IconCopy,
-  IconDeviceGamepad,
   IconPackage,
   IconPlugConnected,
   IconVersions,
@@ -82,10 +81,13 @@ const ServerAddress = ({ server }: { server: ProjectServerView }) => {
   };
 
   return (
-    <div className="border-border bg-card rounded-xl border p-5">
-      <p className={MICRO_LABEL_CLASS}>Server address</p>
+    <div className="border-primary/25 bg-primary/5 rounded-xl border p-5 sm:p-6">
+      <p className={cn(MICRO_LABEL_CLASS, "flex items-center gap-2")}>
+        <span aria-hidden="true" className="bg-primary size-2 rounded-full" />
+        Server address
+      </p>
 
-      <p className="text-foreground mt-2 font-mono text-lg break-all select-all sm:text-xl">
+      <p className="text-foreground border-border/70 bg-background/80 mt-3 rounded-lg border px-3 py-3 font-mono text-base break-all select-all sm:text-lg">
         {address}
       </p>
 
@@ -158,7 +160,7 @@ const ServerVersions = ({ versions }: { versions: string[] }) => {
  * "required" changes the badge and the wording and the two must not drift.
  */
 const ServerLinkRow = ({ link }: { link: ServerLinkView }) => (
-  <li className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+  <li className="border-border bg-background/60 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 sm:p-4">
     <div className="flex min-w-0 items-center gap-3">
       <IconPackage
         aria-hidden="true"
@@ -274,7 +276,7 @@ const ServerJoinPanel = ({ server }: { server: ProjectServerView | null }) => {
 
   if (server === null) {
     return (
-      <section aria-labelledby="join-panel-heading" className="grid gap-4">
+      <section aria-labelledby="join-panel-heading" className="grid gap-3">
         {heading}
         <div className="border-border bg-card rounded-xl border p-5">
           <p className={MICRO_LABEL_CLASS}>Server address</p>
@@ -288,31 +290,17 @@ const ServerJoinPanel = ({ server }: { server: ProjectServerView | null }) => {
   }
 
   return (
-    <section aria-labelledby="join-panel-heading" className="grid gap-4">
+    <section aria-labelledby="join-panel-heading" className="grid gap-3">
       {heading}
       <ServerAddress server={server} />
 
-      <div className="border-border bg-card rounded-xl border p-5">
-        {/* A `p` micro label, not a heading: this card's content is a list of
-            versions, and promoting it would put an `h3` between the panel's
-            `h2` and the requirement `h3`s that follow, reading as a sibling of
-            them rather than a peer card. */}
+      <div className="border-border bg-card rounded-xl border p-5 sm:p-6">
         <p className={cn(MICRO_LABEL_CLASS, "flex items-center gap-1.5")}>
           <IconVersions aria-hidden="true" size={14} />
           Supported versions
         </p>
         <div className="mt-3">
           <ServerVersions versions={server.gameVersions} />
-        </div>
-      </div>
-
-      <div className="border-border bg-card rounded-xl border p-5">
-        <p className={cn(MICRO_LABEL_CLASS, "flex items-center gap-1.5")}>
-          <IconDeviceGamepad aria-hidden="true" size={14} />
-          Before you join
-        </p>
-        <div className="mt-3">
-          <ServerRequirements server={server} />
         </div>
       </div>
     </section>

@@ -2,7 +2,8 @@
 
 `/admin` is the whole back office: user management, account recovery,
 blog posts, storage usage, the notification inbox, and the publishing
-review queue. One panel, eight URL-driven tabs.
+review queue. One panel, nine URL-driven sections, reached from a
+collapsible sidebar.
 
 ## Routes
 
@@ -144,9 +145,9 @@ what the others miss:
 3. **Better Auth statements** (`src/lib/permissions.ts`), what the plugin
    enforces on `/admin/*`.
 
-The panel is **not** the security boundary. It hides tabs a role cannot
+The panel is **not** the security boundary. It hides sections a role cannot
 use, rather than rendering them and refusing, and the server functions
-behind each tab enforce the same bar independently.
+behind each section enforce the same bar independently.
 
 ### Keeping the layers from drifting
 
@@ -210,26 +211,26 @@ permits admin-on-admin because Better Auth has no notion of outranking a
 target. A target whose role is unrecognised outranks everyone, so it fails
 closed the same way `hasRole` does.
 
-## Tabs
+## Sections
 
-Each tab declares the capability it needs in `TAB_CAPABILITY`
-(`src/lib/admin-tabs.ts`). A tab a staff member cannot use is not
-rendered, and a bookmarked URL for a tab they cannot see falls back to
+Each section declares the capability it needs in `TAB_CAPABILITY`
+(`src/lib/admin-tabs.ts`). A section a staff member cannot use is not
+rendered, and a bookmarked URL for a section they cannot see falls back to
 the first one they can.
 
-`resolveAdminTab` is total: it returns a real tab even for a role that
+`resolveAdminTab` is total: it returns a real section even for a role that
 can see none. That is not defensive padding. The panel used to index
-`visibleTabs[0]` for the fallback, and a moderator whose tabs were
+`visibleTabs[0]` for the fallback, and a moderator whose sections were
 Reviews alone, or a session that has not resolved yet and therefore
 reads as `user`, made that `undefined.value` and crashed the panel.
 The policy is extracted to its own module so it can be tested without
 rendering it.
 
-The Notifications, Reviews, and Reports tabs carry unread, pending, and
-open counts. All are fetched client-side after mount and fail soft to
+The Notifications, Reviews, and Reports sections carry unread, pending,
+and open counts. All are fetched client-side after mount and fail soft to
 `null`, because a badge must never be the reason the page fails to render
 
-* the tab itself is where the real error is reported. A failed count
+* the section itself is where the real error is reported. A failed count
 therefore renders as `0` until the panel loads. Only the badges a staff
 member's role can see are fetched, since the others would 403.
 
@@ -325,11 +326,24 @@ filtered from the tab.
 
 ## Layout and feedback
 
-`PageHeader` with a title and description, then a wrapping `Tabs` list
-labelled "Admin sections". Each tab renders one component from
-`src/components/admin/`. Every tab follows the same three-state pattern:
-skeleton while loading, `EmptyState` with the right copy when there is
-nothing, and `ErrorState` with a retry on failure.
+`PageHeader` with a title and description, then a collapsible sidebar
+labelled "Admin sections" and the active panel beside it. The sidebar
+shows icons and labels when expanded, and icons alone when collapsed; the
+collapsed state still exposes every section's name through a tooltip and
+an accessible name. Below the `lg` breakpoint the same navigation moves
+into a left-hand drawer behind a **Sections** button, so tablet and mobile
+screens keep the full content width.
+
+Sections are grouped as People, Content, Moderation, and Support, and a
+group with no visible section is omitted. Grouping is presentation only:
+visibility still comes from `visibleTabsFor(role)`, so a moderator sees
+Reviews and Reports under Moderation and no people or content controls at
+all.
+
+Each section renders one component from `src/components/admin/`. Every
+section follows the same three-state pattern: skeleton while loading,
+`EmptyState` with the right copy when there is nothing, and `ErrorState`
+with a retry on failure.
 
 **Action feedback goes to toasts; validation and load errors stay
 inline.** The split is deliberate rather than a matter of taste:

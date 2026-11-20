@@ -16,6 +16,7 @@ export const toUploadFilename = (name: string): string =>
 interface UploadOptions {
   file: File;
   onProgress?: (fraction: number) => void;
+  platform?: string | null;
   projectId: string;
   versionId: string;
 }
@@ -82,12 +83,16 @@ const readErrorLike = async (response: Response): Promise<Error> => {
 export const uploadVersionFile = ({
   file,
   onProgress,
+  platform,
   projectId,
   versionId,
 }: UploadOptions): Promise<ProjectFileView> => {
   const uploadName = toUploadFilename(file.name);
-  const filename = encodeURIComponent(uploadName);
-  const url = `/api/projects/${projectId}/versions/${versionId}/files?filename=${filename}`;
+  const params = new URLSearchParams({ filename: uploadName });
+  if (platform) {
+    params.set("platform", platform);
+  }
+  const url = `/api/projects/${projectId}/versions/${versionId}/files?${params}`;
 
   // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest has no promise API.
   return new Promise((resolve, reject) => {
@@ -112,6 +117,25 @@ export const uploadVersionFile = ({
     );
     request.send(file);
   });
+};
+
+/** Removes one file from a release while leaving its sibling platform files intact. */
+export const deleteVersionFile = async ({
+  fileId,
+  projectId,
+  versionId,
+}: {
+  fileId: string;
+  projectId: string;
+  versionId: string;
+}): Promise<void> => {
+  const response = await fetch(
+    `/api/projects/${projectId}/versions/${versionId}/files?fileId=${encodeURIComponent(fileId)}`,
+    { method: "DELETE" }
+  );
+  if (!response.ok) {
+    throw await readErrorLike(response);
+  }
 };
 
 /**

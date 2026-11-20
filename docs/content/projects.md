@@ -117,8 +117,10 @@ Tables are defined in `src/db/schema.ts`:
 * `project_versions`: version number (unique per project), release
   channel (`release`, `beta`, `alpha`), game versions, loaders or
   platforms, changelog, and a download counter.
-* `project_files`: filename, size, SHA-1, SHA-512, storage key, and
-  whether it is the version's primary file.
+* `project_files`: filename, optional platform target, size, SHA-1, SHA-512,
+  storage key, and whether it is the version's primary file. Modpack releases
+  can include one independently replaceable download per launcher/platform;
+  all files remain attached to the same release metadata and version number.
 * `project_servers` (migration `drizzle/0015_add_project_servers.sql`):
   one row per server project with its address, optional port (empty means
   25565), and supported game versions.
@@ -187,20 +189,30 @@ from the site they publish to.
 was inline in the hero and the explore heading and is now used by the
 dashboard as well, so there is one definition rather than three copies.
 
-`ProjectSummaryCard` (`src/components/dashboard/project-summary-card.tsx`) is
-built from the landing page's category tile: same border, hover lift, icon
-well, and whole-card link. It shows the project's icon, falling back to a
-type glyph, so `listMyProjects` also selects the icon row.
+The overview at `/dashboard/projects` is a management list rather than a
+gallery. Each project is a divided row with its icon, name, status, type,
+summary, category, release and download counts, and last update, followed
+by explicit **Manage**, **View** or **Preview**, and **Delete** actions.
+Above the rows, search, a type filter, status chips with counts, and a
+sort control narrow the list. The empty state distinguishes "no projects
+yet" from "no matches" and offers to clear the active filters.
 
-The description field on both forms has a **Preview** toggle that renders
-the Markdown beside the editor, so formatting can be checked without saving
-and navigating away. It reuses `MarkdownPreview`
-(`src/components/markdown-preview.tsx`), the same component the blog post
-editor uses, so a preview always matches the published output.
+`ProjectSummaryCard` (`src/components/dashboard/project-summary-card.tsx`)
+renders one of those rows. It is no longer a whole-card link: a delete
+action inside a link would navigate before the confirmation could open,
+so the row leads with its content and ends with separate actions.
+`listMyProjects` selects the icon row so the row can show it, falling back
+to a type glyph when there is none.
 
-The preview starts closed because the project form is long, and a
-permanently open preview pushes the fields below it further down. The blog
-post dialog has the room and shows its preview without a toggle.
+Every Markdown surface in the creator dashboard uses `MarkdownEditor`
+(`src/components/markdown-editor.tsx`): project descriptions, release
+changelogs, and the profile bio. The editor and preview share one row from
+`lg` up and stack in source order on smaller screens, so the preview is
+always visible rather than hidden behind a toggle. The preview reuses
+`MarkdownPreview` (`src/components/markdown-preview.tsx`), the same
+component the blog post editor uses, so it always matches the published
+output. The profile bio debounces its preview by 300 ms because that field
+re-renders on every keystroke.
 
 `/dashboard` redirects anyone whose `usernameConfirmed` is `false` to
 `/welcome` first, so a Google or GitHub account picks its username before

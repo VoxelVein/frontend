@@ -19,9 +19,17 @@ import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
 import { EmptyState } from "@/components/empty-state";
 import { FilledPill } from "@/components/filled-pill";
+import { FormField } from "@/components/form-field";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
@@ -45,10 +53,31 @@ import {
   getEditableProject,
   updateProject,
 } from "@/lib/projects.functions";
+import {
+  MODPACK_PLATFORMS,
+  normalizePlatformId,
+  platformLabel,
+} from "@/lib/release-platforms";
+import { deleteVersionFile, uploadVersionFile } from "@/lib/upload-client";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
 const TABS = ["details", "images", "versions", "danger"] as const;
 type Tab = (typeof TABS)[number];
+
+const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
+  const ids = new Set<string>();
+  for (const version of versions) {
+    for (const file of version.files) {
+      if (
+        file.platform &&
+        !MODPACK_PLATFORMS.some((known) => known.id === file.platform)
+      ) {
+        ids.add(file.platform);
+      }
+    }
+  }
+  return [...ids];
+};
 
 /**
  * Section rhythm and measure follow the landing page, at the narrower
@@ -62,16 +91,141 @@ const searchSchema = object({ tab: optional(picklist(TABS)) });
 const isTab = (value: string): value is Tab =>
   TABS.some((tab) => tab === value);
 
+const VersionPlatformFileForm = ({
+  onChange,
+  options,
+  projectId,
+  version,
+}: {
+  onChange: () => Promise<void>;
+  options: { id: string; label: string }[];
+  projectId: string;
+  version: ProjectVersionView;
+}) => {
+  const [platform, setPlatform] = useState("modrinth");
+  const [customPlatform, setCustomPlatform] = useState("");
+  const [platformFile, setPlatformFile] = useState<File | null>(null);
+  const [inputKey, setInputKey] = useState(0);
+  const [pending, setPending] = useState(false);
+
+  const handleUpload = async () => {
+    if (!platformFile) {
+      return;
+    }
+    const uploadPlatform =
+      platform === "other" ? normalizePlatformId(customPlatform) : platform;
+    if (!uploadPlatform) {
+      toast.error("Enter a valid platform name.");
+      return;
+    }
+    setPending(true);
+    try {
+      await uploadVersionFile({
+        file: platformFile,
+        platform: uploadPlatform,
+        projectId,
+        versionId: version.id,
+      });
+      setPlatformFile(null);
+      setInputKey((key) => key + 1);
+      await onChange();
+      setPlatform(uploadPlatform);
+      setCustomPlatform("");
+      toast.success(`${platformLabel(uploadPlatform)} download saved`);
+    } catch (uploadError) {
+      toast.error(
+        errorMessage(uploadError, "Could not upload this platform file.")
+      );
+    }
+    setPending(false);
+  };
+
+  return (
+    <div className="border-border mt-3 grid gap-3 border-t pt-3 sm:grid-cols-[minmax(10rem,0.8fr)_minmax(0,1.2fr)_auto]">
+      <div className="grid content-start gap-2">
+        <label
+          htmlFor={`platform-${version.id}`}
+          className="text-foreground text-sm font-medium"
+        >
+          Platform
+        </label>
+        <Select
+          items={[
+            ...options.map(({ id, label }) => ({ label, value: id })),
+            { label: "Other…", value: "other" },
+          ]}
+          value={platform}
+          onValueChange={(value) => value && setPlatform(value)}
+        >
+          <SelectTrigger
+            id={`platform-${version.id}`}
+            className="min-h-11 w-full"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map(({ id, label }) => (
+              <SelectItem key={id} value={id}>
+                {label}
+              </SelectItem>
+            ))}
+            <SelectItem value="other">Other…</SelectItem>
+          </SelectContent>
+        </Select>
+        {platform === "other" ? (
+          <FormField
+            id={`platform-name-${version.id}`}
+            label="Platform name"
+            value={customPlatform}
+            onChange={(event) => setCustomPlatform(event.target.value)}
+            placeholder="ATLauncher"
+            autoComplete="off"
+          />
+        ) : null}
+      </div>
+      <FormField
+        key={inputKey}
+        id={`platform-file-${version.id}`}
+        label="Upload or replace file"
+        type="file"
+        accept=".mrpack,.zip,application/x-modrinth-modpack+zip,application/zip"
+        onChange={(event) => setPlatformFile(event.target.files?.[0] ?? null)}
+        helperText={
+          platformFile
+            ? `${platformFile.name} · ${formatBytes(platformFile.size)}`
+            : "Choose a .mrpack or .zip archive."
+        }
+      />
+      <Button
+        type="button"
+        className="min-h-11 self-end"
+        disabled={pending || !platformFile}
+        onClick={handleUpload}
+      >
+        {pending ? "Uploading…" : "Save file"}
+      </Button>
+    </div>
+  );
+};
+
 const VersionList = ({
   onChange,
   versions,
+  projectId,
+  projectType,
 }: {
   onChange: () => Promise<void>;
+  projectId: string;
+  projectType: ProjectView["type"];
   versions: ProjectVersionView[];
 }) => {
   const [target, setTarget] = useState<ProjectVersionView | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fileTarget, setFileTarget] = useState<{
+    fileId: string;
+    version: ProjectVersionView;
+  } | null>(null);
 
   if (versions.length === 0) {
     return (
@@ -101,6 +255,34 @@ const VersionList = ({
     setPending(false);
   };
 
+  const platformOptions = [
+    ...MODPACK_PLATFORMS.map(({ id, label }) => ({ id, label })),
+    ...getCustomPlatformIds(versions).map((id) => ({
+      id,
+      label: platformLabel(id),
+    })),
+  ];
+
+  const confirmDeleteFile = async () => {
+    if (!fileTarget) {
+      return;
+    }
+    setPending(true);
+    try {
+      await deleteVersionFile({
+        fileId: fileTarget.fileId,
+        projectId,
+        versionId: fileTarget.version.id,
+      });
+      toast.success("Platform download removed");
+      setFileTarget(null);
+      await onChange();
+    } catch (deleteError) {
+      setError(errorMessage(deleteError, "Could not remove this file."));
+    }
+    setPending(false);
+  };
+
   return (
     <>
       <ul className="grid gap-3">
@@ -121,12 +303,41 @@ const VersionList = ({
               </p>
               <ul className="text-muted-foreground mt-1 text-xs">
                 {version.files.map((file) => (
-                  <li key={file.id} className="break-all">
-                    {file.filename} · {formatBytes(file.size)} ·{" "}
-                    {formatCount(version.downloads)} downloads
+                  <li
+                    key={file.id}
+                    className="flex flex-wrap items-center justify-between gap-2 break-all"
+                  >
+                    <span>
+                      {projectType === "modpack"
+                        ? `${platformLabel(file.platform)} · `
+                        : ""}
+                      {file.filename} · {formatBytes(file.size)} ·{" "}
+                      {formatCount(version.downloads)} downloads
+                    </span>
+                    {projectType === "modpack" ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="min-h-9"
+                        onClick={() =>
+                          setFileTarget({ fileId: file.id, version })
+                        }
+                      >
+                        Remove
+                      </Button>
+                    ) : null}
                   </li>
                 ))}
               </ul>
+              {projectType === "modpack" ? (
+                <VersionPlatformFileForm
+                  key={version.id}
+                  onChange={onChange}
+                  options={platformOptions}
+                  projectId={projectId}
+                  version={version}
+                />
+              ) : null}
             </div>
             <Button
               type="button"
@@ -160,6 +371,21 @@ const VersionList = ({
         }
         confirmLabel="Delete version"
         onConfirm={confirmDelete}
+        pending={pending}
+        error={error}
+      />
+      <ConfirmDialog
+        open={fileTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setFileTarget(null);
+            setError(null);
+          }
+        }}
+        title="Remove platform download"
+        description="Remove this file from the release? The other platform downloads and release metadata will stay in place. This can't be undone."
+        confirmLabel="Remove file"
+        onConfirm={confirmDeleteFile}
         pending={pending}
         error={error}
       />
@@ -254,6 +480,7 @@ const ManageProjectPage = () => {
         description: input.description,
         name: input.name,
         projectId: project.id,
+        slug: input.slug,
         summary: input.summary,
         tags: input.tags,
       },
@@ -387,7 +614,12 @@ const ManageProjectPage = () => {
               >
                 Versions
               </h2>
-              <VersionList versions={project.versions} onChange={reload} />
+              <VersionList
+                versions={project.versions}
+                projectId={project.id}
+                projectType={project.type}
+                onChange={reload}
+              />
             </section>
           </TabsContent>
         ) : null}

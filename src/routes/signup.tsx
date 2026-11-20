@@ -109,12 +109,25 @@ const SignupPage = () => {
         );
         return;
       }
-      await authClient.getSession();
-      await router.invalidate();
-      await router.navigate({ to: "/" });
+      try {
+        const { data: session, error: sessionError } =
+          await authClient.getSession();
+        if (sessionError || !session) {
+          toast.error(
+            "Your account was created, but we couldn’t sign you in. Please sign in with your new account."
+          );
+          return;
+        }
+        await router.invalidate();
+        await router.navigate({ to: "/" });
+      } catch {
+        toast.error(
+          "Your account was created, but we couldn’t finish signing you in. Please sign in with your new account."
+        );
+      }
     },
     onSubmitInvalid: () => {
-      toast.dismiss();
+      toast.error("Check the highlighted fields and try again.");
     },
   });
 

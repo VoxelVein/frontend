@@ -1,4 +1,5 @@
 import { useId, useState } from "react";
+import type { KeyboardEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,16 +7,18 @@ import {
   Combobox,
   ComboboxChip,
   ComboboxChips,
+  ComboboxChipsInput,
   ComboboxContent,
   ComboboxEmpty,
-  ComboboxInput,
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
 import {
   filterGameVersions,
+  getAllGameVersions,
   LINE_PREFIX,
   newestFirst,
+  resolveVersionSelectionInput,
 } from "@/lib/game-version-search";
 import {
   getMinecraftVersion,
@@ -52,6 +55,7 @@ export const GameVersionPicker = ({
   values,
 }: GameVersionPickerProps) => {
   const [query, setQuery] = useState("");
+  const [selectionError, setSelectionError] = useState<string | null>(null);
   const [includeSnapshots, setIncludeSnapshots] = useState(() =>
     values.some(isSnapshotVersion)
   );
@@ -60,6 +64,13 @@ export const GameVersionPicker = ({
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
   const options = filterGameVersions(query, includeSnapshots);
+  const allVersions = getAllGameVersions(includeSnapshots);
+  const selectedVersions = new Set(values);
+  const selectedVersionLabel = values.length === 1 ? "version" : "versions";
+  const helpText =
+    values.length === 0
+      ? "Search or add the latest release. Enter a line like 1.20 to add every release in it."
+      : `${values.length} ${selectedVersionLabel} selected. Search to add more.`;
 
   const handleChange = (next: string[]) => {
     // A line option expands into every release of that line.
@@ -75,6 +86,37 @@ export const GameVersionPicker = ({
     onChange(newestFirst(expanded));
   };
 
+  const handleQueryChange = (nextQuery: string) => {
+    setSelectionError(null);
+    setQuery(nextQuery);
+  };
+
+  const addVersions = (versions: readonly string[]) => {
+    onChange(newestFirst([...values, ...versions]));
+  };
+
+  const handleQueryKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    const selection = resolveVersionSelectionInput(query, includeSnapshots);
+    if (selection.kind === "not-selection") {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (selection.kind === "invalid") {
+      setSelectionError(selection.message);
+      return;
+    }
+
+    addVersions(selection.versions);
+    setQuery("");
+    setSelectionError(null);
+  };
+
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -85,6 +127,18 @@ export const GameVersionPicker = ({
           {label}
         </label>
         <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-9"
+            disabled={allVersions.every((version) =>
+              selectedVersions.has(version)
+            )}
+            onClick={() => addVersions(allVersions)}
+          >
+            Add all
+          </Button>
           {LATEST_RELEASE ? (
             <Button
               type="button"
@@ -129,7 +183,7 @@ export const GameVersionPicker = ({
         value={[...values]}
         onValueChange={handleChange}
         inputValue={query}
-        onInputValueChange={setQuery}
+        onInputValueChange={handleQueryChange}
         itemToStringLabel={(value: string) =>
           value.startsWith(LINE_PREFIX)
             ? `All ${value.slice(LINE_PREFIX.length)}.x releases`
@@ -142,8 +196,9 @@ export const GameVersionPicker = ({
               {value}
             </ComboboxChip>
           ))}
-          <ComboboxInput
+          <ComboboxChipsInput
             id={inputId}
+            onKeyDown={handleQueryKeyDown}
             placeholder={
               values.length > 0 ? "Add more…" : "Type a version, like 1.20"
             }
@@ -188,10 +243,13 @@ export const GameVersionPicker = ({
       </Combobox>
 
       <p id={helpId} className="text-muted-foreground text-sm">
-        {values.length === 0
-          ? "Search or add the latest release. Enter a line like 1.20 to add every release in it."
-          : `${values.length} ${values.length === 1 ? "version" : "versions"} selected. Search to add more.`}
+        {helpText}
       </p>
+      {selectionError ? (
+        <p role="alert" className="text-destructive text-sm">
+          {selectionError}
+        </p>
+      ) : null}
       {error ? (
         <p id={errorId} role="alert" className="text-destructive text-sm">
           {error}

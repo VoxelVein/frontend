@@ -118,13 +118,25 @@ const LoginPage = () => {
         return;
       }
 
-      await authClient.getSession();
-      await router.invalidate();
-      await router.navigate({ to: "/" });
+      try {
+        const { data: session, error: sessionError } =
+          await authClient.getSession();
+        if (sessionError || !session) {
+          reportError(
+            "Your credentials were accepted, but we couldn’t start your session. Please try again."
+          );
+          return;
+        }
+        await router.invalidate();
+        await router.navigate({ to: "/" });
+      } catch {
+        reportError(
+          "You signed in, but we couldn’t open the next page. Please reload and try again."
+        );
+      }
     },
     onSubmitInvalid: () => {
-      // A retry after a failed submit should not leave the old error up.
-      toast.dismiss();
+      toast.error("Check the highlighted fields and try again.");
     },
   });
 

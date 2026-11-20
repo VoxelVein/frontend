@@ -6,6 +6,7 @@ import { MICRO_LABEL_CLASS, PILL_CLASS } from "@/lib/classes";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import { hasLoaders, LOADER_LABELS } from "@/lib/projects";
 import type { ProjectVersionView, ProjectView } from "@/lib/projects";
+import { platformLabel } from "@/lib/release-platforms";
 
 /**
  * A short factual value as a chip, or a note when there is none.
@@ -37,7 +38,13 @@ const ValuePills = ({ label, values }: { label: string; values: string[] }) => (
  * Files arrive ordered primary-first (`projects.functions` orders by
  * `desc(primary)`), so index zero is the one to feature.
  */
-const DownloadLinks = ({ version }: { version: ProjectVersionView }) => {
+const DownloadLinks = ({
+  version,
+  isModpack,
+}: {
+  version: ProjectVersionView;
+  isModpack: boolean;
+}) => {
   const [primary, ...others] = version.files;
 
   if (primary === undefined) {
@@ -50,7 +57,31 @@ const DownloadLinks = ({ version }: { version: ProjectVersionView }) => {
 
   return (
     <div className="mt-4">
-      {/* A real anchor to the download endpoint, not a button with a click
+      {isModpack ? (
+        <ul className="grid gap-2">
+          {version.files.map((file) => (
+            <li key={file.id}>
+              <Button
+                className="min-h-12 w-full justify-start gap-2 text-base"
+                render={
+                  <a
+                    aria-label={`Download ${file.filename} for ${platformLabel(file.platform)}`}
+                    href={`/api/download/${file.id}`}
+                  />
+                }
+              >
+                <IconDownload aria-hidden="true" size={18} />
+                Download for {platformLabel(file.platform)}
+              </Button>
+              <p className="text-muted-foreground mt-1 text-xs break-all">
+                {file.filename} · {formatBytes(file.size)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <>
+          {/* A real anchor to the download endpoint, not a button with a click
           handler: the endpoint 302s to a signed storage URL, so middle-click,
           right-click-save, and "open in new tab" all have to keep working. A
           `download` attribute would be ignored across the redirect.
@@ -61,44 +92,46 @@ const DownloadLinks = ({ version }: { version: ProjectVersionView }) => {
           announces the same word for every version and the reader cannot tell
           two files apart; it leads with the visible label so the name stays a
           superset of what is on screen. */}
-      <Button
-        className="min-h-12 w-full gap-2 text-base"
-        render={
-          <a
-            aria-label={`Download ${primary.filename}`}
-            href={`/api/download/${primary.id}`}
-          />
-        }
-      >
-        <IconDownload aria-hidden="true" size={18} />
-        Download
-      </Button>
+          <Button
+            className="min-h-12 w-full gap-2 text-base"
+            render={
+              <a
+                aria-label={`Download ${primary.filename}`}
+                href={`/api/download/${primary.id}`}
+              />
+            }
+          >
+            <IconDownload aria-hidden="true" size={18} />
+            Download
+          </Button>
 
-      <p className="text-muted-foreground mt-2 text-xs break-all">
-        {primary.filename} · {formatBytes(primary.size)}
-      </p>
+          <p className="text-muted-foreground mt-2 text-xs break-all">
+            {primary.filename} · {formatBytes(primary.size)}
+          </p>
 
-      {/* A version can carry several files. Only the primary one is worth a
+          {/* A version can carry several files. Only the primary one is worth a
           button; the rest sit under it as plain links so the panel answers
           "what can I get?" completely without crowding the primary action. */}
-      {others.length > 0 ? (
-        <ul className="mt-3 grid gap-1.5">
-          {others.map((file) => (
-            <li key={file.id}>
-              <a
-                className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-                href={`/api/download/${file.id}`}
-              >
-                <IconDownload aria-hidden="true" size={14} />
-                <span className="break-all">{file.filename}</span>
-                <span className="text-muted-foreground">
-                  · {formatBytes(file.size)}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+          {others.length > 0 ? (
+            <ul className="mt-3 grid gap-1.5">
+              {others.map((file) => (
+                <li key={file.id}>
+                  <a
+                    className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                    href={`/api/download/${file.id}`}
+                  >
+                    <IconDownload aria-hidden="true" size={14} />
+                    <span className="break-all">{file.filename}</span>
+                    <span className="text-muted-foreground">
+                      · {formatBytes(file.size)}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </>
+      )}
     </div>
   );
 };
@@ -119,7 +152,7 @@ const Compatibility = ({
   project: ProjectView;
   version: ProjectVersionView;
 }) => (
-  <div className="border-border bg-card rounded-xl border p-5">
+  <div className="border-border bg-card rounded-xl border p-4 sm:p-5">
     {hasLoaders(project.type) ? (
       <ValuePills
         label={LOADER_LABELS[project.type].plural}
@@ -145,7 +178,7 @@ const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
   const [latest] = project.versions;
 
   return (
-    <section aria-labelledby="download-panel-heading" className="grid gap-4">
+    <section aria-labelledby="download-panel-heading" className="grid gap-3">
       <h2
         className="text-foreground flex items-center gap-2 text-lg font-semibold"
         id="download-panel-heading"
@@ -163,24 +196,35 @@ const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
         />
       ) : (
         <>
-          <div className="border-border bg-card rounded-xl border p-5">
-            <p className={MICRO_LABEL_CLASS}>Latest version</p>
-            <p className="text-foreground mt-2 text-2xl font-bold tracking-tight">
-              {latest.versionNumber}
-            </p>
-            <p className="text-muted-foreground mt-0.5 text-sm capitalize">
-              {latest.channel} · {formatDate(latest.createdAt)}
-            </p>
-
-            <DownloadLinks version={latest} />
-
-            {/* The lifetime count, next to the button that moves it. A download
-                total is only interesting in relation to the act of downloading. */}
-            <div className="border-border mt-5 border-t pt-4">
-              <p className={MICRO_LABEL_CLASS}>Downloads</p>
-              <p className="text-foreground mt-1 text-lg font-semibold tabular-nums">
-                {formatCount(project.downloads)}
+          <div className="border-border bg-card overflow-hidden rounded-xl border shadow-sm">
+            <div aria-hidden="true" className="bg-primary h-1.5" />
+            <div className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className={MICRO_LABEL_CLASS}>Latest release</p>
+                  <p className="text-foreground mt-2 text-3xl font-bold tracking-tight tabular-nums">
+                    {latest.versionNumber}
+                  </p>
+                </div>
+                <span className="border-border bg-muted text-muted-foreground inline-flex min-h-7 items-center rounded-md border px-2.5 text-xs font-medium capitalize">
+                  {latest.channel}
+                </span>
+              </div>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Released {formatDate(latest.createdAt)}
               </p>
+
+              <DownloadLinks
+                version={latest}
+                isModpack={project.type === "modpack"}
+              />
+
+              <div className="border-border mt-5 flex items-center justify-between gap-3 border-t pt-4">
+                <p className={MICRO_LABEL_CLASS}>Total downloads</p>
+                <p className="text-foreground text-lg font-semibold tabular-nums">
+                  {formatCount(project.downloads)}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -198,7 +242,13 @@ const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
  * row and column headers, which is what a screen reader needs to announce
  * "Sodium 0.6.0, Fabric, released Sep 20" when moving cell by cell.
  */
-const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
+const VersionsTable = ({
+  versions,
+  isModpack,
+}: {
+  versions: ProjectVersionView[];
+  isModpack: boolean;
+}) => {
   if (versions.length === 0) {
     return (
       <EmptyState
@@ -211,12 +261,12 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
   }
 
   return (
-    <div className="border-border mt-3 overflow-x-auto rounded-xl border">
+    <div className="border-border bg-card overflow-x-auto rounded-xl border">
       <table className="w-full text-left text-sm">
         <caption className="sr-only">
           Versions, newest first, with their downloadable files
         </caption>
-        <thead className="bg-muted/50 text-muted-foreground text-xs tracking-wide uppercase">
+        <thead className="bg-muted/70 text-muted-foreground text-xs tracking-wide uppercase">
           <tr>
             <th scope="col" className="px-4 py-3 font-medium">
               Version
@@ -264,11 +314,14 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
                       >
                         <IconDownload size={16} aria-hidden="true" />
                         <span>
-                          Download{" "}
+                          {isModpack
+                            ? `Download for ${platformLabel(file.platform)}`
+                            : "Download "}
                           <span className="sr-only">{file.filename}</span>
                         </span>
                       </a>
                       <span className="text-muted-foreground block text-xs break-all">
+                        {isModpack ? `${platformLabel(file.platform)} · ` : ""}
                         {file.filename} · {formatBytes(file.size)}
                       </span>
                     </li>
@@ -292,13 +345,24 @@ const VersionsTable = ({ versions }: { versions: ProjectVersionView[] }) => {
  */
 const ProjectVersionHistory = ({ project }: { project: ProjectView }) => (
   <section aria-labelledby="version-history-heading">
+    <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
+      Releases
+    </p>
     <h2
-      className="text-foreground text-lg font-semibold"
+      className="text-foreground mt-2 text-xl font-semibold tracking-tight sm:text-2xl"
       id="version-history-heading"
     >
       Version history
     </h2>
-    <VersionsTable versions={project.versions} />
+    <p className="text-muted-foreground mt-1 text-sm">
+      Downloads and compatibility for every published release.
+    </p>
+    <div className="mt-4">
+      <VersionsTable
+        versions={project.versions}
+        isModpack={project.type === "modpack"}
+      />
+    </div>
   </section>
 );
 

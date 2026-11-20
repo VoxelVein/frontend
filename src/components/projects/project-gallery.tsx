@@ -34,7 +34,10 @@ export const ProjectGallery = ({
   }
 
   return (
-    <section aria-labelledby="gallery-heading" className="mt-10">
+    <section
+      aria-labelledby="gallery-heading"
+      className="border-border bg-card rounded-xl border p-5 sm:p-6"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2
           id="gallery-heading"
@@ -46,21 +49,21 @@ export const ProjectGallery = ({
         <Link
           to={`${PROJECT_TYPE_PATHS[type]}/$slug/gallery`}
           params={{ slug }}
-          className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          className="text-primary focus-visible:ring-ring inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
         >
           <IconPhoto size={16} aria-hidden="true" />
           View all {images.length}
         </Link>
       </div>
 
-      <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         {images.map((image, index) => (
           <li key={image.id}>
             <a
               href={image.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-border focus-visible:ring-ring block overflow-hidden rounded-lg border focus-visible:ring-3 focus-visible:outline-none"
+              className="border-border focus-visible:ring-ring block overflow-hidden rounded-lg border transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-3 focus-visible:outline-none motion-reduce:transform-none motion-reduce:transition-none"
             >
               <ProjectImage
                 image={image}

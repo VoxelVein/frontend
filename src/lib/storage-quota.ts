@@ -240,7 +240,10 @@ export class DuplicateFilenameError extends Error {
   }
 }
 
-const FILENAME_INDEX = "project_files_versionId_filename_uidx";
+const FILE_UNIQUE_INDEXES = new Set([
+  "project_files_versionId_filename_uidx",
+  "project_files_versionId_platform_uidx",
+]);
 
 // Drizzle wraps driver errors, so the Postgres error may sit on a cause.
 export const isDuplicateFilenameViolation = (cause: unknown): boolean => {
@@ -251,7 +254,7 @@ export const isDuplicateFilenameViolation = (cause: unknown): boolean => {
     "code" in cause &&
     cause.code === PG_UNIQUE_VIOLATION &&
     "constraint" in cause &&
-    cause.constraint === FILENAME_INDEX
+    FILE_UNIQUE_INDEXES.has(String(cause.constraint))
   ) {
     return true;
   }
@@ -270,31 +273,51 @@ type FileValues = Omit<typeof projectFiles.$inferInsert, "primary">;
 export const insertFileWithinQuota = async (
   values: FileValues,
   quotaBytes: number | null
-): Promise<{ primary: boolean }> => {
+): Promise<{ primary: boolean; replacedStorageKey: string | null }> => {
   try {
     return await db.transaction(async (tx) => {
       await tx.execute(
         sql`select pg_advisory_xact_lock(${VERSION_LOCK_NAMESPACE}, hashtext(${values.versionId}))`
       );
       const existing = await tx
-        .select({ filename: projectFiles.filename })
+        .select({
+          filename: projectFiles.filename,
+          id: projectFiles.id,
+          platform: projectFiles.platform,
+          primary: projectFiles.primary,
+          size: projectFiles.size,
+          storageKey: projectFiles.storageKey,
+        })
         .from(projectFiles)
         .where(eq(projectFiles.versionId, values.versionId));
-      if (existing.some((file) => file.filename === values.filename)) {
+      const replaced = values.platform
+        ? existing.find((file) => file.platform === values.platform)
+        : undefined;
+      if (
+        existing.some(
+          (file) =>
+            file.filename === values.filename &&
+            file.id !== replaced?.id &&
+            (values.platform === null || file.platform === null)
+        )
+      ) {
         throw new DuplicateFilenameError();
       }
 
       if (quotaBytes !== null) {
         await tx.execute(sql`select pg_advisory_xact_lock(${QUOTA_LOCK_KEY})`);
         const { usedBytes } = await getUsedBytes(tx);
-        if (usedBytes + values.size > quotaBytes) {
+        if (usedBytes - (replaced?.size ?? 0) + values.size > quotaBytes) {
           throw quotaExceededError();
         }
       }
 
-      const primary = existing.length === 0;
+      const primary = replaced?.primary ?? existing.length === 0;
+      if (replaced) {
+        await tx.delete(projectFiles).where(eq(projectFiles.id, replaced.id));
+      }
       await tx.insert(projectFiles).values({ ...values, primary });
-      return { primary };
+      return { primary, replacedStorageKey: replaced?.storageKey ?? null };
     });
   } catch (error) {
     // The unique index backs up the locked check above.

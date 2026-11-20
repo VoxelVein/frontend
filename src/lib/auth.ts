@@ -73,7 +73,9 @@ const turnstileConfig = {
 };
 
 const turnstileConfigProblems = getTurnstileConfigProblems(turnstileConfig);
-if (turnstileConfigProblems.length > 0) {
+const turnstileIsUnconfigured =
+  turnstileConfig.secret === null && turnstileConfig.hostnames.size === 0;
+if (!turnstileIsUnconfigured && turnstileConfigProblems.length > 0) {
   console.error(
     `Turnstile is misconfigured, so password sign-in and sign-up will be rejected: ${turnstileConfigProblems.join(" ")}`
   );
@@ -82,6 +84,14 @@ if (turnstileConfigProblems.length > 0) {
 const requireTurnstile = createAuthMiddleware(async (ctx) => {
   const expectedAction = TURNSTILE_ACTIONS.get(ctx.path);
   if (!expectedAction) {
+    return;
+  }
+
+  // Turnstile is optional for self-hosted installations. When neither server
+  // credential nor hostname is configured, skip the challenge instead of
+  // making every password login and registration fail with 503. Partially
+  // configured setups still fail closed below.
+  if (turnstileIsUnconfigured) {
     return;
   }
 

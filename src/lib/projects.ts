@@ -642,6 +642,7 @@ export interface ProjectServerView {
 export interface ProjectFileView {
   filename: string;
   id: string;
+  platform?: string | null;
   primary: boolean;
   sha1: string;
   sha512: string;
@@ -706,12 +707,14 @@ export interface ProjectView {
 }
 
 export interface ProjectListItem {
+  category: string;
   downloads: number;
   icon: ProjectImageView | null;
   id: string;
   name: string;
   slug: string;
   status: ProjectStatus;
+  summary: string;
   type: ProjectType;
   updatedAt: string;
   versionCount: number;

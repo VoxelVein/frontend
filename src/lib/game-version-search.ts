@@ -19,6 +19,52 @@ export const newestFirst = (ids: Iterable<string>): string[] => {
 
 const lineOption = (line: string) => `${LINE_PREFIX}${line}`;
 
+export type VersionSelectionInput =
+  | { kind: "not-selection" }
+  | { kind: "invalid"; message: string }
+  | { kind: "valid"; versions: string[] };
+
+export const getAllGameVersions = (includeSnapshots: boolean): string[] => [
+  ...(includeSnapshots ? GAME_VERSIONS : RELEASE_GAME_VERSIONS),
+];
+
+/** Expand `*` or an inclusive catalog range such as `1.21.1-26.3`. */
+export const resolveVersionSelectionInput = (
+  input: string,
+  includeSnapshots: boolean
+): VersionSelectionInput => {
+  const value = input.trim();
+  const pool = getAllGameVersions(includeSnapshots);
+
+  if (value === "*") {
+    return { kind: "valid", versions: [...pool] };
+  }
+
+  const range =
+    /^(?<start>\d+(?:\.\d+){1,2})\s*-\s*(?<end>\d+(?:\.\d+){1,2})$/u.exec(
+      value
+    );
+  const startVersion = range?.groups?.start;
+  const endVersion = range?.groups?.end;
+  if (!startVersion || !endVersion) {
+    return { kind: "not-selection" };
+  }
+
+  const start = pool.indexOf(startVersion);
+  const end = pool.indexOf(endVersion);
+  if (start === -1 || end === -1) {
+    return {
+      kind: "invalid",
+      message: "Both ends of the range must be available game versions.",
+    };
+  }
+
+  return {
+    kind: "valid",
+    versions: pool.slice(Math.min(start, end), Math.max(start, end) + 1),
+  };
+};
+
 /**
  * The options for a query: matching versions, newest first, and a shortcut
  * for the whole line when the query names one (`1.20` → "All 1.20.x").

@@ -140,6 +140,7 @@ const loadProjectView = async (
       files: version.files.map((file) => ({
         filename: file.filename,
         id: file.id,
+        platform: file.platform,
         primary: file.primary,
         sha1: file.sha1,
         sha512: file.sha512,
@@ -207,11 +208,13 @@ export const listMyProjects = createServerFn({ method: "GET" }).handler(
 
     const rows = await db
       .select({
+        category: projects.category,
         downloads: projects.downloads,
         id: projects.id,
         name: projects.name,
         slug: projects.slug,
         status: projects.status,
+        summary: projects.summary,
         type: projects.type,
         updatedAt: projects.updatedAt,
         versionCount: count(projectVersions.id),
