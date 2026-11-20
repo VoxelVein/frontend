@@ -9,6 +9,7 @@ import {
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
@@ -59,17 +60,14 @@ import { cn } from "@/lib/utils";
 
 const DEFAULT_SORT = "downloads:desc";
 
-const DEV_API_URL = "http://localhost:3002";
-
 // SAFETY: Vite exposes VITE_* vars as `any`; narrowing to string | undefined
-// matches the runtime value (string when set, undefined when absent).
-// VITE_API_URL is inlined at build time. Only dev builds fall back to the
-// local API; a production build without it gets no live updates rather than
-// connecting to the visitor's own machine. The Docker build refuses to run
-// without it.
+// matches the runtime value (string when set, undefined when absent). Local
+// development uses the same-origin Vite proxy; production connects directly to
+// the configured public API and never falls back to the visitor's localhost.
 const API_URL =
-  (import.meta.env.VITE_API_URL as string | undefined) ??
-  (import.meta.env.DEV ? DEV_API_URL : undefined);
+  import.meta.env.DEV
+    ? ""
+    : (import.meta.env.VITE_API_URL as string | undefined);
 
 const noEventCleanup = (): void => {
   // No EventSource exists when the API URL is not configured.
@@ -696,10 +694,25 @@ export const ProjectBrowser = ({
   ]);
 
   useEffect(() => {
-    if (!API_URL) {
+    if (API_URL === undefined) {
       return noEventCleanup;
     }
     const source = new EventSource(`${API_URL}/api/events`);
+    let hasReportedConnectionIssue = false;
+
+    const handleOpen = () => {
+      hasReportedConnectionIssue = false;
+    };
+
+    const handleError = () => {
+      if (hasReportedConnectionIssue) {
+        return;
+      }
+      hasReportedConnectionIssue = true;
+      toast.error(
+        "Live updates are temporarily unavailable. You can keep browsing; we’ll retry automatically."
+      );
+    };
 
     const handleEvent = (event: MessageEvent) => {
       try {
@@ -714,11 +727,15 @@ export const ProjectBrowser = ({
     source.addEventListener("mod.created", handleEvent);
     source.addEventListener("mod.updated", handleEvent);
     source.addEventListener("mod.deleted", handleEvent);
+    source.addEventListener("open", handleOpen);
+    source.addEventListener("error", handleError);
 
     return () => {
       source.removeEventListener("mod.created", handleEvent);
       source.removeEventListener("mod.updated", handleEvent);
       source.removeEventListener("mod.deleted", handleEvent);
+      source.removeEventListener("open", handleOpen);
+      source.removeEventListener("error", handleError);
       source.close();
     };
   }, []);

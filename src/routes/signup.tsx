@@ -17,6 +17,7 @@ import type { TurnstileWidgetHandle } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
+import { authErrorMessage } from "@/lib/auth-error-message";
 import { getSession } from "@/lib/auth.functions";
 import {
   isTurnstileEnabled,
@@ -103,7 +104,9 @@ const SignupPage = () => {
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
-        toast.error(error.message ?? "Could not create your account.");
+        toast.error(
+          authErrorMessage(error.message, "Could not create your account.")
+        );
         return;
       }
       await authClient.getSession();

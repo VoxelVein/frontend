@@ -17,6 +17,7 @@ import type { TurnstileWidgetHandle } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
+import { authErrorMessage } from "@/lib/auth-error-message";
 import { getSession } from "@/lib/auth.functions";
 import {
   isTurnstileEnabled,
@@ -111,7 +112,9 @@ const LoginPage = () => {
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
-        reportError(error.message ?? INVALID_CREDENTIALS_MESSAGE);
+        reportError(
+          authErrorMessage(error.message, INVALID_CREDENTIALS_MESSAGE)
+        );
         return;
       }
 

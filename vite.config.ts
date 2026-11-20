@@ -5,10 +5,11 @@ import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
 const config = defineConfig(({ command, mode }) => {
   const isDevelopment = command === "serve" && mode === "development";
+  const env = loadEnv(mode, process.cwd(), "");
 
   return {
     plugins: [
@@ -82,6 +83,19 @@ const config = defineConfig(({ command, mode }) => {
       // production server. Local `pnpm dev` falls back to 3000; the Docker
       // compose files set it to 6001.
       port: Number(process.env.PORT ?? 3000),
+      // Keep the event stream same-origin in local development. Browsers then
+      // avoid a CORS request to the separate Elysia process, while Vite forwards
+      // the stream to the configured API server.
+      ...(isDevelopment
+        ? {
+            proxy: {
+              "/api/events": {
+                target: env.API_URL ?? "http://localhost:3002",
+                changeOrigin: true,
+              },
+            },
+          }
+        : {}),
       // Dev origins are hardcoded (better-auth trustedOrigins, CORS), so
       // silently drifting to 3001 when 3000 is busy would break sign-in. Fail
       // loudly.

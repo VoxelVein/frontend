@@ -177,9 +177,12 @@ the auth origins are pinned to 3000.
   shorter than 32 characters, or still a placeholder value.
 * **Uploads return `503`**, storage is not configured. See
   [Object Storage](../storage/object-storage.md).
-* **No live banner on a browse page**, `VITE_API_URL` is unset. The
-  development fallback is `http://localhost:3002`; a production build has
-  no fallback.
+* **Live updates show an unavailable notice**, make sure the API service is
+  running on `API_URL` (default `http://localhost:3002`). Development sends
+  events through Vite's same-origin proxy; production uses `VITE_API_URL`.
+* **Signup or sign-in returns `429`**, the development server may still be
+  running old configuration. Restart `pnpm dev`; Better Auth attempt limits
+  are enabled in production and disabled in development.
 * **Port 3000 already in use**, change `PORT` and `BETTER_AUTH_URL`
   together, or stop whatever is on 3000.
 

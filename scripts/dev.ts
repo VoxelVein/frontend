@@ -53,6 +53,9 @@ for (const service of services) {
   const child = spawn("pnpm", ["run", service.script], {
     stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env, FORCE_COLOR: "1" },
+    // On Windows pnpm is a .cmd shim, which child_process cannot launch
+    // directly unless it goes through the command shell.
+    shell: process.platform === "win32",
   });
   children.push(child);
 

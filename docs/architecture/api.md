@@ -84,9 +84,10 @@ source.addEventListener("mod.created", handleEvent);
 ```
 
 In the app this lives in `src/components/projects/project-browser.tsx`,
-which every browse page renders. The URL comes from `VITE_API_URL`, with a
-`http://localhost:3002` fallback **in development only**, a production
-build without `VITE_API_URL` silently loses the live banner.
+which every browse page renders. Development uses the same-origin
+`/api/events` path, proxied by Vite to `API_URL` (default
+`http://localhost:3002`) so the browser does not need cross-origin access.
+Production uses `VITE_API_URL`; without it the live banner is disabled.
 
 ### `POST /api/webhooks/mods`
 

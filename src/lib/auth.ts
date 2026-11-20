@@ -203,9 +203,9 @@ export const auth = betterAuth({
   // them. Turnstile is the first gate on a credential attempt; this is the
   // second, for a client that solves it in a loop.
   //
-  // Defaults to on in production and off in development, so the values here
-  // only tighten it. `customRules` are matched before the default and use the
-  // same window/max shape.
+  // Keep the built-in attempt limits enabled in production. Development uses
+  // the library default (off), so trying a local signup a few times does not
+  // lock out every browser sharing the localhost address.
   rateLimit: {
     customRules: {
       // A password attempt is expensive to verify and is the target of
@@ -220,7 +220,7 @@ export const auth = betterAuth({
       // should not be looped.
       "/sign-in/social": { max: 20, window: 60 },
     },
-    enabled: true,
+    enabled: env.NODE_ENV === "production",
     max: 60,
     // Counters live in process memory.
     //
