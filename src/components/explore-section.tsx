@@ -47,7 +47,7 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
   return (
     <article
       className={cn(
-        "border-border ease-smooth relative flex h-full flex-col rounded-2xl border p-7",
+        "border-border ease-smooth relative flex h-full flex-col rounded-lg border p-6",
         "transition-colors duration-200 motion-reduce:transition-none",
         available
           ? "group bg-card hover:border-primary/30 focus-within:border-primary/30"
@@ -59,7 +59,7 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
           staying a real link for keyboard and screen reader users. */}
       {available ? (
         <Link
-          className="focus-visible:ring-ring absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+          className="focus-visible:ring-ring absolute inset-0 z-10 rounded-lg focus-visible:ring-2 focus-visible:outline-none"
           preload="intent"
           to={href}
         >
@@ -69,7 +69,7 @@ const CategoryTile = ({ category }: { category: MinecraftCategory }) => {
 
       <div
         className={cn(
-          "flex size-14 shrink-0 items-center justify-center rounded-xl",
+          "flex size-12 shrink-0 items-center justify-center rounded-md",
           "transition-colors duration-200 motion-reduce:transition-none",
           available
             ? "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground group-focus-within:bg-primary group-focus-within:text-primary-foreground"

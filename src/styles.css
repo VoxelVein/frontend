@@ -53,11 +53,10 @@
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 4px 12px oklch(0 0 0 / 0.06);
   --shadow-glow:
-    0 0 0 1px oklch(0.6122 0.2313 22.6077 / 0.14),
-    0 8px 32px oklch(0.6122 0.2313 22.6077 / 0.18);
+    0 0 0 1px oklch(0.6 0.18 255 / 0.14), 0 8px 32px oklch(0.6 0.18 255 / 0.18);
   --font-mono: Inter, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Inter, serif;
-  --radius: 1.4rem;
+  --radius: 0.625rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
@@ -106,10 +105,9 @@
      the animation through the property its name suggests. */
   --tw-ease: var(--motion-ease);
 
-  /* Light: clean with the crimson brand accent
+  /* Light: clean with the blue brand accent
 
-     The brand is the specified #DC143C, stored as the OKLCH value that
-     round-trips to it. One hue drives --primary, --ring, --chart-1,
+     One hue drives --primary, --ring, --chart-1,
      --sidebar-primary and --accent, so nothing can drift out of agreement with
      the button colour.
 
@@ -144,32 +142,32 @@
   --card-foreground: oklch(0.2393 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2393 0 0);
-  --primary: oklch(0.5712 0.2219 20.0874);
+  --primary: oklch(0.54 0.2 255);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9542 0.002 70);
   --secondary-foreground: oklch(0.2178 0 0);
   --muted: oklch(0.9263 0.002 70);
   --muted-foreground: oklch(0.464 0 0);
-  --accent: oklch(0.9542 0.022 20.0874);
+  --accent: oklch(0.9542 0.022 255);
   --accent-foreground: oklch(0.2178 0 0);
   --destructive: oklch(0.55 0.17 40);
   --border: oklch(0.8801 0.002 70);
   --input: oklch(0.8801 0.002 70);
-  --ring: oklch(0.5712 0.2219 20.0874);
-  --chart-1: oklch(0.5712 0.2219 20.0874);
+  --ring: oklch(0.54 0.2 255);
+  --chart-1: oklch(0.54 0.2 255);
   --chart-2: oklch(0.449 0.0405 250.0452);
   --chart-3: oklch(0.4999 0.0802 180.1312);
   --chart-4: oklch(0.8494 0.0104 58.1918);
   --chart-5: oklch(0.6001 0.0492 249.6616);
-  --radius: 1.4rem;
+  --radius: 0.625rem;
   --sidebar: oklch(0.9779 0.002 70);
   --sidebar-foreground: oklch(0.2178 0 0);
-  --sidebar-primary: oklch(0.5712 0.2219 20.0874);
+  --sidebar-primary: oklch(0.54 0.2 255);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9542 0.02 22.6077);
+  --sidebar-accent: oklch(0.9542 0.02 255);
   --sidebar-accent-foreground: oklch(0.2178 0 0);
   --sidebar-border: oklch(0.8801 0.002 70);
-  --sidebar-ring: oklch(0.56 0.2185 22.6077);
+  --sidebar-ring: oklch(0.54 0.2 255);
   --destructive-foreground: oklch(1 0 0);
   --font-sans: Inter, sans-serif;
   --font-serif: Inter, serif;
@@ -199,20 +197,17 @@
 }
 
 .dark {
-  /* Obsidian: deep volcanic glass with the crimson brand accent
+  /* Obsidian: deep volcanic glass with a brighter blue brand accent.
 
-     Same hue and chroma as light, lightness raised to 0.605. The dark
-     background is near-black, so the light theme's 0.5712 lands at 4.12:1 and
-     fails AA as text; 0.605 clears it at 4.74:1. One brand colour, two
-     lightnesses  -  the alternative is a dark theme whose brand stops being
-     readable. */
+     The foreground switches to the dark background colour so the light blue
+     remains readable while keeping a clear blue identity. */
   --background: oklch(0.101 0.0084 165.234);
   --foreground: oklch(0.985 0.0041 91.4457);
   --card: oklch(0.1776 0 0);
   --card-foreground: oklch(0.985 0.0041 91.4457);
   --popover: oklch(0.1822 0 0);
   --popover-foreground: oklch(0.985 0.0041 91.4457);
-  --primary: oklch(0.605 0.2219 20.0874);
+  --primary: oklch(0.72 0.16 255);
   --primary-foreground: oklch(0.101 0.0084 165.234);
   --secondary: oklch(0.2221 0 0);
   --secondary-foreground: oklch(0.9851 0 0);
@@ -223,22 +218,22 @@
   --destructive: oklch(0.7 0.19 40);
   --border: oklch(0.252 0 0);
   --input: oklch(0.252 0 0);
-  --ring: oklch(0.605 0.2219 20.0874);
-  --chart-1: oklch(0.605 0.2219 20.0874);
+  --ring: oklch(0.72 0.16 255);
+  --chart-1: oklch(0.72 0.16 255);
   --chart-2: oklch(0.5799 0.0496 249.6959);
   --chart-3: oklch(0.6001 0.0802 180.0405);
   --chart-4: oklch(0.8494 0.0104 58.1918);
   --chart-5: oklch(0.699 0.0505 250.4634);
   --sidebar: oklch(0.1398 0 0);
   --sidebar-foreground: oklch(0.8514 0 0);
-  --sidebar-primary: oklch(0.605 0.2219 20.0874);
+  --sidebar-primary: oklch(0.72 0.16 255);
   --sidebar-primary-foreground: oklch(0.1398 0 0);
   --sidebar-accent: oklch(0.2002 0 0);
-  --sidebar-accent-foreground: oklch(0.6122 0.2313 22.6077);
+  --sidebar-accent-foreground: oklch(0.72 0.16 255);
   --sidebar-border: oklch(0.252 0 0);
-  --sidebar-ring: oklch(0.6122 0.2313 22.6077);
+  --sidebar-ring: oklch(0.72 0.16 255);
   --destructive-foreground: oklch(0.1398 0 0);
-  --radius: 1.4rem;
+  --radius: 0.625rem;
   --font-sans: Inter, sans-serif;
   --font-serif: Inter, serif;
   --font-mono: Inter, ui-sans-serif, sans-serif, system-ui;
@@ -280,11 +275,11 @@
   html {
     @apply font-sans;
   }
-  /* Ambient glow: soft brand-red bloom at the top of the page. */
+  /* Ambient glow: soft blue brand bloom at the top of the page. */
   .dark body {
     background-image: radial-gradient(
       1100px 520px at 50% -8%,
-      oklch(0.6122 0.2313 22.6077 / 0.06),
+      oklch(0.6 0.18 255 / 0.06),
       transparent 62%
     );
     background-repeat: no-repeat;
@@ -361,6 +356,16 @@
   transform: none;
 }
 
+.comparison-score-fill {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 700ms var(--motion-ease);
+}
+
+.reveal[data-visible="true"] .comparison-score-fill {
+  transform: scaleX(1);
+}
+
 /* Asked for reduced motion: show the content, do not move it. The global
    duration override below would shorten the transition to nothing but leave the
    block sitting at opacity 0 until the observer fired, which is why this states
@@ -371,12 +376,21 @@
     transform: none;
     transition: none;
   }
+
+  .comparison-score-fill {
+    transform: none;
+    transition: none;
+  }
 }
 
 /* No scripting means no observer, so nothing would ever set `is-visible`. */
 @media (scripting: none) {
   .reveal {
     opacity: 1;
+    transform: none;
+  }
+
+  .comparison-score-fill {
     transform: none;
   }
 }

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PostSummary } from "@/lib/posts";
 // The listing is the index route. `/blog` itself is a layout that renders an
 // `Outlet` for `/blog/$slug`, so importing from there would render nothing.
-import { Route } from "@/routes/blog.index";
+import { Route } from "@/routes/blog/index";
 
 const {
   toastErrorMock,

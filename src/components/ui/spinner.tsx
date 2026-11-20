@@ -1,19 +1,23 @@
+import { IconLoader } from "@tabler/icons-react";
 import { cn } from "cn";
+import type { ComponentProps } from "react";
 
-interface SpinnerProps {
-  className?: string;
-  label?: string;
+function Spinner({
+  className,
+  label = "Loading",
+  ...props
+}: ComponentProps<"output"> & { label?: string }) {
+  return (
+    <output
+      data-slot="spinner"
+      aria-busy="true"
+      aria-label={label}
+      className={cn("inline-flex size-4 animate-spin", className)}
+      {...props}
+    >
+      <IconLoader aria-hidden="true" className="size-full" />
+    </output>
+  );
 }
-
-const Spinner = ({ className, label = "Loading" }: SpinnerProps) => (
-  <output
-    aria-busy="true"
-    aria-label={label}
-    className={cn(
-      "inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none",
-      className
-    )}
-  />
-);
 
 export { Spinner };

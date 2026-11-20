@@ -6,7 +6,7 @@ searchable through Postgres like projects are.
 
 ## Pages
 
-* `/blog`  -  the index, in `blog.index.tsx`. A `PageHeader`, a search
+* `/blog`  -  the index, in `src/routes/blog/index.tsx`. A `PageHeader`, a search
   field when search is available, a category filter, and a responsive
   card grid of `PostCard`s.
 * `/blog` (layout)  -  `blog.tsx`. Renders `<Outlet />` and nothing else.

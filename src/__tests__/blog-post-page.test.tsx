@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BlogPostNotFound } from "@/components/blog/post-not-found";
 import { loadPost } from "@/lib/blog-post";
 import type { Post } from "@/lib/posts";
-import { Route } from "@/routes/blog.$slug";
+import { Route } from "@/routes/blog/$slug";
 
 const { getPostMock, useLoaderDataMock, useSessionMock } = vi.hoisted(() => ({
   getPostMock:

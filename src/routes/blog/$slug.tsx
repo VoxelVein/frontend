@@ -22,8 +22,9 @@ import { postCategoryLabel } from "@/lib/posts";
 import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "long",
+  timeZone: "UTC",
 });
 
 const formatDate = (value: Date | string) =>

@@ -58,7 +58,9 @@ const GoogleSignInButtonContent = () => {
       return;
     }
 
-    router.navigate({ to: "/" });
+    await authClient.getSession();
+    await router.invalidate();
+    await router.navigate({ to: "/" });
   };
 
   return (

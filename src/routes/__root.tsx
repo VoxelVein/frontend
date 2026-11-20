@@ -43,19 +43,21 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
       </TooltipProvider>
       <CookieBanner />
       <Toaster />
-      <TanStackDevtools
-        config={{
-          position: "bottom-left",
-          triggerMode: "fixed",
-          hideUntilHover: true,
-        }}
-        plugins={[
-          {
-            name: "Tanstack Router",
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-        ]}
-      />
+      {import.meta.env.DEV ? (
+        <TanStackDevtools
+          config={{
+            position: "bottom-left",
+            triggerMode: "fixed",
+            hideUntilHover: true,
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
+      ) : null}
       <Scripts />
     </body>
   </html>
@@ -221,7 +223,11 @@ export const Route = createRootRoute({
             The page you are looking for does not exist or has been moved. Check
             the URL or head back to the homepage.
           </p>
-          <Button render={<Link to="/" />} className="mt-8 min-h-11 px-6">
+          <Button
+            nativeButton={false}
+            render={<Link to="/" />}
+            className="mt-8 min-h-11 px-6"
+          >
             <IconHome size={16} aria-hidden="true" />
             Back to homepage
           </Button>

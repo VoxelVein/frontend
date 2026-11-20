@@ -38,7 +38,7 @@ import {
 } from "@/lib/storage-quota";
 import { peekStream } from "@/lib/upload-validation";
 
-import env from "../../../env.config";
+import env from "../../../../../env.config";
 
 const uuidSchema = pipe(string(), uuid());
 

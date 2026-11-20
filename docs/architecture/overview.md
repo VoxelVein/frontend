@@ -42,8 +42,10 @@ src/
   hooks/            Reduced motion, username availability, post search
   lib/              Auth, projects, search, storage, server functions
     classes.ts      Class strings shared across unrelated components
-  routes/           TanStack Start file-based routes
-    api/            HTTP handlers: auth, upload, download
+  routes/           TanStack Start file-based routes, grouped by URL segments
+    admin/          Admin pages and nested post editor routes
+    blog/           Blog index and post detail routes
+    api/            HTTP handlers grouped by endpoint path
   tasks/            Nitro scheduled tasks
   test/             Vitest setup
   router.tsx        Router, QueryClient, SSR query integration

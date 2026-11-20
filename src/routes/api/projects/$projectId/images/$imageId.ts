@@ -13,7 +13,7 @@ import {
 import { deleteObjects } from "@/lib/storage";
 import { errorResponse } from "@/lib/storage-http";
 
-import { isSameOrigin, notFound } from "./projects.$projectId.images";
+import { isSameOrigin, notFound } from "../images";
 
 const uuidSchema = pipe(string(), uuid());
 

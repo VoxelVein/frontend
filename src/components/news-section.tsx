@@ -88,11 +88,11 @@ const ReadMore = ({ className }: { className?: string }) => (
  */
 const LeadPost = ({ post }: { post: PostSummary }) => (
   <li className="min-w-0 sm:col-span-2">
-    <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative max-w-full rounded-3xl border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
+    <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative max-w-full rounded-lg border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
       {/* The whole card is the target, but it stays a real link so it is
           reachable by keyboard and announced with the post it leads to. */}
       <Link
-        className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-2xl focus-visible:ring-3 focus-visible:outline-none"
+        className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-lg focus-visible:ring-3 focus-visible:outline-none"
         params={{ slug: post.slug }}
         preload="intent"
         to="/blog/$slug"
@@ -127,7 +127,7 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
  * reveal can wrap the entry without nesting one list item inside another.
  */
 const OlderPost = ({ post }: { post: PostSummary }) => (
-  <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative flex h-full flex-col rounded-2xl border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
+  <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative flex h-full flex-col rounded-lg border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
     <Link
       className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
       params={{ slug: post.slug }}

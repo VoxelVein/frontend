@@ -38,7 +38,7 @@ import {
   sanitizeFilename,
 } from "@/lib/upload-validation";
 
-import env from "../../../env.config";
+import env from "../../../../../../../env.config";
 
 const ZIP_MAGIC_LENGTH = 4;
 const uuidSchema = pipe(string(), uuid());

@@ -47,7 +47,7 @@ import { cn } from "@/lib/utils";
 const BADGE_MAX = 9;
 
 /** Long enough to show two lines of a project name without truncating it. */
-const PANEL_WIDTH = "w-[22rem] sm:w-96";
+const PANEL_WIDTH = "w-[22rem] max-w-[calc(100vw-1rem)] sm:w-96";
 
 /**
  * What the panel holds.
@@ -85,8 +85,8 @@ const TONE_CLASS = {
 
 /** The row's own background, so an unread row reads as unread at a glance. */
 const ROW_CLASS = {
-  read: "hover:bg-muted/60",
-  unread: "bg-primary/5 hover:bg-primary/10",
+  read: "border-transparent hover:bg-muted/60",
+  unread: "border-primary/15 bg-primary/5 hover:bg-primary/10",
 } as const;
 
 interface NotificationRowProps {
@@ -172,7 +172,7 @@ const NotificationRow = ({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-lg p-2 transition-colors",
+        "flex items-start gap-3 rounded-lg border p-2.5 transition-colors",
         ROW_CLASS[item.isRead ? "read" : "unread"]
       )}
     >
@@ -414,11 +414,18 @@ export const NotificationsBody = ({
       {/* The label is a Base UI GroupLabel, so it needs the group that supplies
           its context. Items and separators stay outside it, as in the user menu. */}
       <DropdownMenuGroup>
-        <DropdownMenuLabel className="border-border/70 flex items-center justify-between border-b px-3 py-2.5">
-          Notifications
+        <DropdownMenuLabel className="border-border/70 flex items-center justify-between border-b px-3 py-3">
+          <span className="flex items-center gap-2.5">
+            <span className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-md">
+              <IconBell size={16} stroke={1.8} aria-hidden="true" />
+            </span>
+            <span className="text-foreground text-sm font-semibold tracking-normal normal-case">
+              Notifications
+            </span>
+          </span>
           {unread > 0 ? (
-            <span className="text-muted-foreground text-xs font-normal tabular-nums">
-              {unread} unread
+            <span className="bg-primary/10 text-primary rounded-md px-2 py-1 text-xs font-medium normal-case tabular-nums">
+              {unread} new
             </span>
           ) : null}
         </DropdownMenuLabel>
@@ -642,7 +649,14 @@ export const UserNotifications = () => {
         ) : null}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" sideOffset={8} className={PANEL_WIDTH}>
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className={cn(
+          PANEL_WIDTH,
+          "border-border/70 max-h-[min(34rem,calc(100dvh-5rem))] overflow-hidden border p-2 shadow-2xl"
+        )}
+      >
         <NotificationsBody
           isError={loadFailed}
           isLoading={isLoadingList}

@@ -22,6 +22,22 @@ export default defineConfig({
   ignorePatterns: ["**/.opencode/**", ...(core.ignorePatterns ?? [])],
   jsPlugins: jsPlugins.jsPlugins,
   settings: jsPluginSettings,
+  overrides: [
+    {
+      files: ["src/components/ui/**"],
+      rules: {
+        // Generated shadcn components use named function declarations and
+        // export small style helpers alongside components by design.
+        "eslint/func-style": "off",
+        "eslint/no-use-before-define": "off",
+        "import/consistent-type-specifier-style": "off",
+        "jsx-a11y/prefer-tag-over-role": "off",
+        "react-doctor/only-export-components": "off",
+        "sonarjs/function-name": "off",
+        "sonarjs/shorthand-property-grouping": "off",
+      },
+    },
+  ],
   rules: {
     /**
      * Warn, don't block.

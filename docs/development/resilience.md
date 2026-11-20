@@ -73,7 +73,7 @@ allowed to block the download.
 ### Two things that bite here
 
 `TRUST_PROXY` is read **once at module scope**
-(`src/routes/api/download.$fileId.ts:16`). Changing it needs a process
+(`src/routes/api/download/$fileId.ts:16`). Changing it needs a process
 restart, and setting it `true` without a proxy that sets
 `X-Forwarded-For` lets any client forge its own key.
 

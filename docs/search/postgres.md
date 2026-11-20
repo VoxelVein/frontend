@@ -94,10 +94,12 @@ migration for the matching index, plus a matching edit in
 }
 ```
 
-Categories, game versions, and loaders are validated against the
-allowlists for the given type in `src/lib/projects.ts` before they reach
-the query; an unknown value is dropped rather than forwarded. The response
-includes `hits`, `estimatedTotalHits`, and `facetDistribution`.
+Game versions and loaders are validated against the allowlists for the given
+type in `src/lib/projects.ts`; an unknown value is dropped rather than
+forwarded. Categories are free text, limited by the project form, and passed
+as bound SQL parameters so creator-defined categories can be filtered too.
+Category facets are returned with `hits` and `estimatedTotalHits` so the
+browse filters can offer custom values present in the results.
 
 Page size is 12 and the maximum reachable page is 1000
 (`PAGE_SIZE`, `MAX_PAGE` in `src/lib/search/projects.ts`). The server-side

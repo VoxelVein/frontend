@@ -25,12 +25,12 @@ import {
 } from "@/lib/storage-quota";
 import { peekStream } from "@/lib/upload-validation";
 
-import env from "../../../env.config";
+import env from "../../../../../env.config";
 
 /**
  * Upload and remove the signed-in account's avatar.
  *
- * Mirrors `api/projects.$projectId.images.ts` step for step, because the
+ * Mirrors `api/projects/$projectId/images.ts` step for step, because the
  * hazards are identical: a body that lies about its type, a client-chosen
  * storage key, and a quota that has to be checked inside the write rather than
  * before it.

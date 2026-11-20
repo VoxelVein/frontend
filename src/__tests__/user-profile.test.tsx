@@ -8,7 +8,7 @@ import type { PublicProfile } from "@/lib/user-profiles";
 // Relative rather than aliased: the `$username` in the file name is what
 // TanStack's route files are called, and the alias resolver does not treat it
 // as a literal segment.
-import { Route } from "../routes/u.$username";
+import { Route } from "../routes/u/$username";
 
 const { useLoaderDataMock } = vi.hoisted(() => ({
   useLoaderDataMock: vi.fn<() => PublicProfile>(),

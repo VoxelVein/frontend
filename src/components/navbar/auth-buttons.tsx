@@ -1,8 +1,10 @@
+import { IconLogin2, IconUserPlus } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
 import { UserMenu } from "@/components/navbar/user-menu";
 import { UserNotifications } from "@/components/navbar/user-notifications";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -23,20 +25,40 @@ interface AuthButtonsProps {
 
 const AuthSkeleton = ({ variant }: { variant: "desktop" | "mobile" }) => (
   <Skeleton
-    className={cn(variant === "desktop" ? "h-10 w-24" : "mt-3 h-11 w-full")}
+    className={cn(variant === "desktop" ? "h-10 w-36" : "mt-3 h-11 w-full")}
   />
 );
 
 const AuthSignIn = ({ variant }: { variant: "desktop" | "mobile" }) => (
-  <Link
-    to="/login"
+  <ButtonGroup
+    aria-label="Account"
     className={cn(
-      buttonVariants({ size: "sm", variant: "default" }),
-      variant === "desktop" ? "min-h-10 px-4" : "mt-3 min-h-11 w-full"
+      variant === "desktop" ? "min-h-10" : "mt-3 min-h-11 w-full *:flex-1"
     )}
   >
-    Sign in
-  </Link>
+    <Link
+      to="/login"
+      data-slot="button"
+      className={cn(
+        buttonVariants({ size: "sm", variant: "default" }),
+        variant === "desktop" ? "min-h-10 px-3" : "min-h-11"
+      )}
+    >
+      <IconLogin2 aria-hidden="true" />
+      Sign in
+    </Link>
+    <Link
+      to="/signup"
+      data-slot="button"
+      className={cn(
+        buttonVariants({ size: "sm", variant: "outline" }),
+        variant === "desktop" ? "min-h-10 px-3" : "min-h-11"
+      )}
+    >
+      <IconUserPlus aria-hidden="true" />
+      Sign up
+    </Link>
+  </ButtonGroup>
 );
 
 const MobileUserCard = ({
@@ -111,7 +133,7 @@ const AuthButtons = ({
     return <AuthSkeleton variant={variant} />;
   }
 
-  if (session) {
+  if (session?.user) {
     return (
       <AuthSignedIn
         variant={variant}

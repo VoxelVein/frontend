@@ -42,7 +42,9 @@ const Navbar = () => {
     // Force the session hook to refetch so the UI reflects the signed-out state
     authClient.$store.notify("$sessionSignal");
     router.invalidate();
-    router.navigate({ to: "/" });
+    await authClient.getSession();
+    await router.invalidate();
+    await router.navigate({ to: "/" });
   };
 
   return (

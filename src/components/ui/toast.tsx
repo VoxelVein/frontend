@@ -1,3 +1,5 @@
+"use client";
+
 import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import {
   IconX,
@@ -8,25 +10,21 @@ import {
   IconLoader,
 } from "@tabler/icons-react";
 import { cn } from "cn";
-import type { ReactNode } from "react";
-/* oxlint-disable eslint/arrow-body-style, eslint/func-style, react/todo, react/function-component-definition, react-doctor/only-export-components */
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 
 const toast = ToastPrimitive.createToastManager();
 
-const ToastProvider = ({ ...props }: ToastPrimitive.Provider.Props) => {
+function ToastProvider({ ...props }: ToastPrimitive.Provider.Props) {
   return <ToastPrimitive.Provider {...props} />;
-};
+}
 
-const ToastPortal = ({ ...props }: ToastPrimitive.Portal.Props) => {
+function ToastPortal({ ...props }: ToastPrimitive.Portal.Props) {
   return <ToastPrimitive.Portal data-slot="toast-portal" {...props} />;
-};
+}
 
-const ToastViewport = ({
-  className,
-  ...props
-}: ToastPrimitive.Viewport.Props) => {
+function ToastViewport({ className, ...props }: ToastPrimitive.Viewport.Props) {
   return (
     <ToastPrimitive.Viewport
       data-slot="toast-viewport"
@@ -37,9 +35,9 @@ const ToastViewport = ({
       {...props}
     />
   );
-};
+}
 
-const Toast = ({ className, ...props }: ToastPrimitive.Root.Props) => {
+function Toast({ className, ...props }: ToastPrimitive.Root.Props) {
   return (
     <ToastPrimitive.Root
       data-slot="toast"
@@ -64,12 +62,9 @@ const Toast = ({ className, ...props }: ToastPrimitive.Root.Props) => {
       {...props}
     />
   );
-};
+}
 
-const ToastContent = ({
-  className,
-  ...props
-}: ToastPrimitive.Content.Props) => {
+function ToastContent({ className, ...props }: ToastPrimitive.Content.Props) {
   return (
     <ToastPrimitive.Content
       data-slot="toast-content"
@@ -80,9 +75,9 @@ const ToastContent = ({
       {...props}
     />
   );
-};
+}
 
-const ToastTitle = ({ className, ...props }: ToastPrimitive.Title.Props) => {
+function ToastTitle({ className, ...props }: ToastPrimitive.Title.Props) {
   return (
     <ToastPrimitive.Title
       data-slot="toast-title"
@@ -90,12 +85,12 @@ const ToastTitle = ({ className, ...props }: ToastPrimitive.Title.Props) => {
       {...props}
     />
   );
-};
+}
 
-const ToastDescription = ({
+function ToastDescription({
   className,
   ...props
-}: ToastPrimitive.Description.Props) => {
+}: ToastPrimitive.Description.Props) {
   return (
     <ToastPrimitive.Description
       data-slot="toast-description"
@@ -103,36 +98,34 @@ const ToastDescription = ({
       {...props}
     />
   );
-};
+}
 
-const ToastAction = ({
+function ToastAction({
   className,
-  render,
+  render = <Button variant="outline" size="sm" />,
   ...props
-}: ToastPrimitive.Action.Props) => {
-  const resolvedRender = render ?? <Button variant="outline" size="sm" />;
+}: ToastPrimitive.Action.Props) {
   return (
     <ToastPrimitive.Action
       data-slot="toast-action"
-      render={resolvedRender}
+      render={render}
       className={cn("shrink-0", className)}
       {...props}
     />
   );
-};
+}
 
-const ToastClose = ({
+function ToastClose({
   className,
   children,
-  render,
+  render = <Button variant="ghost" size="icon-sm" />,
   ...props
-}: ToastPrimitive.Close.Props) => {
-  const resolvedRender = render ?? <Button variant="ghost" size="icon-sm" />;
+}: ToastPrimitive.Close.Props) {
   return (
     <ToastPrimitive.Close
       data-slot="toast-close"
       aria-label="Close toast"
-      render={resolvedRender}
+      render={render}
       className={cn(
         "text-muted-foreground hover:text-foreground relative shrink-0 after:absolute after:-inset-2 after:content-['']",
         className
@@ -142,10 +135,10 @@ const ToastClose = ({
       {children ?? <IconX aria-hidden="true" />}
     </ToastPrimitive.Close>
   );
-};
+}
 
-const ToastIcon = ({ type }: { type: string | undefined }) => {
-  let icon: ReactNode = null;
+function ToastIcon({ type }: { type: string | undefined }) {
+  let icon: React.ReactNode = null;
 
   if (type === "success") {
     icon = <IconCircleCheck aria-hidden="true" />;
@@ -179,10 +172,9 @@ const ToastIcon = ({ type }: { type: string | undefined }) => {
       {icon}
     </span>
   );
-};
+}
 
-// oxlint-disable-next-line sonarjs/function-name -- JSX component names must start uppercase
-const ToastList = () => {
+function ToastList() {
   const { toasts } = ToastPrimitive.useToastManager();
 
   return toasts.map((toastItem) => (
@@ -198,13 +190,13 @@ const ToastList = () => {
       </ToastContent>
     </Toast>
   ));
-};
+}
 
-const Toaster = ({
+function Toaster({
   children,
   toastManager = toast,
   ...props
-}: ToastPrimitive.Provider.Props) => {
+}: ToastPrimitive.Provider.Props) {
   return (
     <ToastProvider toastManager={toastManager} {...props}>
       {children}
@@ -215,10 +207,10 @@ const Toaster = ({
       </ToastPortal>
     </ToastProvider>
   );
-};
+}
 
-const { createToastManager } = ToastPrimitive;
-const { useToastManager } = ToastPrimitive;
+const createToastManager = ToastPrimitive.createToastManager;
+const useToastManager = ToastPrimitive.useToastManager;
 
 export {
   Toaster,
