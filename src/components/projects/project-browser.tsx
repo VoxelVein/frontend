@@ -64,10 +64,9 @@ const DEFAULT_SORT = "downloads:desc";
 // matches the runtime value (string when set, undefined when absent). Local
 // development uses the same-origin Vite proxy; production connects directly to
 // the configured public API and never falls back to the visitor's localhost.
-const API_URL =
-  import.meta.env.DEV
-    ? ""
-    : (import.meta.env.VITE_API_URL as string | undefined);
+const API_URL = import.meta.env.DEV
+  ? ""
+  : (import.meta.env.VITE_API_URL as string | undefined);
 
 const noEventCleanup = (): void => {
   // No EventSource exists when the API URL is not configured.

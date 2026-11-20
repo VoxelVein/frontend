@@ -151,12 +151,12 @@ export const AdminReviews = ({
     setIsLoadingDetails(true);
     try {
       const project = await getProject({ data: { slug: review.slug } });
-      if (!project) {
+      if (project) {
+        setReviewDetails(project);
+      } else {
         setDetailsError(
           "This submission is no longer available. Refresh the queue."
         );
-      } else {
-        setReviewDetails(project);
       }
     } catch {
       setDetailsError("Could not load project details. Try again.");

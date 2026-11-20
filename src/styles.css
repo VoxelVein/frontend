@@ -329,6 +329,23 @@
   animation: hero-enter 460ms var(--motion-ease) 90ms both;
 }
 
+/* News lead story entrance: slides up and fades in, arriving just after the
+   section heading so the eye lands on the headline first. */
+@keyframes news-lead-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-news-lead {
+  animation: news-lead-enter 560ms var(--motion-ease) 140ms both;
+}
+
 /* ── Scroll reveal ────────────────────────────────────────────────────
 
    A transition rather than keyframes, per docs/content/motion.md: the curve,

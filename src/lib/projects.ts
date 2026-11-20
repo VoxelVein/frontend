@@ -455,6 +455,7 @@ export type ProjectInput = InferOutput<typeof projectInputSchema>;
 export const projectUpdateSchema = object({
   ...projectFieldsEntries,
   projectId: pipe(string(), uuid()),
+  slug: projectSlugSchema,
 });
 
 export type ProjectUpdateInput = InferOutput<typeof projectUpdateSchema>;

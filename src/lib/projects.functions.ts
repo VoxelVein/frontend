@@ -298,7 +298,16 @@ export const updateProject = createServerFn({ method: "POST" })
     const { projectId, ...fields } = data;
     await requireEditableProject(session, projectId);
 
-    await db.update(projects).set(fields).where(eq(projects.id, projectId));
+    try {
+      await db.update(projects).set(fields).where(eq(projects.id, projectId));
+    } catch (error) {
+      if (hasErrorCode(error, PG_UNIQUE_VIOLATION)) {
+        throw new Error("That slug is already taken. Choose another one.", {
+          cause: error,
+        });
+      }
+      throw error;
+    }
   });
 
 const hasPrimaryFile = async (projectId: string): Promise<boolean> => {

@@ -18,13 +18,6 @@ interface NewsSectionProps {
   initialPosts: PostSummary[];
 }
 
-/**
- * The lead story's summary is deliberately short: a headline card that already
- * shows the date, category and byline reads best when the excerpt stays a
- * teaser, and the full preview belongs on the post page.
- */
-const MAX_LEAD_PREVIEW_CHARS = 75;
-
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   day: "numeric",
   month: "short",
@@ -32,13 +25,6 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
   year: "numeric",
 });
 
-/**
- * A post's date as a `<time>` value, or null when the timestamp is unusable.
- *
- * The formatting is pinned to UTC rather than the visitor's zone. These are
- * publication dates, and a dispatch ledger whose first column shifts by a day
- * depending on where you are is not a ledger.
- */
 const toIsoDate = (value: Date | string): string | null => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
@@ -57,12 +43,7 @@ const NewsDate = ({ value }: { value: Date | string }) => {
   );
 };
 
-/**
- * The decorative "Read more" cue at the end of a card.
- *
- * It is aria-hidden because every card is already a real link whose accessible
- * name includes the post title; the text would only repeat it.
- */
+/** The decorative "Read more" cue at the end of a card. */
 const ReadMore = ({ className }: { className?: string }) => (
   <span
     aria-hidden="true"
@@ -81,18 +62,17 @@ const ReadMore = ({ className }: { className?: string }) => (
 );
 
 /**
- * The newest post, given the room a lead story actually needs.
+ * The newest post, given the room a lead story needs.
  *
- * The whole card responds to the pointer: the border warms on hover, and a
- * press scales the card down a hair so the click is felt as well as seen.
+ * Keyframe entrance like the hero: it lands first, then the older posts
+ * stagger in behind it. The whole card responds to the pointer - border
+ * warms on hover, and a press scales the card down a hair.
  */
 const LeadPost = ({ post }: { post: PostSummary }) => (
   <li className="min-w-0 sm:col-span-2">
-    <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative max-w-full rounded-lg border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
-      {/* The whole card is the target, but it stays a real link so it is
-          reachable by keyboard and announced with the post it leads to. */}
+    <article className="border-border bg-card focus-within:border-primary/30 hover:border-primary/30 group animate-news-lead relative max-w-full rounded-xl border p-6 transition-colors duration-300 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
       <Link
-        className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-lg focus-visible:ring-3 focus-visible:outline-none"
+        className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
         params={{ slug: post.slug }}
         preload="intent"
         to="/blog/$slug"
@@ -104,30 +84,29 @@ const LeadPost = ({ post }: { post: PostSummary }) => (
         <NewsDate value={post.createdAt} />
         <PostCategoryBadge category={post.category} variant="subtle" />
       </div>
-      <h3 className="text-foreground mt-2 truncate text-xl font-semibold tracking-tight sm:text-2xl">
+      <h3 className="text-foreground mt-2 truncate text-2xl font-bold tracking-tight sm:text-3xl">
         {post.title}
       </h3>
       {post.preview ? (
-        <p className="text-muted-foreground mt-3 truncate text-sm leading-6 sm:text-base">
-          {truncate(post.preview, MAX_LEAD_PREVIEW_CHARS)}
+        <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-7 sm:text-base">
+          {truncate(post.preview, 140)}
         </p>
       ) : null}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <PostAuthors authors={post.authors} compact linked={false} />
-        <ReadMore />
+        <div className="flex items-center gap-2">
+          <ReadMore className="group-hover:text-primary/90" />
+        </div>
       </div>
     </article>
   </li>
 );
 
 /**
- * One older post, as a compact card.
- *
- * Renders the card only, not a list item: the call site owns the `<li>` so the
- * reveal can wrap the entry without nesting one list item inside another.
+ * One older post, as a compact card with its own staggered reveal.
  */
 const OlderPost = ({ post }: { post: PostSummary }) => (
-  <article className="border-border bg-card focus-within:border-foreground/30 hover:border-foreground/30 group relative flex h-full flex-col rounded-lg border p-6 transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
+  <article className="border-border bg-card focus-within:border-primary/30 hover:border-primary/30 group relative flex h-full flex-col rounded-xl border p-6 transition-colors duration-300 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100">
     <Link
       className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
       params={{ slug: post.slug }}
@@ -141,17 +120,19 @@ const OlderPost = ({ post }: { post: PostSummary }) => (
       <NewsDate value={post.createdAt} />
       <PostCategoryBadge category={post.category} variant="subtle" />
     </div>
-    <h3 className="text-foreground mt-2 truncate text-base font-semibold tracking-tight">
+    <h3 className="text-foreground mt-2 truncate text-lg font-semibold tracking-tight">
       {post.title}
     </h3>
     {post.preview ? (
-      <p className="text-muted-foreground mt-1 truncate text-sm leading-6">
+      <p className="text-muted-foreground mt-2 line-clamp-2 text-sm leading-6">
         {post.preview}
       </p>
     ) : null}
-    <div className="mt-4 flex items-center justify-between gap-x-4 gap-y-3">
+    <div className="mt-5 flex items-center justify-between gap-x-4 gap-y-3">
       <PostAuthors authors={post.authors} compact linked={false} />
-      <ReadMore />
+      <div className="flex items-center gap-2">
+        <ReadMore className="group-hover:text-primary/90" />
+      </div>
     </div>
   </article>
 );
@@ -172,13 +153,11 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
   return (
     <section
       aria-labelledby="news-heading"
-      className="px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
+      className="px-4 py-12 sm:px-6 sm:py-16 lg:px-8"
       id="news"
     >
-      {/* One reveal for the whole section, so the heading and the posts
-          arrive together instead of the heading leading on its own. */}
-      <Reveal className="mx-auto max-w-5xl">
-        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b pb-6">
+      <Reveal className="mx-auto max-w-5xl" delay={0.1}>
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b pb-8">
           <div>
             <h2
               className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl"
@@ -194,7 +173,7 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
           <Link
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              "min-h-11 shrink-0"
+              "ease-smooth min-h-11 shrink-0 transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
             )}
             preload="intent"
             to="/blog"
@@ -206,29 +185,30 @@ const NewsSection = ({ initialPosts }: NewsSectionProps) => {
 
         {lead === undefined ? (
           <EmptyState
-            // No action: the header link above already goes to /blog. This
-            // state used to render a second one reading "Visit the blog", so an
-            // empty section offered the same destination under two names.
             description="Once the team publishes an update, the newest posts show up here."
             icon={<IconNews aria-hidden size={24} />}
             title="No posts yet"
             variant="inline"
           />
         ) : (
-          // One grid for all three entries: the lead spans the full width and
-          // the two older posts sit side by side under it, which gives the
-          // section a clear hierarchy rather than one big card plus a list.
           <ol
             aria-label="Latest blog posts"
-            className="mt-8 grid gap-6 sm:grid-cols-2"
+            className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
           >
-            <LeadPost post={lead} />
-            {/* Staggered like the trending row above it, so the grids on the
-                page behave the same way. Capped: the grid is unbounded, and an
-                uncapped delay would leave the last entry waiting seconds. */}
+            <li
+              key={lead.id}
+              className="col-span-full flex min-w-0 sm:col-span-2"
+            >
+              <Reveal className="h-full" delay={0.2}>
+                <LeadPost post={lead} />
+              </Reveal>
+            </li>
             {rest.map((post, index) => (
               <li key={post.id} className="flex min-w-0">
-                <Reveal className="h-full flex-1" delay={staggerDelay(index)}>
+                <Reveal
+                  className="h-full flex-1"
+                  delay={staggerDelay(index + 1)}
+                >
                   <OlderPost post={post} />
                 </Reveal>
               </li>
