@@ -89,17 +89,24 @@ const LoginPage = () => {
 
       const identifier = value.identifier.trim();
       const fetchOptions = turnstileFetchOptions(turnstileToken);
-      const { error } = isEmailIdentifier(identifier)
-        ? await authClient.signIn.email({
-            email: identifier,
-            fetchOptions,
-            password: value.password,
-          })
-        : await authClient.signIn.username({
-            fetchOptions,
-            password: value.password,
-            username: identifier,
-          });
+      let error: { message?: string } | null;
+      try {
+        ({ error } = isEmailIdentifier(identifier)
+          ? await authClient.signIn.email({
+              email: identifier,
+              fetchOptions,
+              password: value.password,
+            })
+          : await authClient.signIn.username({
+              fetchOptions,
+              password: value.password,
+              username: identifier,
+            }));
+      } catch {
+        turnstileRef.current?.reset();
+        reportError("Could not reach the account service. Please try again.");
+        return;
+      }
 
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
@@ -108,7 +115,9 @@ const LoginPage = () => {
         return;
       }
 
-      router.navigate({ to: "/" });
+      await authClient.getSession();
+      await router.invalidate();
+      await router.navigate({ to: "/" });
     },
     onSubmitInvalid: () => {
       // A retry after a failed submit should not leave the old error up.

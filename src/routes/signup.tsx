@@ -28,6 +28,7 @@ import {
 // the comment there.
 const EMAIL_PATTERN = /^[^\s@]{1,64}@(?:[^\s@.]{1,63}\.)+[^\s@.]{1,63}$/u;
 const MIN_PASSWORD_LENGTH = 8;
+const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{3,32}$/u;
 const MISSING_VERIFICATION_MESSAGE =
   "Complete the human verification check before creating your account.";
 
@@ -40,6 +41,12 @@ const emailSchema = pipe(
   string(),
   check((value) => value.trim().length > 0, "Email is required."),
   regex(EMAIL_PATTERN, "Enter a valid email address.")
+);
+
+const usernameSchema = pipe(
+  string(),
+  check((value) => value.trim().length > 0, "Username is required."),
+  regex(USERNAME_PATTERN, "Use 3–32 letters, numbers, dots, or underscores.")
 );
 
 const passwordSchema = pipe(
@@ -70,6 +77,7 @@ const SignupPage = () => {
       name: "",
       email: "",
       password: "",
+      username: "",
     },
     onSubmit: async ({ value }) => {
       toast.dismiss();
@@ -80,17 +88,27 @@ const SignupPage = () => {
         return;
       }
 
-      const { error } = await authClient.signUp.email({
-        ...value,
-        fetchOptions: turnstileFetchOptions(turnstileToken),
-      });
+      let error: { message?: string } | null;
+      try {
+        ({ error } = await authClient.signUp.email({
+          ...value,
+          username: value.username.trim(),
+          fetchOptions: turnstileFetchOptions(turnstileToken),
+        }));
+      } catch {
+        turnstileRef.current?.reset();
+        toast.error("Could not reach the account service. Please try again.");
+        return;
+      }
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
         toast.error(error.message ?? "Could not create your account.");
         return;
       }
-      router.navigate({ to: "/" });
+      await authClient.getSession();
+      await router.invalidate();
+      await router.navigate({ to: "/" });
     },
     onSubmitInvalid: () => {
       toast.dismiss();
@@ -140,6 +158,31 @@ const SignupPage = () => {
           aria-busy={isSubmitting}
           className="mt-6 grid gap-4"
         >
+          <form.Field
+            name="username"
+            validators={{
+              onChange: usernameSchema,
+              onSubmit: usernameSchema,
+            }}
+          >
+            {(field) => (
+              <FormField
+                id="username"
+                label="Username"
+                type="text"
+                autoComplete="username"
+                placeholder="Your username"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                onBlur={field.handleBlur}
+                error={field.state.meta.errors[0]?.message}
+                minLength={3}
+                maxLength={32}
+                required
+              />
+            )}
+          </form.Field>
+
           <form.Field
             name="name"
             validators={{

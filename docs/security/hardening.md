@@ -69,6 +69,12 @@ it is mentioned here.
 
 ## Account linking
 
+Email signup requires a username because the username plugin and the
+username-availability hook enforce it before a user row is created. The
+signup form sends the chosen username along with name, email, and password;
+failed or unreachable auth requests are shown to the user rather than being
+treated as a successful sign-in.
+
 `accountLinking` sets `allowDifferentEmails: true` but
 `requireLocalEmailVerified: true` (`src/lib/auth.ts:202`).
 
@@ -189,7 +195,7 @@ browser bundle.
 
 ### Avatars
 
-The avatar route (`src/routes/api/users.me.avatar.ts`) is the project image
+The avatar route (`src/routes/api/users/me/avatar.ts`) is the project image
 route with the project replaced by the session's user, and it inherits every
 gate above: byte sniffing, a regenerated filename, a server-derived
 `users/{userId}/avatar/{uuid}.{ext}` key, and a quota enforced inside the
