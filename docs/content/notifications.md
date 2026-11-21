@@ -98,6 +98,13 @@ somewhere unrelated. Migration `0020` dropped the constraint.
 A row about a project still cascades with it, so a notification can never point
 at something that no longer exists.
 
+## On a phone
+
+The desktop bell sits beside the avatar menu, which has no room in a narrow
+navbar. The signed-in drawer renders it as a labelled row instead, beside
+My projects, Support, Settings, and Admin panel, so the inbox stays reachable
+without opening a popup and the unread badge stays visible in the row.
+
 ## Tests
 
 * `src/lib/__tests__/notifications.test.ts`, the day buckets, including that

@@ -12,11 +12,11 @@ under `src/routes/admin/`:
 
 | Route                       | File                                  |
 | --------------------------- | ------------------------------------- |
-| `/admin` (layout)           | `admin.tsx`                            |
-| `/admin`                    | `admin/index.tsx`                      |
-| `/admin/posts/*` (layout)   | `admin/posts.tsx`                      |
-| `/admin/posts/new`          | `admin/posts/new.tsx`                  |
-| `/admin/posts/$postId/edit` | `admin/posts/$postId/edit.tsx`         |
+| `/admin` (layout)           | `admin.tsx`                           |
+| `/admin`                    | `admin/index.tsx`                     |
+| `/admin/posts/*` (layout)   | `admin/posts.tsx`                     |
+| `/admin/posts/new`          | `admin/posts/new.tsx`                 |
+| `/admin/posts/$postId/edit` | `admin/posts/$postId/edit.tsx`        |
 
 The panel is the **index** route; the two `*.tsx` files above it are plain
 layouts whose only job is a `beforeLoad` guard, and the two editor pages
@@ -48,6 +48,10 @@ That source matters. The panel previously read the role from
 SSR the role was `user`, no tab was visible, and the panel rendered with no
 tab strip at all. The context is already resolved, so reading it is free on
 the server and correct on the first paint.
+
+The panel is also listed in the navbar's signed-in mobile drawer, so admins
+and moderators reach it from a phone without opening the avatar menu. The row
+uses the same `viewAdminPanel` capability as the desktop menu.
 
 The tab comes from `?tab=`, validated with a Valibot `picklist`,
 defaulting to `users`:
