@@ -25,6 +25,17 @@ const MENU_ITEMS = PROJECT_ITEMS.filter((item) => !item.alwaysInline);
 const linkClassName =
   "text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
 
+/**
+ * The drawer's row treatment, shared with the signed-in account links so the
+ * mobile menu reads as one list rather than a styled navigation section with a
+ * differently styled account block underneath.
+ */
+const MOBILE_LINK_CLASS =
+  "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring min-h-11 flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
+
+const MOBILE_SECTION_HEADING_CLASS =
+  "text-muted-foreground mb-1 px-3 py-2 text-xs font-semibold tracking-wider uppercase";
+
 const activeLinkClassName =
   "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary";
 
@@ -186,4 +197,11 @@ const NavbarLinks = () => {
   );
 };
 
-export { BrowseMenuItems, CONTENT_LINKS, NavbarLinks, PROJECT_ITEMS };
+export {
+  BrowseMenuItems,
+  CONTENT_LINKS,
+  MOBILE_LINK_CLASS,
+  MOBILE_SECTION_HEADING_CLASS,
+  NavbarLinks,
+  PROJECT_ITEMS,
+};

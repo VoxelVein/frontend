@@ -3,7 +3,12 @@ import { Link, useMatchRoute } from "@tanstack/react-router";
 
 import { AuthButtons } from "@/components/navbar/auth-buttons";
 import type { NavbarUser } from "@/components/navbar/auth-buttons";
-import { CONTENT_LINKS, PROJECT_ITEMS } from "@/components/navbar/navbar-links";
+import {
+  CONTENT_LINKS,
+  MOBILE_LINK_CLASS,
+  MOBILE_SECTION_HEADING_CLASS,
+  PROJECT_ITEMS,
+} from "@/components/navbar/navbar-links";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -23,14 +28,8 @@ interface NavbarMobileMenuProps {
   onSignOut: () => void;
 }
 
-const mobileLinkClassName =
-  "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring min-h-11 flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
-
 const ACTIVE_LINK_CLASS = "bg-primary/10 hover:bg-primary/15";
 const ACTIVE_TEXT_CLASS = "text-primary";
-
-const SECTION_HEADING_CLASS =
-  "text-muted-foreground mb-1 px-3 py-2 text-xs font-semibold tracking-wider uppercase";
 
 const NavbarMobileMenu = ({
   open,
@@ -84,7 +83,10 @@ const NavbarMobileMenu = ({
                 menu would only add a tap. Each row keeps the icon and
                 description the desktop Browse menu shows, so the two menus
                 describe the same eight destinations the same way. */}
-            <h3 id="mobile-projects-heading" className={SECTION_HEADING_CLASS}>
+            <h3
+              id="mobile-projects-heading"
+              className={MOBILE_SECTION_HEADING_CLASS}
+            >
               Projects
             </h3>
 
@@ -99,7 +101,7 @@ const NavbarMobileMenu = ({
                   aria-current={isActive ? "page" : undefined}
                   onClick={onClose}
                   className={cn(
-                    mobileLinkClassName,
+                    MOBILE_LINK_CLASS,
                     "items-start gap-3 py-2.5",
                     isActive && ACTIVE_LINK_CLASS
                   )}
@@ -135,7 +137,10 @@ const NavbarMobileMenu = ({
             aria-labelledby="mobile-content-heading"
             className="flex flex-col"
           >
-            <h3 id="mobile-content-heading" className={SECTION_HEADING_CLASS}>
+            <h3
+              id="mobile-content-heading"
+              className={MOBILE_SECTION_HEADING_CLASS}
+            >
               Content
             </h3>
 
@@ -150,7 +155,7 @@ const NavbarMobileMenu = ({
                   aria-current={isActive ? "page" : undefined}
                   onClick={onClose}
                   className={cn(
-                    mobileLinkClassName,
+                    MOBILE_LINK_CLASS,
                     "gap-3",
                     isActive && "bg-primary/10 text-primary hover:bg-primary/15"
                   )}
@@ -175,6 +180,7 @@ const NavbarMobileMenu = ({
               isPending={isPending}
               session={session}
               onSignOut={onSignOut}
+              onClose={onClose}
             />
           </div>
         </div>

@@ -13,6 +13,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
+import { MOBILE_LINK_CLASS } from "@/components/navbar/navbar-links";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -353,9 +354,11 @@ export const NotificationsBody = ({
     // Grouped in one pass: the list is already newest-first, so a bucket only
     // has to remember which group it is currently filling.
     const buckets = new Map<NotificationGroup, UserNotification[]>();
+
     for (const item of items) {
       const group = notificationGroup(item.createdAt, now);
       const existing = buckets.get(group);
+
       if (existing) {
         existing.push(item);
       } else {
@@ -438,6 +441,14 @@ export const NotificationsBody = ({
   );
 };
 
+interface UserNotificationsProps {
+  /**
+   * `mobile` renders a labelled drawer row; `desktop` keeps the icon-only bell
+   * that sits beside the avatar menu.
+   */
+  variant?: "desktop" | "mobile";
+}
+
 /**
  * The signed-in user's notification bell.
  *
@@ -450,7 +461,9 @@ export const NotificationsBody = ({
  * across route changes. As mount-time state it was a server round-trip on every
  * page, for a badge that almost never changes between two pages.
  */
-export const UserNotifications = () => {
+export const UserNotifications = ({
+  variant = "desktop",
+}: UserNotificationsProps) => {
   const queryClient = useQueryClient();
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -485,8 +498,10 @@ export const UserNotifications = () => {
     if (!isOpen || panel !== null) {
       return;
     }
+
     setIsLoadingList(true);
     setLoadFailed(false);
+
     try {
       const loaded = await listUserNotifications();
       setPanel({ items: loaded, loadedAt: Date.now() });
@@ -494,6 +509,7 @@ export const UserNotifications = () => {
       setLoadFailed(true);
       toast.error("Could not load your notifications.");
     }
+
     setIsLoadingList(false);
   };
 
@@ -527,9 +543,11 @@ export const UserNotifications = () => {
    */
   const markItemRead = async (id: string): Promise<void> => {
     const target = items?.find((item) => item.id === id);
+
     if (!target || target.isRead) {
       return;
     }
+
     setPanel((current) =>
       current
         ? {
@@ -541,16 +559,20 @@ export const UserNotifications = () => {
           }
         : current
     );
+
     settleCount(Math.max(0, unread - 1));
+
     try {
       await markUserNotificationRead({ data: { notificationId: id } });
     } catch {
       // The row already shows as read, and the next open reloads from the
       // database. Reporting here would be noise about something the user did.
       const reloaded = await listUserNotifications().catch(() => null);
+
       if (reloaded) {
         setPanel({ items: reloaded, loadedAt: Date.now() });
       }
+
       settleCount(await countUnreadUserNotifications().catch(() => 0));
     }
   };
@@ -577,6 +599,7 @@ export const UserNotifications = () => {
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: LIST_QUERY_KEY });
       const target = items?.find((item) => item.id === id);
+
       setPanel((current) =>
         current
           ? {
@@ -585,6 +608,7 @@ export const UserNotifications = () => {
             }
           : current
       );
+
       if (target && !target.isRead) {
         settleCount(Math.max(0, unread - 1));
       }
@@ -615,11 +639,28 @@ export const UserNotifications = () => {
   });
 
   const hasUnread = unread > 0;
+
   const ariaLabel = hasUnread
     ? `Notifications, ${unread} unread`
     : "Notifications, none unread";
+
   const badgeText = unread > BADGE_MAX ? `${BADGE_MAX}+` : String(unread);
   const isMutating = dismissItem.isPending || dismissRead.isPending;
+
+  const badgeClass =
+    variant === "mobile"
+      ? "bg-primary text-primary-foreground ml-auto inline-flex min-w-4.5 items-center justify-center rounded-full px-1 text-xs font-semibold"
+      : "bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 inline-flex min-w-4.5 items-center justify-center rounded-full px-1 text-xs font-semibold";
+
+  let badge: ReactNode = null;
+
+  if (hasUnread) {
+    badge = (
+      <span aria-hidden="true" className={badgeClass}>
+        {badgeText}
+      </span>
+    );
+  }
 
   return (
     <DropdownMenu onOpenChange={loadOnOpen}>
@@ -628,25 +669,29 @@ export const UserNotifications = () => {
           <Button
             type="button"
             variant="ghost"
-            size="icon-lg"
+            size={variant === "mobile" ? "lg" : "icon-lg"}
             // Square, and the same 44px as the theme toggle beside it. Without
             // an explicit size the button is content-width, so a taller touch
             // target would leave the bell visibly taller than it is wide.
-            className="relative size-11"
+            className={
+              variant === "mobile"
+                ? cn(MOBILE_LINK_CLASS, "w-full justify-start gap-3 px-3")
+                : "relative size-11"
+            }
             {...props}
           />
         )}
         aria-label={ariaLabel}
       >
         <IconBell size={20} stroke={1.8} aria-hidden="true" />
-        {hasUnread ? (
-          <span
-            aria-hidden="true"
-            className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 inline-flex min-w-4.5 items-center justify-center rounded-full px-1 text-xs font-semibold"
-          >
-            {badgeText}
-          </span>
-        ) : null}
+        {variant === "mobile" ? (
+          <>
+            <span>Notifications</span>
+            {badge}
+          </>
+        ) : (
+          badge
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
