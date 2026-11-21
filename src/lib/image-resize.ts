@@ -236,6 +236,85 @@ export const clampCropOffset = (
   };
 };
 
+/** How far past the fitted framing the zoom control may go. */
+export const MAX_CROP_ZOOM_FACTOR = 8;
+
+/** The zoom range a framed image is allowed to move inside. */
+export interface CropZoomBounds {
+  max: number;
+  min: number;
+}
+
+/** A framed crop window: its zoom and how far it is panned into the image. */
+export interface CropView {
+  offset: { x: number; y: number };
+  zoom: number;
+}
+
+/**
+ * The zoom range that always covers the square window.
+ *
+ * `min` is the fitted framing: the shorter edge exactly fills the window, so
+ * the picture can never expose empty space and the crop always maps onto real
+ * pixels. `max` reaches far enough in that one source pixel can span several
+ * screen pixels, which is plenty for picking a face out of a photo. Both ends
+ * derive from the source size, so an image of any dimensions is accepted.
+ */
+export const cropZoomBounds = (
+  { height, width }: Dimensions,
+  windowSize: number = CROP_WINDOW_SIZE
+): CropZoomBounds => {
+  const fitted = windowSize / Math.min(width, height);
+
+  return { max: fitted * MAX_CROP_ZOOM_FACTOR, min: fitted };
+};
+
+/** Centres the fitted image inside the square window. */
+export const centerCropOffset = (
+  zoom: number,
+  windowSize: number,
+  { height, width }: Dimensions
+): { x: number; y: number } =>
+  clampCropOffset(
+    zoom,
+    windowSize,
+    {
+      x: (width * zoom - windowSize) / 2,
+      y: (height * zoom - windowSize) / 2,
+    },
+    { height, width }
+  );
+
+/**
+ * Zooms the window while keeping its centre over the same part of the image.
+ *
+ * Scaling the offset by the same ratio is what keeps the framing steady
+ * between wheel ticks or pinch samples, so the picture grows around the middle
+ * instead of jumping back to a corner. The result is clamped with the new zoom
+ * so an offset valid at the old scale never exposes empty space at the new one.
+ */
+export const zoomCropView = (
+  view: CropView,
+  nextZoom: number,
+  windowSize: number,
+  dimensions: Dimensions
+): CropView => {
+  const ratio = nextZoom / view.zoom;
+
+  return {
+    offset: clampCropOffset(
+      nextZoom,
+      windowSize,
+      {
+        x: (view.offset.x + windowSize / 2) * ratio - windowSize / 2,
+        y: (view.offset.y + windowSize / 2) * ratio - windowSize / 2,
+      },
+      dimensions
+    ),
+    zoom: nextZoom,
+  };
+};
+
 /**
  * Draws a source crop onto a square canvas of `size` x `size` pixels and
  * encodes it as the requested type at the requested quality. Returns null when

@@ -1,5 +1,5 @@
 import { IconRefresh, IconUpload } from "@tabler/icons-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { PointerEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,13 +15,196 @@ import { Slider } from "@/components/ui/slider";
 import {
   AVATAR_OUTPUT_SIZE,
   CROP_WINDOW_SIZE,
+  centerCropOffset,
   clampCropOffset,
+  cropZoomBounds,
   renderAvatarBlob,
   sourceCrop,
+  zoomCropView,
 } from "@/lib/image-resize";
+import type { CropView, CropZoomBounds, Dimensions } from "@/lib/image-resize";
 
-/** How far the zoom control may push the framing. */
-const MAX_ZOOM = 8;
+/** Slider positions; the zoom itself is mapped logarithmically across them. */
+const ZOOM_SLIDER_MAX = 100;
+
+type CropAction =
+  | { type: "pan"; dimensions: Dimensions; dx: number; dy: number }
+  | { type: "reset"; dimensions: Dimensions; zoom: number }
+  | {
+      type: "zoomBy";
+      bounds: CropZoomBounds;
+      dimensions: Dimensions;
+      factor: number;
+    }
+  | {
+      type: "zoomTo";
+      bounds: CropZoomBounds;
+      dimensions: Dimensions;
+      zoom: number;
+    };
+
+const clampZoom = (zoom: number, { max, min }: CropZoomBounds): number =>
+  Math.min(max, Math.max(min, zoom));
+
+/**
+ * Owns the whole framing so zoom and pan cannot drift apart.
+ *
+ * A single reducer keeps the offset valid for the zoom that replaces it, which
+ * is what lets the wheel, the slider, and a pinch all move smoothly: the image
+ * grows around the window centre and the pan is clamped in the same step.
+ */
+const cropViewReducer = (view: CropView, action: CropAction): CropView => {
+  switch (action.type) {
+    case "pan": {
+      return {
+        offset: clampCropOffset(
+          view.zoom,
+          CROP_WINDOW_SIZE,
+          { x: view.offset.x - action.dx, y: view.offset.y - action.dy },
+          action.dimensions
+        ),
+        zoom: view.zoom,
+      };
+    }
+
+    case "reset": {
+      return {
+        offset: centerCropOffset(
+          action.zoom,
+          CROP_WINDOW_SIZE,
+          action.dimensions
+        ),
+        zoom: action.zoom,
+      };
+    }
+
+    case "zoomBy": {
+      return zoomCropView(
+        view,
+        clampZoom(view.zoom * action.factor, action.bounds),
+        CROP_WINDOW_SIZE,
+        action.dimensions
+      );
+    }
+
+    case "zoomTo": {
+      return zoomCropView(
+        view,
+        clampZoom(action.zoom, action.bounds),
+        CROP_WINDOW_SIZE,
+        action.dimensions
+      );
+    }
+
+    default: {
+      return view;
+    }
+  }
+};
+
+/** Maps a zoom onto the 0-100 slider evenly by ratio, not by pixel count. */
+const zoomToPercent = (zoom: number, { max, min }: CropZoomBounds): number => {
+  const range = Math.log(max / min);
+
+  if (range === 0) {
+    return 0;
+  }
+
+  return Math.min(
+    ZOOM_SLIDER_MAX,
+    Math.max(0, (Math.log(zoom / min) / range) * ZOOM_SLIDER_MAX)
+  );
+};
+
+/** Inverse of `zoomToPercent`. */
+const percentToZoom = (percent: number, { max, min }: CropZoomBounds): number =>
+  min * (max / min) ** (percent / ZOOM_SLIDER_MAX);
+
+interface CropPreviewProps {
+  image: HTMLImageElement;
+  objectUrl: string | null;
+  onPointerCancel: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerDown: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerUp: (event: PointerEvent<HTMLDivElement>) => void;
+  view: CropView;
+}
+
+/**
+ * The square crop window, the panned image, and the circular preview overlay.
+ *
+ * The window stays a square; the circle is only a preview overlay. Everything
+ * outside it is dimmed, which is what draws the circle without clipping the
+ * square that gets uploaded.
+ */
+const CropPreview = ({
+  image,
+  objectUrl,
+  onPointerCancel,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  view,
+}: CropPreviewProps) => {
+  const { offset, zoom } = view;
+  const radius = CROP_WINDOW_SIZE / 2;
+
+  return (
+    <div
+      aria-label="Avatar crop area"
+      className="bg-muted/40 ring-border relative mx-auto touch-none overflow-hidden ring-1 select-none"
+      style={{ height: CROP_WINDOW_SIZE, width: CROP_WINDOW_SIZE }}
+      onPointerCancel={onPointerCancel}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+    >
+      <img
+        alt=""
+        className="pointer-events-none absolute top-0 left-0 max-w-none"
+        draggable={false}
+        style={{
+          height: image.naturalHeight * zoom,
+          transform: `translate3d(${-offset.x}px, ${-offset.y}px, 0)`,
+          width: image.naturalWidth * zoom,
+        }}
+        src={objectUrl ?? undefined}
+      />
+      <svg
+        aria-hidden="true"
+        className="text-foreground pointer-events-none absolute inset-0 h-full w-full"
+        viewBox={`0 0 ${CROP_WINDOW_SIZE} ${CROP_WINDOW_SIZE}`}
+      >
+        <defs>
+          <mask id="avatar-crop-circle">
+            <rect
+              fill="white"
+              height={CROP_WINDOW_SIZE}
+              width={CROP_WINDOW_SIZE}
+            />
+            <circle cx={radius} cy={radius} fill="black" r={radius} />
+          </mask>
+        </defs>
+        <rect
+          fill="currentColor"
+          fillOpacity={0.4}
+          height={CROP_WINDOW_SIZE}
+          mask="url(#avatar-crop-circle)"
+          width={CROP_WINDOW_SIZE}
+        />
+        <circle
+          cx={radius}
+          cy={radius}
+          fill="none"
+          r={radius - 0.5}
+          stroke="currentColor"
+          strokeOpacity={0.35}
+          strokeWidth={1}
+        />
+      </svg>
+    </div>
+  );
+};
 
 interface AvatarCropModalProps {
   /** The validated image waiting to be framed. */
@@ -35,11 +218,11 @@ interface AvatarCropModalProps {
 /**
  * Frames a square avatar out of an uploaded image.
  *
- * The crop window is locked to a square at `CROP_WINDOW_SIZE`, the preview is
- * clipped to a circle of that diameter, and the framing is carried as a source
- * crop so the confirmed square can be re-rendered onto a canvas. Zoom covers
- * the slider and the scroll wheel; panning covers drags, with pinch zooming for
- * touch. Leaving the dialog revokes the temporary object URL.
+ * The crop window is the square 1:1 area that gets uploaded. The circle is a
+ * semi-transparent scrim over the corners that previews how an avatar is
+ * displayed, without rounding the stored image, so nothing is lost to the
+ * shape. Zoom covers the slider, the wheel, and pinch; panning covers drags.
+ * Leaving the dialog revokes the temporary object URL.
  */
 export const AvatarCropModal = ({
   file,
@@ -49,21 +232,25 @@ export const AvatarCropModal = ({
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [view, dispatch] = useReducer(cropViewReducer, {
+    offset: { x: 0, y: 0 },
+    zoom: 1,
+  });
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
-  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
+  const pinchDistanceRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!file) {
       return;
     }
 
+    // Created here rather than in render so StrictMode's mount/unmount/mount
+    // cycle gets a fresh URL each time instead of one that was just revoked.
     const url = URL.createObjectURL(file);
     setObjectUrl(url);
     const element = new Image();
@@ -77,16 +264,21 @@ export const AvatarCropModal = ({
           return;
         }
 
+        const size = {
+          height: element.naturalHeight,
+          width: element.naturalWidth,
+        };
+
         setFailed(false);
         setImage(element);
-        // Starts at zero zoom: the window fits the source square rather than
-        // magnifying it, so the whole picture is framed before the person
-        // decides what part of it they actually want.
-        setZoom(
-          CROP_WINDOW_SIZE /
-            Math.min(element.naturalWidth, element.naturalHeight)
-        );
-        setOffset({ x: 0, y: 0 });
+        // Starts at 0%: the shorter edge fills the square exactly, centred on
+        // the picture, so the whole framing is visible before deciding what to
+        // keep. The bounds come from the source size, not a fixed range.
+        dispatch({
+          type: "reset",
+          zoom: cropZoomBounds(size).min,
+          dimensions: size,
+        });
       })
       .catch(() => {
         if (!cancelled) {
@@ -101,69 +293,46 @@ export const AvatarCropModal = ({
     };
   }, [file]);
 
-  const dimensions = image
-    ? { height: image.naturalHeight, width: image.naturalWidth }
-    : null;
-
-  const minZoom =
-    dimensions === null
-      ? 0.05
-      : Math.max(
-          CROP_WINDOW_SIZE / Math.max(dimensions.width, dimensions.height),
-          0.05
-        );
-
-  const maxZoom =
-    dimensions === null
-      ? MAX_ZOOM
-      : Math.max(
-          CROP_WINDOW_SIZE / Math.min(dimensions.width, dimensions.height),
-          minZoom
-        ) * 8;
-
-  const applyZoom = useCallback(
-    (next: number) => {
-      const clamped = Math.min(maxZoom, Math.max(minZoom, next));
-      setZoom(clamped);
-      // Keep the window's centre where it was rather than jumping.
-      setOffset((current) => {
-        const centerX = current.x + CROP_WINDOW_SIZE / 2;
-        const centerY = current.y + CROP_WINDOW_SIZE / 2;
-
-        return dimensions
-          ? clampCropOffset(
-              clamped,
-              CROP_WINDOW_SIZE,
-              {
-                x: centerX - CROP_WINDOW_SIZE / 2,
-                y: centerY - CROP_WINDOW_SIZE / 2,
-              },
-              dimensions
-            )
-          : { x: 0, y: 0 };
-      });
-    },
-    [dimensions, maxZoom, minZoom]
+  // Memoised so the wheel listener is attached once per image rather than being
+  // torn down and rebuilt on every frame while the picture zooms.
+  const dimensions = useMemo<Dimensions | null>(
+    () =>
+      image ? { height: image.naturalHeight, width: image.naturalWidth } : null,
+    [image]
   );
 
-  // The zoom control is the slider; the wheel is the same operation, applied
-  // around the centre so the framing follows the gesture.
+  const bounds = useMemo(
+    () => (dimensions ? cropZoomBounds(dimensions) : null),
+    [dimensions]
+  );
+
+  const { offset, zoom } = view;
+
   useEffect(() => {
     const viewport = viewportRef.current;
 
-    if (!viewport) {
+    if (!(viewport && bounds && dimensions)) {
       return;
     }
 
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      applyZoom(zoom * Math.exp(-event.deltaY * 0.001));
+      // One notch is a small multiplicative step. Clamping the delta stops a
+      // trackpad flick from crossing the whole range in one event.
+      const delta = Math.min(100, Math.max(-100, event.deltaY));
+
+      dispatch({
+        type: "zoomBy",
+        factor: Math.exp(-delta * 0.0018),
+        bounds,
+        dimensions,
+      });
     };
 
     viewport.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => viewport.removeEventListener("wheel", handleWheel);
-  }, [applyZoom, zoom]);
+  }, [bounds, dimensions]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -177,7 +346,7 @@ export const AvatarCropModal = ({
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const previous = lastPointerRef.current;
 
-    if (!previous) {
+    if (!(previous && bounds && dimensions)) {
       return;
     }
 
@@ -192,85 +361,71 @@ export const AvatarCropModal = ({
     if (pointersRef.current.size > 1) {
       const [first, second] = [...pointersRef.current.values()];
       const distance = Math.hypot(first.x - second.x, first.y - second.y);
+      const lastDistance = pinchDistanceRef.current;
 
-      const midpoint = {
-        x: (first.x + second.x) / 2,
-        y: (first.y + second.y) / 2,
-      };
+      pinchDistanceRef.current = distance;
 
-      const previousPinch = pinchRef.current;
-
-      if (previousPinch) {
-        applyZoom(previousPinch.zoom * (distance / previousPinch.distance));
-      }
-
-      pinchRef.current = { distance, zoom };
-      const nextZoom = pinchRef.current.zoom;
-
-      if (dimensions) {
-        const x = midpoint.x / nextZoom - CROP_WINDOW_SIZE / 2;
-        const y = midpoint.y / nextZoom - CROP_WINDOW_SIZE / 2;
-        setOffset(() =>
-          clampCropOffset(nextZoom, CROP_WINDOW_SIZE, { x, y }, dimensions)
-        );
+      if (lastDistance !== null && lastDistance > 0) {
+        dispatch({
+          type: "zoomBy",
+          factor: distance / lastDistance,
+          bounds,
+          dimensions,
+        });
       }
 
       return;
     }
 
-    pinchRef.current = null;
-
-    if (!dimensions) {
-      return;
-    }
-
-    setOffset((current) =>
-      clampCropOffset(
-        zoom,
-        CROP_WINDOW_SIZE,
-        { x: current.x - deltaX, y: current.y - deltaY },
-        dimensions
-      )
-    );
+    pinchDistanceRef.current = null;
+    dispatch({ type: "pan", dx: deltaX, dy: deltaY, dimensions });
   };
 
   const releasePointer = (event: PointerEvent<HTMLDivElement>) => {
     pointersRef.current.delete(event.pointerId);
 
     if (pointersRef.current.size < 2) {
-      pinchRef.current = null;
+      pinchDistanceRef.current = null;
     }
 
-    lastPointerRef.current = null;
+    // Keep panning with whichever finger is still down.
+    lastPointerRef.current = pointersRef.current.values().next().value ?? null;
   };
 
   const handleReset = () => {
     setSaveError(null);
-    setOffset({ x: 0, y: 0 });
 
-    if (dimensions) {
-      // The reset returns to the same zero-zoom framing the modal opens with.
-      setZoom(CROP_WINDOW_SIZE / Math.min(dimensions.width, dimensions.height));
+    if (bounds && dimensions) {
+      dispatch({ type: "reset", zoom: bounds.min, dimensions });
     }
   };
 
   const handleSave = async () => {
-    if (!image || isSaving) {
+    if (!(image && dimensions) || isSaving) {
       return;
     }
 
     setSaveError(null);
-    const source = sourceCrop(zoom, CROP_WINDOW_SIZE, offset);
-    const blob = await renderAvatarBlob(image, source, AVATAR_OUTPUT_SIZE);
-
-    if (!blob) {
-      setSaveError("That image could not be prepared. Try another picture.");
-
-      return;
-    }
-
     setIsSaving(true);
-    onConfirm(new File([blob], "avatar.webp", { type: blob.type }));
+
+    try {
+      const source = sourceCrop(zoom, CROP_WINDOW_SIZE, offset);
+      const blob = await renderAvatarBlob(image, source, AVATAR_OUTPUT_SIZE);
+
+      if (!blob) {
+        setIsSaving(false);
+        setSaveError("That image could not be prepared. Try another picture.");
+
+        return;
+      }
+
+      // Stays busy until the dialog closes, so a second click cannot start a
+      // second crop while the first one is being handed to the uploader.
+      onConfirm(new File([blob], "avatar.webp", { type: blob.type }));
+    } catch {
+      setIsSaving(false);
+      setSaveError("That image could not be prepared. Try another picture.");
+    }
   };
 
   const canSave = image !== null && !failed && !isSaving && !saveError;
@@ -301,39 +456,15 @@ export const AvatarCropModal = ({
 
         {image ? (
           <div className="flex flex-col gap-4">
-            <div
-              aria-label="Avatar crop area"
-              className="bg-muted/40 relative mx-auto overflow-hidden rounded-full"
-              style={{ height: CROP_WINDOW_SIZE, width: CROP_WINDOW_SIZE }}
+            <CropPreview
+              image={image}
+              objectUrl={objectUrl}
+              onPointerCancel={releasePointer}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={releasePointer}
-              onPointerCancel={releasePointer}
-            >
-              <img
-                alt=""
-                className="pointer-events-none absolute top-0 left-0"
-                draggable={false}
-                style={{
-                  height: image.naturalHeight * zoom,
-                  width: image.naturalWidth * zoom,
-                }}
-                src={objectUrl ?? undefined}
-              />
-              {/* The frame is a semi-transparent overlay shaped into the circle,
-                  not a border: the radius alone draws the circle, and the alpha
-                  keeps it a suggestion rather than a hard ring. */}
-              <div
-                aria-hidden="true"
-                className="bg-foreground/10 absolute rounded-full"
-                style={{
-                  height: CROP_WINDOW_SIZE,
-                  left: offset.x,
-                  top: offset.y,
-                  width: CROP_WINDOW_SIZE,
-                }}
-              />
-            </div>
+              view={view}
+            />
 
             <div className="flex flex-col gap-2">
               <label
@@ -344,12 +475,25 @@ export const AvatarCropModal = ({
               </label>
               <Slider
                 className="w-full"
-                max={maxZoom}
-                min={minZoom}
-                onValueChange={(next) =>
-                  setZoom(Array.isArray(next) ? next[0] : next)
-                }
-                value={[zoom]}
+                disabled={!bounds}
+                max={ZOOM_SLIDER_MAX}
+                min={0}
+                onValueChange={(next) => {
+                  if (!(bounds && dimensions)) {
+                    return;
+                  }
+
+                  const percent = Array.isArray(next) ? next[0] : next;
+
+                  dispatch({
+                    type: "zoomTo",
+                    zoom: percentToZoom(percent, bounds),
+                    bounds,
+                    dimensions,
+                  });
+                }}
+                step={1}
+                value={[bounds ? zoomToPercent(zoom, bounds) : 0]}
               />
             </div>
 

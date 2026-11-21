@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   MAX_EDGE_BY_KIND,
+  centerCropOffset,
   clampCropOffset,
+  cropZoomBounds,
   needsResize,
   outputTypeFor,
   scaledSize,
   sourceCrop,
+  zoomCropView,
 } from "@/lib/image-resize";
 
 describe(scaledSize, () => {
@@ -158,6 +161,69 @@ describe(clampCropOffset, () => {
       x: 244,
       y: 100,
     });
+  });
+});
+
+describe(cropZoomBounds, () => {
+  it("fits the shorter edge to the window and never exposes empty space", () => {
+    // A 2000x1000 photo must at least fill a 256px window by its short edge.
+    expect(cropZoomBounds({ height: 1000, width: 2000 })).toStrictEqual({
+      max: 2.048,
+      min: 0.256,
+    });
+  });
+
+  it("derives from the source size, so every image is accepted", () => {
+    // A huge panorama and a tiny icon both get a usable, proportional range.
+    const huge = cropZoomBounds({ height: 100, width: 20_000 });
+    const tiny = cropZoomBounds({ height: 16, width: 16 });
+
+    expect(huge.min).toBeCloseTo(2.56);
+    expect(huge.max).toBeCloseTo(20.48);
+    expect(tiny.min).toBe(16);
+    expect(tiny.max).toBe(128);
+  });
+});
+
+describe(centerCropOffset, () => {
+  it("centres the fitted image, leaving no offset on the tight axis", () => {
+    expect(
+      centerCropOffset(0.256, 256, { height: 1000, width: 2000 })
+    ).toStrictEqual({
+      x: 128,
+      y: 0,
+    });
+  });
+});
+
+describe(zoomCropView, () => {
+  it("keeps the same image point under the window centre", () => {
+    expect(
+      zoomCropView({ offset: { x: 128, y: 0 }, zoom: 0.256 }, 0.512, 256, {
+        height: 1000,
+        width: 2000,
+      })
+    ).toStrictEqual({
+      offset: { x: 384, y: 128 },
+      zoom: 0.512,
+    });
+  });
+
+  it("returns to the original framing after zooming in and back out", () => {
+    const original = { offset: { x: 128, y: 0 }, zoom: 0.256 };
+
+    const zoomedIn = zoomCropView(original, 0.512, 256, {
+      height: 1000,
+      width: 2000,
+    });
+
+    const zoomedOut = zoomCropView(zoomedIn, 0.256, 256, {
+      height: 1000,
+      width: 2000,
+    });
+
+    expect(zoomedOut.offset.x).toBeCloseTo(original.offset.x);
+    expect(zoomedOut.offset.y).toBeCloseTo(original.offset.y);
   });
 });
 
