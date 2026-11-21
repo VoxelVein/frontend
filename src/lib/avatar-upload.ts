@@ -21,36 +21,19 @@ export type AvatarAcceptedType = (typeof AVATAR_ACCEPTED_TYPES)[number];
 export const isAcceptedAvatarType = (
   type: string | null | undefined
 ): type is AvatarAcceptedType =>
+  // SAFETY: the tuple is declared as strings, so widening it is sound; the
+  // widened element type is what `includes` needs to accept an arbitrary input.
   (AVATAR_ACCEPTED_TYPES as readonly string[]).includes(type ?? "");
 
 /** Whether a file is small enough to be cropped and stored as an avatar. */
 export const isAvatarWithinLimit = (bytes: number): boolean =>
   bytes > 0 && bytes <= AVATAR_MAX_BYTES;
 
-/**
- * Reads the pixel size of a file, applying the EXIF orientation.
- *
- * Returns null when the browser cannot decode the file, so the caller can
- * refuse the upload before it reaches the cropper rather than failing there.
- */
-export const readAvatarDimensions = async (
+/** Decodes through an `<img>`, for browsers without `createImageBitmap`. */
+const readDimensionsWithImageElement = async (
   file: File
-): Promise<Dimensions | null> => {
-  if (!isAcceptedAvatarType(file.type)) {
-    return null;
-  }
-
-  if ("createImageBitmap" in globalThis) {
-    const bitmap = await createImageBitmap(file, {
-      imageOrientation: "from-image",
-    });
-
-    const size = { height: bitmap.height, width: bitmap.width };
-    bitmap.close();
-
-    return size;
-  }
-
+): Promise<Dimensions> => {
+  // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- Revoked in the `finally` below; the rule does not follow the await into it.
   const url = URL.createObjectURL(file);
 
   try {
@@ -61,5 +44,44 @@ export const readAvatarDimensions = async (
     return { height: image.naturalHeight, width: image.naturalWidth };
   } finally {
     URL.revokeObjectURL(url);
+  }
+};
+
+/**
+ * Reads the pixel size of a file, applying the EXIF orientation.
+ *
+ * Returns null when the browser cannot decode the file, so the caller can
+ * refuse the upload before it reaches the cropper rather than failing there.
+ * Decoding is wrapped rather than left to reject: an unhandled rejection in the
+ * file picker's change handler produced no modal and no toast, which looked
+ * exactly like the button doing nothing.
+ */
+export const readAvatarDimensions = async (
+  file: File
+): Promise<Dimensions | null> => {
+  if (!isAcceptedAvatarType(file.type)) {
+    return null;
+  }
+
+  try {
+    if ("createImageBitmap" in globalThis) {
+      try {
+        const bitmap = await createImageBitmap(file, {
+          imageOrientation: "from-image",
+        });
+
+        const size = { height: bitmap.height, width: bitmap.width };
+        bitmap.close();
+
+        return size;
+      } catch {
+        // Older browsers accept `createImageBitmap` but not its options; the
+        // <img> path below still reads the same file.
+      }
+    }
+
+    return await readDimensionsWithImageElement(file);
+  } catch {
+    return null;
   }
 };
