@@ -1,4 +1,4 @@
-import { IconX } from "@tabler/icons-react";
+import { IconArticle, IconX } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 
 import { AuthButtons } from "@/components/navbar/auth-buttons";
@@ -25,6 +25,12 @@ interface NavbarMobileMenuProps {
 
 const mobileLinkClassName =
   "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring min-h-11 flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
+
+const ACTIVE_LINK_CLASS = "bg-primary/10 hover:bg-primary/15";
+const ACTIVE_TEXT_CLASS = "text-primary";
+
+const SECTION_HEADING_CLASS =
+  "text-muted-foreground mb-1 px-3 py-2 text-xs font-semibold tracking-wider uppercase";
 
 const NavbarMobileMenu = ({
   open,
@@ -68,14 +74,19 @@ const NavbarMobileMenu = ({
         </DrawerHeader>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-          <nav aria-label="Content navigation" className="flex flex-col">
+          <nav
+            aria-labelledby="mobile-projects-heading"
+            className="flex flex-col"
+          >
             {/* Projects first, matching the desktop bar's reading order. The
                 drawer lists every section flat regardless of which ones get a
                 flat link on desktop, since there is room for them and a nested
-                menu would only add a tap. */}
-            <p className="text-muted-foreground mb-2 px-3 py-2 text-xs font-semibold tracking-wider uppercase">
+                menu would only add a tap. Each row keeps the icon and
+                description the desktop Browse menu shows, so the two menus
+                describe the same eight destinations the same way. */}
+            <h3 id="mobile-projects-heading" className={SECTION_HEADING_CLASS}>
               Projects
-            </p>
+            </h3>
 
             {PROJECT_ITEMS.map((item) => {
               const isActive = !!matchRoute({ fuzzy: true, to: item.href });
@@ -89,17 +100,44 @@ const NavbarMobileMenu = ({
                   onClick={onClose}
                   className={cn(
                     mobileLinkClassName,
-                    isActive && "bg-muted text-foreground"
+                    "items-start gap-3 py-2.5",
+                    isActive && ACTIVE_LINK_CLASS
                   )}
                 >
-                  {item.label}
+                  <item.icon
+                    size={18}
+                    stroke={1.8}
+                    aria-hidden="true"
+                    className={cn(
+                      "mt-0.5 shrink-0",
+                      isActive ? ACTIVE_TEXT_CLASS : "text-muted-foreground"
+                    )}
+                  />
+                  <span className="grid min-w-0 gap-0.5">
+                    <span
+                      className={cn(
+                        "text-sm font-medium",
+                        isActive ? ACTIVE_TEXT_CLASS : "text-foreground"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    <span className="text-muted-foreground text-xs leading-snug">
+                      {item.description}
+                    </span>
+                  </span>
                 </Link>
               );
             })}
+          </nav>
 
-            <p className="text-muted-foreground mt-4 mb-2 px-3 py-2 text-xs font-semibold tracking-wider uppercase">
+          <nav
+            aria-labelledby="mobile-content-heading"
+            className="flex flex-col"
+          >
+            <h3 id="mobile-content-heading" className={SECTION_HEADING_CLASS}>
               Content
-            </p>
+            </h3>
 
             {CONTENT_LINKS.map((link) => {
               const isActive = !!matchRoute({ to: link.href });
@@ -113,21 +151,32 @@ const NavbarMobileMenu = ({
                   onClick={onClose}
                   className={cn(
                     mobileLinkClassName,
-                    isActive && "bg-muted text-foreground"
+                    "gap-3",
+                    isActive && "bg-primary/10 text-primary hover:bg-primary/15"
                   )}
                 >
+                  <IconArticle
+                    size={18}
+                    stroke={1.8}
+                    aria-hidden="true"
+                    className={cn(
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    )}
+                  />
                   {link.label}
                 </Link>
               );
             })}
           </nav>
 
-          <AuthButtons
-            variant="mobile"
-            isPending={isPending}
-            session={session}
-            onSignOut={onSignOut}
-          />
+          <div className="border-border/70 mt-2 border-t pt-4">
+            <AuthButtons
+              variant="mobile"
+              isPending={isPending}
+              session={session}
+              onSignOut={onSignOut}
+            />
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

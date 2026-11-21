@@ -19,6 +19,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       const { error } = await authClient.signOut();
+
       if (error) {
         toast.error(error.message ?? "Could not sign you out.", {
           action: {
@@ -26,6 +27,7 @@ const Navbar = () => {
             onClick: () => handleSignOut(),
           },
         });
+
         return;
       }
     } catch {
@@ -35,6 +37,7 @@ const Navbar = () => {
           onClick: () => handleSignOut(),
         },
       });
+
       return;
     }
 
@@ -48,7 +51,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="border-border/70 bg-background sticky top-0 z-50 border-b">
+    <header className="border-border/60 bg-background/80 supports-[backdrop-filter]:bg-background/65 sticky top-0 z-50 border-b backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <NavbarLogo />
 
@@ -57,6 +60,7 @@ const Navbar = () => {
         {/* Desktop actions */}
         <div className="ml-auto hidden items-center gap-2 lg:flex">
           <ThemeToggle variant="pixel" />
+          <span aria-hidden="true" className="bg-border/70 mx-0.5 h-6 w-px" />
           <AuthButtons
             variant="desktop"
             isPending={isPending}
@@ -66,7 +70,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile actions */}
-        <div className="ml-auto flex items-center gap-2 lg:hidden">
+        <div className="ml-auto flex items-center gap-1.5 lg:hidden">
           <ThemeToggle variant="pixel" />
           <Button
             type="button"

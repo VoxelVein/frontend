@@ -23,9 +23,10 @@ const INLINE_ITEMS = PROJECT_ITEMS.filter((item) => item.alwaysInline);
 const MENU_ITEMS = PROJECT_ITEMS.filter((item) => !item.alwaysInline);
 
 const linkClassName =
-  "text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
+  "text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none";
 
-const activeLinkClassName = "bg-muted text-foreground";
+const activeLinkClassName =
+  "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary";
 
 /**
  * How long the pointer must rest on "Browse" before the menu opens.
@@ -75,7 +76,7 @@ const BrowseMenuItems = ({
             aria-current={isActive(item.href) ? "page" : undefined}
           />
         }
-        className="text-muted-foreground data-highlighted:bg-muted data-highlighted:text-foreground aria-[current=page]:text-foreground min-h-11 cursor-pointer items-start gap-3 rounded-lg px-2.5 py-2.5"
+        className="text-muted-foreground data-highlighted:bg-muted data-highlighted:text-foreground aria-[current=page]:text-primary min-h-11 cursor-pointer items-start gap-3 rounded-lg px-2.5 py-2.5"
       >
         <item.icon
           size={18}
@@ -123,7 +124,7 @@ const BrowseMenu = ({ isActive }: { isActive: (href: string) => boolean }) => (
           type="button"
           variant="ghost"
           className={cn(
-            "group text-muted-foreground hover:text-foreground min-h-11 gap-1 px-3 text-sm font-medium",
+            "group text-muted-foreground hover:bg-muted/60 hover:text-foreground min-h-11 gap-1 px-3 text-sm font-medium",
             MENU_ITEMS.some((item) => isActive(item.href)) &&
               activeLinkClassName
           )}
