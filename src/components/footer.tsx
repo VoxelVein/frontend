@@ -41,7 +41,7 @@ const RESOURCE_LINKS: readonly FooterLink[] = [
 const COPYRIGHT_YEAR = new Date().getFullYear();
 
 const COMPANY_LINKS: readonly FooterLink[] = [
-  { available: false, href: "/about", label: "About" },
+  { available: true, href: "/about", label: "About" },
   { available: true, href: "/blog", label: "Blog" },
   { available: false, href: "/contact", label: "Contact" },
   { available: false, href: "/brand", label: "Brand" },
