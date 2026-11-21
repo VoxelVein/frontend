@@ -7,10 +7,19 @@ interface AuthResult {
   error: { message: string } | null;
 }
 
+interface SessionResult {
+  data: { user: { id: string } } | null;
+  error: null;
+}
+
 interface SignInEmailOptions {
   email: string;
   fetchOptions?: { headers: Record<string, string> };
   password: string;
+}
+
+interface SignInPasskeyOptions {
+  autoFill: boolean;
 }
 
 interface SignInUsernameOptions {
@@ -19,15 +28,25 @@ interface SignInUsernameOptions {
   username: string;
 }
 
-const { navigate, signInEmail, signInUsername, toastDismiss, toastError } =
-  vi.hoisted(() => ({
-    navigate: vi.fn<(opts: { to: string }) => void>(),
-    toastDismiss: vi.fn<() => void>(),
-    toastError: vi.fn<(message: string) => void>(),
-    signInEmail: vi.fn<(opts: SignInEmailOptions) => Promise<AuthResult>>(),
-    signInUsername:
-      vi.fn<(opts: SignInUsernameOptions) => Promise<AuthResult>>(),
-  }));
+const {
+  getSessionMock,
+  invalidate,
+  navigate,
+  signInEmail,
+  signInPasskey,
+  signInUsername,
+  toastDismiss,
+  toastError,
+} = vi.hoisted(() => ({
+  getSessionMock: vi.fn<() => Promise<SessionResult>>(),
+  invalidate: vi.fn<() => Promise<void>>(),
+  navigate: vi.fn<(opts: { to: string }) => void>(),
+  signInEmail: vi.fn<(opts: SignInEmailOptions) => Promise<AuthResult>>(),
+  signInPasskey: vi.fn<(opts: SignInPasskeyOptions) => Promise<AuthResult>>(),
+  signInUsername: vi.fn<(opts: SignInUsernameOptions) => Promise<AuthResult>>(),
+  toastDismiss: vi.fn<() => void>(),
+  toastError: vi.fn<(message: string) => void>(),
+}));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Action feedback is a toast; stubbing Sonner is what makes the call assertable
 vi.mock("sonner", () => ({
@@ -60,8 +79,10 @@ const fillValidCredentials = () => {
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the login form requires a faithful auth client stub; string path avoids strict factory type-checking against the real auth client
 vi.mock("@/lib/auth-client", () => ({
   authClient: {
+    getSession: getSessionMock,
     signIn: {
       email: signInEmail,
+      passkey: signInPasskey,
       username: signInUsername,
     },
   },
@@ -76,29 +97,39 @@ vi.mock("@/lib/auth.functions", () => ({
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute/redirect; the cast only widens the type for the mock factory
+
   return {
     ...(actual as object),
     Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
       <a href={to}>{children}</a>
     ),
-    useRouter: () => ({ navigate }),
+    useRouter: () => ({ invalidate, navigate }),
   };
 });
 
 const LoginPage = Route.options.component;
+
 if (!LoginPage) {
   throw new Error("LoginPage component not found");
 }
 
 describe("LoginPage", () => {
   beforeEach(() => {
+    getSessionMock.mockReset();
+    getSessionMock.mockResolvedValue({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+    invalidate.mockReset();
     navigate.mockReset();
     signInEmail.mockReset();
+    signInPasskey.mockReset();
     signInUsername.mockReset();
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     delete window.turnstile;
   });
 
@@ -232,6 +263,62 @@ describe("LoginPage", () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it("offers passkey sign-in when the browser supports WebAuthn", () => {
+    vi.stubGlobal("PublicKeyCredential", {});
+
+    render(<LoginPage />);
+
+    expect(
+      screen.getByRole("button", { name: "Sign in with passkey" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Settings → Security")).toBeInTheDocument();
+  });
+
+  it("hides passkey sign-in when the browser has no WebAuthn", () => {
+    vi.stubGlobal("PublicKeyCredential", undefined);
+
+    render(<LoginPage />);
+
+    expect(
+      screen.queryByRole("button", { name: "Sign in with passkey" })
+    ).toBeNull();
+  });
+
+  it("signs in with a passkey and navigates home", async () => {
+    vi.stubGlobal("PublicKeyCredential", {});
+    signInPasskey.mockResolvedValue({ error: null });
+
+    render(<LoginPage />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign in with passkey" })
+    );
+
+    await waitFor(() => {
+      expect(signInPasskey).toHaveBeenCalledWith({ autoFill: true });
+    });
+    expect(invalidate).toHaveBeenCalledOnce();
+    expect(navigate).toHaveBeenCalledWith({ to: "/" });
+  });
+
+  it("shows the server error when passkey sign-in fails", async () => {
+    vi.stubGlobal("PublicKeyCredential", {});
+    signInPasskey.mockResolvedValue({
+      error: { message: "No passkey was found for this device" },
+    });
+
+    render(<LoginPage />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign in with passkey" })
+    );
+
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(
+        "No passkey was found for this device"
+      );
+    });
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it("requires the Turnstile check before signing in when enabled", async () => {
     vi.stubEnv("VITE_TURNSTILE_SITE_KEY", TEST_SITE_KEY);
     window.turnstile = {
@@ -256,12 +343,15 @@ describe("LoginPage", () => {
   it("sends the Turnstile token and resets the widget after a failure", async () => {
     vi.stubEnv("VITE_TURNSTILE_SITE_KEY", TEST_SITE_KEY);
     const reset = vi.fn<(widgetId: string) => void>();
+
     const renderWidget = vi.fn<NonNullable<typeof window.turnstile>["render"]>(
       (_container, options) => {
         options.callback("turnstile-token");
+
         return "widget-1";
       }
     );
+
     window.turnstile = {
       remove: vi.fn<(widgetId: string) => void>(),
       render: renderWidget,

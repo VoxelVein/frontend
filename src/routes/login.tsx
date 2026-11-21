@@ -1,3 +1,4 @@
+import { IconFingerprint } from "@tabler/icons-react";
 import { useForm, useStore } from "@tanstack/react-form";
 import {
   Link,
@@ -5,7 +6,7 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { check, nonEmpty, pipe, string } from "valibot";
 
@@ -32,6 +33,7 @@ const MIN_USERNAME_LENGTH = 3;
 
 const MISSING_VERIFICATION_MESSAGE =
   "Complete the human verification check before signing in.";
+
 const INVALID_CREDENTIALS_MESSAGE = "Invalid email, username, or password.";
 
 /**
@@ -72,8 +74,39 @@ const LoginPage = () => {
   // state read there would always be the initial null.
   const turnstileTokenRef = useRef<string | null>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const [isSigningInWithPasskey, setIsSigningInWithPasskey] = useState(false);
+
   const handleTurnstileToken = (token: string | null) => {
     turnstileTokenRef.current = token;
+  };
+
+  const handlePasskeySignIn = async () => {
+    setIsSigningInWithPasskey(true);
+    toast.dismiss();
+
+    let error: { message?: string } | null = null;
+
+    try {
+      ({ error } = await authClient.signIn.passkey({
+        autoFill: true,
+      }));
+    } catch {
+      error = {
+        message: "Could not reach the account service. Please try again.",
+      };
+    }
+
+    setIsSigningInWithPasskey(false);
+
+    if (error) {
+      const { message } = error;
+      reportError(message ?? "Could not sign in with passkey.");
+
+      return;
+    }
+
+    await router.invalidate();
+    await router.navigate({ to: "/" });
   };
 
   const form = useForm({
@@ -83,20 +116,23 @@ const LoginPage = () => {
     },
     onSubmit: async ({ value }) => {
       const turnstileToken = turnstileTokenRef.current;
+
       if (isTurnstileEnabled() && !turnstileToken) {
         reportError(MISSING_VERIFICATION_MESSAGE);
+
         return;
       }
 
       const identifier = value.identifier.trim();
       const fetchOptions = turnstileFetchOptions(turnstileToken);
       let error: { message?: string } | null;
+
       try {
         ({ error } = isEmailIdentifier(identifier)
           ? await authClient.signIn.email({
               email: identifier,
-              fetchOptions,
               password: value.password,
+              fetchOptions,
             })
           : await authClient.signIn.username({
               fetchOptions,
@@ -106,6 +142,7 @@ const LoginPage = () => {
       } catch {
         turnstileRef.current?.reset();
         reportError("Could not reach the account service. Please try again.");
+
         return;
       }
 
@@ -115,18 +152,22 @@ const LoginPage = () => {
         reportError(
           authErrorMessage(error.message, INVALID_CREDENTIALS_MESSAGE)
         );
+
         return;
       }
 
       try {
         const { data: session, error: sessionError } =
           await authClient.getSession();
+
         if (sessionError || !session) {
           reportError(
             "Your credentials were accepted, but we couldn’t start your session. Please try again."
           );
+
           return;
         }
+
         await router.invalidate();
         await router.navigate({ to: "/" });
       } catch {
@@ -146,6 +187,8 @@ const LoginPage = () => {
     (import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? "").length > 0 ||
     (import.meta.env.VITE_GITHUB_CLIENT_ID?.trim() ?? "").length > 0;
 
+  const passkeysSupported = typeof PublicKeyCredential !== "undefined";
+
   return (
     <div className="flex min-h-svh items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
@@ -160,6 +203,42 @@ const LoginPage = () => {
           <div className="mt-6">
             <GoogleSignInButton />
             <GitHubSignInButton />
+          </div>
+        ) : null}
+
+        {passkeysSupported ? (
+          <div className="mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="min-h-11 w-full"
+              disabled={isSigningInWithPasskey}
+              onClick={handlePasskeySignIn}
+            >
+              {isSigningInWithPasskey ? (
+                <>
+                  <Spinner className="mr-1.5" label="Signing in" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  <IconFingerprint size={16} aria-hidden="true" />
+                  Sign in with passkey
+                </>
+              )}
+            </Button>
+            <p className="text-muted-foreground mt-2 text-center text-xs">
+              Register a passkey in{" "}
+              <Link
+                to="/settings"
+                search={{ tab: "security" }}
+                className="text-primary focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
+              >
+                Settings → Security
+              </Link>
+              .
+            </p>
           </div>
         ) : null}
 
@@ -277,6 +356,7 @@ const LoginPage = () => {
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
     const session = await getSession();
+
     if (session) {
       throw redirect({ to: "/" });
     }
