@@ -4,6 +4,7 @@ import {
   Link,
   createFileRoute,
   redirect,
+  useHydrated,
   useRouter,
 } from "@tanstack/react-router";
 import { useRef, useState } from "react";
@@ -35,6 +36,20 @@ const MISSING_VERIFICATION_MESSAGE =
   "Complete the human verification check before signing in.";
 
 const INVALID_CREDENTIALS_MESSAGE = "Invalid email, username, or password.";
+
+/**
+ * Better Auth reports every WebAuthn failure as "Auth cancelled", including
+ * the common case where the device simply holds no passkey. The generic
+ * wording leaves the person with no next step, so the two cases it covers are
+ * named and the remedy points at the place passkeys are registered.
+ */
+const PASSKEY_CANCELLED_MESSAGE =
+  "No passkey was found, or the prompt was cancelled. Register a passkey in Settings → Security, or sign in with your password.";
+
+const passkeyErrorMessage = (message?: string): string =>
+  message === "Auth cancelled" || !message
+    ? PASSKEY_CANCELLED_MESSAGE
+    : message;
 
 /**
  * A single field accepts either identifier, and the `@` decides which one it
@@ -88,7 +103,11 @@ const LoginPage = () => {
 
     try {
       ({ error } = await authClient.signIn.passkey({
-        autoFill: true,
+        // Not autofill: conditional mediation needs an input with
+        // `autocomplete="webauthn"`, which this form does not have, so the
+        // browser refuses the ceremony before it ever prompts. The explicit
+        // button runs a normal WebAuthn request instead.
+        autoFill: false,
       }));
     } catch {
       error = {
@@ -100,7 +119,7 @@ const LoginPage = () => {
 
     if (error) {
       const { message } = error;
-      reportError(message ?? "Could not sign in with passkey.");
+      reportError(passkeyErrorMessage(message));
 
       return;
     }
@@ -187,7 +206,13 @@ const LoginPage = () => {
     (import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? "").length > 0 ||
     (import.meta.env.VITE_GITHUB_CLIENT_ID?.trim() ?? "").length > 0;
 
-  const passkeysSupported = typeof PublicKeyCredential !== "undefined";
+  // Client-only capability, so it is gated on hydration: SSR has no
+  // `PublicKeyCredential`, and rendering the block only on the client after
+  // hydration would replace markup React already matched against.
+  const isHydrated = useHydrated();
+
+  const passkeysSupported =
+    isHydrated && typeof PublicKeyCredential !== "undefined";
 
   return (
     <div className="flex min-h-svh items-center justify-center px-4 py-12">

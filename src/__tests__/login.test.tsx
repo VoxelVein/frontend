@@ -294,7 +294,7 @@ describe("LoginPage", () => {
     );
 
     await waitFor(() => {
-      expect(signInPasskey).toHaveBeenCalledWith({ autoFill: true });
+      expect(signInPasskey).toHaveBeenCalledWith({ autoFill: false });
     });
     expect(invalidate).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith({ to: "/" });
@@ -314,6 +314,25 @@ describe("LoginPage", () => {
     await waitFor(() => {
       expect(toastError).toHaveBeenCalledWith(
         "No passkey was found for this device"
+      );
+    });
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("explains a cancelled passkey prompt with a next step", async () => {
+    vi.stubGlobal("PublicKeyCredential", {});
+    signInPasskey.mockResolvedValue({
+      error: { message: "Auth cancelled" },
+    });
+
+    render(<LoginPage />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign in with passkey" })
+    );
+
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(
+        "No passkey was found, or the prompt was cancelled. Register a passkey in Settings → Security, or sign in with your password."
       );
     });
     expect(navigate).not.toHaveBeenCalled();
