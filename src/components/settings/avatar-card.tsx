@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { FormField } from "@/components/form-field";
+import { AvatarCropModal } from "@/components/settings/avatar-crop-modal";
 import { StorageGated } from "@/components/storage-gated";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -23,9 +24,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRefreshSession } from "@/hooks/use-refresh-session";
 import { useStorageAvailable } from "@/hooks/use-storage-available";
 import { setAvatarUrl } from "@/lib/account.functions";
+import {
+  isAcceptedAvatarType,
+  isAvatarWithinLimit,
+  readAvatarDimensions,
+} from "@/lib/avatar-upload";
 import { isExternalAvatarSrc, parseAvatarUrl } from "@/lib/avatar-url";
 import { formatBytes } from "@/lib/format";
-import { IMAGE_MAX_BYTES } from "@/lib/image-limits";
+import { AVATAR_MAX_BYTES } from "@/lib/image-limits";
 import {
   STORAGE_UNAVAILABLE_REASON,
   storageFailureMessage,
@@ -162,6 +168,7 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // `catch` rather than a rejection handler, and no `finally`: the React
@@ -178,6 +185,7 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
         storageFailureMessage(actionError, "The avatar could not be saved.")
       );
       setIsBusy(false);
+
       return;
     }
 
@@ -207,8 +215,10 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
     // next to the input, rather than the server's error arriving as a toast with
     // no indication of which field was wrong.
     const parsed = parseAvatarUrl(url);
+
     if (!parsed.ok) {
       setUrlError(parsed.error);
+
       return;
     }
 
@@ -312,9 +322,40 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
                   const file = event.target.files?.[0];
                   // Reset so choosing the same file twice still fires a change.
                   event.target.value = "";
-                  if (file) {
-                    void handleFile(file);
+
+                  if (!file) {
+                    return;
                   }
+
+                  void (async () => {
+                    if (!isAcceptedAvatarType(file.type)) {
+                      toast.error(
+                        "VoxelVein accepts PNG, JPEG, WebP, and GIF images."
+                      );
+
+                      return;
+                    }
+
+                    if (!isAvatarWithinLimit(file.size)) {
+                      toast.error(
+                        `Avatars can be at most ${formatBytes(AVATAR_MAX_BYTES)}.`
+                      );
+
+                      return;
+                    }
+
+                    const dimensions = await readAvatarDimensions(file);
+
+                    if (!dimensions) {
+                      toast.error(
+                        "That image could not be read. Try a different picture."
+                      );
+
+                      return;
+                    }
+
+                    setCropFile(file);
+                  })();
                 }}
               />
 
@@ -356,8 +397,8 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
 
               <Alert>
                 <AlertDescription>
-                  PNG, JPEG, WebP, or GIF, up to {formatBytes(IMAGE_MAX_BYTES)}.
-                  {UPLOAD_HELPER}
+                  PNG, JPEG, WebP, or GIF, up to {formatBytes(AVATAR_MAX_BYTES)}
+                  .{UPLOAD_HELPER}
                 </AlertDescription>
               </Alert>
             </TabsContent>
@@ -382,6 +423,7 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
                   label="Image URL"
                   onChange={(event) => {
                     setUrl(event.target.value);
+
                     if (urlError) {
                       setUrlError(null);
                     }
@@ -444,6 +486,17 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
               void handleRemove();
             }}
           />
+
+          {cropFile ? (
+            <AvatarCropModal
+              file={cropFile}
+              onCancel={() => setCropFile(null)}
+              onConfirm={(file) => {
+                setCropFile(null);
+                void handleFile(file);
+              }}
+            />
+          ) : null}
         </CardContent>
       </Card>
     </section>

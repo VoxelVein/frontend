@@ -14,8 +14,10 @@ import env from "../../env.config";
 
 const DEFAULT_MAX_FILE_BYTES = 100 * 1024 * 1024;
 const PRESIGNED_DOWNLOAD_TTL_SECONDS = 300;
+
 // Keys are content-addressed, so a stored object never changes.
-const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+
 // Images are served through a proxy route that sets its own caching, and
 // their keys are not content-addressed: replacing an icon reuses its row.
 const REVALIDATE_CACHE_CONTROL = "public, max-age=0, must-revalidate";
@@ -43,6 +45,12 @@ export interface UploadInput {
    * for images, which a browser would otherwise save instead of rendering.
    */
   inline?: boolean;
+  /**
+   * Explicit `Cache-Control` for the object, overriding the derived value.
+   * Use it for objects that are content-addressed and therefore immutable for
+   * as long as the key exists, such as re-encoded avatars.
+   */
+  cacheControl?: string;
   filename: string;
   key: string;
   /** Lower byte limit for this upload, e.g. the space left in the quota. */
@@ -148,17 +156,21 @@ export const withStorageErrors = async <T>(
     if (error instanceof StorageError) {
       throw error;
     }
+
     if (error instanceof Error) {
       if (isConnectionName(error.name)) {
         throw unreachable();
       }
+
       // The SDK wraps the underlying cause, so the useful name can be a level
       // down.
       const { cause } = error;
+
       if (cause instanceof Error && isConnectionName(cause.name)) {
         throw unreachable();
       }
     }
+
     throw error;
   }
 };
@@ -207,6 +219,7 @@ const getClient = (config: StorageConfig): S3Client => {
     forcePathStyle: config.forcePathStyle,
     region: config.region,
   });
+
   return cachedClient;
 };
 
@@ -229,12 +242,14 @@ const hashAndLimit = async function* hashAndLimit(
 ): AsyncGenerator<Uint8Array> {
   for await (const chunk of source) {
     digest.size += chunk.byteLength;
+
     if (digest.size > maxBytes) {
       throw new StorageError(
         STORAGE_ERROR.fileTooLarge,
         `File exceeds the ${maxBytes} byte limit.`
       );
     }
+
     digest.sha1.update(chunk);
     digest.sha512.update(chunk);
     yield chunk;
@@ -250,9 +265,11 @@ export const deleteObjects = async (
   client: S3Client = getClient(config)
 ): Promise<void> => {
   const batches: string[][] = [];
+
   for (let start = 0; start < keys.length; start += DELETE_BATCH_SIZE) {
     batches.push(keys.slice(start, start + DELETE_BATCH_SIZE));
   }
+
   await withStorageErrors(() =>
     Promise.all(
       batches.map((batch) =>
@@ -294,9 +311,9 @@ export const uploadStream = async (
         )
       ),
       Bucket: config.bucket,
-      CacheControl: input.inline
-        ? REVALIDATE_CACHE_CONTROL
-        : IMMUTABLE_CACHE_CONTROL,
+      CacheControl:
+        input.cacheControl ??
+        (input.inline ? REVALIDATE_CACHE_CONTROL : IMMUTABLE_CACHE_CONTROL),
       ContentDisposition: input.inline
         ? `inline; filename*=UTF-8''${encodeURIComponent(input.filename)}`
         : contentDisposition(input.filename),
@@ -340,12 +357,14 @@ export const getObjectBytes = async (
   const response = await withStorageErrors(() =>
     client.send(new GetObjectCommand({ Bucket: config.bucket, Key: key }))
   );
+
   if (!response.Body) {
     throw new StorageError(
       STORAGE_ERROR.notConfigured,
       "The stored object has no body."
     );
   }
+
   return {
     // SAFETY: the check above guarantees Body is present, and the AWS SDK
     // types it as a Node Readable, which is a ReadableStream at runtime in
@@ -365,8 +384,10 @@ export const getDownloadUrl = (
 ): Promise<string> => {
   if (config.publicUrl) {
     const path = key.split("/").map(encodeURIComponent).join("/");
+
     return Promise.resolve(`${config.publicUrl}/${path}`);
   }
+
   return getSignedUrl(
     client,
     new GetObjectCommand({ Bucket: config.bucket, Key: key }),

@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   MAX_EDGE_BY_KIND,
+  clampCropOffset,
   needsResize,
   outputTypeFor,
   scaledSize,
+  sourceCrop,
 } from "@/lib/image-resize";
 
 describe(scaledSize, () => {
@@ -85,6 +87,77 @@ describe(needsResize, () => {
     expect(
       needsResize("icon", { height: 4000, type: "image/png", width: 4000 })
     ).toBeTruthy();
+  });
+});
+
+describe(sourceCrop, () => {
+  it("frames a square crop the size of the crop window at zero zoom", () => {
+    // Zoom 1 means the window is the source: a full square, no more.
+    expect(sourceCrop(1, 256, { x: 0, y: 0 })).toStrictEqual({
+      height: 256,
+      width: 256,
+      x: 0,
+      y: 0,
+    });
+  });
+
+  it("scales the square window down to the source at any zoom", () => {
+    expect(sourceCrop(2, 256, { x: 0, y: 0 })).toStrictEqual({
+      height: 128,
+      width: 128,
+      x: 0,
+      y: 0,
+    });
+  });
+
+  it("divides the pan offset out of the source crop like the window was scaled", () => {
+    expect(sourceCrop(2, 256, { x: 64, y: 32 })).toStrictEqual({
+      height: 128,
+      width: 128,
+      x: 32,
+      y: 16,
+    });
+  });
+});
+
+describe(clampCropOffset, () => {
+  it("allows the square window to sit anywhere inside a square source", () => {
+    expect(
+      clampCropOffset(1, 256, { x: 10, y: 20 }, { height: 512, width: 512 })
+    ).toStrictEqual({
+      x: 10,
+      y: 20,
+    });
+  });
+
+  it("pins a window that overflows the source back to a full square", () => {
+    // At this zoom the square cannot fill the source, so the window is pinned
+    // at the origin rather than allowed to expose empty space.
+    expect(
+      clampCropOffset(
+        0.25,
+        256,
+        { x: 10_000, y: 10_000 },
+        { height: 1000, width: 1000 }
+      )
+    ).toStrictEqual({
+      x: 0,
+      y: 0,
+    });
+  });
+
+  it("clamps a pan that runs past the end of a fully covered source", () => {
+    expect(
+      clampCropOffset(
+        0.5,
+        256,
+        { x: 300, y: 100 },
+        { height: 1000, width: 1000 }
+      )
+    ).toStrictEqual({
+      x: 244,
+      y: 100,
+    });
   });
 });
 

@@ -14,5 +14,12 @@
  */
 export const IMAGE_MAX_BYTES = 8 * 1024 * 1024;
 
+/**
+ * Maximum raw avatar upload. The client crops and re-encodes before sending,
+ * so anything above this is a client-side mistake rather than an optimisation
+ * opportunity, and it bounds the server-side buffer before `sharp` runs.
+ */
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+
 /** Gallery images allowed per project. */
 export const GALLERY_MAX_COUNT = 12;

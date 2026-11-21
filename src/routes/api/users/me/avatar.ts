@@ -1,10 +1,14 @@
+import { createHash } from "node:crypto";
+import { Readable } from "node:stream";
+
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
+import sharp from "sharp";
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getSession } from "@/lib/auth.functions";
-import { IMAGE_MAX_BYTES, readImage } from "@/lib/image-validation";
+import { AVATAR_MAX_BYTES, readImage } from "@/lib/image-validation";
 import {
   consumeRateLimit,
   rateLimitedResponse,
@@ -12,6 +16,7 @@ import {
 } from "@/lib/rate-limit";
 import {
   deleteObjects,
+  IMMUTABLE_CACHE_CONTROL,
   loadStorageConfig,
   StorageError,
   uploadStream,
@@ -35,11 +40,11 @@ import env from "../../../../../env.config";
  * storage key, and a quota that has to be checked inside the write rather than
  * before it.
  *
- * The object is written to `users/{userId}/avatar/{uuid}.{ext}` and served
- * from `/api/avatar/$avatarId`. `users.image` is written with that URL, which
- * is the field Better Auth already reads for an avatar  -  so the navbar, the
- * account menu, and the public profile all pick it up with no per-surface
- * change.
+ * The object is written to `avatars/{userId}-{hash}.webp` - the hash of the
+ * bytes sharp produced - and served from `/api/avatar/$avatarId`. `users.image`
+ * is written with that URL, which is the field Better Auth already reads for an
+ * avatar, so the navbar, the account menu, and the public profile all pick it
+ * up with no per-surface change.
  */
 
 // The same reasoning as the project image route: large enough for every
@@ -57,6 +62,7 @@ const handleUpload = async (request: Request): Promise<Response> => {
   }
 
   const session = await getSession();
+
   if (!session) {
     return errorResponse(401, "Sign in to upload an avatar.");
   }
@@ -67,26 +73,30 @@ const handleUpload = async (request: Request): Promise<Response> => {
     `user:${session.user.id}`,
     RATE_LIMITS.upload
   );
+
   if (quota.limited) {
     return rateLimitedResponse(quota.retryAfterSeconds);
   }
 
   const { quotaBytes } = loadStorageConfig();
   const declaredLength = Number(request.headers.get("content-length") ?? "0");
-  if (declaredLength > IMAGE_MAX_BYTES) {
+
+  if (declaredLength > AVATAR_MAX_BYTES) {
     return errorResponse(
       413,
-      `Avatars can be at most ${IMAGE_MAX_BYTES} bytes.`
+      `Avatars can be at most ${AVATAR_MAX_BYTES} bytes.`
     );
   }
 
   const remainingBytes = await getRemainingBytes(quotaBytes);
+
   if (
     remainingBytes !== null &&
     (remainingBytes === 0 || declaredLength > remainingBytes)
   ) {
     throw quotaExceededError();
   }
+
   if (!request.body) {
     return errorResponse(400, "The upload is empty.");
   }
@@ -94,36 +104,57 @@ const handleUpload = async (request: Request): Promise<Response> => {
   const { head, stream } = await peekStream(request.body, HEADER_BYTES);
   // The type comes from the bytes, never from the request's content-type.
   const image = readImage(head);
+
   if (!image) {
     return errorResponse(415, "Upload a PNG, JPEG, WebP, or GIF image.");
   }
 
+  // The client crops and re-encodes before sending, so what arrives is already
+  // a square WebP; sharp re-encodes it rather than trusting the client to have
+  // done it, and the bytes it writes are the ones that get hashed and stored.
+  const sourceChunks: Uint8Array[] = [];
+
+  for await (const chunk of stream) {
+    sourceChunks.push(chunk);
+  }
+
+  const source = Buffer.concat(sourceChunks);
+
+  const processed = await sharp(source)
+    .rotate()
+    .resize(512, 512, { fit: "cover" })
+    .webp({ quality: 80, effort: 5 })
+    .toBuffer();
+
   const id = crypto.randomUUID();
-  const filename = `avatar-${id}.${image.extension}`;
-  // Server-derived: the client contributes no path component.
-  const storageKey = `users/${session.user.id}/avatar/${id}.${image.extension}`;
+  // oxlint-disable-next-line sonarjs/hashing -- Content fingerprint, not a security control.
+  const hash = createHash("sha1").update(processed).digest("hex");
+  const filename = `${session.user.id}-${hash}.webp`;
+  const storageKey = `avatars/${filename}`;
 
   const stored = await uploadStream({
-    body: stream,
-    contentType: image.contentType,
+    body: Readable.from([processed]),
+    contentType: "image/webp",
     filename,
     inline: true,
     key: storageKey,
-    maxBytes: remainingBytes ?? IMAGE_MAX_BYTES,
+    maxBytes: remainingBytes ?? AVATAR_MAX_BYTES,
+    cacheControl: IMMUTABLE_CACHE_CONTROL,
   });
 
   const url = `/api/avatar/${id}`;
   let superseded: string | null = null;
+
   try {
     superseded = await insertAvatarWithinQuota(
       {
-        contentType: image.contentType,
-        height: image.dimensions.height,
+        contentType: "image/webp",
+        height: 512,
         id,
         size: stored.size,
         storageKey,
         userId: session.user.id,
-        width: image.dimensions.width,
+        width: 512,
       },
       quotaBytes
     );
@@ -144,11 +175,11 @@ const handleUpload = async (request: Request): Promise<Response> => {
 
   return Response.json(
     {
-      contentType: image.contentType,
-      height: image.dimensions.height,
+      contentType: "image/webp",
+      height: 512,
       size: stored.size,
       url,
-      width: image.dimensions.width,
+      width: 512,
     },
     { status: 201 }
   );
@@ -156,6 +187,7 @@ const handleUpload = async (request: Request): Promise<Response> => {
 
 const handleDelete = async (): Promise<Response> => {
   const session = await getSession();
+
   if (!session) {
     return errorResponse(401, "Sign in to remove your avatar.");
   }
@@ -182,7 +214,9 @@ const asResponse = async (action: () => Promise<Response>) => {
     if (error instanceof StorageError) {
       return storageErrorResponse(error, "avatar");
     }
+
     console.error("Avatar change failed", error);
+
     return errorResponse(500, "The avatar could not be saved. Try again.");
   }
 };

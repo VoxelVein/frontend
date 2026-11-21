@@ -7,6 +7,8 @@ import type { ProjectImageKind } from "@/lib/projects";
  */
 export { IMAGE_MAX_BYTES } from "@/lib/image-limits";
 
+export { AVATAR_MAX_BYTES } from "@/lib/image-limits";
+
 /** Gallery images allowed per project. */
 export { GALLERY_MAX_COUNT } from "@/lib/image-limits";
 
@@ -85,21 +87,25 @@ export const isAllowedImageType = (bytes: Uint8Array): boolean =>
  */
 export const sniffImageType = (bytes: Uint8Array): AllowedImageType | null => {
   const match = PREFIXES.find((prefix) => startsWith(bytes, prefix.bytes));
+
   if (match) {
     return match.type;
   }
+
   return isRiffWebp(bytes) ? "image/webp" : null;
 };
 
 const readPngSize = (bytes: Uint8Array): ImageDimensions => {
   // Width and height are big-endian uint32 at offsets 16 and 20.
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
   return { height: view.getUint32(20), width: view.getUint32(16) };
 };
 
 const readGifSize = (bytes: Uint8Array): ImageDimensions => {
   // Little-endian uint16 at offsets 6 and 8.
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
   return { height: view.getUint16(8, true), width: view.getUint16(6, true) };
 };
 
@@ -114,24 +120,31 @@ const findJpegSize = (bytes: Uint8Array): ImageDimensions | null => {
   // uint16 length, then its payload. The frame header holds the dimensions.
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let offset = 2;
+
   while (offset + 9 < bytes.byteLength) {
     if (bytes[offset] !== 0xff) {
       offset += 1;
       continue;
     }
+
     const marker = bytes[offset + 1];
+
     if (START_OF_FRAME_MARKERS.has(marker)) {
       return {
         height: view.getUint16(offset + 5),
         width: view.getUint16(offset + 7),
       };
     }
+
     const length = view.getUint16(offset + 2);
+
     if (length < 2) {
       return null;
     }
+
     offset += 2 + length;
   }
+
   return null;
 };
 
@@ -142,6 +155,7 @@ const readUint24 = (bytes: Uint8Array, offset: number): number =>
 const readWebpSize = (bytes: Uint8Array): ImageDimensions | null => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const chunk = ascii(bytes, 12, 4);
+
   if (chunk === "VP8X") {
     // Stored as width-1 and height-1, so each is read and then increased.
     return {
@@ -149,6 +163,7 @@ const readWebpSize = (bytes: Uint8Array): ImageDimensions | null => {
       width: 1 + readUint24(bytes, 24),
     };
   }
+
   if (chunk === "VP8 ") {
     // 14 bits each, following a 2-bit scale factor.
     return {
@@ -156,13 +171,16 @@ const readWebpSize = (bytes: Uint8Array): ImageDimensions | null => {
       width: view.getUint16(24, true) % 16_384,
     };
   }
+
   if (chunk === "VP8L") {
     const bits = view.getUint32(21, true);
+
     return {
       height: (bits % 16_384) + 1,
       width: (Math.floor(bits / 16_384) % 16_384) + 1,
     };
   }
+
   return null;
 };
 
@@ -190,15 +208,19 @@ const SIZE_READERS: Record<AllowedImageType, SizeReader> = {
  */
 export const readImage = (bytes: Uint8Array): SniffedImage | null => {
   const contentType = sniffImageType(bytes);
+
   if (!contentType) {
     return null;
   }
+
   const extension = SIGNATURES[contentType].ext;
 
   const dimensions = SIZE_READERS[contentType](bytes);
+
   if (!dimensions || !isPlausibleSize(dimensions)) {
     return null;
   }
+
   return { contentType, dimensions, extension };
 };
 
