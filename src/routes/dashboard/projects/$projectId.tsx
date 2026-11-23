@@ -62,10 +62,12 @@ import { deleteVersionFile, uploadVersionFile } from "@/lib/upload-client";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
 const TABS = ["details", "images", "versions", "danger"] as const;
+
 type Tab = (typeof TABS)[number];
 
 const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
   const ids = new Set<string>();
+
   for (const version of versions) {
     for (const file of version.files) {
       if (
@@ -76,6 +78,7 @@ const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
       }
     }
   }
+
   return [...ids];
 };
 
@@ -112,19 +115,24 @@ const VersionPlatformFileForm = ({
     if (!platformFile) {
       return;
     }
+
     const uploadPlatform =
       platform === "other" ? normalizePlatformId(customPlatform) : platform;
+
     if (!uploadPlatform) {
       toast.error("Enter a valid platform name.");
+
       return;
     }
+
     setPending(true);
+
     try {
       await uploadVersionFile({
         file: platformFile,
         platform: uploadPlatform,
-        projectId,
         versionId: version.id,
+        projectId,
       });
       setPlatformFile(null);
       setInputKey((key) => key + 1);
@@ -137,6 +145,7 @@ const VersionPlatformFileForm = ({
         errorMessage(uploadError, "Could not upload this platform file.")
       );
     }
+
     setPending(false);
   };
 
@@ -222,6 +231,7 @@ const VersionList = ({
   const [target, setTarget] = useState<ProjectVersionView | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [fileTarget, setFileTarget] = useState<{
     fileId: string;
     version: ProjectVersionView;
@@ -242,8 +252,10 @@ const VersionList = ({
     if (!target) {
       return;
     }
+
     setPending(true);
     setError(null);
+
     try {
       await deleteVersion({ data: { versionId: target.id } });
       setTarget(null);
@@ -252,6 +264,7 @@ const VersionList = ({
     } catch (deleteError) {
       setError(errorMessage(deleteError, "Could not delete the version."));
     }
+
     setPending(false);
   };
 
@@ -267,12 +280,14 @@ const VersionList = ({
     if (!fileTarget) {
       return;
     }
+
     setPending(true);
+
     try {
       await deleteVersionFile({
         fileId: fileTarget.fileId,
-        projectId,
         versionId: fileTarget.version.id,
+        projectId,
       });
       toast.success("Platform download removed");
       setFileTarget(null);
@@ -280,6 +295,7 @@ const VersionList = ({
     } catch (deleteError) {
       setError(errorMessage(deleteError, "Could not remove this file."));
     }
+
     setPending(false);
   };
 
@@ -402,14 +418,16 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
   const confirmDelete = async () => {
     setPending(true);
     setError(null);
+
     try {
       await deleteProject({ data: { projectId: project.id } });
       toast.success(`Deleted ${project.name}`);
       await navigate({ to: "/dashboard/projects" });
     } catch (deleteError) {
       setError(errorMessage(deleteError, "Could not delete the project."));
-      setPending(false);
     }
+
+    setPending(false);
   };
 
   return (
@@ -440,6 +458,7 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
         open={open}
         onOpenChange={(next) => {
           setOpen(next);
+
           if (!next) {
             setError(null);
           }
@@ -458,9 +477,11 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
 
 const ManageProjectPage = () => {
   const project = useLoaderData({ from: ROUTE_ID });
+
   const { tab = "details" } = useSearch({
     from: ROUTE_ID,
   });
+
   const navigate = useNavigate({ from: ROUTE_ID });
   const router = useRouter();
 
@@ -478,6 +499,7 @@ const ManageProjectPage = () => {
       data: {
         category: input.category,
         description: input.description,
+        disclosures: input.disclosures,
         name: input.name,
         projectId: project.id,
         slug: input.slug,
@@ -544,6 +566,7 @@ const ManageProjectPage = () => {
             initialValues={{
               category: project.category,
               description: project.description,
+              disclosures: project.disclosures,
               name: project.name,
               slug: project.slug,
               summary: project.summary,

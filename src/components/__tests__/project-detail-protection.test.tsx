@@ -29,6 +29,13 @@ vi.mock("@/lib/reports.functions", () => ({
   createReport: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The player count query pulls in the database; this suite is about the moderation controls
+vi.mock("@/lib/server-status.functions", () => ({
+  getMinecraftServerStatuses: vi.fn<() => Promise<Record<string, never>>>(() =>
+    Promise.resolve({})
+  ),
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The session comes from Better Auth over the network; a stub picks the signed-in role per test
 vi.mock("@/lib/auth-client", () => ({
   authClient: { useSession: useSessionMock },
@@ -44,6 +51,7 @@ const PROJECT: ProjectView = {
   authorUsername: "alice",
   category: "utility",
   description: "",
+  disclosures: [],
   downloads: 10,
   gallery: [],
   icon: null,

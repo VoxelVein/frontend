@@ -41,6 +41,7 @@ export const PROJECT_TYPES = [
   "datapack",
   "server",
 ] as const;
+
 /**
  * The two kinds of image a project can have.
  *
@@ -81,6 +82,7 @@ export const PROJECT_STATUSES = [
   "published",
   "removed",
 ] as const;
+
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
 /**
@@ -97,6 +99,7 @@ export const PROJECT_STATUS_LABELS = {
 } as const satisfies Record<ProjectStatus, string>;
 
 export const RELEASE_CHANNELS = ["release", "beta", "alpha"] as const;
+
 export type ReleaseChannel = (typeof RELEASE_CHANNELS)[number];
 
 export const MOD_CATEGORIES = [
@@ -308,6 +311,57 @@ export const PROJECT_TYPE_DESCRIPTIONS = {
     "Add dimensions, biomes, loot tables, and recipes to your world with datapacks.",
 } as const satisfies Record<ProjectType, string>;
 
+/**
+ * Notes a creator attaches to a project to tell readers how it was made or
+ * what it depends on.
+ *
+ * A disclosure is project-level rather than per version: an AI-assisted icon,
+ * a translated description, or a discontinued release describes the listing as
+ * a whole, not one download. Each entry carries a description because the
+ * label alone leaves the reader guessing  -  "Statistics" says nothing about
+ * which data was used.
+ *
+ * The values are validated in app code against `DISCLOSURE_TYPES`, so the
+ * column stays plain JSON and extending the list needs no migration.
+ */
+export const DISCLOSURE_TYPES = [
+  "ai-generated",
+  "statistics",
+  "early-access",
+  "fan-content",
+  "personal-content",
+  "translation",
+  "discontinued",
+] as const;
+
+export type DisclosureType = (typeof DISCLOSURE_TYPES)[number];
+
+export const DISCLOSURE_TYPE_LABELS = {
+  "ai-generated": "AI-generated content",
+  statistics: "Statistics",
+  "early-access": "Early access",
+  "fan-content": "Fan content",
+  "personal-content": "Personal content",
+  translation: "Translation",
+  discontinued: "Discontinued",
+} as const satisfies Record<DisclosureType, string>;
+
+/** What a creator should explain once they tick a disclosure. */
+export const DISCLOSURE_TYPE_HINTS = {
+  "ai-generated": "Describe what AI generated, such as art, code, or text.",
+  statistics: "Describe the data or statistics the project relies on.",
+  "early-access": "Describe what is unfinished or planned for a later release.",
+  "fan-content": "Describe the original work this project is based on.",
+  "personal-content": "Describe the personal details or experiences included.",
+  translation: "Describe the languages translated and the source content.",
+  discontinued: "Explain why the project is discontinued and what still works.",
+} as const satisfies Record<DisclosureType, string>;
+
+export interface ProjectDisclosure {
+  description: string;
+  type: DisclosureType;
+}
+
 // Slugs appear in URLs: lowercase letters, digits, and single dashes.
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 export const SLUG_MAX_LENGTH = 64;
@@ -370,6 +424,7 @@ const MAX_TAGS = 8;
 const TAG_MAX_LENGTH = 24;
 const VERSION_NUMBER_MAX_LENGTH = 32;
 const CATEGORY_MAX_LENGTH = 40;
+export const DISCLOSURE_DESCRIPTION_MAX_LENGTH = 400;
 
 /**
  * One phrasing for every character limit.
@@ -394,6 +449,32 @@ export const projectSlugSchema = pipe(
   regex(SLUG_PATTERN, "Use lowercase letters, numbers, and single hyphens.")
 );
 
+const disclosureSchema = object({
+  description: pipe(
+    string(),
+    trim(),
+    nonEmpty("Describe this disclosure."),
+    maxLength(
+      DISCLOSURE_DESCRIPTION_MAX_LENGTH,
+      maxChars(DISCLOSURE_DESCRIPTION_MAX_LENGTH)
+    )
+  ),
+  type: picklist(DISCLOSURE_TYPES),
+});
+
+const disclosuresSchema = pipe(
+  array(disclosureSchema),
+  maxLength(
+    DISCLOSURE_TYPES.length,
+    `Use at most ${DISCLOSURE_TYPES.length} disclosures.`
+  ),
+  check(
+    (entries) =>
+      new Set(entries.map((entry) => entry.type)).size === entries.length,
+    "Each disclosure can only be added once."
+  )
+);
+
 const projectFieldsEntries = {
   category: pipe(
     string(),
@@ -406,6 +487,7 @@ const projectFieldsEntries = {
     string(),
     maxLength(DESCRIPTION_MAX_LENGTH, maxChars(DESCRIPTION_MAX_LENGTH))
   ),
+  disclosures: disclosuresSchema,
   name: pipe(
     string(),
     trim(),
@@ -502,6 +584,7 @@ const ADDRESS_MAX_LENGTH = 253;
 // A hostname (play.example.net) or an IPv4 address; no scheme, path, or port.
 const HOSTNAME_PATTERN =
   /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/iu;
+
 // A bare IPv6 address such as 2001:db8::1.
 const IPV6_PATTERN = /^[0-9a-f]{0,4}(?::[0-9a-f]{0,4}){2,7}$/iu;
 
@@ -523,6 +606,7 @@ export const SERVER_LINK_TYPES = [
   "resourcepack",
   "datapack",
 ] as const;
+
 export type ServerLinkType = (typeof SERVER_LINK_TYPES)[number];
 
 export const isServerLinkType = (type: ProjectType): type is ServerLinkType =>
@@ -541,6 +625,7 @@ export const CLIENT_REQUIREMENTS = [
   "recommended",
   "vanilla",
 ] as const;
+
 export type ClientRequirement = (typeof CLIENT_REQUIREMENTS)[number];
 
 export const CLIENT_REQUIREMENT_LABELS = {
@@ -562,6 +647,7 @@ export const clientRequirementFor = (
   if (links.some((link) => link.required)) {
     return "required";
   }
+
   return links.length > 0 ? "recommended" : "vanilla";
 };
 
@@ -616,6 +702,7 @@ export const formatServerAddress = (
   if (port === null || port === DEFAULT_SERVER_PORT) {
     return address;
   }
+
   return address.includes(":") ? `[${address}]:${port}` : `${address}:${port}`;
 };
 
@@ -676,6 +763,8 @@ export interface ProjectView {
   authorUsername: string | null;
   category: string;
   description: string;
+  /** Creator disclosures, each with the explanation shown beside its label. */
+  disclosures: ProjectDisclosure[];
   downloads: number;
   /** Project's gallery images, oldest first. */
   gallery: ProjectImageView[];

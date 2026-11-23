@@ -4,6 +4,7 @@ import {
   ProjectDetailHero,
   ProjectDetailPageFrame,
 } from "@/components/projects/project-detail-layout";
+import { ProjectDisclosuresSection } from "@/components/projects/project-disclosures";
 import { ProjectGallery } from "@/components/projects/project-gallery";
 import {
   ServerJoinPanel,
@@ -16,6 +17,7 @@ import { can } from "@/lib/roles";
 /** Server details share the project page shell while keeping their join flow. */
 const ServerDetail = ({ project }: { project: ProjectView }) => {
   const { data: session } = authClient.useSession();
+
   const canManage =
     session?.user.id === project.ownerId ||
     can(session?.user.role, "reviewProjects");
@@ -24,8 +26,9 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
     <ProjectDetailPageFrame>
       {project.status === "published" ? null : (
         <output className="border-primary/20 bg-primary/5 text-foreground mb-4 block rounded-lg border px-4 py-3 text-sm">
-          This server is still {project.status}. Only you and admins can view
-          this page.
+          This server is{" "}
+          {project.status === "draft" ? "a draft" : `still ${project.status}`}.
+          Only you and admins can view this page.
         </output>
       )}
 
@@ -81,6 +84,10 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
               <ServerRequirements server={project.server} />
             </div>
           </section>
+        ) : null}
+
+        {project.disclosures.length > 0 ? (
+          <ProjectDisclosuresSection disclosures={project.disclosures} />
         ) : null}
 
         <ProjectGallery

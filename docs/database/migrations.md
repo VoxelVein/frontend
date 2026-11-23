@@ -88,7 +88,8 @@ Application tables:
   [Blog](../content/blog.md)
 * `projects`, all six project types, with a `draft` / `pending` /
   `published` / `removed` lifecycle, review audit columns, download
-  counters, tags, `is_protected`, and `pending_deletion`
+  counters, tags, creator disclosures, `is_protected`, and
+  `pending_deletion`
 * `project_versions`, released versions with a release channel, game
   versions, loaders, changelog, and a download counter; version number is
   unique per project
@@ -210,6 +211,7 @@ written by hand, and several do this alongside their DDL:
 | `0026_support_tickets_tags.sql` | Ticket tags |
 | `0027_drop_posts_author_id.sql` | Removes the unused post author column |
 | `0028_modpack_platform_files.sql` | Per-platform modpack release files |
+| `0029_project_disclosures.sql` | Project-level creator disclosures |
 
 ## Index every foreign key
 

@@ -106,6 +106,41 @@ and returned the *function*, which reached React as a child and threw. A
 fallback path, which title-cases the slug and turns `-` into a space. Any
 lookup keyed by user-influenced data should follow the same rule.
 
+## Disclosures
+
+Creators can attach disclosures to a project so readers know how it was
+made or what it depends on. A disclosure is project-level rather than
+per-version: an AI-assisted icon, a translated description, or a
+discontinued release describes the listing as a whole. Every ticked type
+requires a description, because the label alone leaves the reader guessing
+("Statistics" does not say which data was used).
+
+There are seven types, defined once in `DISCLOSURE_TYPES` and labelled by
+`DISCLOSURE_TYPE_LABELS` (`src/lib/projects.ts`):
+
+| Value           | Label                |
+| --------------- | -------------------- |
+| `ai-generated`  | AI-generated content |
+| `statistics`    | Statistics           |
+| `early-access`  | Early access         |
+| `fan-content`   | Fan content          |
+| `personal-content` | Personal content  |
+| `translation`   | Translation          |
+| `discontinued`  | Discontinued         |
+
+`projectInputSchema` and `projectUpdateSchema` validate the list: at most
+seven entries, each type at most once, each description trimmed and capped
+at 400 characters. The creator dashboard's `ProjectDisclosures` fieldset
+(`src/components/dashboard/project-disclosures.tsx`) ticks types and expands
+a description field for each one. Both `ProjectDetail` and `ServerDetail`
+show the disclosures in a **Transparency** section when any are set.
+
+The values live in `projects.disclosures`, a `jsonb` column defaulting to
+`[]` (migration `drizzle/0029_project_disclosures.sql`). It is JSON rather
+than a table because a project has at most seven entries and nothing queries
+into them, and because the types are validated in app code  -  extending the
+list needs no migration.
+
 ## Data model
 
 Tables are defined in `src/db/schema.ts`:
@@ -113,7 +148,7 @@ Tables are defined in `src/db/schema.ts`:
 * `projects`: `slug` (unique, used in URLs), `type` (`mod`, `modpack`,
   `plugin`, `resourcepack`, `shader`, `datapack`, or `server`), `status` (`draft`,
   `pending`, `published`, or `removed`), owner, category, tags, summary,
-  Markdown description, and a download counter.
+  Markdown description, creator disclosures, and a download counter.
 * `project_versions`: version number (unique per project), release
   channel (`release`, `beta`, `alpha`), game versions, loaders or
   platforms, changelog, and a download counter.

@@ -204,6 +204,13 @@
       "when": 1795196566733,
       "tag": "0028_modpack_platform_files",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795446511429,
+      "tag": "0029_project_disclosures",
+      "breakpoints": true
     }
   ]
 }

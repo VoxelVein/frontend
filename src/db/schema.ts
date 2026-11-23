@@ -5,6 +5,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -15,6 +16,7 @@ import {
 
 import type { UserNotificationType } from "../lib/notifications";
 import type {
+  ProjectDisclosure,
   ProjectImageKind,
   ProjectStatus,
   ProjectType,
@@ -231,6 +233,19 @@ export const projects = pgTable(
     category: text("category").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     description: text("description").default("").notNull(),
+    /**
+     * Creator disclosures, each a type plus the explanation a reader needs.
+     *
+     * Project-level rather than per version: an AI-assisted icon or a
+     * discontinued release describes the listing as a whole. Stored as JSON
+     * because a project has at most seven entries and nothing queries into
+     * them; the app validates the types, so extending the list needs no
+     * migration.
+     */
+    disclosures: jsonb("disclosures")
+      .$type<ProjectDisclosure[]>()
+      .default([])
+      .notNull(),
     downloads: integer("downloads").default(0).notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),

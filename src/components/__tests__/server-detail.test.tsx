@@ -25,6 +25,12 @@ vi.mock("@/lib/reports.functions", () => ({
   createReport: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The player count query pulls in the database and needs a query client; this suite is about the server page's layout and copy
+vi.mock("@/components/projects/server-player-count", () => ({
+  // oxlint-disable-next-line sonarjs/function-name -- The mock keeps the component's exported name
+  ServerPlayerCount: () => null,
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Links need a router instance; a plain anchor keeps the test on the page's own structure
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to, ...props }: ComponentProps<"a"> & { to: string }) => (
@@ -64,6 +70,7 @@ const PROJECT: ProjectView = {
   authorUsername: "alice",
   category: "skyblock",
   description: "A long-running skyblock server.",
+  disclosures: [],
   downloads: 0,
   gallery: [],
   icon: null,
@@ -95,9 +102,11 @@ const groupFor = (heading: HTMLElement): HTMLElement => {
   // SAFETY: rendered by `ServerDetail`, so the heading is in the document and
   // always has a parent element.
   const parent = heading.parentElement;
+
   if (parent === null) {
     throw new Error("heading has no parent element");
   }
+
   return parent;
 };
 
@@ -122,6 +131,7 @@ const stubClipboard = (writeText: (text: string) => Promise<void>) => {
 describe(ServerDetail, () => {
   beforeEach(() => {
     useSessionMock.mockReset().mockReturnValue({ data: null });
+
     // jsdom has neither observer. One class satisfies both interfaces: the
     // report dialog and Reveal want IntersectionObserver, the icon swap wants
     // ResizeObserver, and neither calls anything beyond these three methods.
@@ -130,6 +140,7 @@ describe(ServerDetail, () => {
       observe = vi.fn<() => void>();
       unobserve = vi.fn<() => void>();
     }
+
     vi.stubGlobal("IntersectionObserver", ObserverStub);
     vi.stubGlobal("ResizeObserver", ObserverStub);
   });
@@ -174,6 +185,7 @@ describe(ServerDetail, () => {
     const writeText = vi
       .fn<(text: string) => Promise<void>>()
       .mockResolvedValue();
+
     stubClipboard(writeText);
 
     render(<ServerDetail project={PROJECT} />);
@@ -214,6 +226,7 @@ describe(ServerDetail, () => {
     for (const version of SERVER.gameVersions) {
       expect(screen.getByText(version)).toBeInTheDocument();
     }
+
     expect(
       screen.queryByText(SERVER.gameVersions.join(", "))
     ).not.toBeInTheDocument();
@@ -227,6 +240,7 @@ describe(ServerDetail, () => {
     const required = screen.getByRole("heading", {
       name: /required to join/iu,
     });
+
     const recommended = screen.getByRole("heading", { name: /recommended/iu });
 
     // Queried by role rather than by text: every row repeats its project's name
@@ -322,10 +336,12 @@ describe(ServerDetail, () => {
       .map((heading) => Number(heading.tagName.slice(1)));
 
     expect(levels[0]).toBe(1);
+
     for (const [index, level] of levels.entries()) {
       const previous = levels[index - 1] ?? 1;
       expect(level - previous).toBeLessThanOrEqual(1);
     }
+
     // And the panel is genuinely there, not an empty heading.
     expect(
       screen.getByRole("heading", { level: 2, name: /join this server/iu })

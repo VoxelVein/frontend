@@ -37,17 +37,27 @@ const CONTENT_TYPE_HEADER = "content-type";
 /** Shared by all three uploads, since they fail the same way. */
 const UPLOAD_FAILED_MESSAGE = "The upload failed. Check your connection.";
 
-const toFailure = (
-  body: { code?: string; error?: string },
-  status: number
-): Error => {
+/**
+ * Any 2xx is a success.
+ *
+ * The routes answer `201`, but a proxy or a runtime that rewrites a response
+ * can hand the client a `200` with the same body. Treating only `201` as
+ * success turned that into "The upload failed (200)."  -  a failure report for
+ * an upload that had actually worked.
+ */
+const isSuccess = (status: number): boolean => status >= 200 && status < 300;
+
+const toFailure = (body: { code?: string; error?: string }): Error => {
   if (body.code) {
     return new StorageRequestError(
       body.code,
       body.error ?? UPLOAD_FAILED_MESSAGE
     );
   }
-  return new Error(body.error ?? `The upload failed (${status}).`);
+
+  // The status is already in the response, not in the sentence: a reader who
+  // sees "The upload failed (200)." cannot tell what to do with the number.
+  return new Error(body.error ?? UPLOAD_FAILED_MESSAGE);
 };
 
 const readError = (request: XMLHttpRequest): Error => {
@@ -55,11 +65,10 @@ const readError = (request: XMLHttpRequest): Error => {
     // SAFETY: the upload routes always answer errors with { error } and,
     // for a storage failure, the `code` alongside it.
     return toFailure(
-      JSON.parse(request.responseText) as { code?: string; error?: string },
-      request.status
+      JSON.parse(request.responseText) as { code?: string; error?: string }
     );
   } catch {
-    return new Error(`The upload failed (${request.status}).`);
+    return new Error(UPLOAD_FAILED_MESSAGE);
   }
 };
 
@@ -68,11 +77,10 @@ const readErrorLike = async (response: Response): Promise<Error> => {
   try {
     // SAFETY: the delete routes always answer errors with { error }.
     return toFailure(
-      (await response.json()) as { code?: string; error?: string },
-      response.status
+      (await response.json()) as { code?: string; error?: string }
     );
   } catch {
-    return new Error(`The request failed (${response.status}).`);
+    return new Error("The request failed. Check your connection.");
   }
 };
 
@@ -89,9 +97,11 @@ export const uploadVersionFile = ({
 }: UploadOptions): Promise<ProjectFileView> => {
   const uploadName = toUploadFilename(file.name);
   const params = new URLSearchParams({ filename: uploadName });
+
   if (platform) {
     params.set("platform", platform);
   }
+
   const url = `/api/projects/${projectId}/versions/${versionId}/files?${params}`;
 
   // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest has no promise API.
@@ -105,11 +115,17 @@ export const uploadVersionFile = ({
       }
     });
     request.addEventListener("load", () => {
-      if (request.status === 201) {
-        // SAFETY: a 201 from the upload route always carries a ProjectFileView.
-        resolve(JSON.parse(request.responseText) as ProjectFileView);
+      if (isSuccess(request.status)) {
+        try {
+          // SAFETY: a successful upload route always carries a ProjectFileView.
+          resolve(JSON.parse(request.responseText) as ProjectFileView);
+        } catch {
+          reject(new Error(UPLOAD_FAILED_MESSAGE));
+        }
+
         return;
       }
+
       reject(readError(request));
     });
     request.addEventListener("error", () =>
@@ -133,6 +149,7 @@ export const deleteVersionFile = async ({
     `/api/projects/${projectId}/versions/${versionId}/files?fileId=${encodeURIComponent(fileId)}`,
     { method: "DELETE" }
   );
+
   if (!response.ok) {
     throw await readErrorLike(response);
   }
@@ -171,11 +188,17 @@ export const uploadProjectImage = async ({
       }
     });
     request.addEventListener("load", () => {
-      if (request.status === 201) {
-        // SAFETY: a 201 from the image route always carries an image record.
-        resolve(JSON.parse(request.responseText) as UploadedProjectImage);
+      if (isSuccess(request.status)) {
+        try {
+          // SAFETY: a successful image route always carries an image record.
+          resolve(JSON.parse(request.responseText) as UploadedProjectImage);
+        } catch {
+          reject(new Error(UPLOAD_FAILED_MESSAGE));
+        }
+
         return;
       }
+
       reject(readError(request));
     });
     request.addEventListener("error", () =>
@@ -223,11 +246,17 @@ export const uploadAvatar = async ({
       }
     });
     request.addEventListener("load", () => {
-      if (request.status === 201) {
-        // SAFETY: a 201 from the avatar route always carries an avatar record.
-        resolve(JSON.parse(request.responseText) as UploadedAvatar);
+      if (isSuccess(request.status)) {
+        try {
+          // SAFETY: a successful avatar route always carries an avatar record.
+          resolve(JSON.parse(request.responseText) as UploadedAvatar);
+        } catch {
+          reject(new Error(UPLOAD_FAILED_MESSAGE));
+        }
+
         return;
       }
+
       reject(readError(request));
     });
     request.addEventListener("error", () =>
@@ -240,6 +269,7 @@ export const uploadAvatar = async ({
 /** Removes the signed-in account's avatar. */
 export const deleteAvatar = async (): Promise<void> => {
   const response = await fetch("/api/users/me/avatar", { method: "DELETE" });
+
   if (!response.ok) {
     throw await readErrorLike(response);
   }
@@ -253,6 +283,7 @@ export const deleteProjectImage = async (
   const response = await fetch(`/api/projects/${projectId}/images/${imageId}`, {
     method: "DELETE",
   });
+
   if (!response.ok) {
     throw await readErrorLike(response);
   }

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ProjectForm } from "@/components/dashboard/project-form";
@@ -23,6 +23,7 @@ const renderForm = (mode: "create" | "edit" = "edit") =>
       initialValues={{
         category: "optimization",
         description: "# Heading\n\nSome **bold** text.",
+        disclosures: [],
         name: "Sodium",
         slug: "sodium",
         summary: "Makes the game go faster.",
@@ -65,6 +66,7 @@ describe("project description editor", () => {
         initialValues={{
           category: "optimization",
           description: "   ",
+          disclosures: [],
           name: "Sodium",
           slug: "sodium",
           summary: "Makes the game go faster.",
@@ -78,6 +80,27 @@ describe("project description editor", () => {
     expect(
       screen.getByText("Your description will appear here as you type.")
     ).toBeInTheDocument();
+  });
+
+  it("submits a disclosure with the description it needs", async () => {
+    onSubmit.mockClear();
+    renderForm();
+
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "AI-generated content" })
+    );
+    fireEvent.change(screen.getByLabelText("Describe ai-generated content"), {
+      target: { value: "The icon art was generated with AI." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0]?.[0].disclosures).toStrictEqual([
+      {
+        description: "The icon art was generated with AI.",
+        type: "ai-generated",
+      },
+    ]);
   });
 
   it("puts the editor and preview in one row from large screens up", () => {

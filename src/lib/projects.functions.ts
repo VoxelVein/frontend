@@ -61,9 +61,11 @@ const hasErrorCode = (cause: unknown, code: string): boolean => {
   if (!(cause instanceof Error)) {
     return false;
   }
+
   if ("code" in cause && cause.code === code) {
     return true;
   }
+
   return hasErrorCode(cause.cause, code);
 };
 
@@ -113,6 +115,7 @@ const loadProjectView = async (
     authorUsername: project.owner?.username ?? null,
     category: project.category,
     description: project.description,
+    disclosures: project.disclosures,
     downloads: project.downloads,
     id: project.id,
     isProtected: project.isProtected,
@@ -169,17 +172,22 @@ export const getProject = createServerFn({ method: "GET" })
   .validator((data: { slug: string }) => parse(slugSchema, data))
   .handler(async ({ data }): Promise<ProjectView | null> => {
     const project = await loadProjectView(eq(projects.slug, data.slug));
+
     if (!project) {
       return null;
     }
+
     if (project.pendingDeletion) {
       // Its owner is deleting their account; only admins may still look.
       const session = await getSessionOrNull();
+
       return session && hasSessionRole(session, "admin") ? project : null;
     }
+
     if (project.status === "published") {
       return project;
     }
+
     return canSeeUnpublished(await getSessionOrNull(), project)
       ? project
       : null;
@@ -190,18 +198,22 @@ export const getEditableProject = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ProjectView> => {
     const session = await getUploader();
     await requireEditableProject(session, data.projectId);
+
     const project = await loadProjectView(eq(projects.id, data.projectId), {
       includeHidden: true,
     });
+
     if (!project) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.notFound);
     }
+
     return project;
   });
 
 export const listMyProjects = createServerFn({ method: "GET" }).handler(
   async (): Promise<ProjectListItem[]> => {
     const session = await getSessionOrNull();
+
     if (!session) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.unauthenticated);
     }
@@ -274,12 +286,14 @@ export const createProject = createServerFn({ method: "POST" })
         .insert(projects)
         .values({ ...data, ownerId: session.user.id })
         .returning({ id: projects.id, slug: projects.slug });
+
       // Remembered for good: owning a project once means a later account
       // deletion gets the recoverable grace period.
       await db
         .update(users)
         .set({ hasOwnedProject: true })
         .where(eq(users.id, session.user.id));
+
       return created;
     } catch (error) {
       if (hasErrorCode(error, PG_UNIQUE_VIOLATION)) {
@@ -287,6 +301,7 @@ export const createProject = createServerFn({ method: "POST" })
           cause: error,
         });
       }
+
       throw error;
     }
   });
@@ -306,6 +321,7 @@ export const updateProject = createServerFn({ method: "POST" })
           cause: error,
         });
       }
+
       throw error;
     }
   });
@@ -316,6 +332,7 @@ const hasPrimaryFile = async (projectId: string): Promise<boolean> => {
     .from(projectFiles)
     .innerJoin(projectVersions, eq(projectVersions.id, projectFiles.versionId))
     .where(eq(projectVersions.projectId, projectId));
+
   return (row?.files ?? 0) > 0;
 };
 
@@ -327,15 +344,19 @@ export const createVersion = createServerFn({ method: "POST" })
     const project = await requireEditableProject(session, projectId);
 
     const labels = PROJECT_TYPE_LABELS[project.type];
+
     if (!hasVersions(project.type)) {
       throw new Error(`${labels.plural} do not have versions.`);
     }
+
     const allowedLoaders = new Set<string>(LOADERS_BY_TYPE[project.type]);
+
     if (!fields.loaders.every((loader) => allowedLoaders.has(loader))) {
       throw new Error(
         `Choose loaders that fit a ${labels.singular.toLowerCase()}.`
       );
     }
+
     if (hasLoaders(project.type) && fields.loaders.length === 0) {
       throw new Error("Choose at least one loader.");
     }
@@ -350,10 +371,12 @@ export const createVersion = createServerFn({ method: "POST" })
           projectId,
         })
         .returning({ id: projectVersions.id });
+
       await db
         .update(projects)
         .set({ updatedAt: new Date() })
         .where(eq(projects.id, projectId));
+
       return created;
     } catch (error) {
       if (hasErrorCode(error, PG_UNIQUE_VIOLATION)) {
@@ -364,6 +387,7 @@ export const createVersion = createServerFn({ method: "POST" })
           }
         );
       }
+
       throw error;
     }
   });
@@ -379,7 +403,9 @@ const isLinkable = (target: LinkTarget, alreadyLinked: Set<string>) => {
   if (!isServerLinkType(target.type)) {
     return false;
   }
+
   const visible = target.status === "published" && !target.pendingDeletion;
+
   return visible || alreadyLinked.has(target.id);
 };
 
@@ -390,14 +416,17 @@ export const saveServerDetails = createServerFn({ method: "POST" })
     const session = await getUploader();
     const { links, projectId, ...fields } = data;
     const project = await requireEditableProject(session, projectId);
+
     if (project.type !== "server") {
       throw new Error("Only servers have join details.");
     }
 
     const linkedIds = links.map((link) => link.projectId);
+
     if (linkedIds.includes(projectId)) {
       throw new Error("A server cannot link to itself.");
     }
+
     const targets =
       linkedIds.length > 0
         ? await db
@@ -410,16 +439,21 @@ export const saveServerDetails = createServerFn({ method: "POST" })
             .from(projects)
             .where(inArray(projects.id, linkedIds))
         : [];
+
     const targetsById = new Map(targets.map((target) => [target.id, target]));
+
     // Links saved earlier may point at projects that were unpublished since;
     // keep those, but only accept new links to published projects.
     const existing = await db
       .select({ linkedProjectId: projectServerLinks.linkedProjectId })
       .from(projectServerLinks)
       .where(eq(projectServerLinks.serverId, projectId));
+
     const alreadyLinked = new Set(existing.map((row) => row.linkedProjectId));
+
     for (const link of links) {
       const target = targetsById.get(link.projectId);
+
       if (!target || !isLinkable(target, alreadyLinked)) {
         throw new Error(
           "Link only published mods, modpacks, shaders, or resource packs."
@@ -431,6 +465,7 @@ export const saveServerDetails = createServerFn({ method: "POST" })
       ...fields,
       gameVersions: [...new Set(fields.gameVersions)],
     };
+
     await db.transaction(async (tx) => {
       await tx
         .insert(projectServers)
@@ -439,6 +474,7 @@ export const saveServerDetails = createServerFn({ method: "POST" })
       await tx
         .delete(projectServerLinks)
         .where(eq(projectServerLinks.serverId, projectId));
+
       if (links.length > 0) {
         // Stagger timestamps so the saved order survives the reload.
         const now = Date.now();
@@ -451,6 +487,7 @@ export const saveServerDetails = createServerFn({ method: "POST" })
           }))
         );
       }
+
       await tx
         .update(projects)
         .set({ updatedAt: new Date() })
@@ -470,9 +507,11 @@ export const deleteVersion = createServerFn({ method: "POST" })
         .where(eq(projectVersions.id, data.versionId))
         .limit(1),
     ]);
+
     if (!version) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.notFound);
     }
+
     const project = await requireEditableProject(session, version.projectId);
 
     const files = await db
@@ -505,6 +544,7 @@ export const deleteProject = createServerFn({ method: "POST" })
       .select({ id: projectVersions.id })
       .from(projectVersions)
       .where(eq(projectVersions.projectId, project.id));
+
     const [files, images] = await Promise.all([
       db
         .select({ storageKey: projectFiles.storageKey })
@@ -512,6 +552,7 @@ export const deleteProject = createServerFn({ method: "POST" })
         .where(inArray(projectFiles.versionId, versionIds)),
       getProjectImageKeys([project.id]),
     ]);
+
     await db.delete(projects).where(eq(projects.id, project.id));
     await deleteObjects([
       ...files.map((file) => file.storageKey),
@@ -534,9 +575,11 @@ export const removeProject = createServerFn({ method: "POST" })
   .validator((data: { projectId: string }) => parse(projectIdSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await getSessionOrNull();
+
     if (!session || !can(session.user.role, "manageProtectedProjects")) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
     }
+
     await db
       .update(projects)
       .set({ status: "removed", takenDownAt: new Date() })
@@ -558,9 +601,11 @@ export const setProjectProtected = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<void> => {
     const session = await getSessionOrNull();
+
     if (!session || !can(session.user.role, "manageProtectedProjects")) {
       throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
     }
+
     await db
       .update(projects)
       .set({ isProtected: data.isProtected })

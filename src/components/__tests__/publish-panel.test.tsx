@@ -66,6 +66,7 @@ const project = (overrides: Partial<ProjectView> = {}): ProjectView => ({
   authorUsername: "alice",
   category: "optimization",
   description: "",
+  disclosures: [],
   downloads: 0,
   gallery: [],
   icon: null,

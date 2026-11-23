@@ -8,6 +8,7 @@ import {
   ProjectDetailHero,
   ProjectDetailPageFrame,
 } from "@/components/projects/project-detail-layout";
+import { ProjectDisclosuresSection } from "@/components/projects/project-disclosures";
 import { ProjectGallery } from "@/components/projects/project-gallery";
 import {
   ProjectDownloadPanel,
@@ -112,12 +113,16 @@ interface ProtectedOverride {
 /** Shared detail page for mods, modpacks, plugins, packs, shaders, and datapacks. */
 export const ProjectDetail = ({ project }: { project: ProjectView }) => {
   const { data: session } = authClient.useSession();
+
   const canManage =
     session?.user.id === project.ownerId ||
     can(session?.user.role, "reviewProjects");
+
   const canProtect = can(session?.user.role, "manageProtectedProjects");
+
   const [protectedOverride, setProtectedOverride] =
     useState<ProtectedOverride | null>(null);
+
   const [isSavingProtection, setIsSavingProtection] = useState(false);
   const [protectionError, setProtectionError] = useState<string | null>(null);
 
@@ -130,6 +135,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
     const next = !isProtected;
     setIsSavingProtection(true);
     setProtectionError(null);
+
     try {
       await setProjectProtected({
         data: { isProtected: next, projectId: project.id },
@@ -138,6 +144,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
     } catch (error) {
       setProtectionError(errorMessage(error, "Could not update the project."));
     }
+
     setIsSavingProtection(false);
   };
 
@@ -195,6 +202,10 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
               <MarkdownBody>{project.description}</MarkdownBody>
             </div>
           </section>
+        ) : null}
+
+        {project.disclosures.length > 0 ? (
+          <ProjectDisclosuresSection disclosures={project.disclosures} />
         ) : null}
 
         <ProjectGallery

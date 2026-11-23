@@ -3,6 +3,7 @@ import type { FormEvent, ReactNode } from "react";
 import { toast } from "sonner";
 import { safeParse } from "valibot";
 
+import { ProjectDisclosures } from "@/components/dashboard/project-disclosures";
 import { FormField } from "@/components/form-field";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { RequiredLabel } from "@/components/required-label";
@@ -32,12 +33,17 @@ import {
   projectInputSchema,
   SLUG_MAX_LENGTH,
 } from "@/lib/projects";
-import type { ProjectInput, ProjectType } from "@/lib/projects";
+import type {
+  ProjectDisclosure,
+  ProjectInput,
+  ProjectType,
+} from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 export interface ProjectFormValues {
   category: string;
   description: string;
+  disclosures: ProjectDisclosure[];
   name: string;
   slug: string;
   summary: string;
@@ -56,6 +62,7 @@ interface ProjectFormProps {
 const EMPTY_VALUES: ProjectFormValues = {
   category: "",
   description: "",
+  disclosures: [],
   name: "",
   slug: "",
   summary: "",
@@ -71,7 +78,8 @@ const slugify = (value: string): string =>
     .toLowerCase()
     .normalize("NFKD")
     .replaceAll(/[^a-z0-9]+/gu, "-")
-    .replaceAll(/^-+|-+$/gu, "")
+    .replaceAll(/^-+/gu, "")
+    .replaceAll(/-+$/gu, "")
     .slice(0, SLUG_MAX_LENGTH);
 
 const splitTags = (value: string): string[] => [
@@ -106,10 +114,12 @@ export const ProjectForm = ({
   submitLabel,
 }: ProjectFormProps) => {
   const [values, setValues] = useState(initialValues);
+
   const [categoryIsCustom, setCategoryIsCustom] = useState(
     Boolean(initialValues.category) &&
       !isCategoryForType(initialValues.type, initialValues.category)
   );
+
   const [customCategory, setCustomCategory] = useState(initialValues.category);
   // Once the slug is typed by hand, stop deriving it from the name.
   const slugEditedRef = useRef(mode === "edit");
@@ -148,18 +158,23 @@ export const ProjectForm = ({
       ...values,
       tags: splitTags(values.tags),
     });
+
     if (!result.success) {
       setErrors(toFieldErrors(result.issues));
+
       return;
     }
+
     setErrors(NO_FIELD_ERRORS);
 
     setPending(true);
+
     try {
       await onSubmit(result.output);
     } catch (error) {
       toast.error(errorMessage(error, "Could not save the project."));
     }
+
     setPending(false);
   };
 
@@ -254,11 +269,14 @@ export const ProjectForm = ({
             onValueChange={(value) => {
               const custom = value === OTHER_CATEGORY;
               setCategoryIsCustom(custom);
+
               if (!custom) {
                 setCustomCategory("");
                 update("category", value ?? "");
+
                 return;
               }
+
               const nextCustom = categoryIsCustom ? customCategory : "";
               setCustomCategory(nextCustom);
               update("category", nextCustom);
@@ -354,6 +372,17 @@ export const ProjectForm = ({
           helperText="Markdown is supported. The preview uses the same renderer as the public page."
           previewEmptyMessage="Your description will appear here as you type."
           previewMaxHeightClassName="max-h-[30rem] min-h-56"
+        />
+      </FormSection>
+
+      <FormSection
+        title="Disclosures"
+        description="Optional notes about how the project was made, what it relies on, or whether it is still maintained."
+      >
+        <ProjectDisclosures
+          disclosures={values.disclosures}
+          error={errors.get("disclosures")}
+          onChange={(disclosures) => update("disclosures", disclosures)}
         />
       </FormSection>
 

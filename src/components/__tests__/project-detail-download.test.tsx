@@ -19,6 +19,13 @@ vi.mock("@/lib/reports.functions", () => ({
   createReport: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The player count query pulls in the database; this suite is about the project page's layout
+vi.mock("@/lib/server-status.functions", () => ({
+  getMinecraftServerStatuses: vi.fn<() => Promise<Record<string, never>>>(() =>
+    Promise.resolve({})
+  ),
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Same reason as reports.functions: the protection control imports it at module scope
 vi.mock("@/lib/projects.functions", () => ({
   setProjectProtected: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
@@ -66,6 +73,7 @@ const project = (overrides: Partial<ProjectView> = {}): ProjectView => ({
   authorUsername: "alice",
   category: "performance",
   description: "A rendering engine.",
+  disclosures: [],
   downloads: 1_240_000,
   gallery: [],
   icon: null,
@@ -93,12 +101,14 @@ const panel = () => screen.getByRole("region", { name: /^download$/iu });
 describe(ProjectDetail, () => {
   beforeEach(() => {
     useSessionMock.mockReset().mockReturnValue({ data: null });
+
     // jsdom has neither observer; the report dialog and Reveal want them.
     class ObserverStub {
       disconnect = vi.fn<() => void>();
       observe = vi.fn<() => void>();
       unobserve = vi.fn<() => void>();
     }
+
     vi.stubGlobal("IntersectionObserver", ObserverStub);
     vi.stubGlobal("ResizeObserver", ObserverStub);
   });
@@ -129,6 +139,7 @@ describe(ProjectDetail, () => {
     const link = within(panel()).getByRole("link", {
       name: /download sodium-0\.6\.0\.jar/iu,
     });
+
     expect(link.getAttribute("href")).toBe(`/api/download/${FILE_ID}`);
   });
 
@@ -177,6 +188,7 @@ describe(ProjectDetail, () => {
     for (const loader of ["fabric", "forge"]) {
       expect(within(panel()).getByText(loader)).toBeInTheDocument();
     }
+
     expect(
       within(panel()).getByText("Loaders", { selector: "p" })
     ).toBeInTheDocument();
@@ -188,6 +200,7 @@ describe(ProjectDetail, () => {
     for (const gameVersion of ["1.21.4", "1.21.1"]) {
       expect(within(panel()).getByText(gameVersion)).toBeInTheDocument();
     }
+
     expect(
       within(panel()).queryByText("1.21.4, 1.21.1")
     ).not.toBeInTheDocument();
@@ -275,6 +288,7 @@ describe(ProjectDetail, () => {
       .map((heading) => Number(heading.tagName.slice(1)));
 
     expect(levels[0]).toBe(1);
+
     for (const [index, level] of levels.entries()) {
       expect(level - (levels[index - 1] ?? 1)).toBeLessThanOrEqual(1);
     }
@@ -287,6 +301,31 @@ describe(ProjectDetail, () => {
     // reader what they are reading about.
     expect(
       screen.getByRole("heading", { name: /about this datapack/iu })
+    ).toBeInTheDocument();
+  });
+
+  it("shows each disclosure beside the explanation it needs", () => {
+    render(
+      <ProjectDetail
+        project={project({
+          disclosures: [
+            {
+              description: "The icon art was generated with AI.",
+              type: "ai-generated",
+            },
+          ],
+        })}
+      />
+    );
+
+    // The label alone leaves the reader guessing. The description is the
+    // disclosure, so both have to reach the page.
+    expect(
+      screen.getByRole("heading", { name: "Disclosures" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("AI-generated content")).toBeInTheDocument();
+    expect(
+      screen.getByText("The icon art was generated with AI.")
     ).toBeInTheDocument();
   });
 });
