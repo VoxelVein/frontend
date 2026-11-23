@@ -124,7 +124,12 @@ const ImageManager = (props: ImageManagerProps) => {
 
   return (
     <div className="grid gap-2">
-      <span className="text-foreground text-sm font-medium">{label}</span>
+      <label
+        htmlFor={`project-${kind}-upload`}
+        className="text-foreground text-sm font-medium"
+      >
+        {label}
+      </label>
 
       {images.length > 0 ? (
         <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">

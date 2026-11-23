@@ -10,10 +10,13 @@ import {
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { optional, parse, picklist, object } from "valibot";
 
 import { ImageManager } from "@/components/dashboard/image-manager";
 import { ProjectForm } from "@/components/dashboard/project-form";
+import {
+  ProjectMobileNav,
+  ProjectSidebar,
+} from "@/components/dashboard/project-sidebar";
 import { PublishPanel } from "@/components/dashboard/publish-panel";
 import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
@@ -31,10 +34,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import type { ProjectImagesView } from "@/lib/project-images";
+import {
+  parseProjectSearch,
+  PROJECT_TABS,
+  resolveProjectTab,
+} from "@/lib/project-tabs";
+import type { ProjectTab } from "@/lib/project-tabs";
 import {
   PROJECT_IMAGE_KIND,
   hasVersions,
@@ -61,9 +69,6 @@ import {
 import { deleteVersionFile, uploadVersionFile } from "@/lib/upload-client";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
-const TABS = ["details", "images", "versions", "danger"] as const;
-
-type Tab = (typeof TABS)[number];
 
 const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
   const ids = new Set<string>();
@@ -83,16 +88,11 @@ const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
 };
 
 /**
- * Section rhythm and measure follow the landing page, at the narrower
- * `max-w-3xl` band it uses for reading text. Matches the width cap on the
- * form fields closely enough that they read as one column.
+ * The editor uses the same page rhythm and mini-sidebar as Settings and the
+ * Admin panel. Reading columns keep a narrower measure inside that layout.
  */
-const PAGE_WIDTH = "mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8";
-
-const searchSchema = object({ tab: optional(picklist(TABS)) });
-
-const isTab = (value: string): value is Tab =>
-  TABS.some((tab) => tab === value);
+const PAGE_WIDTH =
+  "mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8";
 
 const VersionPlatformFileForm = ({
   onChange,
@@ -478,12 +478,30 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
 const ManageProjectPage = () => {
   const project = useLoaderData({ from: ROUTE_ID });
 
-  const { tab = "details" } = useSearch({
-    from: ROUTE_ID,
-  });
+  const activeTab = resolveProjectTab(useSearch({ from: ROUTE_ID }));
+  const hasReleaseVersions = hasVersions(project.type);
 
   const navigate = useNavigate({ from: ROUTE_ID });
   const router = useRouter();
+
+  const selectTab = (value: ProjectTab) => {
+    // The search parameter is the source of truth, and `replace` keeps section
+    // hops from filling browser history.
+    void navigate({ replace: true, search: { tab: value } });
+  };
+
+  const sidebarProps = {
+    activeTab,
+    hasVersions: hasReleaseVersions,
+    onSelect: selectTab,
+    versionCount: project.versions.length,
+  };
+
+  const activeLabel =
+    activeTab === "versions" && !hasReleaseVersions
+      ? "Server"
+      : (PROJECT_TABS.find((entry) => entry.value === activeTab)?.label ??
+        "Project");
 
   // Image uploads answer with the new record, so the tab updates itself
   // rather than round-tripping the loader after every file.
@@ -515,142 +533,137 @@ const ManageProjectPage = () => {
     <div className={PAGE_WIDTH}>
       <Link
         to="/dashboard/projects"
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring -ml-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
       >
         <IconArrowLeft size={16} aria-hidden="true" />
         My projects
       </Link>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-          {project.name}
-        </h1>
-        <FilledPill className="text-sm">
-          {PROJECT_STATUS_LABELS[project.status]}
-        </FilledPill>
-      </div>
-      <p className="text-muted-foreground mt-3 text-lg">
-        {PROJECT_TYPE_LABELS[project.type].singular} ·{" "}
-        {PROJECT_TYPE_PATHS[project.type]}/{project.slug}
-      </p>
+      <PageHeader
+        title={project.name}
+        description={`${PROJECT_TYPE_LABELS[project.type].singular} · ${PROJECT_TYPE_PATHS[project.type]}/${project.slug}`}
+        action={
+          <div className="flex flex-wrap items-center gap-3">
+            <FilledPill className="text-sm">
+              {PROJECT_STATUS_LABELS[project.status]}
+            </FilledPill>
+            <ProjectMobileNav {...sidebarProps} />
+          </div>
+        }
+      />
 
-      <div className="mt-8">
+      <div className="mt-8 max-w-3xl">
         <PublishPanel project={project} onChange={reload} />
       </div>
 
-      <Tabs
-        className="mt-8"
-        value={tab}
-        onValueChange={(value) => {
-          if (isTab(value)) {
-            void navigate({ replace: true, search: { tab: value } });
-          }
-        }}
-      >
-        <TabsList aria-label="Project sections">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="images">Images</TabsTrigger>
-          <TabsTrigger value="versions">
-            {hasVersions(project.type)
-              ? `Versions (${project.versions.length})`
-              : "Server"}
-          </TabsTrigger>
-          <TabsTrigger value="danger">Danger Zone</TabsTrigger>
-        </TabsList>
+      <div className="mt-8 flex flex-col items-start gap-6 lg:flex-row lg:gap-8">
+        <ProjectSidebar {...sidebarProps} />
 
-        <TabsContent value="details" className="pt-4">
-          <ProjectForm
-            key={project.updatedAt}
-            mode="edit"
-            submitLabel="Save changes"
-            initialValues={{
-              category: project.category,
-              description: project.description,
-              disclosures: project.disclosures,
-              name: project.name,
-              slug: project.slug,
-              summary: project.summary,
-              tags: project.tags.join(", "),
-              type: project.type,
-            }}
-            onSubmit={handleDetails}
-          />
-        </TabsContent>
-
-        <TabsContent value="images" className="grid gap-8 pt-4">
-          <ImageManager
-            kind={PROJECT_IMAGE_KIND.icon}
-            icon={images.icon}
-            projectId={project.id}
-            projectName={project.name}
-            onChange={(next) =>
-              setImages((current) => ({ ...current, ...next }))
-            }
-          />
-          <ImageManager
-            kind={PROJECT_IMAGE_KIND.gallery}
-            gallery={images.gallery}
-            projectId={project.id}
-            projectName={project.name}
-            onChange={(next) =>
-              setImages((current) => ({ ...current, ...next }))
-            }
-          />
-        </TabsContent>
-
-        {hasVersions(project.type) ? null : (
-          <TabsContent value="versions" className="pt-4">
-            <ServerForm
+        <section aria-label={activeLabel} className="min-w-0 flex-1">
+          {activeTab === "details" ? (
+            <ProjectForm
               key={project.updatedAt}
-              projectId={project.id}
-              server={project.server}
-              onSaved={async () => {
-                await reload();
-                toast.success("Server saved");
+              mode="edit"
+              submitLabel="Save changes"
+              initialValues={{
+                category: project.category,
+                description: project.description,
+                disclosures: project.disclosures,
+                name: project.name,
+                slug: project.slug,
+                summary: project.summary,
+                tags: project.tags.join(", "),
+                type: project.type,
               }}
+              onSubmit={handleDetails}
             />
-          </TabsContent>
-        )}
+          ) : null}
 
-        {hasVersions(project.type) ? (
-          <TabsContent value="versions" className="grid gap-10 pt-4">
-            <section aria-labelledby="new-version-heading">
+          {activeTab === "images" ? (
+            <div className="grid max-w-3xl gap-8">
+              <ImageManager
+                kind={PROJECT_IMAGE_KIND.icon}
+                icon={images.icon}
+                projectId={project.id}
+                projectName={project.name}
+                onChange={(next) =>
+                  setImages((current) => ({ ...current, ...next }))
+                }
+              />
+              <ImageManager
+                kind={PROJECT_IMAGE_KIND.gallery}
+                gallery={images.gallery}
+                projectId={project.id}
+                projectName={project.name}
+                onChange={(next) =>
+                  setImages((current) => ({ ...current, ...next }))
+                }
+              />
+            </div>
+          ) : null}
+
+          {activeTab === "versions" && !hasReleaseVersions ? (
+            <section aria-labelledby="server-heading" className="max-w-3xl">
               <h2
-                id="new-version-heading"
+                id="server-heading"
                 className="text-foreground mb-4 text-lg font-semibold"
               >
-                New version
+                Server details
               </h2>
-              <VersionForm
+              <ServerForm
+                key={project.updatedAt}
                 projectId={project.id}
-                projectType={project.type}
-                onCreated={async () => {
+                server={project.server}
+                onSaved={async () => {
                   await reload();
-                  toast.success("Version uploaded");
+                  toast.success("Server saved");
                 }}
               />
             </section>
-            <section aria-labelledby="versions-heading">
-              <h2
-                id="versions-heading"
-                className="text-foreground mb-4 text-lg font-semibold"
-              >
-                Versions
-              </h2>
-              <VersionList
-                versions={project.versions}
-                projectId={project.id}
-                projectType={project.type}
-                onChange={reload}
-              />
-            </section>
-          </TabsContent>
-        ) : null}
+          ) : null}
 
-        <TabsContent value="danger" className="pt-4">
-          <DangerZone project={project} />
-        </TabsContent>
-      </Tabs>
+          {activeTab === "versions" && hasReleaseVersions ? (
+            <div className="grid gap-10">
+              <section aria-labelledby="new-version-heading">
+                <h2
+                  id="new-version-heading"
+                  className="text-foreground mb-4 text-lg font-semibold"
+                >
+                  Add a version
+                </h2>
+                <VersionForm
+                  projectId={project.id}
+                  projectType={project.type}
+                  onCreated={async () => {
+                    await reload();
+                    toast.success("Version uploaded");
+                  }}
+                />
+              </section>
+              <section aria-labelledby="versions-heading">
+                <h2
+                  id="versions-heading"
+                  className="text-foreground mb-4 text-lg font-semibold"
+                >
+                  Uploaded versions
+                </h2>
+                <VersionList
+                  versions={project.versions}
+                  projectId={project.id}
+                  projectType={project.type}
+                  onChange={reload}
+                />
+              </section>
+            </div>
+          ) : null}
+
+          {activeTab === "danger" ? (
+            <div className="max-w-3xl">
+              <DangerZone project={project} />
+            </div>
+          ) : null}
+        </section>
+      </div>
     </div>
   );
 };
@@ -661,8 +674,14 @@ const ManageProjectSkeleton = () => (
     <Skeleton className="h-11 w-32" />
     <Skeleton className="mt-4 h-9 w-64" />
     <Skeleton className="mt-3 h-5 w-80 max-w-full" />
-    <Skeleton className="mt-8 h-32 w-full rounded-xl" />
-    <Skeleton className="mt-8 h-64 w-full rounded-xl" />
+    <Skeleton className="mt-8 h-32 w-full max-w-3xl rounded-xl" />
+    <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:gap-8">
+      <Skeleton className="hidden h-64 w-60 rounded-xl lg:block" />
+      <div className="grid flex-1 gap-4">
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    </div>
   </div>
 );
 
@@ -685,8 +704,7 @@ const ProjectUnavailable = ({ error }: ErrorComponentProps) => (
 
 export const Route = createFileRoute("/dashboard/projects/$projectId")({
   pendingComponent: ManageProjectSkeleton,
-  validateSearch: (search: Record<string, string | undefined>) =>
-    parse(searchSchema, search),
+  validateSearch: parseProjectSearch,
   loader: ({ params }) =>
     getEditableProject({ data: { projectId: params.projectId } }),
   head: ({ loaderData }) => ({

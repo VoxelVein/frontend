@@ -213,16 +213,19 @@ children:
 * `/dashboard/projects/$projectId?tab=`, `details`, `images`, `versions`,
   or `danger`
 
-Both dashboard pages use the landing page's design language rather than the
-settings screens: the `py-16` section rhythm and `max-w-7xl` measure of the
-home page, big `text-3xl sm:text-4xl` bold headings instead of the smaller
-`PageHeader`, and the filled accent pill for a project's status. A creator
-dashboard that looks like the settings screen reads as a different product
-from the site they publish to.
+The project editor shares the Settings and Admin panel shell: a
+`PageHeader` carrying the name, type, slug and status, a mobile section
+drawer, and the `AppSidebar` mini-navigation beside the active panel. The
+tab lives in `?tab=` and is parsed by `src/lib/project-tabs.ts`; switching
+sections uses `navigate({ replace: true })` so section hops do not fill
+browser history. A release project offers Details, Images, Versions and
+Danger Zone; a server swaps Versions for Server. Reading columns keep a
+`max-w-3xl` measure inside the wider `max-w-7xl` layout.
 
-`FilledPill` (`src/components/filled-pill.tsx`) holds that accent shape. It
-was inline in the hero and the explore heading and is now used by the
-dashboard as well, so there is one definition rather than three copies.
+`FilledPill` (`src/components/filled-pill.tsx`) holds the status accent
+shape. It was inline in the hero and the explore heading and is now used
+by the dashboard as well, so there is one definition rather than three
+copies.
 
 The overview at `/dashboard/projects` is a management list rather than a
 gallery. Each project is a divided row with its icon, name, status, type,

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ProjectLink } from "@/components/projects/project-link";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { Spinner } from "@/components/ui/spinner";
 import { errorMessage } from "@/lib/form-errors";
 import type { PublicationOutcome } from "@/lib/project-moderation";
 import {
@@ -17,17 +18,12 @@ import type { ProjectView } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 /**
- * What each status means for a creator, and the one action it offers.
+ * Per-status copy and the one action available from it.
  *
  * `action` is null where there is nothing to do, which is how a removed project
- * renders read-only instead of showing a button the server would reject.
- */
-/**
- * Per-status copy and the action available from it.
- *
- * There is no `heading` here: the page header already carries the status as a
- * badge, and repeating it as this panel's title said the same word twice
- * within a few hundred pixels. The panel names its own job instead.
+ * renders read-only instead of showing a button the server would reject. The
+ * page header carries the status badge, so this panel names its own job
+ * ("Visibility") rather than repeating the status word.
  */
 const VISIBILITY = {
   draft: {
@@ -195,6 +191,7 @@ export const PublishPanel = ({
 
   return (
     <section
+      aria-busy={isPending}
       aria-labelledby="visibility-heading"
       className="border-border bg-card rounded-xl border p-6"
     >
@@ -240,6 +237,7 @@ export const PublishPanel = ({
           <IconExternalLink size={16} aria-hidden="true" />
           View page
         </ProjectLink>
+        {isPending ? <Spinner label="Changing visibility" /> : null}
       </div>
     </section>
   );
