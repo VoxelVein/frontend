@@ -89,6 +89,12 @@
      arriving rather than sliding. */
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* The site-wide cursor. Declared once so the base layer and the
+     `cursor-default` override below cannot drift apart. The hotspot sits at
+     the arrow tip (2px in, 1px down); `auto` keeps a native cursor if the SVG
+     fails to load. */
+  --cursor-default: url("/cursor.svg") 2 1, auto;
+
   /* Every overlay  -  dialog, alert dialog, dropdown, select, cookie banner  - 
      animates through tw-animate-css, which reads its curve from `--tw-ease` and
      its duration from `--tw-duration`.
@@ -274,6 +280,9 @@
   }
   html {
     @apply font-sans;
+    /* `cursor` inherits, so this becomes the default everywhere without
+       touching the pointer/text/resize cursors components declare themselves. */
+    cursor: var(--cursor-default);
   }
   /* Ambient glow: soft blue brand bloom at the top of the page. */
   .dark body {
@@ -283,6 +292,15 @@
       transparent 62%
     );
     background-repeat: no-repeat;
+  }
+}
+
+/* shadcn menu items opt out of the pointer cursor with `cursor-default`. That
+   is still the site's default arrow, just expressed as a utility, so map it to
+   the same SVG instead of leaving a native arrow behind on those items. */
+@layer utilities {
+  .cursor-default {
+    cursor: var(--cursor-default);
   }
 }
 
