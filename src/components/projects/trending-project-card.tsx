@@ -40,11 +40,7 @@ const TrendingProjectCard = ({ project, rank }: TrendingProjectCardProps) => (
         image={project.icon}
         alt=""
         className="size-11 shrink-0 rounded-xl border"
-        fallback={
-          <div className="border-primary/20 bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border text-base font-bold">
-            {project.name.charAt(0)}
-          </div>
-        }
+        fallbackSeed={project.id}
       />
 
       <div className="min-w-0 flex-1">

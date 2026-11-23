@@ -108,7 +108,7 @@ describe(Hero, () => {
     render(<Hero />);
 
     const link = screen.getByRole("link", { name: BROWSE_PROJECTS });
-    expect(link.getAttribute("href")).toBe("/mods");
+    expect(link.getAttribute("href")).toBe("/p/mods");
     expect(screen.queryByRole("button", { name: BROWSE_PROJECTS })).toBeNull();
     expect(consoleError).not.toHaveBeenCalled();
   });
@@ -132,7 +132,7 @@ describe(Hero, () => {
     ).toBe("/signup");
     expect(
       screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
-    ).toBe("/mods");
+    ).toBe("/p/mods");
   });
 
   it("swaps the join call to action for the dashboard once signed in", () => {
@@ -149,7 +149,7 @@ describe(Hero, () => {
     // came to look at.
     expect(
       screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
-    ).toBe("/mods");
+    ).toBe("/p/mods");
   });
 
   it("shows neither call to action label before the session resolves", () => {
@@ -163,7 +163,7 @@ describe(Hero, () => {
     expect(screen.queryByRole("link", { name: /your projects/iu })).toBeNull();
     expect(
       screen.getByRole("link", { name: BROWSE_PROJECTS }).getAttribute("href")
-    ).toBe("/mods");
+    ).toBe("/p/mods");
   });
 
   it("prints the category list once, for screen readers only", () => {

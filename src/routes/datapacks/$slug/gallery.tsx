@@ -1,43 +1,14 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  ProjectGalleryPage,
-  ProjectGalleryPageSkeleton,
-} from "@/components/projects/project-gallery-page";
-import { galleryLoader } from "@/lib/project-gallery.functions";
-import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
+import { legacyProjectRedirect } from "@/lib/legacy-project-redirect";
 
-const GalleryPage = () => {
-  const project = useLoaderData({ from: "/datapacks/$slug/gallery" });
-
-  return (
-    <ProjectGalleryPage
-      images={project.gallery}
-      projectName={project.name}
-      slug={project.slug}
-      type="datapack"
-    />
-  );
-};
-
+/** Old gallery links keep working after the /p migration. */
 export const Route = createFileRoute("/datapacks/$slug/gallery")({
-  loader: ({ params }) => galleryLoader("datapack", params.slug),
-  head: ({ loaderData, match }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.name} gallery | VoxelVein`
-          : "Gallery not found | VoxelVein",
-      },
-      ...socialMeta({
-        description: loaderData?.summary ?? SITE_DESCRIPTION,
-        path: match.pathname,
-        title: loaderData
-          ? `${loaderData.name} gallery | VoxelVein`
-          : "Gallery not found | VoxelVein",
-      }),
-    ],
-  }),
-  component: GalleryPage,
-  pendingComponent: ProjectGalleryPageSkeleton,
+  beforeLoad: ({ location, params }) =>
+    legacyProjectRedirect({
+      gallery: true,
+      searchStr: location.searchStr,
+      slug: params.slug,
+      type: "datapack",
+    }),
 });

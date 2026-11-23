@@ -3,8 +3,8 @@
 Search runs inside Postgres. There is no search service to run, no key to
 configure, and no index to keep in step with the tables it was built from.
 
-All six browse pages (`/mods`, `/modpacks`, `/plugins`, `/resource-packs`,
-`/shaders`, `/servers`), the blog, and the admin Posts tab query Postgres
+All six browse pages (`/p/mods`, `/p/modpacks`, `/p/plugins`, `/p/resource-packs`,
+`/p/shaders`, `/p/servers`), the blog, and the admin Posts tab query Postgres
 directly through server functions.
 
 ## How it works

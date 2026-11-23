@@ -7,6 +7,7 @@ import {
 import { Link } from "@tanstack/react-router";
 
 import { Logo } from "@/components/logo";
+import { PROJECT_TYPE_PATHS } from "@/lib/projects";
 
 interface FooterLink {
   available: boolean;
@@ -15,13 +16,17 @@ interface FooterLink {
 }
 
 const PROJECT_LINKS: readonly FooterLink[] = [
-  { available: true, href: "/mods", label: "Mods" },
-  { available: true, href: "/modpacks", label: "Modpacks" },
-  { available: true, href: "/plugins", label: "Plugins" },
-  { available: true, href: "/resource-packs", label: "Resource Packs" },
-  { available: true, href: "/shaders", label: "Shaders" },
-  { available: true, href: "/servers", label: "Servers" },
-  { available: true, href: "/datapacks", label: "Datapacks" },
+  { available: true, href: PROJECT_TYPE_PATHS.mod, label: "Mods" },
+  { available: true, href: PROJECT_TYPE_PATHS.modpack, label: "Modpacks" },
+  { available: true, href: PROJECT_TYPE_PATHS.plugin, label: "Plugins" },
+  {
+    available: true,
+    href: PROJECT_TYPE_PATHS.resourcepack,
+    label: "Resource Packs",
+  },
+  { available: true, href: PROJECT_TYPE_PATHS.shader, label: "Shaders" },
+  { available: true, href: PROJECT_TYPE_PATHS.server, label: "Servers" },
+  { available: true, href: PROJECT_TYPE_PATHS.datapack, label: "Datapacks" },
 ];
 
 const RESOURCE_LINKS: readonly FooterLink[] = [

@@ -6,7 +6,7 @@ import { getProject } from "@/lib/projects.functions";
 /**
  * Loader for a project's gallery route, shared by all six type routes.
  *
- * Every type has its own gallery path (`/mods/$slug/gallery` and so on) because
+ * Every type has its own gallery path (`/p/mods/$slug/gallery` and so on) because
  * the project routes are per-type, but the work is identical, so it lives here
  * once.
  *

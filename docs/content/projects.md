@@ -13,15 +13,15 @@ Postgres, files live in
 
 Each type has a browse page and a detail page:
 
-| Type           | Browse            | Detail                  |
-| -------------- | ----------------- | ----------------------- |
-| `mod`          | `/mods`           | `/mods/$slug`           |
-| `modpack`      | `/modpacks`       | `/modpacks/$slug`       |
-| `plugin`       | `/plugins`        | `/plugins/$slug`        |
-| `resourcepack` | `/resource-packs` | `/resource-packs/$slug` |
-| `shader`       | `/shaders`        | `/shaders/$slug`        |
-| `datapack`     | `/datapacks`      | `/datapacks/$slug`      |
-| `server`       | `/servers`        | `/servers/$slug`        |
+| Type           | Browse              | Detail                    |
+| -------------- | ------------------- | ------------------------- |
+| `mod`          | `/p/mods`           | `/p/mods/$slug`           |
+| `modpack`      | `/p/modpacks`       | `/p/modpacks/$slug`       |
+| `plugin`       | `/p/plugins`        | `/p/plugins/$slug`        |
+| `resourcepack` | `/p/resource-packs` | `/p/resource-packs/$slug` |
+| `shader`       | `/p/shaders`        | `/p/shaders/$slug`        |
+| `datapack`     | `/p/datapacks`      | `/p/datapacks/$slug`      |
+| `server`       | `/p/servers`        | `/p/servers/$slug`        |
 
 All seven browse pages render the same `ProjectBrowser` component with a
 different type, so filters, sorting, pagination, the SSE live banner, and
@@ -30,22 +30,41 @@ lives in one place, `src/lib/categories.ts`, and drives the navbar menu,
 the navbar overflow menu, the footer, and the home page's explore grid, so
 a category can never be advertised in one place and missing in another.
 
+`/p` is the project namespace, mirroring `/u` for users. The browse pages
+use the shared page frame: a `PageHeader` with the type's icon, a bordered
+search-and-filter card, and a results section with a total. The old
+top-level paths (`/mods`, `/servers`, and their detail and gallery paths)
+remain as redirect-only routes so bookmarks and indexed links keep working;
+`legacyProjectRedirect` builds the target from `PROJECT_TYPE_PATHS`.
+
 ### The detail pages are two components, not one
 
 The seven detail routes split into two components, because the types do not
 share a subject. Six of them are downloads and render `ProjectDetail`; a
 server is a place you go, not a file you fetch, and renders `ServerDetail`.
 
-Both share one layout: a sidebar on the left from `lg` up, and the
-long-form content beside it. Each sidebar answers the same two questions
-in the same order, *can I use this*, then *how do I get it*, and each
-leads the DOM, so the priority holds on mobile and for a screen reader
-alike rather than depending on where the sidebar happens to sit.
+Both share the standard page shell: the back link and name use the same
+`PageHeader` and `max-w-7xl` rhythm as Settings and the project editor,
+with a plain summary and a compact stat row underneath. The old dimmed
+gallery backdrop, brand eyebrow, oversized icon and boxed stat strip are
+gone, so a detail page reads like the rest of the site. The action column
+sits on the right from `lg` up, with long-form content beside it. Each
+sidebar answers the same two questions in the same order, *can I use
+this*, then *how do I get it*, and each leads the DOM, so the priority
+holds on mobile and for a screen reader alike rather than depending on
+where the sidebar happens to sit.
 
 | Type                 | Sidebar                                     |
 | -------------------- | ------------------------------------------- |
 | the six downloadable | newest version and file, then compatibility |
 | `server`             | address, versions, then client requirements |
+
+The byline reads *Created by \<name\>*. `loadProjectView` selects the
+owner's `image` alongside their name, and `ProjectView.authorImage` carries
+it to the page. The picture is rendered only when it is present and passes
+`isSafeAvatarSrc`; an account without one shows the name alone, with no
+initial tile standing in for a photo it never uploaded. A project kept
+after its owner deleted their account has both fields null.
 
 The download used to be the last section on the page, below the
 description and the gallery, and the join address below the stats, the
@@ -179,15 +198,15 @@ Tables are defined in `src/db/schema.ts`:
 Shared constants and validation schemas (categories, loaders, slug rules,
 URL paths per type) are in `src/lib/projects.ts`.
 
-| Type           | URL               | Files               |
-| -------------- | ----------------- | ------------------- |
-| `mod`          | `/mods`           | `.jar`              |
-| `modpack`      | `/modpacks`       | `.mrpack` or `.zip` |
-| `plugin`       | `/plugins`        | `.jar`              |
-| `resourcepack` | `/resource-packs` | `.zip`              |
-| `shader`       | `/shaders`        | `.zip`              |
-| `datapack`     | `/datapacks`      | `.zip`              |
-| `server`       | `/servers`        | None                |
+| Type           | URL                 | Files               |
+| -------------- | ------------------- | ------------------- |
+| `mod`          | `/p/mods`           | `.jar`              |
+| `modpack`      | `/p/modpacks`       | `.mrpack` or `.zip` |
+| `plugin`       | `/p/plugins`        | `.jar`              |
+| `resourcepack` | `/p/resource-packs` | `.zip`              |
+| `shader`       | `/p/shaders`        | `.zip`              |
+| `datapack`     | `/p/datapacks`      | `.zip`              |
+| `server`       | `/p/servers`        | None                |
 
 Mods and modpacks list mod loaders, plugins list server platforms, and
 shaders list shader loaders. Resource packs, datapacks, and servers have
@@ -202,6 +221,17 @@ Mojang's launcher manifest. They are generated into
 Mojang ships a version and commit the result. Uploaders pick versions in
 a searchable field: typing a line such as `1.20` offers to add all of its
 releases at once, and snapshots stay hidden until "Show snapshots" is on.
+
+Servers share that picker and also offer **Add Suggested**. It opens
+`SuggestedVersionsModal`, which fetches the live release list from Mojang's
+`version_manifest_v2.json` through `getSuggestedMinecraftVersions`. The
+result is cached for an hour on the server and falls back to the generated
+manifest when Mojang is unreachable. Releases appear as removable chips
+alongside the versions already saved; typing a version and pressing Enter
+or comma adds another chip. **Accept** writes the whole chip list back to
+the form, while **Cancel** asks for confirmation before discarding the
+edit. The same `ServerForm` is used when creating and when managing a
+server, so the button is in both places.
 
 ## The creator dashboard
 
@@ -471,9 +501,24 @@ from them in every way that matters:
   project's icon is therefore not readable by anyone who guesses its id.
 * Images never affect a version's or a project's download counter.
 
-Nothing is resized. The stored `width` and `height` let the UI reserve the
-correct box, which avoids layout shift, but the file itself is what was
-uploaded. `ROADMAP.md` records the resizing options and their trade-offs.
+The server stores the bytes it receives: no re-encoding, no crop. The
+client may shrink an oversized image before sending it, via
+`resizeImageForUpload`. The stored `width` and `height` let the UI reserve
+the correct box and avoid layout shift.
+
+A project with no uploaded icon gets a deterministic DiceBear identicon
+instead of a letter tile. `projectFallbackIconUrl` builds
+`https://api.dicebear.com/9.x/identicon/svg?seed=…` from the project's
+`id`, and `ProjectImage` renders it in the same sized box an uploaded icon
+would occupy. Everywhere a project appears  -  browse cards, trending, the
+detail header and the creator list  -  keeps the same generated picture.
+
+A project **icon** is different: selecting one opens `ImageCropModal`, the
+same zoom, pan, pinch and slider control the account picture uses. The
+creator frames a square, which is encoded as a 512px WebP and sent as the
+icon. The circular scrim in the avatar version is only a preview; the icon
+version outlines the square instead. Gallery images keep their own aspect
+ratio and are uploaded directly, with no crop dialog.
 
 ## Server client requirements
 

@@ -42,11 +42,11 @@ describe("project type registry", () => {
     }
   });
 
-  it("gives every type a unique lowercase URL path", () => {
+  it("gives every type a unique lowercase URL path under /p", () => {
     const paths = PROJECT_TYPES.map((type) => PROJECT_TYPE_PATHS[type]);
 
     for (const path of paths) {
-      expect(path, "URL path").toMatch(/^\/[a-z0-9-]+$/u);
+      expect(path, "URL path").toMatch(/^\/p\/[a-z0-9-]+$/u);
     }
 
     expect(new Set(paths).size).toBe(PROJECT_TYPES.length);

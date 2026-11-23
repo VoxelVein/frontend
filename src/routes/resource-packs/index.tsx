@@ -1,30 +1,12 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  ProjectBrowser,
-  ProjectBrowserSkeleton,
-} from "@/components/projects/project-browser";
-import { loadProjectBrowser } from "@/lib/project-browser-loader";
-import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
+import { legacyProjectRedirect } from "@/lib/legacy-project-redirect";
 
-const ResourcePacksPage = () => {
-  const data = useLoaderData({ from: "/resource-packs/" });
-
-  return <ProjectBrowser type="resourcepack" {...data} />;
-};
-
+/** Old /resource-packs bookmarks resolve to the project route below /p. */
 export const Route = createFileRoute("/resource-packs/")({
-  loader: () => loadProjectBrowser("resourcepack"),
-  head: ({ match }) => ({
-    meta: [
-      { title: "Resource Packs | VoxelVein" },
-      ...socialMeta({
-        description: SITE_DESCRIPTION,
-        path: match.pathname,
-        title: "Resource Packs | VoxelVein",
-      }),
-    ],
-  }),
-  component: ResourcePacksPage,
-  pendingComponent: ProjectBrowserSkeleton,
+  beforeLoad: ({ location }) =>
+    legacyProjectRedirect({
+      searchStr: location.searchStr,
+      type: "resourcepack",
+    }),
 });

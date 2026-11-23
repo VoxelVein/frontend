@@ -1,7 +1,6 @@
 import {
   IconDownload,
   IconEye,
-  IconPackage,
   IconPencil,
   IconTrash,
   IconVersions,
@@ -57,14 +56,7 @@ export const ProjectSummaryCard = ({
       alt=""
       ratio="square"
       className="size-14 shrink-0 rounded-xl border sm:size-16"
-      fallback={
-        <span
-          aria-hidden="true"
-          className="border-primary/15 bg-primary/10 text-primary flex size-14 shrink-0 items-center justify-center rounded-xl border sm:size-16"
-        >
-          <IconPackage size={24} stroke={1.8} />
-        </span>
-      }
+      fallbackSeed={project.id}
     />
 
     <div className="min-w-0 flex-1">

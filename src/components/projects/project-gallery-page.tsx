@@ -15,7 +15,7 @@ interface ProjectGalleryPageProps {
 }
 
 /**
- * A project's gallery on its own page, at `/<type>/$slug/gallery`.
+ * A project's gallery on its own page, at `/p/<type>/$slug/gallery`.
  *
  * The inline grid on the project page stays, so this is where someone goes to
  * see the images at full size with room to breathe. The route throws

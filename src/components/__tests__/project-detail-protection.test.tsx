@@ -48,6 +48,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 const PROJECT: ProjectView = {
   author: "Alice",
+  authorImage: null,
   authorUsername: "alice",
   category: "utility",
   description: "",

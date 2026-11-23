@@ -87,7 +87,12 @@ const loadProjectView = async (
         orderBy: [projectImages.createdAt],
       },
       owner: {
-        columns: { displayUsername: true, name: true, username: true },
+        columns: {
+          displayUsername: true,
+          image: true,
+          name: true,
+          username: true,
+        },
       },
       versions: {
         orderBy: [desc(projectVersions.createdAt)],
@@ -110,6 +115,9 @@ const loadProjectView = async (
         project.owner.username ??
         project.owner.name)
       : DELETED_USER_LABEL,
+    // A deleted owner has no picture either, so both byline fields go null
+    // together and the name is rendered on its own.
+    authorImage: project.owner?.image ?? null,
     // Null when the owner is gone, which keeps the byline from linking to a
     // profile that no longer exists.
     authorUsername: project.owner?.username ?? null,

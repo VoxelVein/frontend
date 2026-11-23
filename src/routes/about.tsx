@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/card";
 import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
 import type { MinecraftCategory } from "@/lib/categories";
+import { PROJECT_TYPE_PATHS } from "@/lib/projects";
 import { staggerDelay } from "@/lib/reveal-stagger";
 import { SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -309,7 +310,7 @@ const AboutPage = () => (
           <Link
             className={cn(buttonVariants({ variant: "default" }), CTA_CLASS)}
             preload="intent"
-            to="/mods"
+            to={PROJECT_TYPE_PATHS.mod}
           >
             Browse projects
             <IconArrowRight aria-hidden="true" />
@@ -576,7 +577,7 @@ const AboutPage = () => (
             <Link
               className={cn(buttonVariants({ variant: "outline" }), CTA_CLASS)}
               preload="intent"
-              to="/mods"
+              to={PROJECT_TYPE_PATHS.mod}
             >
               Browse projects
             </Link>

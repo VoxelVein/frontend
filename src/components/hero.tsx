@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { authClient } from "@/lib/auth-client";
 import { MINECRAFT_CATEGORIES, categoryLabelSentence } from "@/lib/categories";
+import { PROJECT_TYPE_PATHS } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 /**
@@ -115,7 +116,7 @@ const Hero = () => {
             Stacked on mobile, side by side from `sm` up. */}
         <div className="animate-hero-enter-lag flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
-            to="/mods"
+            to={PROJECT_TYPE_PATHS.mod}
             className={cn(
               buttonVariants({ size: "lg", variant: "default" }),
               "ease-smooth min-h-12 gap-2 px-6 text-base transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"

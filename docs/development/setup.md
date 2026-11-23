@@ -140,10 +140,10 @@ the auth origins are pinned to 3000.
 
 * `http://localhost:3000`, the homepage renders, with trending projects
   and the news section once content exists.
-* `http://localhost:3000/mods`, search works straight from Postgres, with
+* `http://localhost:3000/p/mods`, search works straight from Postgres, with
   filters for category, game version, and loader. The other five browse
   pages behave the same.
-* `http://localhost:3000/servers`, the client-requirement filter appears,
+* `http://localhost:3000/p/servers`, the client-requirement filter appears,
   because it is specific to servers.
 * `http://localhost:3002/api/health`, the API server responds.
 * Send a test mod event and watch the live banner on any browse page:

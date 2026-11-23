@@ -1,4 +1,4 @@
-import { IconX } from "@tabler/icons-react";
+import { IconSparkles, IconX } from "@tabler/icons-react";
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { safeParse } from "valibot";
 
 import { GameVersionPicker } from "@/components/dashboard/game-version-picker";
+import { SuggestedVersionsModal } from "@/components/dashboard/suggested-versions-modal";
 import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -282,6 +283,7 @@ export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
   const [links, setLinks] = useState<ServerLinkView[]>(server?.links ?? []);
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
   const [pending, setPending] = useState(false);
+  const [versionEditorOpen, setVersionEditorOpen] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -327,52 +329,79 @@ export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="grid gap-6">
-      <div className="grid gap-6 sm:grid-cols-[1fr_10rem]">
-        <FormField
-          id="server-address"
-          label="Server address"
-          value={address}
-          onChange={(event) => setAddress(event.target.value)}
-          error={errors.get("address")}
-          helperText="The hostname or IP players connect to."
-          placeholder="play.example.net"
-          autoComplete="off"
-          spellCheck={false}
-          required
+    <>
+      <form noValidate onSubmit={handleSubmit} className="grid gap-6">
+        <div className="grid gap-6 sm:grid-cols-[1fr_10rem]">
+          <FormField
+            id="server-address"
+            label="Server address"
+            value={address}
+            onChange={(event) => setAddress(event.target.value)}
+            error={errors.get("address")}
+            helperText="The hostname or IP players connect to."
+            placeholder="play.example.net"
+            autoComplete="off"
+            spellCheck={false}
+            required
+          />
+          <FormField
+            id="server-port"
+            label="Port"
+            inputMode="numeric"
+            value={port}
+            onChange={(event) => setPort(event.target.value)}
+            error={errors.get("port")}
+            helperText={`Leave empty for ${DEFAULT_SERVER_PORT}.`}
+            placeholder={String(DEFAULT_SERVER_PORT)}
+            autoComplete="off"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            onClick={() => setVersionEditorOpen(true)}
+            type="button"
+            variant="outline"
+          >
+            <IconSparkles aria-hidden="true" size={16} />
+            Add Suggested
+          </Button>
+          <span className="text-muted-foreground text-xs">
+            Fill the version list with the latest releases from Mojang.
+          </span>
+        </div>
+
+        <GameVersionPicker
+          id="server-game-versions"
+          label="Supported game versions"
+          values={gameVersions}
+          onChange={setGameVersions}
+          error={errors.get("gameVersions")}
         />
-        <FormField
-          id="server-port"
-          label="Port"
-          inputMode="numeric"
-          value={port}
-          onChange={(event) => setPort(event.target.value)}
-          error={errors.get("port")}
-          helperText={`Leave empty for ${DEFAULT_SERVER_PORT}.`}
-          placeholder={String(DEFAULT_SERVER_PORT)}
-          autoComplete="off"
+
+        <LinkedContent
+          links={links}
+          onChange={setLinks}
+          error={errors.get("links")}
         />
-      </div>
 
-      <GameVersionPicker
-        id="server-game-versions"
-        label="Supported game versions"
-        values={gameVersions}
-        onChange={setGameVersions}
-        error={errors.get("gameVersions")}
-      />
+        <div>
+          <Button type="submit" className="min-h-11" disabled={pending}>
+            {pending ? "Saving…" : "Save server"}
+          </Button>
+        </div>
+      </form>
 
-      <LinkedContent
-        links={links}
-        onChange={setLinks}
-        error={errors.get("links")}
-      />
-
-      <div>
-        <Button type="submit" className="min-h-11" disabled={pending}>
-          {pending ? "Saving…" : "Save server"}
-        </Button>
-      </div>
-    </form>
+      {versionEditorOpen ? (
+        <SuggestedVersionsModal
+          initialValues={gameVersions}
+          onAccept={(versions) => {
+            setGameVersions(versions);
+            setVersionEditorOpen(false);
+          }}
+          onCancel={() => setVersionEditorOpen(false)}
+        />
+      ) : null}
+    </>
   );
 };

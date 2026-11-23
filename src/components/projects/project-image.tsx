@@ -1,3 +1,4 @@
+import { projectFallbackIconUrl } from "@/lib/project-fallback-icon";
 import type { ProjectImageView } from "@/lib/project-images";
 import { cn } from "@/lib/utils";
 
@@ -6,10 +7,12 @@ interface ProjectImageProps {
   className?: string;
   image: ProjectImageView | null;
   /**
-   * Rendered in place of the image when the project has none. A letter tile
-   * is the existing look, so it stays the default.
+   * Rendered in place of the image when the project has none. Takes priority
+   * over `fallbackSeed` for callers that need their own artwork.
    */
   fallback?: React.ReactNode;
+  /** The project id (or slug) used to generate an identicon when there is no icon. */
+  fallbackSeed?: string;
   /** Above the fold images should not be lazy, or they pop in after paint. */
   priority?: boolean;
   /**
@@ -33,11 +36,33 @@ export const ProjectImage = ({
   className,
   image,
   fallback,
+  fallbackSeed,
   priority = false,
   ratio = "natural",
 }: ProjectImageProps) => {
   if (!image) {
-    return fallback ?? null;
+    if (fallback) {
+      return fallback;
+    }
+
+    if (!fallbackSeed) {
+      return null;
+    }
+
+    // The wrapper carries the same size and border classes an uploaded image
+    // would get, so swapping one for the other never shifts the layout.
+    return (
+      <div className={cn("bg-muted overflow-hidden", className)}>
+        <img
+          src={projectFallbackIconUrl(fallbackSeed)}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          referrerPolicy="no-referrer"
+          className="size-full object-cover"
+        />
+      </div>
+    );
   }
 
   return (

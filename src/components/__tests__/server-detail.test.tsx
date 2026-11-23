@@ -67,6 +67,7 @@ const SERVER: ProjectServerView = {
 
 const PROJECT: ProjectView = {
   author: "Alice",
+  authorImage: null,
   authorUsername: "alice",
   category: "skyblock",
   description: "A long-running skyblock server.",

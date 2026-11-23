@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { MarkdownBody } from "@/components/markdown-body";
+import { PageHeader } from "@/components/page-header";
 import {
   ProjectDetailColumns,
   ProjectDetailHero,
@@ -30,29 +31,15 @@ export { ProjectDetailSkeleton } from "@/components/projects/project-detail-layo
 
 export const ProjectNotFound = ({ type }: { type: ProjectType }) => (
   <ProjectDetailPageFrame>
-    <div className="border-border bg-card relative overflow-hidden rounded-2xl border p-6 sm:p-10">
-      <div
-        aria-hidden="true"
-        className="from-primary/10 absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l to-transparent"
-      />
-      <div className="relative max-w-xl">
-        <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
-          {PROJECT_TYPE_LABELS[type].singular}
-        </p>
-        <h1 className="text-foreground mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          {PROJECT_TYPE_LABELS[type].singular} not found
-        </h1>
-        <p className="text-muted-foreground mt-3 leading-7">
-          The {PROJECT_TYPE_LABELS[type].singular.toLowerCase()} you are looking
-          for does not exist or may have been removed.
-        </p>
-        <div className="mt-6">
-          <Button render={<Link to={PROJECT_TYPE_PATHS[type]} />}>
-            Browse {PROJECT_TYPE_LABELS[type].plural.toLowerCase()}
-          </Button>
-        </div>
-      </div>
-    </div>
+    <PageHeader
+      title={`${PROJECT_TYPE_LABELS[type].singular} not found`}
+      description={`The ${PROJECT_TYPE_LABELS[type].singular.toLowerCase()} you are looking for does not exist or may have been removed.`}
+      action={
+        <Button render={<Link to={PROJECT_TYPE_PATHS[type]} />}>
+          Browse {PROJECT_TYPE_LABELS[type].plural.toLowerCase()}
+        </Button>
+      }
+    />
   </ProjectDetailPageFrame>
 );
 

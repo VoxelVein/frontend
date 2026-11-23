@@ -70,6 +70,7 @@ const version = (
 
 const project = (overrides: Partial<ProjectView> = {}): ProjectView => ({
   author: "Alice",
+  authorImage: null,
   authorUsername: "alice",
   category: "performance",
   description: "A rendering engine.",
@@ -292,6 +293,37 @@ describe(ProjectDetail, () => {
     for (const [index, level] of levels.entries()) {
       expect(level - (levels[index - 1] ?? 1)).toBeLessThanOrEqual(1);
     }
+  });
+
+  it("shows the creator's picture when they have uploaded one", () => {
+    const { container } = render(
+      <ProjectDetail project={project({ authorImage: "/api/avatar/alice" })} />
+    );
+
+    expect(
+      container.querySelector('img[src="/api/avatar/alice"]')
+    ).toBeInTheDocument();
+    expect(screen.getByText("Created by")).toBeInTheDocument();
+  });
+
+  it("shows no picture at all when the creator has none", () => {
+    render(<ProjectDetail project={project()} />);
+
+    const byline = screen.getByText("Created by").parentElement;
+    expect(byline?.querySelector("img")).toBeNull();
+    expect(screen.getByRole("link", { name: "Alice" })).toBeInTheDocument();
+  });
+
+  it("refuses an unsafe byline picture instead of drawing a placeholder", () => {
+    render(
+      <ProjectDetail
+        project={project({ authorImage: "http://example.com/alice.png" })}
+      />
+    );
+
+    expect(
+      screen.getByText("Created by").parentElement?.querySelector("img")
+    ).toBeNull();
   });
 
   it("titles the description section after the project's own type", () => {

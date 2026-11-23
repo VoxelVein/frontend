@@ -213,9 +213,14 @@ A separate `user_images` table, not a key on `users`
 : Better Auth's key type. A foreign key cannot reference across types,
   and the avatar's own `id` stays a `uuid` because that one is ours.
 
-The image is resized in the browser before it is sent, using the `icon`
-kind, an avatar renders at 24-80px, the same range as a project icon  -
-so a phone photo is scaled rather than stored and never used.
+The image is framed in the browser before it is sent. `AvatarCropModal`
+is a thin configuration of the shared `ImageCropModal`: the creator zooms,
+pans and pinches a square window, and the framed square is encoded as a
+512px WebP. The circle in the avatar preview is a scrim showing how the
+picture will be displayed, not the shape of the stored file. Project
+icons use the same cropper with a square outline, so both uploads behave
+identically. An avatar renders at 24-80px, the same range as a project
+icon.
 
 * The bio is **Markdown**, rendered with `@tanstack/markdown/react` in the
   same `.markdown-body` container as a project description, so raw HTML and

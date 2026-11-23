@@ -1,30 +1,9 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  ProjectBrowser,
-  ProjectBrowserSkeleton,
-} from "@/components/projects/project-browser";
-import { loadProjectBrowser } from "@/lib/project-browser-loader";
-import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
+import { legacyProjectRedirect } from "@/lib/legacy-project-redirect";
 
-const ModpacksPage = () => {
-  const data = useLoaderData({ from: "/modpacks/" });
-
-  return <ProjectBrowser type="modpack" {...data} />;
-};
-
+/** Old /modpacks bookmarks resolve to the project route below /p. */
 export const Route = createFileRoute("/modpacks/")({
-  loader: () => loadProjectBrowser("modpack"),
-  head: ({ match }) => ({
-    meta: [
-      { title: "Modpacks | VoxelVein" },
-      ...socialMeta({
-        description: SITE_DESCRIPTION,
-        path: match.pathname,
-        title: "Modpacks | VoxelVein",
-      }),
-    ],
-  }),
-  component: ModpacksPage,
-  pendingComponent: ProjectBrowserSkeleton,
+  beforeLoad: ({ location }) =>
+    legacyProjectRedirect({ searchStr: location.searchStr, type: "modpack" }),
 });

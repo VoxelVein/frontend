@@ -104,3 +104,15 @@ export const getValkey = async (): Promise<RedisClientType> => {
 
 /** Whether a client is currently connected, for startup reporting. */
 export const isValkeyReady = (): boolean => client?.isReady ?? false;
+
+/**
+ * Whether this deployment has a cache configured at all.
+ *
+ * Development falls back to localhost, so only production can be genuinely
+ * unconfigured. Admins need that distinction: a missing URL is a deployment
+ * mistake, while a refused connection is an outage.
+ *
+ * Admins need that distinction in the warning banner.
+ */
+export const isValkeyConfigured = (): boolean =>
+  Boolean(process.env.VALKEY_URL) || process.env.NODE_ENV !== "production";

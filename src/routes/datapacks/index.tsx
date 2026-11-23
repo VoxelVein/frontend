@@ -1,30 +1,9 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  ProjectBrowser,
-  ProjectBrowserSkeleton,
-} from "@/components/projects/project-browser";
-import { loadProjectBrowser } from "@/lib/project-browser-loader";
-import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
+import { legacyProjectRedirect } from "@/lib/legacy-project-redirect";
 
-const DatapacksPage = () => {
-  const data = useLoaderData({ from: "/datapacks/" });
-
-  return <ProjectBrowser type="datapack" {...data} />;
-};
-
+/** Old /datapacks bookmarks resolve to the project route below /p. */
 export const Route = createFileRoute("/datapacks/")({
-  loader: () => loadProjectBrowser("datapack"),
-  head: ({ match }) => ({
-    meta: [
-      { title: "Datapacks | VoxelVein" },
-      ...socialMeta({
-        description: SITE_DESCRIPTION,
-        path: match.pathname,
-        title: "Datapacks | VoxelVein",
-      }),
-    ],
-  }),
-  component: DatapacksPage,
-  pendingComponent: ProjectBrowserSkeleton,
+  beforeLoad: ({ location }) =>
+    legacyProjectRedirect({ searchStr: location.searchStr, type: "datapack" }),
 });

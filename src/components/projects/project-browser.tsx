@@ -9,7 +9,6 @@ import {
 import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
@@ -33,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { categoryIconForPath } from "@/lib/categories";
-import { formatCategory } from "@/lib/format";
+import { formatCategory, formatCount } from "@/lib/format";
 import { filterGameVersions } from "@/lib/game-version-search";
 import { toSearchErrorMessage } from "@/lib/project-browser-loader";
 import type { ProjectBrowserData } from "@/lib/project-browser-loader";
@@ -113,7 +112,7 @@ const SearchBar = ({
   onQueryChange: (value: string) => void;
   type: ProjectType;
 }) => (
-  <div className="relative mt-8">
+  <div className="relative">
     <IconSearch
       size={18}
       stroke={1.8}
@@ -254,6 +253,13 @@ const GameVersionFilter = ({
  * A plain function rather than a component: the icon is chosen from a lookup
  * and rendering `<Icon />` would otherwise define a component during render.
  */
+/** The category mark in the page header, as an element rather than a component. */
+const headerIcon = (type: ProjectType) => {
+  const Icon = categoryIconForPath(PROJECT_TYPE_PATHS[type]) ?? IconPackage;
+
+  return <Icon size={22} aria-hidden="true" />;
+};
+
 const emptyStateIcon = (type: ProjectType, isFiltered: boolean) => {
   if (isFiltered) {
     return <IconSearchOff size={24} aria-hidden="true" />;
@@ -606,7 +612,7 @@ interface ProjectBrowserProps extends ProjectBrowserData {
   type: ProjectType;
 }
 
-// oxlint-disable-next-line eslint/complexity -- ProjectBrowser conditionally renders search, filters, skeleton, empty, results, and pagination states; extracting further would fragment the page logic
+// oxlint-disable-next-line react-doctor/no-giant-component, eslint/complexity -- Search, filters, live events and results share one query state; extracting further would fragment the page logic
 export const ProjectBrowser = ({
   initial,
   initialError,
@@ -711,23 +717,10 @@ export const ProjectBrowser = ({
     }
 
     const source = new EventSource(`${API_URL}/api/events`);
-    let hasReportedConnectionIssue = false;
 
-    const handleOpen = () => {
-      hasReportedConnectionIssue = false;
-    };
-
-    const handleError = () => {
-      if (hasReportedConnectionIssue) {
-        return;
-      }
-
-      hasReportedConnectionIssue = true;
-      toast.error(
-        "Live updates are temporarily unavailable. You can keep browsing; we’ll retry automatically."
-      );
-    };
-
+    // A dropped stream is silent by design: browsing, filtering and searching
+    // all still work, and EventSource reconnects on its own. Infrastructure
+    // warnings belong on the admin dashboard, not in a public user's toast.
     const handleEvent = (event: MessageEvent) => {
       try {
         // SAFETY: The event stream is produced by our own webhook endpoint,
@@ -741,15 +734,11 @@ export const ProjectBrowser = ({
     source.addEventListener("mod.created", handleEvent);
     source.addEventListener("mod.updated", handleEvent);
     source.addEventListener("mod.deleted", handleEvent);
-    source.addEventListener("open", handleOpen);
-    source.addEventListener("error", handleError);
 
     return () => {
       source.removeEventListener("mod.created", handleEvent);
       source.removeEventListener("mod.updated", handleEvent);
       source.removeEventListener("mod.deleted", handleEvent);
-      source.removeEventListener("open", handleOpen);
-      source.removeEventListener("error", handleError);
       source.close();
     };
   }, []);
@@ -831,28 +820,57 @@ export const ProjectBrowser = ({
     };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <PageHeader
         title={PROJECT_TYPE_LABELS[type].plural}
         description={PROJECT_TYPE_DESCRIPTIONS[type]}
+        icon={
+          <span className="border-primary/20 bg-primary/10 text-primary flex size-12 items-center justify-center rounded-xl border">
+            {headerIcon(type)}
+          </span>
+        }
       />
 
-      <SearchBar query={query} onQueryChange={setQuery} type={type} />
+      <section
+        aria-label="Search and filters"
+        className="border-border bg-card mt-8 rounded-xl border p-4 sm:p-5"
+      >
+        <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
+          Find a project
+        </p>
+        <SearchBar query={query} onQueryChange={setQuery} type={type} />
 
-      <Filters
-        category={category}
-        categories={categories}
-        clientRequirement={clientRequirement}
-        onClientRequirementChange={changeFilter(setClientRequirement)}
-        gameVersion={gameVersion}
-        loader={loader}
-        onCategoryChange={changeFilter(setCategory)}
-        onGameVersionChange={changeFilter(setGameVersion)}
-        onLoaderChange={changeFilter(setLoader)}
-        onSortChange={changeFilter(setSort)}
-        sort={sort}
-        type={type}
-      />
+        <Filters
+          category={category}
+          categories={categories}
+          clientRequirement={clientRequirement}
+          onClientRequirementChange={changeFilter(setClientRequirement)}
+          gameVersion={gameVersion}
+          loader={loader}
+          onCategoryChange={changeFilter(setCategory)}
+          onGameVersionChange={changeFilter(setGameVersion)}
+          onLoaderChange={changeFilter(setLoader)}
+          onSortChange={changeFilter(setSort)}
+          sort={sort}
+          type={type}
+        />
+      </section>
+
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
+            Results
+          </p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Browse {label.toLowerCase()} from across the community.
+          </p>
+        </div>
+        {result ? (
+          <span className="border-border bg-muted text-foreground inline-flex min-h-8 items-center rounded-full border px-3 text-sm font-medium tabular-nums">
+            {formatCount(result.estimatedTotalHits)} total
+          </span>
+        ) : null}
+      </div>
 
       {error ? <ErrorState message={error} onRetry={retry} /> : null}
 
@@ -906,14 +924,24 @@ export const ProjectBrowser = ({
 export const ProjectBrowserSkeleton = () => (
   <div
     aria-busy="true"
-    className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8"
+    className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
   >
-    <Skeleton className="h-9 w-32" />
-    <Skeleton className="mt-3 h-5 w-72 max-w-full" />
-    <Skeleton className="mt-8 h-12 w-full rounded-xl" />
-    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <Skeleton className="size-12 rounded-xl" />
+    <Skeleton className="mt-4 h-9 w-64 max-w-full" />
+    <Skeleton className="mt-3 h-5 w-80 max-w-full" />
+    <div className="border-border bg-card mt-8 rounded-xl border p-4 sm:p-5">
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="mt-4 h-12 w-full rounded-xl" />
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
+      </div>
+    </div>
+    <Skeleton className="mt-8 h-5 w-32" />
+    <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }, (_, index) => (
-        <Skeleton key={index} className="h-52 rounded-2xl" />
+        <Skeleton key={index} className="h-52 rounded-xl" />
       ))}
     </div>
   </div>

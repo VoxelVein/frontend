@@ -63,6 +63,7 @@ const WITH_FILE: ProjectView["versions"] = [
 
 const project = (overrides: Partial<ProjectView> = {}): ProjectView => ({
   author: "Alice",
+  authorImage: null,
   authorUsername: "alice",
   category: "optimization",
   description: "",

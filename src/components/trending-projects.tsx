@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { TrendingProjectCard } from "@/components/projects/trending-project-card";
 import { Reveal } from "@/components/reveal";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { PROJECT_TYPE_PATHS } from "@/lib/projects";
 import type { ProjectDocument } from "@/lib/projects";
 import { staggerDelay } from "@/lib/reveal-stagger";
 import {
@@ -112,7 +113,7 @@ const TrendingProjects = ({ initialProjects }: TrendingProjectsProps) => {
                 "hidden min-h-12 shrink-0 sm:inline-flex"
               )}
               preload="intent"
-              to="/mods"
+              to={PROJECT_TYPE_PATHS.mod}
             >
               {/* Not "Browse projects": the hero already carries that label on
                   the same destination one screen up, and two buttons saying

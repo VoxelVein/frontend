@@ -65,15 +65,21 @@ docs/               Guides (this documentation)
 
 Public pages:
 
-| Route                              | What it does                  |
-| ---------------------------------- | ----------------------------- |
-| `/`                                | Hero, trending, explore, news |
-| `/mods` and its five sibling types | Browse and search             |
-| `/<type>/$slug`                    | Project detail page           |
-| `/blog`, `/blog/$slug`             | Blog index and post           |
-| `/u/$username`                     | Author profile with a bio     |
-| `/login`, `/signup`, `/welcome`    | Auth, username picker         |
-| `/legal` and its five siblings     | Legal pages                   |
+Public pages use two namespaces: `/u/*` is a user, `/p/*` is a project.
+Everything about a project  -  browse, detail, gallery  -  lives under `/p`.
+The old top-level project paths are kept as redirect-only routes for existing
+bookmarks and search results.
+
+| Route                                | What it does                  |
+| ------------------------------------ | ----------------------------- |
+| `/`                                  | Hero, trending, explore, news |
+| `/p/mods` and its six sibling types  | Browse and search             |
+| `/p/<type>/$slug`                    | Project detail page           |
+| `/p/<type>/$slug/gallery`            | Full-size gallery             |
+| `/blog`, `/blog/$slug`               | Blog index and post           |
+| `/u/$username`                       | Author profile with a bio     |
+| `/login`, `/signup`, `/welcome`      | Auth, username picker         |
+| `/legal` and its five siblings       | Legal pages                   |
 
 Signed-in pages, with the tab in the URL:
 

@@ -1,30 +1,9 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  ProjectBrowser,
-  ProjectBrowserSkeleton,
-} from "@/components/projects/project-browser";
-import { loadProjectBrowser } from "@/lib/project-browser-loader";
-import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
+import { legacyProjectRedirect } from "@/lib/legacy-project-redirect";
 
-const ModsPage = () => {
-  const data = useLoaderData({ from: "/mods/" });
-
-  return <ProjectBrowser type="mod" {...data} />;
-};
-
+/** Old /mods bookmarks resolve to the project route below /p. */
 export const Route = createFileRoute("/mods/")({
-  loader: () => loadProjectBrowser("mod"),
-  head: ({ match }) => ({
-    meta: [
-      { title: "Mods | VoxelVein" },
-      ...socialMeta({
-        description: SITE_DESCRIPTION,
-        path: match.pathname,
-        title: "Mods | VoxelVein",
-      }),
-    ],
-  }),
-  component: ModsPage,
-  pendingComponent: ProjectBrowserSkeleton,
+  beforeLoad: ({ location }) =>
+    legacyProjectRedirect({ searchStr: location.searchStr, type: "mod" }),
 });

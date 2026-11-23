@@ -277,15 +277,20 @@ export const PROJECT_TYPE_LABELS = {
   datapack: { plural: "Datapacks", singular: "Datapack" },
 } as const satisfies Record<ProjectType, { plural: string; singular: string }>;
 
-/** URL section each type's pages live under. */
+/**
+ * URL section each type's pages live under.
+ *
+ * Everything about a project sits below `/p`, the project counterpart to the
+ * `/u` user routes. The old top-level paths are kept only as redirects.
+ */
 export const PROJECT_TYPE_PATHS = {
-  mod: "/mods",
-  modpack: "/modpacks",
-  plugin: "/plugins",
-  resourcepack: "/resource-packs",
-  server: "/servers",
-  shader: "/shaders",
-  datapack: "/datapacks",
+  mod: "/p/mods",
+  modpack: "/p/modpacks",
+  plugin: "/p/plugins",
+  resourcepack: "/p/resource-packs",
+  server: "/p/servers",
+  shader: "/p/shaders",
+  datapack: "/p/datapacks",
 } as const satisfies Record<ProjectType, string>;
 
 /**
@@ -755,6 +760,12 @@ export const DELETED_USER_LABEL = "Deleted user";
 
 export interface ProjectView {
   author: string;
+  /**
+   * The owner's profile picture, when they have one. Null means no avatar is
+   * shown at all  -  the byline shows the name alone rather than an initial
+   * tile, so an account without a picture never grows a fake one.
+   */
+  authorImage: string | null;
   /**
    * The owner's normalised username, which is what a profile URL is keyed on.
    * Null when the account is gone, so callers can skip the link rather than
