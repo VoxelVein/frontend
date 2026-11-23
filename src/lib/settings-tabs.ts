@@ -21,6 +21,7 @@ import { object, optional, parse, picklist } from "valibot";
  */
 export const SETTINGS_TABS = [
   { label: "Profile", value: "profile" },
+  { label: "Appearance", value: "appearance" },
   { label: "Security", value: "security" },
   { label: "Sessions", value: "sessions" },
   { label: "Danger Zone", value: "danger" },
@@ -40,6 +41,7 @@ export type SettingsTab = (typeof SETTINGS_TABS)[number]["value"];
  */
 const URL_TAB_NAMES = [
   "profile",
+  "appearance",
   "security",
   "passkeys",
   "sessions",

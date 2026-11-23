@@ -202,6 +202,13 @@
   --tracking-normal: 0em;
 }
 
+/* Turning the preference off falls back to the platform arrow. Both the root
+   rule and the `cursor-default` utility read the same variable, so this one
+   override covers the whole site. */
+:root[data-custom-cursor="off"] {
+  --cursor-default: auto;
+}
+
 .dark {
   /* Obsidian: deep volcanic glass with a brighter blue brand accent.
 

@@ -62,9 +62,14 @@ describe(resolveTab, () => {
     // Nothing is selected, every panel is hidden, and the page looks broken
     // rather than reporting an error.
     const fromEveryUrlName = [
-      ...["profile", "security", "passkeys", "sessions", "danger"].map((name) =>
-        resolveTab(search(`tab=${name}`))
-      ),
+      ...[
+        "profile",
+        "appearance",
+        "security",
+        "passkeys",
+        "sessions",
+        "danger",
+      ].map((name) => resolveTab(search(`tab=${name}`))),
       resolveTab(search(`confirm=${DELETE_CONFIRM}`)),
       resolveTab(search("")),
     ];

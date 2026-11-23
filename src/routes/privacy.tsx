@@ -35,8 +35,8 @@ const PrivacyPage = () => (
               used to keep you signed in.
             </li>
             <li>
-              Preferences: theme preference and cookie consent choices stored in
-              your browser.
+              Preferences: theme and cursor preferences and cookie consent
+              choices stored in your browser.
             </li>
             <li>
               Usage data: search queries and page interactions needed to operate
