@@ -96,6 +96,31 @@ export const SuggestedVersionsModal = ({
     if (event.key === "Enter" || event.key === ",") {
       event.preventDefault();
       commitDraft();
+
+      return;
+    }
+
+    if (
+      event.key === "Backspace" &&
+      draft.length === 0 &&
+      versions.length > 0
+    ) {
+      event.preventDefault();
+
+      const last = versions.at(-1);
+
+      if (!last) {
+        return;
+      }
+
+      // Putting the value back in the field is the edit affordance: a chip is
+      // removed from the list and its text becomes editable again. Pressing
+      // Enter re-commits it, this time as a custom entry.
+      setDraft(last);
+      setCustomVersions((current) => current.filter((entry) => entry !== last));
+      setRemoved((current) =>
+        current.includes(last) ? current : [...current, last]
+      );
     }
   };
 
@@ -180,8 +205,8 @@ export const SuggestedVersionsModal = ({
               className="text-muted-foreground text-xs"
               id="suggested-versions-help"
             >
-              Press Enter or comma to add a version. Remove a chip with its ×
-              button.
+              Press Enter or comma to add a version, or Backspace on an empty
+              field to edit the last one. The × button on a chip removes it.
             </p>
           </div>
 

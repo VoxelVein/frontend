@@ -85,6 +85,23 @@ describe(SuggestedVersionsModal, () => {
     );
   });
 
+  it("turns the last chip back into text on Backspace in an empty field", async () => {
+    renderModal();
+
+    await screen.findByRole("button", { name: "Remove 1.21.8" });
+    fireEvent.keyDown(input(), { key: "Backspace" });
+
+    expect(input()).toHaveValue("1.21.8");
+    expect(screen.queryByRole("button", { name: "Remove 1.21.8" })).toBeNull();
+
+    fireEvent.keyDown(input(), { key: "Enter" });
+
+    expect(input()).toHaveValue("");
+    expect(
+      screen.getByRole("button", { name: "Remove 1.21.8" })
+    ).toBeInTheDocument();
+  });
+
   it("removes a chip when its button is pressed", async () => {
     const onAccept = vi.fn<(versions: string[]) => void>();
     renderModal(onAccept);
