@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const GalleryPage = () => {
   const project = useLoaderData({ from: "/mods/$slug/gallery" });
+
   return (
     <ProjectGalleryPage
       images={project.gallery}

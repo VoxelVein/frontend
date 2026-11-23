@@ -44,9 +44,11 @@ const MAX_PASSWORD_LENGTH = 128;
 
 const requireSession = async (): Promise<Session> => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
+
   if (!session) {
     throw new AccountError("Sign in to manage your account.");
   }
+
   return session;
 };
 
@@ -58,6 +60,7 @@ const hasCredentialAccount = async (userId: string): Promise<boolean> => {
       and(eq(accounts.userId, userId), eq(accounts.providerId, "credential"))
     )
     .limit(1);
+
   return Boolean(credential);
 };
 
@@ -72,10 +75,13 @@ const verifyPassword = async (
       and(eq(accounts.userId, userId), eq(accounts.providerId, "credential"))
     )
     .limit(1);
+
   if (!credential?.password) {
     return false;
   }
+
   const context = await auth.$context;
+
   return context.password.verify({ hash: credential.password, password });
 };
 
@@ -100,19 +106,21 @@ export const getAccountDeletionContext = createServerFn({
   method: "GET",
 }).handler(async (): Promise<AccountDeletionContext> => {
   const session = await requireSession();
+
   const [projects, hasPassword] = await Promise.all([
     listOwnedProjects(session.user.id),
     hasCredentialAccount(session.user.id),
   ]);
+
   const until = reauthenticatedUntil(session);
 
   return {
     hasPassword,
+    projects,
     mode:
       session.user.hasOwnedProject || projects.length > 0
         ? "scheduled"
         : "immediate",
-    projects,
     reauthenticatedUntil: until > new Date() ? until.toISOString() : null,
     username: session.user.username ?? null,
   };
@@ -134,6 +142,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<DeletionResult> => {
     const session = await requireSession();
+
     if (session.session.impersonatedBy) {
       throw new AccountError("Stop impersonating before deleting accounts.");
     }
@@ -143,6 +152,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
     const verified = data.password
       ? await verifyPassword(session.user.id, data.password)
       : reauthenticatedUntil(session) > new Date();
+
     if (!verified) {
       throw new AccountError(
         data.password
@@ -152,6 +162,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
     }
 
     const expected = session.user.username ?? session.user.email;
+
     if (normalizeUsername(data.confirmation) !== normalizeUsername(expected)) {
       throw new AccountError(`Type ${expected} to confirm.`);
     }
@@ -175,6 +186,7 @@ export const checkUsername = createServerFn({ method: "GET" })
   .validator((data: { username: string }) => parse(usernameInputSchema, data))
   .handler(async ({ data }): Promise<UsernameCheck> => {
     const session = await requireSession();
+
     return checkUsernameFor(data.username, session.user.id);
   });
 
@@ -182,9 +194,11 @@ export const checkUsername = createServerFn({ method: "GET" })
 export const suggestUsername = createServerFn({ method: "GET" }).handler(
   async (): Promise<string> => {
     const session = await requireSession();
+
     if (session.user.username) {
       return session.user.username;
     }
+
     return findAvailableUsername([
       session.user.email.split("@")[0],
       session.user.name,
@@ -196,6 +210,7 @@ export const confirmUsername = createServerFn({ method: "POST" })
   .validator((data: { username: string }) => parse(usernameInputSchema, data))
   .handler(async ({ data }): Promise<string> => {
     const session = await requireSession();
+
     return confirmUsernameFor(session.user.id, data.username);
   });
 
@@ -203,6 +218,7 @@ export const changeUsername = createServerFn({ method: "POST" })
   .validator((data: { username: string }) => parse(usernameInputSchema, data))
   .handler(async ({ data }): Promise<string> => {
     const session = await requireSession();
+
     return changeUsernameFor(session.user.id, data.username);
   });
 
@@ -238,6 +254,7 @@ export const setAvatarUrl = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<void> => {
     const session = await requireSession();
     const parsed = parseAvatarUrl(data.url);
+
     if (!parsed.ok) {
       throw new AccountError(parsed.error);
     }
@@ -249,6 +266,7 @@ export const setAvatarUrl = createServerFn({ method: "POST" })
 
     if (parsed.url !== null) {
       const storageKey = await removeAvatar(session.user.id);
+
       if (storageKey) {
         await deleteObjects([storageKey]).catch(() => null);
       }
@@ -275,9 +293,11 @@ export const setPassword = createServerFn({ method: "POST" })
   .validator((data: { newPassword: string }) => parse(setPasswordSchema, data))
   .handler(async ({ data }): Promise<void> => {
     const session = await requireSession();
+
     if (await hasCredentialAccount(session.user.id)) {
       throw new AccountError("You already have a password. Change it instead.");
     }
+
     await auth.api.setPassword({
       body: { newPassword: data.newPassword },
       headers: getRequestHeaders(),

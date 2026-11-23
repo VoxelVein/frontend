@@ -73,6 +73,7 @@ const renderDangerZone = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+
   return render(
     <QueryClientProvider client={queryClient}>
       <SettingsDangerZone />
@@ -84,6 +85,7 @@ const openDeleteDialog = async () => {
   fireEvent.click(
     await screen.findByRole("button", { name: "Delete account" })
   );
+
   return screen.findByRole("dialog");
 };
 
@@ -174,6 +176,7 @@ describe("SettingsDangerZone account deletion", () => {
     const schedule = await screen.findByRole("button", {
       name: "Schedule deletion",
     });
+
     expect(schedule).toBeDisabled();
     fireEvent.change(screen.getByLabelText("Type ada to confirm"), {
       target: { value: "ADA" },

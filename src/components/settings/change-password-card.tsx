@@ -50,11 +50,14 @@ export const ChangePasswordCard = () => {
         newPassword: value.newPassword,
         revokeOtherSessions: true,
       });
+
       if (changeError) {
         // Action feedback, so a toast. Field-level validation stays inline.
         toast.error(changeError.message ?? "Could not change your password.");
+
         return;
       }
+
       passwordForm.reset();
       toast.success("Password updated.");
     },

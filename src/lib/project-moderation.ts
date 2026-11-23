@@ -103,6 +103,7 @@ export const hasVersion = async (projectId: string): Promise<boolean> => {
     .select({ versions: count(projectVersions.id) })
     .from(projectVersions)
     .where(eq(projectVersions.projectId, projectId));
+
   return (row?.versions ?? 0) > 0;
 };
 
@@ -187,6 +188,7 @@ export const hasServerDetails = async (projectId: string): Promise<boolean> => {
     .from(projectServers)
     .where(eq(projectServers.projectId, projectId))
     .limit(1);
+
   return row !== undefined;
 };
 
@@ -271,6 +273,7 @@ export const requestPublication = async (
     .from(projects)
     .where(eq(projects.id, projectId))
     .limit(1);
+
   // Servers are listings: they need join details instead of a version.
   if (project?.type === "server") {
     if (!(await hasServerDetails(projectId))) {
@@ -282,6 +285,7 @@ export const requestPublication = async (
 
   if (!(await publicationNeedsReview(projectId))) {
     await publishWithoutReview(projectId);
+
     return "published";
   }
 
@@ -365,11 +369,11 @@ export const approveReview = async (
     // A project whose owner deleted their account has nobody to tell.
     if (updated.ownerId) {
       await tx.insert(userNotifications).values({
+        projectId,
         // Active voice, and it says what the creator gains rather than restating
         // the status change: "It is now listed on the site" told the reader
         // nothing they could not see for themselves a moment later.
         message: `An admin approved "${updated.name}". Anyone can now find it on the site and download it.`,
-        projectId,
         title: "Project approved",
         type: "project-approved",
         userId: updated.ownerId,
@@ -391,6 +395,7 @@ export const rejectReview = async (
   reason: string
 ): Promise<void> => {
   const trimmed = reason.trim();
+
   if (trimmed.length === 0) {
     throw new ModerationError(MODERATION_ERROR.reasonRequired);
   }
@@ -416,11 +421,11 @@ export const rejectReview = async (
 
     if (updated.ownerId) {
       await tx.insert(userNotifications).values({
+        projectId,
         // "Asked for changes", not "sent back to draft": the creator's publish
         // panel already uses the plainer phrase for the same event, and the
         // internal status name is not something a creator has to learn.
         message: `An admin asked for changes to "${updated.name}": ${trimmed}`,
-        projectId,
         title: "Project needs changes",
         type: "project-rejected",
         userId: updated.ownerId,

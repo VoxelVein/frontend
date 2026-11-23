@@ -42,18 +42,22 @@ const listListeningPids = (port: number): number[] => {
     // oxlint-disable-next-line sonarjs/no-os-command-from-path -- Literal `ss` binary, no interpolation at all
     const output = execSync("ss -ltnpH", { encoding: "utf-8" });
     const pids = new Set<number>();
+
     for (const line of output.split("\n")) {
       // `users:(("MainThread",pid=123,fd=23))`
       if (!line.includes(`:${port} `) && !line.includes(`:${port}\t`)) {
         continue;
       }
+
       for (const match of line.matchAll(/pid=(?<pid>\d+)/gu)) {
         const pid = Number(match.groups?.pid);
+
         if (Number.isInteger(pid)) {
           pids.add(pid);
         }
       }
     }
+
     return [...pids];
   } catch {
     // `ss` is missing or denied. Fall back to lsof, then give up quietly and
@@ -63,6 +67,7 @@ const listListeningPids = (port: number): number[] => {
       const output = execSync(`lsof -ti tcp:${port} -sTCP:LISTEN`, {
         encoding: "utf-8",
       });
+
       return output
         .split("\n")
         .map((line) => Number(line.trim()))
@@ -88,15 +93,19 @@ const isOwnProcess = (command: string): boolean =>
 
 const holders = (): PortHolder[] => {
   const found: PortHolder[] = [];
+
   for (const port of [WEB_PORT, API_PORT]) {
     for (const pid of listListeningPids(port)) {
       const command = readCommand(pid);
+
       if (!isOwnProcess(command)) {
         continue;
       }
+
       found.push({ command, pid, port });
     }
   }
+
   return found;
 };
 
@@ -105,6 +114,7 @@ const describe = (holder: PortHolder): string => {
   const short = holder.command
     .replaceAll(`${CWD}/node_modules/`, "")
     .replaceAll(CWD, ".");
+
   return `  :${holder.port}  pid ${holder.pid}  ${short}`;
 };
 
@@ -134,12 +144,16 @@ const reportStatus = (running: PortHolder[]): void => {
     console.log(
       `Nothing is listening on :${WEB_PORT} or :${API_PORT}. Start one with \`pnpm dev\`.`
     );
+
     return;
   }
+
   console.log("Already running:");
+
   for (const holder of running) {
     console.log(describe(holder));
   }
+
   console.log(
     "\nReuse that session. To start a fresh one, run `pnpm dev:stop` first."
   );
@@ -148,13 +162,17 @@ const reportStatus = (running: PortHolder[]): void => {
 const reportStopped = (running: PortHolder[]): void => {
   if (running.length === 0) {
     console.log(`Nothing is listening on :${WEB_PORT} or :${API_PORT}.`);
+
     return;
   }
+
   console.log("Stopping:");
+
   for (const holder of running) {
     console.log(describe(holder));
     stop(holder);
   }
+
   console.log("\nStopped. If a port is still held, re-run `pnpm dev:stop`.");
 };
 

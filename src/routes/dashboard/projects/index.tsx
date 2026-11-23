@@ -46,6 +46,7 @@ import { can } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const ROUTE_ID = "/dashboard/projects/";
+
 const PAGE_SHELL =
   "mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8";
 
@@ -74,10 +75,12 @@ const sortProjects = (
       // oxlint-disable-next-line unicorn/no-array-sort -- The tsconfig target does not include ES2023 `toSorted`.
       return [...projects].sort((a, b) => a.name.localeCompare(b.name));
     }
+
     case "downloads": {
       // oxlint-disable-next-line unicorn/no-array-sort -- The tsconfig target does not include ES2023 `toSorted`.
       return [...projects].sort((a, b) => b.downloads - a.downloads);
     }
+
     default: {
       // oxlint-disable-next-line unicorn/no-array-sort -- The tsconfig target does not include ES2023 `toSorted`.
       return [...projects].sort((a, b) =>
@@ -96,9 +99,11 @@ const countStatuses = (
     published: 0,
     removed: 0,
   };
+
   for (const project of projects) {
     counts[project.status] += 1;
   }
+
   return counts;
 };
 
@@ -114,15 +119,19 @@ const summarizeProjects = (
   const parts = [
     `${projects.length} ${projects.length === 1 ? "project" : "projects"}`,
   ];
+
   if (counts.published > 0) {
     parts.push(`${counts.published} published`);
   }
+
   if (counts.pending > 0) {
     parts.push(`${counts.pending} in review`);
   }
+
   if (counts.draft > 0) {
     parts.push(`${counts.draft} ${counts.draft === 1 ? "draft" : "drafts"}`);
   }
+
   return `${parts.join(", ")}.`;
 };
 
@@ -398,24 +407,30 @@ const MyProjectsPage = () => {
   const [status, setStatus] = useState<ProjectStatus | "all">("all");
   const [type, setType] = useState<ProjectType | "all">("all");
   const [sort, setSort] = useState<SortOption>("recent");
+
   const [deleteTarget, setDeleteTarget] = useState<ProjectListItem | null>(
     null
   );
+
   const [deletePending, setDeletePending] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const canUpload =
     session.user.emailVerified || can(session.user.role, "reviewProjects");
+
   const normalizedQuery = query.trim().toLowerCase();
+
   const availableTypes = PROJECT_TYPES.filter((projectType) =>
     projects.some((project) => project.type === projectType)
   );
+
   const statusCounts = countStatuses(projects);
   const summary = summarizeProjects(projects, statusCounts);
 
   const filteredProjects = projects.filter((project) => {
     const matchesStatus = status === "all" || project.status === status;
     const matchesType = type === "all" || project.type === type;
+
     const searchable = [
       project.name,
       project.summary,
@@ -427,8 +442,10 @@ const MyProjectsPage = () => {
     ]
       .join(" ")
       .toLowerCase();
+
     return matchesStatus && matchesType && searchable.includes(normalizedQuery);
   });
+
   const sortedProjects = sortProjects(filteredProjects, sort);
 
   const clearFilters = () => {
@@ -441,8 +458,10 @@ const MyProjectsPage = () => {
     if (!deleteTarget) {
       return;
     }
+
     setDeletePending(true);
     setDeleteError(null);
+
     try {
       await deleteProject({ data: { projectId: deleteTarget.id } });
       toast.success(`Deleted ${deleteTarget.name}`);
@@ -451,6 +470,7 @@ const MyProjectsPage = () => {
     } catch (error) {
       setDeleteError(errorMessage(error, "Could not delete the project."));
     }
+
     setDeletePending(false);
   };
 

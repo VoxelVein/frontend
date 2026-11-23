@@ -27,6 +27,7 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 
 const toIsoDate = (value: Date | string): string | null => {
   const date = new Date(value);
+
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 };
 
@@ -69,37 +70,35 @@ const ReadMore = ({ className }: { className?: string }) => (
  * warms on hover, and a press scales the card down a hair.
  */
 const LeadPost = ({ post }: { post: PostSummary }) => (
-  <li className="min-w-0 sm:col-span-2">
-    <article className="border-border bg-card focus-within:border-primary/30 hover:border-primary/30 group animate-news-lead relative max-w-full rounded-xl border p-6 transition-colors duration-300 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
-      <Link
-        className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
-        params={{ slug: post.slug }}
-        preload="intent"
-        to="/blog/$slug"
-      >
-        <span className="sr-only">Read {post.title}</span>
-      </Link>
+  <article className="border-border bg-card focus-within:border-primary/30 hover:border-primary/30 group animate-news-lead relative max-w-full min-w-0 rounded-xl border p-6 transition-colors duration-300 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:p-8">
+    <Link
+      className="focus-visible:ring-ring focus-visible:ring-ring/50 absolute inset-0 z-10 rounded-xl focus-visible:ring-3 focus-visible:outline-none"
+      params={{ slug: post.slug }}
+      preload="intent"
+      to="/blog/$slug"
+    >
+      <span className="sr-only">Read {post.title}</span>
+    </Link>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <NewsDate value={post.createdAt} />
-        <PostCategoryBadge category={post.category} variant="subtle" />
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <NewsDate value={post.createdAt} />
+      <PostCategoryBadge category={post.category} variant="subtle" />
+    </div>
+    <h3 className="text-foreground mt-2 truncate text-2xl font-bold tracking-tight sm:text-3xl">
+      {post.title}
+    </h3>
+    {post.preview ? (
+      <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-7 sm:text-base">
+        {truncate(post.preview, 75)}
+      </p>
+    ) : null}
+    <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+      <PostAuthors authors={post.authors} compact linked={false} />
+      <div className="flex items-center gap-2">
+        <ReadMore className="group-hover:text-primary/90" />
       </div>
-      <h3 className="text-foreground mt-2 truncate text-2xl font-bold tracking-tight sm:text-3xl">
-        {post.title}
-      </h3>
-      {post.preview ? (
-        <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-7 sm:text-base">
-          {truncate(post.preview, 140)}
-        </p>
-      ) : null}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <PostAuthors authors={post.authors} compact linked={false} />
-        <div className="flex items-center gap-2">
-          <ReadMore className="group-hover:text-primary/90" />
-        </div>
-      </div>
-    </article>
-  </li>
+    </div>
+  </article>
 );
 
 /**

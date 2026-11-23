@@ -66,21 +66,25 @@ const openMenu = () =>
 describe(NavbarLinks, () => {
   it("shows exactly two sections as flat links", () => {
     render(<NavbarLinks />);
+
     for (const label of FLAT_LABELS) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
+
     // Two sections plus Blog.
     expect(screen.getAllByRole("link")).toHaveLength(FLAT_LABELS.length + 1);
   });
 
   it("collapses every other section behind one Browse trigger", () => {
     render(<NavbarLinks />);
+
     for (const label of MENU_LABELS) {
       expect(
         screen.queryByRole("link", { name: label }),
         `${label} should not be a flat link`
       ).not.toBeInTheDocument();
     }
+
     expect(
       screen.getByRole("button", { name: /browse/iu }),
       "one trigger for every collapsed section"
@@ -110,6 +114,7 @@ describe(NavbarLinks, () => {
 
   it("does not mark anything current while no route is active", () => {
     render(<NavbarLinks />);
+
     for (const link of screen.getAllByRole("link")) {
       expect(link).not.toHaveAttribute("aria-current");
     }
@@ -120,6 +125,7 @@ describe(BrowseMenuItems, () => {
   it("lists every collapsed section", () => {
     openMenu();
     const menu = screen.getByRole("menu");
+
     for (const label of MENU_LABELS) {
       expect(
         within(menu).getByRole("menuitem", { name: new RegExp(label, "u") })
@@ -129,10 +135,12 @@ describe(BrowseMenuItems, () => {
 
   it("describes each section, which a flat link has no room for", () => {
     openMenu();
+
     for (const label of MENU_LABELS) {
       const category = MINECRAFT_CATEGORIES.find(
         (entry) => entry.label === label
       );
+
       expect(
         screen.getByText(category?.description ?? "missing"),
         `${label} description`

@@ -39,6 +39,7 @@ export const ProjectImage = ({
   if (!image) {
     return fallback ?? null;
   }
+
   return (
     <div
       className={cn("bg-muted overflow-hidden", className)}

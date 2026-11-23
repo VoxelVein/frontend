@@ -142,6 +142,7 @@ const useThemeToggle = ({
     if (document.querySelector(`#${VT_STYLE_ID}`)) {
       return;
     }
+
     const el = document.createElement("style");
     el.id = VT_STYLE_ID;
     el.textContent = VT_CSS;
@@ -155,6 +156,7 @@ const useThemeToggle = ({
 
     if (reduce || !("startViewTransition" in document)) {
       setTheme(next);
+
       return;
     }
 
@@ -180,6 +182,7 @@ const useThemeToggle = ({
         };
       }
     ).startViewTransition(() => setTheme(next));
+
     // The reveal keeps the transition open until it ends, so awaiting
     // vt.finished below also covers it.
     const reveal = variant === "pixel" ? playPixelReveal(vt) : undefined;
@@ -190,6 +193,7 @@ const useThemeToggle = ({
       // The view transition can be interrupted (e.g. by another navigation);
       // the theme has already been applied.
     }
+
     delete root.dataset.beuiVt;
   };
 
@@ -233,4 +237,5 @@ const ThemeToggle = ({
 };
 
 export { ThemeToggle, useThemeToggle };
+
 export type { RectStart, ThemeToggleProps, ThemeVariant };

@@ -85,8 +85,10 @@ export const resolveTab = ({ confirm, tab }: SettingsSearch): SettingsTab => {
   if (tab === LEGACY_TAB_ALIAS) {
     return "security";
   }
+
   if (tab) {
     return tab;
   }
+
   return confirm === DELETE_CONFIRM ? "danger" : "profile";
 };

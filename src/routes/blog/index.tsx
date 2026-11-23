@@ -110,11 +110,13 @@ const BlogPage = () => {
   // this is a reader page, so the session is read client-side the same way the
   // hero does. The server still guards /admin/posts/new behind its own check.
   const canManagePosts = useCanManagePosts();
+
   const { hits, isActive, isAvailable, isSearching, onQueryChange, query } =
     usePostSearch({
       availability: searchAvailable,
       fetchResults: (value) => searchPosts({ data: { query: value } }),
     });
+
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   // Search and category compose rather than replace each other: a reader who

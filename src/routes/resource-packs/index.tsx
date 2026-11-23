@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ResourcePacksPage = () => {
   const data = useLoaderData({ from: "/resource-packs/" });
+
   return <ProjectBrowser type="resourcepack" {...data} />;
 };
 

@@ -10,6 +10,7 @@ import {
 } from "valibot";
 
 export const TICKET_STATUS_VALUES = ["open", "closed"] as const;
+
 export type TicketStatus = (typeof TICKET_STATUS_VALUES)[number];
 
 export const TICKET_SUBJECT_MAX_LENGTH = 120;

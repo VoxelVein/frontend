@@ -70,6 +70,7 @@ const countGallery = async (projectId: string) => {
         eq(projectImages.kind, PROJECT_IMAGE_KIND.gallery)
       )
     );
+
   return row?.total ?? 0;
 };
 
@@ -80,10 +81,13 @@ const handleUpload = async (
   if (!isSameOrigin(request)) {
     return errorResponse(403, "Cross-origin uploads are not allowed.");
   }
+
   if (!safeParse(uuidSchema, projectId).success) {
     return notFound();
   }
+
   const kind = parseKind(new URL(request.url).searchParams.get("kind"));
+
   if (!kind) {
     return errorResponse(400, "Specify kind=icon or kind=gallery.");
   }
@@ -98,20 +102,24 @@ const handleUpload = async (
     `user:${session.user.id}`,
     RATE_LIMITS.upload
   );
+
   if (quota.limited) {
     return rateLimitedResponse(quota.retryAfterSeconds);
   }
 
   const { quotaBytes } = loadStorageConfig();
   const declaredLength = Number(request.headers.get("content-length") ?? "0");
+
   if (declaredLength > IMAGE_MAX_BYTES) {
     return errorResponse(
       413,
       `Images can be at most ${IMAGE_MAX_BYTES} bytes.`
     );
   }
+
   if (kind === PROJECT_IMAGE_KIND.gallery) {
     const total = await countGallery(project.id);
+
     if (total >= GALLERY_MAX_COUNT) {
       return errorResponse(
         400,
@@ -119,13 +127,16 @@ const handleUpload = async (
       );
     }
   }
+
   const remainingBytes = await getRemainingBytes(quotaBytes);
+
   if (
     remainingBytes !== null &&
     (remainingBytes === 0 || declaredLength > remainingBytes)
   ) {
     throw quotaExceededError();
   }
+
   if (!request.body) {
     return errorResponse(400, "The upload is empty.");
   }
@@ -133,6 +144,7 @@ const handleUpload = async (
   const { head, stream } = await peekStream(request.body, HEADER_BYTES);
   // The type comes from the bytes, never from the request's content-type.
   const image = readImage(head);
+
   if (!image) {
     return errorResponse(415, "Upload a PNG, JPEG, WebP, or GIF image.");
   }
@@ -142,9 +154,9 @@ const handleUpload = async (
   const storageKey = `projects/${project.id}/images/${filename}`;
 
   const stored = await uploadStream({
+    filename,
     body: stream,
     contentType: image.contentType,
-    filename,
     inline: true,
     key: storageKey,
     maxBytes: remainingBytes ?? IMAGE_MAX_BYTES,
@@ -159,13 +171,13 @@ const handleUpload = async (
   try {
     await insertImageWithinQuota(
       {
-        contentType: image.contentType,
-        height: image.dimensions.height,
         id,
         kind,
+        storageKey,
+        contentType: image.contentType,
+        height: image.dimensions.height,
         projectId: project.id,
         size: stored.size,
-        storageKey,
         width: image.dimensions.width,
       },
       quotaBytes
@@ -184,10 +196,10 @@ const handleUpload = async (
 
   return Response.json(
     {
-      contentType: image.contentType,
-      height: image.dimensions.height,
       id,
       kind,
+      contentType: image.contentType,
+      height: image.dimensions.height,
       size: stored.size,
       url: `/api/image/${id}`,
       width: image.dimensions.width,
@@ -206,10 +218,13 @@ const handle = async (request: Request, projectId: string) => {
         error.message
       );
     }
+
     if (error instanceof StorageError) {
       return storageErrorResponse(error, "image");
     }
+
     console.error("Image upload failed", error);
+
     return errorResponse(500, "The image upload failed. Try again.");
   }
 };

@@ -29,6 +29,7 @@ import type { ReportInput } from "@/lib/reports";
 const parses = (run: () => void): boolean => {
   try {
     run();
+
     return true;
   } catch {
     return false;
@@ -89,6 +90,7 @@ describe(validateReportTarget, () => {
     );
   });
 });
+
 // Spelled out rather than referencing the schema: vitest accepts only a string
 // or a function as a describe label, and the schema is neither.
 describe("submitted report payload", () => {

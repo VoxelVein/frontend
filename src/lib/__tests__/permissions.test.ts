@@ -21,6 +21,7 @@ describe("role definitions", () => {
     const resources = new Set(
       Object.values(staffRoles).flatMap((role) => Object.keys(role.statements))
     );
+
     // Membership rather than a sorted comparison: `toSorted` is unavailable at
     // this file's ES2022 target and the order is not what is under test.
     expect(resources.has("user")).toBeTruthy();
@@ -36,6 +37,7 @@ describe("role definitions", () => {
       ([statement, actions]) =>
         actions.map((action) => `${statement}:${action}`)
     );
+
     expect(granted).toStrictEqual([]);
   });
 
@@ -49,6 +51,7 @@ describe("role definitions", () => {
     ] as const) {
       expect(moderator.authorize({ user: [action] }).success).toBeFalsy();
     }
+
     expect(moderator.authorize({ session: ["list"] }).success).toBeFalsy();
     expect(moderator.authorize({ session: ["revoke"] }).success).toBeFalsy();
   });
@@ -72,6 +75,7 @@ describe("role definitions", () => {
     ] as const) {
       expect(admin.authorize({ user: [action] }).success).toBeTruthy();
     }
+
     for (const action of ["list", "revoke", "delete"] as const) {
       expect(admin.authorize({ session: [action] }).success).toBeTruthy();
     }
@@ -86,6 +90,7 @@ describe("role definitions", () => {
           (action) => admin.authorize({ [statement]: [action] }).success
         )
     );
+
     expect(adminChecks.flat().every(Boolean)).toBeTruthy();
   });
 
@@ -94,6 +99,7 @@ describe("role definitions", () => {
       ([statement, actions]) =>
         actions.map((action) => `${statement}:${action}`)
     );
+
     expect(granted).toStrictEqual([]);
   });
 });
@@ -128,12 +134,14 @@ describe("capability statements", () => {
     // which the case above proves only ever holds `user` or `session`  -  the
     // exact key list of `CAPABILITIES_BY_RESOURCE`.
     const claims = CAPABILITIES_BY_RESOURCE[resource as Resource];
+
     if (!claims) {
       throw new Error(
         `${resource} has statements but no capability claims it. Add it to ` +
           `CAPABILITIES_BY_RESOURCE or drop the statements.`
       );
     }
+
     return claims;
   };
 
@@ -145,6 +153,7 @@ describe("capability statements", () => {
         // The action names do not matter here  -  only which resource was
         // granted  -  so the count is what gets asserted, not the strings.
         expect(actions.length).toBeGreaterThan(0);
+
         for (const capability of claimsFor(resource)) {
           expect(
             can(role, capability),
@@ -182,6 +191,7 @@ describe("capability statements", () => {
 
     for (const role of ALL_ROLES) {
       const held: ReadonlySet<Capability> = new Set(expected[role]);
+
       for (const capability of ALL_CAPABILITIES) {
         expect(can(role, capability), `${role}.${capability}`).toBe(
           held.has(capability)

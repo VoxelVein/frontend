@@ -154,9 +154,11 @@ const ProfileRoute = () => {
       shader: 0,
       datapack: 0,
     } satisfies Record<ProjectType, number>;
+
     const nextTypeCounts: Partial<Record<ProjectType, number>> = {};
 
     let downloads = 0;
+
     for (const project of profile.projects) {
       nextCounts[project.type] += 1;
       nextTypeCounts[project.type] = (nextTypeCounts[project.type] ?? 0) + 1;
@@ -179,6 +181,7 @@ const ProfileRoute = () => {
   // them are the same text, so each is dropped when it adds nothing.
   const handle = `@${profile.username}`;
   const showsHandle = handle !== `@${profile.displayUsername.toLowerCase()}`;
+
   const showsName =
     profile.name !== profile.displayUsername &&
     profile.name !== profile.username;
@@ -322,16 +325,19 @@ export const Route = createFileRoute("/u/$username")({
     const profile = await getPublicProfile({
       data: { username: params.username },
     });
+
     // A real 404 rather than a "not found" page rendered with a 200: this URL
     // is linked from every project byline, so a soft 404 would be indexed as
     // a page that exists.
     if (!profile) {
       throw notFound();
     }
+
     return profile;
   },
   head: ({ loaderData, match }) => {
     const bio = loaderData?.bio;
+
     return {
       meta: [
         { title: `${loaderData?.displayUsername ?? "Profile"} | VoxelVein` },

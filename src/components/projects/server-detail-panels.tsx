@@ -49,6 +49,7 @@ const ServerAddress = ({ server }: { server: ProjectServerView }) => {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
     "idle"
   );
+
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clear on unmount: the timer otherwise outlives the component and React
@@ -68,12 +69,14 @@ const ServerAddress = ({ server }: { server: ProjectServerView }) => {
     if (resetTimer.current !== null) {
       clearTimeout(resetTimer.current);
     }
+
     try {
       await navigator.clipboard.writeText(address);
       setCopyState("copied");
     } catch {
       setCopyState("failed");
     }
+
     resetTimer.current = setTimeout(
       () => setCopyState("idle"),
       COPIED_RESET_MS

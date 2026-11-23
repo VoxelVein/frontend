@@ -73,8 +73,10 @@ const turnstileConfig = {
 };
 
 const turnstileConfigProblems = getTurnstileConfigProblems(turnstileConfig);
+
 const turnstileIsUnconfigured =
   turnstileConfig.secret === null && turnstileConfig.hostnames.size === 0;
+
 if (!turnstileIsUnconfigured && turnstileConfigProblems.length > 0) {
   console.error(
     `Turnstile is misconfigured, so password sign-in and sign-up will be rejected: ${turnstileConfigProblems.join(" ")}`
@@ -83,6 +85,7 @@ if (!turnstileIsUnconfigured && turnstileConfigProblems.length > 0) {
 
 const requireTurnstile = createAuthMiddleware(async (ctx) => {
   const expectedAction = TURNSTILE_ACTIONS.get(ctx.path);
+
   if (!expectedAction) {
     return;
   }
@@ -107,6 +110,7 @@ const requireTurnstile = createAuthMiddleware(async (ctx) => {
   if (result.ok) {
     return;
   }
+
   if (
     result.reason === TURNSTILE_FAILURE.notConfigured ||
     result.reason === TURNSTILE_FAILURE.siteverifyUnavailable
@@ -115,6 +119,7 @@ const requireTurnstile = createAuthMiddleware(async (ctx) => {
       message: "We couldn't verify that you're human right now. Try again.",
     });
   }
+
   throw new APIError("FORBIDDEN", {
     message: "Human verification failed. Complete the check and try again.",
   });
@@ -132,6 +137,7 @@ const USERNAME_CHOSEN_PATHS = new Set([
 // Request bodies are parsed here, at the hook boundary. Loose objects keep
 // every other field for Better Auth's own validation.
 const usernameBodySchema = looseObject({ username: optional(string()) });
+
 const profileUpdateSchema = looseObject({
   displayUsername: optional(unknown()),
   username: optional(unknown()),
@@ -155,6 +161,7 @@ const accountRules = {
         handler: createAuthMiddleware(async (ctx) => {
           if (ctx.path === UPDATE_USER_PATH) {
             const update = parse(profileUpdateSchema, ctx.body);
+
             if (
               update.username !== undefined ||
               update.displayUsername !== undefined
@@ -163,9 +170,12 @@ const accountRules = {
                 message: "Change your username in Settings → Profile.",
               });
             }
+
             return;
           }
+
           const { username: requested } = parse(usernameBodySchema, ctx.body);
+
           if (requested && !(await isUsernameFree(requested))) {
             throw new APIError("BAD_REQUEST", {
               message: "This username is already taken.",
@@ -177,21 +187,36 @@ const accountRules = {
         matcher: (context) => context.path === "/sign-in/username",
         handler: createAuthMiddleware(async (ctx) => {
           const { username: requested } = parse(usernameBodySchema, ctx.body);
+
           const current = requested
             ? await resolveReservedUsername(requested)
             : null;
+
           if (current) {
             return { context: { body: { ...ctx.body, username: current } } };
           }
+
+          // Better Auth reads `undefined` as "leave the context unchanged".
+          // Keeping it explicit satisfies no-inconsistent-returns, which
+          // rejects a bare `return` here.
+          // oxlint-disable-next-line unicorn/no-useless-undefined
+          return undefined;
         }),
       },
       {
         matcher: (context) => context.path === "/is-username-available",
         handler: createAuthMiddleware(async (ctx) => {
           const { username: requested } = parse(usernameBodySchema, ctx.body);
+
           if (requested && !(await isUsernameFree(requested))) {
             return ctx.json({ available: false });
           }
+
+          // Better Auth reads `undefined` as "leave the context unchanged".
+          // Keeping it explicit satisfies no-inconsistent-returns, which
+          // rejects a bare `return` here.
+          // oxlint-disable-next-line unicorn/no-useless-undefined
+          return undefined;
         }),
       },
     ],
@@ -283,15 +308,22 @@ export const auth = betterAuth({
       create: {
         before: async (user, ctx) => {
           if (ctx?.path && USERNAME_CHOSEN_PATHS.has(ctx.path)) {
-            return;
+            // Better Auth reads `undefined` as "keep the supplied user".
+            // Keeping it explicit satisfies no-inconsistent-returns, which
+            // rejects a bare `return` here.
+            // oxlint-disable-next-line unicorn/no-useless-undefined
+            return undefined;
           }
+
           // GitHub's login arrives here through mapProfileToUser.
           const { username: hint } = parse(usernameBodySchema, user);
+
           const generated = await findAvailableUsername([
             hint,
             user.email.split("@")[0],
             user.name,
           ]);
+
           return {
             data: {
               ...user,
@@ -323,10 +355,10 @@ export const auth = betterAuth({
     accountRules,
 
     admin({
+      ac,
       // Also shown to accounts waiting out their deletion grace period.
       bannedUserMessage:
         "This account is suspended or scheduled for deletion. Contact support if you think this is a mistake.",
-      ac,
       // A moderator is not an admin: `adminRoles` is deliberately left at its
       // default so only "admin" passes the plugin's own admin checks. A
       // moderator's reach comes from their access-control statements.
@@ -334,8 +366,8 @@ export const auth = betterAuth({
     }),
 
     passkey({
-      origin: env.BETTER_AUTH_URL,
       rpID,
+      origin: env.BETTER_AUTH_URL,
       rpName: "VoxelVein",
     }),
 
@@ -355,10 +387,6 @@ export const auth = betterAuth({
     // request.
     updateAge: ONE_DAY_IN_SECONDS,
   },
-
-  socialProviders,
-
-  trustedOrigins,
 
   user: {
     additionalFields: {
@@ -391,4 +419,8 @@ export const auth = betterAuth({
       enabled: false,
     },
   },
+
+  socialProviders,
+
+  trustedOrigins,
 });

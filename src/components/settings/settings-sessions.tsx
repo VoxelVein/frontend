@@ -52,12 +52,15 @@ const sessionsReducer = (
     case "LOAD_START": {
       return { ...state, error: null, isLoading: true };
     }
+
     case "LOAD_SUCCESS": {
       return { error: null, isLoading: false, sessions: action.sessions };
     }
+
     case "LOAD_ERROR": {
       return { ...state, error: action.error, isLoading: false };
     }
+
     case "REVOKE_SUCCESS": {
       return {
         ...state,
@@ -67,6 +70,7 @@ const sessionsReducer = (
         ),
       };
     }
+
     case "REVOKE_OTHERS_SUCCESS": {
       return {
         ...state,
@@ -76,15 +80,19 @@ const sessionsReducer = (
         ),
       };
     }
+
     default: {
       return state;
     }
   }
 };
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+// An explicit locale and time zone keep server and client output identical;
+// "en" matches the shared formatter in `src/lib/format.ts`.
+const dateFormatter = new Intl.DateTimeFormat("en", {
   dateStyle: "medium",
   timeStyle: "short",
+  timeZone: "UTC",
 });
 
 const parseUserAgent = (userAgent: string) => {
@@ -125,6 +133,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
     isLoading: true,
     sessions: [],
   });
+
   const [isRevokingOther, setIsRevokingOther] = useState(false);
 
   // oxlint-disable-next-line react-doctor/react-compiler-no-manual-memoization -- React Compiler is not enabled in this project; useCallback keeps loadSessions stable so the effect does not re-run on every render
@@ -138,6 +147,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
         error: loadError.message ?? "Could not load your signed-in devices.",
         type: "LOAD_ERROR",
       });
+
       return;
     }
 
@@ -156,6 +166,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
       // inline: it has a retry button and leaves the list empty, which a
       // transient toast cannot convey.
       toast.error(revokeError.message ?? "Could not sign out that device.");
+
       return;
     }
 
@@ -171,6 +182,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
       toast.error(
         revokeError.message ?? "Could not sign out your other devices."
       );
+
       return;
     }
 
@@ -207,6 +219,7 @@ const SettingsSessions = ({ currentSessionToken }: SettingsSessionsProps) => {
           const { browser, isMobile, os } = parseUserAgent(
             session.userAgent ?? ""
           );
+
           const isCurrent = session.token === currentSessionToken;
           const DeviceIcon = isMobile ? IconDeviceMobile : IconDeviceDesktop;
 

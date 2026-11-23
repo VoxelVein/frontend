@@ -7,6 +7,7 @@ import "../env";
 import { events } from "../lib/events";
 
 const MIN_SECRET_LENGTH = 32;
+
 const PLACEHOLDER_SECRETS = new Set([
   "dev-webhook-secret-change-me",
   "generate-with-openssl-rand-base64-32",
@@ -42,7 +43,9 @@ const isFreshTimestamp = (timestamp: string): boolean => {
   if (!/^\d+$/u.test(timestamp)) {
     return false;
   }
+
   const nowSeconds = Math.floor(Date.now() / 1000);
+
   return Math.abs(nowSeconds - Number(timestamp)) <= MAX_TIMESTAMP_SKEW_SECONDS;
 };
 
@@ -56,6 +59,7 @@ const verifySignature = (
   const expected = createHmac("sha256", WEBHOOK_SECRET)
     .update(`${timestamp}.${payload}`)
     .digest();
+
   const signatureBuffer = Buffer.from(signature, "hex");
 
   return (
@@ -79,6 +83,7 @@ export const webhooksRoute = new Elysia().post(
     }
 
     let body: unknown;
+
     try {
       body = JSON.parse(raw);
     } catch {
@@ -86,11 +91,13 @@ export const webhooksRoute = new Elysia().post(
     }
 
     const parsed = safeParse(modEventSchema, body);
+
     if (!parsed.success) {
       return new Response("Invalid webhook payload", { status: 400 });
     }
 
     events.broadcast(parsed.output);
+
     return { ok: true };
   }
 );

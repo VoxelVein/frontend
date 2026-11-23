@@ -80,6 +80,7 @@ const AdminPage = () => {
   // closed on an absent value, so a session without one sees no sections.
   const role = session.user.role ?? "user";
   const { tab = "users" } = useSearch({ from: "/admin/" });
+
   const [counts, setCounts] = useState<AdminTabCounts>({
     open: 0,
     pending: 0,
@@ -91,6 +92,7 @@ const AdminPage = () => {
   // bookmarked or shared admin URL lands somewhere usable.
   const visibleTabs = visibleTabsFor(role);
   const activeTab = resolveAdminTab(tab, role);
+
   const activeLabel =
     visibleTabs.find((entry) => entry.value === activeTab)?.label ??
     "Admin section";
@@ -108,6 +110,7 @@ const AdminPage = () => {
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       // Only the badges this role can actually see are fetched; the others
       // would 403 and the count is a convenience either way.
@@ -122,16 +125,20 @@ const AdminPage = () => {
           ? fetchOpenReportCount()
           : Promise.resolve(null),
       ]);
+
       if (!isCurrent) {
         return;
       }
+
       setCounts((current) => ({
         open: open ?? current.open,
         pending: pending ?? current.pending,
         unread: unread ?? current.unread,
       }));
     };
+
     void loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -139,6 +146,7 @@ const AdminPage = () => {
 
   const refreshUnreadCount = async () => {
     const unread = await fetchUnreadCount();
+
     if (unread !== null) {
       setCounts((current) => ({ ...current, unread }));
     }
@@ -146,6 +154,7 @@ const AdminPage = () => {
 
   const refreshPendingReviews = async () => {
     const pending = await fetchPendingReviewCount();
+
     if (pending !== null) {
       setCounts((current) => ({ ...current, pending }));
     }
@@ -153,6 +162,7 @@ const AdminPage = () => {
 
   const refreshOpenReports = async () => {
     const open = await fetchOpenReportCount();
+
     if (open !== null) {
       setCounts((current) => ({ ...current, open }));
     }
@@ -204,6 +214,7 @@ export const Route = createFileRoute("/admin/")({
     // from a bookmark after a tab was removed) falls back to the default tab
     // instead of surfacing a generic "an error occurred" with no detail.
     const result = safeParse(adminSearchSchema, search);
+
     return result.success ? result.output : { tab: "users" };
   },
   component: AdminPage,

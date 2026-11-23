@@ -27,15 +27,19 @@ const searchReducer = (
     case "START": {
       return { ...state, error: null, isSearching: true };
     }
+
     case "SUCCESS": {
       return { error: null, isSearching: false, hits: action.hits };
     }
+
     case "CLEARED": {
       return { error: null, isSearching: false, hits: null };
     }
+
     case "ERROR": {
       return { ...state, error: action.error, isSearching: false };
     }
+
     default: {
       return state;
     }
@@ -84,15 +88,19 @@ export const usePostSearch = ({
   probe,
 }: UsePostSearchOptions): UsePostSearchResult => {
   const [query, setQuery] = useState("");
+
   const [debouncedQuery] = useDebouncedValue(query, {
     wait: SEARCH_DEBOUNCE_MS,
   });
+
   const [probed, setProbed] = useState<boolean | null>(null);
+
   const [state, dispatch] = useReducer(searchReducer, {
     error: null,
     isSearching: false,
     hits: null,
   });
+
   const hasMountedRef = useRef(false);
   const requestIdRef = useRef(0);
   /**
@@ -123,29 +131,27 @@ export const usePostSearch = ({
   const isAvailable = availability ?? probed ?? false;
 
   useEffect(() => {
-    if (availability !== null || !probe) {
-      return;
-    }
-
     let cancelled = false;
 
-    const runProbe = async () => {
-      try {
-        const available = await probe();
+    if (availability === null && probe) {
+      const runProbe = async () => {
+        try {
+          const available = await probe();
 
-        if (!cancelled) {
-          setProbed(available);
+          if (!cancelled) {
+            setProbed(available);
+          }
+        } catch {
+          // A failed probe just leaves the field hidden. Availability is
+          // re-checked by the next search, which is where it actually matters.
+          if (!cancelled) {
+            setProbed(false);
+          }
         }
-      } catch {
-        // A failed probe just leaves the field hidden. Availability is
-        // re-checked by the next search, which is where it actually matters.
-        if (!cancelled) {
-          setProbed(false);
-        }
-      }
-    };
+      };
 
-    void runProbe();
+      void runProbe();
+    }
 
     return () => {
       cancelled = true;
@@ -197,6 +203,7 @@ export const usePostSearch = ({
     // to real edits after that.
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
+
       return;
     }
 
@@ -209,6 +216,7 @@ export const usePostSearch = ({
 
     if (trimmedQuery.length === 0) {
       pendingRef.current = false;
+
       return;
     }
 
@@ -258,9 +266,9 @@ export const usePostSearch = ({
   };
 
   return {
-    error,
     hits: hits ?? [],
     isActive: isAvailable && trimmedQuery.length > 0,
+    error,
     isAvailable,
     isSearching,
     onQueryChange,

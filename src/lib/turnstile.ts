@@ -3,6 +3,7 @@ import type { InferOutput } from "valibot";
 
 const SITEVERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
 const SITEVERIFY_TIMEOUT_MS = 10_000;
 const MAX_TOKEN_LENGTH = 2048;
 
@@ -77,15 +78,19 @@ export const getTurnstileConfigProblems = (
   if (!config.secret) {
     problems.push("TURNSTILE_SECRET is not set.");
   }
+
   if (config.hostnames.size === 0) {
     problems.push("TURNSTILE_HOSTNAMES is not set.");
   }
+
   if (!config.isProduction) {
     return problems;
   }
+
   if (config.secret && isTestingSecret(config.secret)) {
     problems.push("TURNSTILE_SECRET is a Cloudflare testing secret.");
   }
+
   for (const local of ["localhost", "127.0.0.1"]) {
     if (config.hostnames.has(local)) {
       problems.push(`TURNSTILE_HOSTNAMES must not include ${local}.`);
@@ -107,6 +112,7 @@ const isAcceptedResult = (
   // Testing keys never return the real action or hostname. Accept them only
   // outside production; production refuses testing secrets entirely.
   const isTestingResult = result.metadata?.result_with_testing_key === true;
+
   if (isTestingResult) {
     return !config.isProduction;
   }
@@ -138,11 +144,13 @@ export const verifyTurnstileToken = async (
   }
 
   const body = new URLSearchParams({ response: token, secret: config.secret });
+
   if (remoteIp) {
     body.set("remoteip", remoteIp);
   }
 
   let result: SiteverifyResponse;
+
   try {
     const response = await fetchImpl(SITEVERIFY_URL, {
       body,
@@ -150,13 +158,17 @@ export const verifyTurnstileToken = async (
       method: "POST",
       signal: AbortSignal.timeout(SITEVERIFY_TIMEOUT_MS),
     });
+
     if (!response.ok) {
       return { ok: false, reason: TURNSTILE_FAILURE.siteverifyUnavailable };
     }
+
     const parsed = safeParse(siteverifyResponseSchema, await response.json());
+
     if (!parsed.success) {
       return { ok: false, reason: TURNSTILE_FAILURE.siteverifyUnavailable };
     }
+
     result = parsed.output;
   } catch {
     return { ok: false, reason: TURNSTILE_FAILURE.siteverifyUnavailable };

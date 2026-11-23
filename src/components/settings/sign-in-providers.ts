@@ -19,6 +19,7 @@ export interface LinkedAccount {
 }
 
 export const LINKED_ACCOUNTS_QUERY_KEY = ["linked-accounts"] as const;
+
 export const ACCOUNT_DELETION_CONTEXT_QUERY_KEY = [
   "account-deletion-context",
 ] as const;
@@ -51,9 +52,11 @@ export const getConfiguredSocialProviders = (): SocialProvider[] =>
 
 const fetchLinkedAccounts = async (): Promise<LinkedAccount[]> => {
   const { data, error } = await authClient.listAccounts();
+
   if (error) {
     throw new Error(error.message ?? "Could not load your sign-in methods.");
   }
+
   return (data ?? []).map((account) => ({
     id: account.id,
     providerId: account.providerId,

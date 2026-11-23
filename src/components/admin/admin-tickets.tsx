@@ -39,6 +39,7 @@ const AdminTickets = () => {
   const load = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
     try {
       setTickets(
         await listAllTickets({
@@ -52,18 +53,22 @@ const AdminTickets = () => {
           : "Could not load tickets."
       );
     }
+
     setIsLoading(false);
   }, [tagFilter]);
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       setIsLoading(true);
       setError(null);
+
       try {
         const next = await listAllTickets({
           data: { status: "open", tag: tagFilter.trim() || undefined },
         });
+
         if (isCurrent) {
           setTickets(next);
         }
@@ -76,11 +81,14 @@ const AdminTickets = () => {
           );
         }
       }
+
       if (isCurrent) {
         setIsLoading(false);
       }
     };
+
     loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -91,6 +99,7 @@ const AdminTickets = () => {
     setThread(null);
     setReply("");
     setEditTags("");
+
     try {
       const next = await getTicketThread({ data: { ticketId: id } });
       setThread(next);
@@ -108,12 +117,15 @@ const AdminTickets = () => {
     if (!selectedId) {
       return;
     }
+
     setIsMutating(true);
+
     try {
       const tags = editTags
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean);
+
       await updateTicketTags({ data: { tags, ticketId: selectedId } });
       const next = await getTicketThread({ data: { ticketId: selectedId } });
       setThread(next);
@@ -126,6 +138,7 @@ const AdminTickets = () => {
           : "Could not save tags."
       );
     }
+
     setIsMutating(false);
   };
 
@@ -133,7 +146,9 @@ const AdminTickets = () => {
     if (!selectedId || !reply.trim()) {
       return;
     }
+
     setIsMutating(true);
+
     try {
       await replyToTicket({
         data: { body: reply.trim(), ticketId: selectedId },
@@ -149,6 +164,7 @@ const AdminTickets = () => {
           : "Could not send reply."
       );
     }
+
     setIsMutating(false);
   };
 
@@ -156,7 +172,9 @@ const AdminTickets = () => {
     if (!selectedId) {
       return;
     }
+
     setIsMutating(true);
+
     try {
       await closeTicket({ data: { ticketId: selectedId } });
       setSelectedId(null);
@@ -169,6 +187,7 @@ const AdminTickets = () => {
           : "Could not close ticket."
       );
     }
+
     setIsMutating(false);
   };
 

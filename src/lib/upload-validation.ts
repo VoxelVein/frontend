@@ -28,6 +28,7 @@ const CONTENT_TYPE_BY_EXTENSION = {
 /** Content type to store and serve a file under, from its extension. */
 export const contentTypeFor = (filename: string): string => {
   const lower = filename.toLowerCase();
+
   for (const [extension, contentType] of Object.entries(
     CONTENT_TYPE_BY_EXTENSION
   )) {
@@ -35,6 +36,7 @@ export const contentTypeFor = (filename: string): string => {
       return contentType;
     }
   }
+
   return "application/octet-stream";
 };
 
@@ -53,10 +55,13 @@ export const sanitizeFilename = (
   if (!value || value.length > FILENAME_MAX_LENGTH) {
     return null;
   }
+
   if (!SAFE_FILENAME.test(value) || value.includes("..")) {
     return null;
   }
+
   const lower = value.toLowerCase();
+
   return ALLOWED_EXTENSIONS_BY_TYPE[type].some((extension) =>
     lower.endsWith(extension)
   )
@@ -88,15 +93,18 @@ export const peekStream = async (
   while (bufferedLength < length) {
     // oxlint-disable-next-line no-await-in-loop -- Stream chunks must be read in order.
     const { done, value } = await reader.read();
+
     if (done) {
       break;
     }
+
     buffered.push(value);
     bufferedLength += value.byteLength;
   }
 
   const head = new Uint8Array(bufferedLength);
   let offset = 0;
+
   for (const chunk of buffered) {
     head.set(chunk, offset);
     offset += chunk.byteLength;
@@ -106,13 +114,16 @@ export const peekStream = async (
     if (head.byteLength > 0) {
       yield head;
     }
+
     try {
       while (true) {
         // oxlint-disable-next-line no-await-in-loop -- Stream chunks must be read in order.
         const { done, value } = await reader.read();
+
         if (done) {
           return;
         }
+
         yield value;
       }
     } finally {

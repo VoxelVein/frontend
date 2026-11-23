@@ -194,6 +194,7 @@ export const loadStorageConfig = (): StorageConfig => {
     accessKeyId,
     bucket,
     endpoint,
+    secretAccessKey,
     forcePathStyle: env.STORAGE_FORCE_PATH_STYLE === "true",
     maxFileBytes: env.STORAGE_MAX_FILE_BYTES
       ? Number(env.STORAGE_MAX_FILE_BYTES)
@@ -203,7 +204,6 @@ export const loadStorageConfig = (): StorageConfig => {
       ? Number(env.STORAGE_QUOTA_BYTES)
       : null,
     region: env.STORAGE_REGION ?? "auto",
-    secretAccessKey,
   };
 };
 

@@ -428,7 +428,7 @@ export const NotificationsBody = ({
           </span>
           {unread > 0 ? (
             <span className="bg-primary/10 text-primary rounded-md px-2 py-1 text-xs font-medium normal-case tabular-nums">
-              {unread} new
+              {unread} unread
             </span>
           ) : null}
         </DropdownMenuLabel>

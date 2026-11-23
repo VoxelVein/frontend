@@ -25,8 +25,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { listPasskeys } from "@/lib/auth.functions";
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+// An explicit locale and time zone keep server and client output identical;
+// "en" matches the shared formatter in `src/lib/format.ts`.
+const dateFormatter = new Intl.DateTimeFormat("en", {
   dateStyle: "medium",
+  timeZone: "UTC",
 });
 
 const formatDate = (value: Date | string) =>
@@ -34,6 +37,7 @@ const formatDate = (value: Date | string) =>
 
 const SettingsPasskeys = () => {
   const queryClient = useQueryClient();
+
   const {
     data: passkeys,
     error: listError,
@@ -43,6 +47,7 @@ const SettingsPasskeys = () => {
     queryFn: listPasskeys,
     queryKey: ["passkeys"],
   });
+
   const [name, setName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -61,6 +66,7 @@ const SettingsPasskeys = () => {
 
     if (error) {
       toast.error(error.message ?? "Could not add the passkey.");
+
       return;
     }
 
@@ -82,6 +88,7 @@ const SettingsPasskeys = () => {
 
     if (error) {
       toast.error(error.message ?? "Could not remove the passkey.");
+
       return;
     }
 
@@ -180,6 +187,7 @@ const SettingsPasskeys = () => {
             <ul className="mt-4 grid gap-3">
               {passkeys.map((passkey) => {
                 const isSynced = passkey.deviceType === "multiDevice";
+
                 const DeviceIcon = isSynced
                   ? IconFingerprint
                   : IconDeviceMobile;
@@ -244,7 +252,7 @@ const SettingsPasskeys = () => {
             pending={removingId !== null}
             onConfirm={() => {
               if (pendingRemovalId) {
-                return handleRemove(pendingRemovalId);
+                handleRemove(pendingRemovalId);
               }
             }}
           />

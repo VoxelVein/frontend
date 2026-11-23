@@ -10,9 +10,11 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const PluginDetailPage = () => {
   const project = useLoaderData({ from: "/plugins/$slug" });
+
   if (!project) {
     return <ProjectNotFound type="plugin" />;
   }
+
   return <ProjectDetail project={project} />;
 };
 
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/plugins/$slug")({
     const project = await getProject({ data: { slug: params.slug } }).catch(
       () => null
     );
+
     // A slug belongs to one project type; other types are not found here.
     return project?.type === "plugin" ? project : null;
   },

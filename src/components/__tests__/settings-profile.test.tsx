@@ -82,9 +82,11 @@ const renderProfile = (user: Parameters<typeof SettingsProfile>[0]["user"]) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+
   const view = render(<SettingsProfile user={user} />, { wrapper });
 
   // Re-delivers the card with a new session, which is what `refreshSession`
@@ -430,9 +432,11 @@ describe(SettingsProfile, () => {
 
   it("locks the username during the cooldown and says until when", () => {
     const changedAt = new Date(Date.now() - DAY_IN_MS);
+
     const nextChange = new Date(
       changedAt.getTime() + USERNAME_CHANGE_COOLDOWN_MS
     );
+
     renderProfile({ ...baseUser, usernameChangedAt: changedAt });
 
     expect(screen.getByRole("textbox", { name: "Username" })).toBeDisabled();

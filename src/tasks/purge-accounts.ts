@@ -17,6 +17,7 @@ export default defineTask({
   run: async () => {
     const purged = await purgeExpiredAccounts();
     await pruneUsernameHistory();
+
     return { result: { purged } };
   },
 });

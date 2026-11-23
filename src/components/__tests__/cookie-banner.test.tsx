@@ -8,6 +8,7 @@ const CONSENT_STORAGE_KEY = "voxelvein-cookie-consent";
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the cookie banner requires a faithful Link stub; string path avoids strict factory type-checking against the router module
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute/redirect; the cast only widens the type for the mock factory
   return {
     ...(actual as object),

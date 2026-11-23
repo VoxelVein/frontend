@@ -17,6 +17,7 @@ export const rateLimitIdentity = (
   if (userId) {
     return `user:${userId}`;
   }
+
   return `ip:${getForwardedClientIp(headers, trustProxy) ?? "unknown"}`;
 };
 
@@ -34,6 +35,7 @@ export const consumeServerLimit = async (
   limit: RateLimit
 ): Promise<RateLimitResult | null> => {
   const result = await consumeRateLimit(bucket, identity, limit);
+
   return result.limited ? result : null;
 };
 

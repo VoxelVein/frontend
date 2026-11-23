@@ -149,6 +149,7 @@ export const hasSearchablePosts = async (): Promise<boolean> => {
   const result = await db.execute(
     sql`select exists(select 1 from posts where published = true) as present`
   );
+
   const [row] = result.rows;
   const parsed = safeParse(boolean(), row?.present);
 

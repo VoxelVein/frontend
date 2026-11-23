@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProjectBrowser } from "@/components/projects/project-browser";
@@ -42,12 +44,31 @@ vi.mock("@/lib/project-search-cache", () => ({
   },
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The server-status query pulls in the database; this suite is about browser search state
+vi.mock("@/lib/server-status.functions", () => ({
+  getMinecraftServerStatuses: vi.fn<
+    (opts: { data: { projectIds: string[] } }) => Promise<Record<string, never>>
+  >(() => Promise.resolve({})),
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- ProjectCard is covered by its own rendering; a stub keeps the page test focused on search state
 vi.mock("@/components/projects/project-card", () => ({
   ProjectCard: ({ project }: { project: ProjectDocument }) => (
     <div data-testid={`mod-card-${project.id}`}>{project.name}</div>
   ),
 }));
+
+// The results region reads server status through TanStack Query, so it needs a
+// provider even when the query is disabled for non-server project types.
+const renderPage = (ui: ReactNode) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+};
 
 const ModsPage = () => <ProjectBrowser type="mod" {...useLoaderDataMock()} />;
 
@@ -95,6 +116,7 @@ class EventSourceMock {
 
   emit(type: string, data: LiveModEvent): void {
     const listener = this.listeners.get(type);
+
     if (listener) {
       // SAFETY: The mock only needs the `data` field; the cast narrows the
       // minimal MessageEvent shape the page's handler reads.
@@ -123,10 +145,10 @@ const modFixture: ProjectDocument = {
 };
 
 const responseFixture = (hits: ProjectDocument[]): ProjectSearchResponse => ({
+  hits,
   estimatedTotalHits: hits.length,
   // oxlint-disable-next-line sonarjs/no-undefined-assignment -- Test fixture mirrors the server response shape
   facetDistribution: null,
-  hits,
   page: 1,
   pageSize: 12,
   query: "",
@@ -159,7 +181,7 @@ describe(ProjectBrowser, () => {
       initialError: null,
     });
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     expect(screen.getByRole("heading", { name: "Mods" })).toBeInTheDocument();
     expect(screen.getByTestId("mod-card-sodium")).toBeInTheDocument();
@@ -175,7 +197,7 @@ describe(ProjectBrowser, () => {
       })
     );
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     await selectCategory("performance");
 
@@ -194,7 +216,7 @@ describe(ProjectBrowser, () => {
   it("shows the empty state with a clear-filters action", async () => {
     searchModsMock.mockResolvedValue(responseFixture([]));
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     await selectCategory("performance");
 
@@ -212,7 +234,7 @@ describe(ProjectBrowser, () => {
   it("shows an error with a retry button and recovers on retry", async () => {
     searchModsMock.mockRejectedValueOnce(new Error("Search failed"));
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     await selectCategory("performance");
 
@@ -234,7 +256,7 @@ describe(ProjectBrowser, () => {
       new Error("connect ECONNREFUSED 127.0.0.1:5432")
     );
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     await selectCategory("performance");
 
@@ -250,7 +272,7 @@ describe(ProjectBrowser, () => {
     // "failed to fetch" means that hop broke, not that Postgres is down.
     searchModsMock.mockRejectedValueOnce(new Error("Failed to fetch"));
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     await selectCategory("performance");
 
@@ -264,7 +286,7 @@ describe(ProjectBrowser, () => {
   it("searches immediately as the query changes (real-time)", async () => {
     searchModsMock.mockResolvedValue(responseFixture([modFixture]));
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     fireEvent.change(screen.getByLabelText("Search mods"), {
       target: { value: "sodium" },
@@ -280,7 +302,7 @@ describe(ProjectBrowser, () => {
   it("shows a live-event banner and refreshes results on demand", async () => {
     searchModsMock.mockResolvedValue(responseFixture([modFixture]));
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     const [source] = EventSourceMock.instances;
     expect(source).toBeTruthy();
@@ -307,7 +329,7 @@ describe(ProjectBrowser, () => {
   it("serves cached results without calling the search function", async () => {
     cacheGetMock.mockReturnValue(responseFixture([modFixture]));
 
-    render(<ModsPage />);
+    renderPage(<ModsPage />);
 
     await selectCategory("performance");
 
@@ -320,7 +342,9 @@ describe(ProjectBrowser, () => {
   it("adapts labels and search params to plugins", async () => {
     searchModsMock.mockResolvedValue(responseFixture([]));
 
-    render(<ProjectBrowser type="plugin" initial={null} initialError={null} />);
+    renderPage(
+      <ProjectBrowser type="plugin" initial={null} initialError={null} />
+    );
 
     expect(
       screen.getByRole("heading", { name: "Plugins" })

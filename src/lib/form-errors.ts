@@ -12,13 +12,16 @@ export const toFieldErrors = (
 ): Map<string, string> => {
   const { nested = {} } = flatten(issues);
   const errors = new Map<string, string>();
+
   for (const [path, messages] of Object.entries(nested)) {
     const [field] = path.split(".");
     const [message] = messages ?? [];
+
     if (field && message && !errors.has(field)) {
       errors.set(field, message);
     }
   }
+
   return errors;
 };
 

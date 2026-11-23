@@ -25,14 +25,17 @@ let connecting: Promise<RedisClientType> | null = null;
  */
 const readUrl = (): string => {
   const url = process.env.VALKEY_URL;
+
   if (url) {
     return url;
   }
+
   if (process.env.NODE_ENV === "production") {
     throw new Error(
       "VALKEY_URL must be set in production (redis://host:port). Rate-limit counters are shared through it, and without it every replica would enforce its own limit."
     );
   }
+
   return "redis://127.0.0.1:6379";
 };
 
@@ -51,6 +54,7 @@ export const getValkey = async (): Promise<RedisClientType> => {
   if (client?.isReady) {
     return client;
   }
+
   if (connecting) {
     return connecting;
   }
@@ -67,6 +71,7 @@ export const getValkey = async (): Promise<RedisClientType> => {
       reconnectStrategy: false,
     },
   });
+
   created.on("error", (error: Error) => {
     // Without a listener node-redis throws on every reconnect attempt and
     // crashes the process.
@@ -82,11 +87,14 @@ export const getValkey = async (): Promise<RedisClientType> => {
       created.destroy();
       throw error;
     }
+
     client = created;
+
     return created;
   })();
 
   connecting = pending;
+
   try {
     return await pending;
   } finally {

@@ -20,7 +20,7 @@ const languages = {
   yaml: () => import("shiki/langs/yaml.mjs"),
 };
 
-const aliases: Record<string, keyof typeof languages> = {
+const aliases = {
   js: "javascript",
   md: "markdown",
   py: "python",
@@ -30,11 +30,14 @@ const aliases: Record<string, keyof typeof languages> = {
   ts: "typescript",
   yml: "yaml",
   zsh: "bash",
-};
+} as const satisfies Record<string, keyof typeof languages>;
+
+const isLanguageAlias = (name: string): name is keyof typeof aliases =>
+  Object.hasOwn(aliases, name);
 
 let highlighter: Promise<HighlighterCore> | undefined;
 
-function getHighlighter() {
+const getHighlighter = () => {
   highlighter ??= createHighlighterCore({
     themes: [
       import("shiki/themes/github-light.mjs"),
@@ -45,9 +48,9 @@ function getHighlighter() {
   });
 
   return highlighter;
-}
+};
 
-function getLanguage(language: string) {
+const getLanguage = (language: string) => {
   const name = language.toLowerCase();
 
   if (name === "ansi") {
@@ -55,15 +58,20 @@ function getLanguage(language: string) {
   }
 
   if (name in languages) {
+    // SAFETY: the `in` check proves `name` is a key of `languages`.
     return name as keyof typeof languages;
   }
 
-  return aliases[name] ?? null;
-}
+  if (isLanguageAlias(name)) {
+    return aliases[name];
+  }
+
+  return null;
+};
 
 // Loads a language and returns a highlighter for it, or null for a language
 // that is not listed.
-export async function loadHighlighter(language: string) {
+export const loadHighlighter = async (language: string) => {
   const lang = getLanguage(language);
 
   if (!lang) {
@@ -98,6 +106,8 @@ export async function loadHighlighter(language: string) {
       return {
         lines: tokens.map((line) =>
           line.map((token, index) => (
+            // SAFETY: Shiki's `htmlStyle` is a CSS property map, which is the
+            // shape React accepts for an inline style object.
             <span
               key={index}
               style={token.htmlStyle as React.CSSProperties}
@@ -111,11 +121,11 @@ export async function loadHighlighter(language: string) {
       };
     },
   };
-}
+};
 
 // Returns one React node per line, or null for a language that is not listed.
-export async function highlightCode(code: string, language: string) {
-  const highlighter = await loadHighlighter(language);
+export const highlightCode = async (code: string, language: string) => {
+  const loaded = await loadHighlighter(language);
 
-  return highlighter ? highlighter.highlight(code).lines : null;
-}
+  return loaded ? loaded.highlight(code).lines : null;
+};

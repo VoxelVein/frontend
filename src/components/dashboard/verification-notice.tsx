@@ -29,21 +29,25 @@ export const VerificationNotice = ({ email }: VerificationNoticeProps) => {
   const handleResend = async () => {
     setIsSending(true);
 
-    const { error } = await authClient.sendVerificationEmail({
-      callbackURL: "/dashboard/projects",
-      email,
-    });
+    try {
+      const { error } = await authClient.sendVerificationEmail({
+        callbackURL: "/dashboard/projects",
+        email,
+      });
 
-    setIsSending(false);
-
-    if (error) {
-      toast.error(
-        error.message ?? "Could not send another verification email. Try again."
-      );
-      return;
+      if (error) {
+        toast.error(
+          error.message ??
+            "Could not send another verification email. Try again."
+        );
+      } else {
+        toast.success(`Sent another verification email to ${email}.`);
+      }
+    } catch {
+      toast.error("Could not send another verification email. Try again.");
     }
 
-    toast.success(`Sent another verification email to ${email}.`);
+    setIsSending(false);
   };
 
   return (

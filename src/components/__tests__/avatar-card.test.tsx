@@ -87,6 +87,7 @@ const renderCard = (props: { image: string | null; name: string }) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -100,6 +101,7 @@ const renderCard = (props: { image: string | null; name: string }) => {
  */
 const openUrlTab = async () => {
   fireEvent.click(screen.getByRole("tab", { name: /from a url/iu }));
+
   return await screen.findByLabelText("Image URL");
 };
 
@@ -334,6 +336,7 @@ describe(AvatarCard, () => {
       image: "/api/avatar/2f1c-uuid",
       name: "Ada",
     });
+
     fireEvent.click(screen.getByRole("button", { name: /remove picture/iu }));
     await expect(
       screen.findByText(/stored copy is deleted/iu)

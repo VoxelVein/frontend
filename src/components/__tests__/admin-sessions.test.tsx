@@ -75,8 +75,8 @@ const sessionsFor = (token: string) => ({
         expiresAt: "2026-02-01T00:00:00.000Z",
         id: `session-${token}`,
         ipAddress: "203.0.113.1",
-        token,
         userAgent: "Mozilla/5.0 (Macintosh)",
+        token,
       },
     ],
   },
@@ -108,9 +108,11 @@ const settle = async () => {
 const selectUser = async (name: string) => {
   // The user list is fetched on mount, so it has to commit before a row exists.
   await settle();
+
   const option = await screen.findByRole("button", {
     name: new RegExp(name, "u"),
   });
+
   fireEvent.click(option);
   await settle();
 };

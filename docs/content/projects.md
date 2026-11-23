@@ -118,15 +118,15 @@ requires a description, because the label alone leaves the reader guessing
 There are seven types, defined once in `DISCLOSURE_TYPES` and labelled by
 `DISCLOSURE_TYPE_LABELS` (`src/lib/projects.ts`):
 
-| Value           | Label                |
-| --------------- | -------------------- |
-| `ai-generated`  | AI-generated content |
-| `statistics`    | Statistics           |
-| `early-access`  | Early access         |
-| `fan-content`   | Fan content          |
-| `personal-content` | Personal content  |
-| `translation`   | Translation          |
-| `discontinued`  | Discontinued         |
+| Value              | Label                |
+| ------------------ | -------------------- |
+| `ai-generated`     | AI-generated content |
+| `statistics`       | Statistics           |
+| `early-access`     | Early access         |
+| `fan-content`      | Fan content          |
+| `personal-content` | Personal content     |
+| `translation`      | Translation          |
+| `discontinued`     | Discontinued         |
 
 `projectInputSchema` and `projectUpdateSchema` validate the list: at most
 seven entries, each type at most once, each description trimmed and capped

@@ -50,10 +50,13 @@ export const reloadForChunkError = (
 ): boolean => {
   const { navigate, now, storage } = environment;
   const last = storage?.getItem(STORAGE_KEY);
+
   if (last && now() - Number(last) < CHUNK_RELOAD_COOLDOWN_MS) {
     return false;
   }
+
   storage?.setItem(STORAGE_KEY, String(now()));
   navigate(href);
+
   return true;
 };

@@ -166,10 +166,12 @@ export const slugify = (input: string) =>
 
 const PREVIEW_MAX_LENGTH = 180;
 const ELLIPSIS = "…";
+
 /** Only break on a word boundary if it is reasonably close to the limit. */
 const MIN_WORD_BREAK_RATIO = 0.6;
 
 const FENCED_CODE = /```[\s\S]*?```/gu;
+
 // Captures the wrapped text so identifiers such as `WEBHOOK_SECRET` survive
 // into the teaser instead of collapsing to a blank.
 const INLINE_CODE = /`(?<code>[^`]*)`/gu;
@@ -184,12 +186,14 @@ const STRONG_ASTERISK = /\*\*(?<text>\S(?:[^*]*\S)?)\*\*/gu;
 const STRONG_UNDERSCORE = /__(?<text>\S(?:[^_]*\S)?)__/gu;
 const STRIKETHROUGH = /~~(?<text>\S(?:[^~]*\S)?)~~/gu;
 const EMPHASIS_ASTERISK = /\*(?<text>\S(?:[^*]*\S)?)\*/gu;
+
 // Requires a non-word character before the opening underscore and a
 // non-word character after the closing one, so `snake_case` survives intact.
 const EMPHASIS_UNDERSCORE =
   /(?<lead>^|[\s(])_(?<text>\S(?:[^_]*\S)?)_(?=$|[\s).,!?:;])/gu;
+
 const WHITESPACE = /\s+/gu;
-const TRAILING_NOISE = /[\s.,;:!? - –-]+$/gu;
+const TRAILING_NOISE = /[\s.,;:!?\-–]+$/gu;
 
 /** Replaces block syntax with nothing, keeping the inline word text. */
 const stripBlockSyntax = (text: string): string =>
@@ -227,6 +231,7 @@ export const truncate = (text: string, maxLength: number): string => {
 
   const clipped = text.slice(0, maxLength);
   const lastSpace = clipped.lastIndexOf(" ");
+
   const body =
     lastSpace > maxLength * MIN_WORD_BREAK_RATIO
       ? clipped.slice(0, lastSpace)

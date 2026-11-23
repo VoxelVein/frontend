@@ -40,6 +40,7 @@ const WelcomePage = () => {
     defaultValues: { username: suggestion },
     onSubmit: async ({ value }) => {
       toast.dismiss();
+
       try {
         await confirmUsername({ data: { username: value.username.trim() } });
       } catch (error) {
@@ -48,6 +49,7 @@ const WelcomePage = () => {
             ? error.message
             : "Could not save your username."
         );
+
         return;
       }
 
@@ -138,14 +140,17 @@ export const Route = createFileRoute("/welcome")({
     parse(welcomeSearchSchema, search),
   beforeLoad: async ({ search }) => {
     const session = await getSession();
+
     if (!session) {
       throw redirect({ to: "/login" });
     }
+
     if (session.user.usernameConfirmed !== false) {
       throw redirect({
         href: getSafeRedirect(search.redirect, DEFAULT_DESTINATION),
       });
     }
+
     return { session };
   },
   loader: () => suggestUsername(),

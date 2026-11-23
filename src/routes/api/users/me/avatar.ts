@@ -51,6 +51,10 @@ import env from "../../../../../env.config";
 // dimension reader in `readImage`.
 const HEADER_BYTES = 64;
 
+// The object, the database row, and the response all describe the same WebP
+// bytes sharp produced, so they must not drift apart.
+const AVATAR_CONTENT_TYPE = "image/webp";
+
 // Browsers send Origin on PUT; reject cross-site uploads rather than relying
 // only on the session cookie's SameSite setting.
 const isSameOrigin = (request: Request): boolean =>
@@ -133,9 +137,9 @@ const handleUpload = async (request: Request): Promise<Response> => {
   const storageKey = `avatars/${filename}`;
 
   const stored = await uploadStream({
-    body: Readable.from([processed]),
-    contentType: "image/webp",
     filename,
+    body: Readable.from([processed]),
+    contentType: AVATAR_CONTENT_TYPE,
     inline: true,
     key: storageKey,
     maxBytes: remainingBytes ?? AVATAR_MAX_BYTES,
@@ -148,11 +152,11 @@ const handleUpload = async (request: Request): Promise<Response> => {
   try {
     superseded = await insertAvatarWithinQuota(
       {
-        contentType: "image/webp",
-        height: 512,
         id,
-        size: stored.size,
         storageKey,
+        contentType: AVATAR_CONTENT_TYPE,
+        height: 512,
+        size: stored.size,
         userId: session.user.id,
         width: 512,
       },
@@ -175,10 +179,10 @@ const handleUpload = async (request: Request): Promise<Response> => {
 
   return Response.json(
     {
-      contentType: "image/webp",
+      url,
+      contentType: AVATAR_CONTENT_TYPE,
       height: 512,
       size: stored.size,
-      url,
       width: 512,
     },
     { status: 201 }

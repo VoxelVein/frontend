@@ -52,9 +52,11 @@ const requireModerator = (): Promise<StaffSession> =>
  */
 const requireMember = async (): Promise<StaffSession> => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
+
   if (!session) {
     throw new Error("Sign in to report something.");
   }
+
   return session;
 };
 
@@ -71,6 +73,7 @@ const requireReportQuota = async (session: StaffSession): Promise<void> => {
     `user:${session.user.id}`,
     RATE_LIMITS.report
   );
+
   if (quota) {
     throw new Error(RATE_LIMIT_MESSAGE);
   }
@@ -94,6 +97,7 @@ const alreadyReported = async (
 ): Promise<boolean> => {
   const targetColumn =
     targetKind === "project" ? reports.projectId : reports.reportedUserId;
+
   const [row] = await db
     .select({ total: count() })
     .from(reports)
@@ -125,6 +129,7 @@ const resolveTargetId = async (input: ReportInput): Promise<string> => {
     if (!input.projectId) {
       throw new Error("Choose which project to report.");
     }
+
     const [row] = await db
       .select({ id: projects.id })
       .from(projects)
@@ -134,12 +139,14 @@ const resolveTargetId = async (input: ReportInput): Promise<string> => {
     if (!row) {
       throw new Error("That project no longer exists.");
     }
+
     return row.id;
   }
 
   if (!input.reportedUsername) {
     throw new Error("Choose which user to report.");
   }
+
   const [row] = await db
     .select({ id: users.id })
     .from(users)
@@ -149,6 +156,7 @@ const resolveTargetId = async (input: ReportInput): Promise<string> => {
   if (!row) {
     throw new Error("That account no longer exists.");
   }
+
   return row.id;
 };
 
@@ -159,6 +167,7 @@ export const createReport = createServerFn({ method: "POST" })
     const session = await requireMember();
 
     const targetProblem = validateReportTarget(data);
+
     if (targetProblem) {
       throw new Error(targetProblem);
     }
@@ -191,6 +200,7 @@ export const createReport = createServerFn({ method: "POST" })
 export const countOpenReports = createServerFn({ method: "GET" }).handler(
   async (): Promise<number> => {
     await requireModerator();
+
     const [row] = await db
       .select({ open: count() })
       .from(reports)

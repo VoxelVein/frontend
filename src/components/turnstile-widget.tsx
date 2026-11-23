@@ -97,6 +97,7 @@ const TurnstileWidget = ({
     () => ({
       reset: () => {
         onTokenChangeRef.current(null);
+
         if (widgetIdRef.current && window.turnstile) {
           window.turnstile.reset(widgetIdRef.current);
         }
@@ -106,52 +107,57 @@ const TurnstileWidget = ({
   );
 
   useEffect(() => {
-    if (!siteKey) {
-      return;
-    }
-
     let isCancelled = false;
 
-    const renderWidget = async () => {
-      try {
-        const turnstile = await loadTurnstile();
-        const container = containerRef.current;
-        if (isCancelled || !container) {
-          return;
-        }
-        setHasError(false);
-        widgetIdRef.current =
-          turnstile.render(container, {
-            action,
-            callback: (token) => {
-              setHasError(false);
-              onTokenChangeRef.current(token);
-            },
-            "error-callback": () => {
-              setHasError(true);
-              onTokenChangeRef.current(null);
-            },
-            "expired-callback": () => onTokenChangeRef.current(null),
-            sitekey: siteKey,
-            size: "flexible",
-            theme,
-          }) ?? null;
-      } catch {
-        if (!isCancelled) {
-          setHasError(true);
-        }
-      }
-    };
+    if (siteKey) {
+      const renderWidget = async () => {
+        try {
+          const turnstile = await loadTurnstile();
+          const container = containerRef.current;
 
-    void renderWidget();
+          if (isCancelled || !container) {
+            return;
+          }
+
+          setHasError(false);
+          widgetIdRef.current =
+            turnstile.render(container, {
+              callback: (token) => {
+                setHasError(false);
+                onTokenChangeRef.current(token);
+              },
+              "error-callback": () => {
+                setHasError(true);
+                onTokenChangeRef.current(null);
+              },
+              "expired-callback": () => onTokenChangeRef.current(null),
+              sitekey: siteKey,
+              size: "flexible",
+              action,
+              theme,
+            }) ?? null;
+        } catch {
+          if (!isCancelled) {
+            setHasError(true);
+          }
+        }
+      };
+
+      void renderWidget();
+    }
 
     return () => {
       isCancelled = true;
-      onTokenChangeRef.current(null);
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
+
+      if (siteKey) {
+        onTokenChangeRef.current(null);
+
+        if (widgetIdRef.current && window.turnstile) {
+          window.turnstile.remove(widgetIdRef.current);
+        }
+
+        widgetIdRef.current = null;
       }
-      widgetIdRef.current = null;
     };
   }, [action, siteKey, theme]);
 

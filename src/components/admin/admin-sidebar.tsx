@@ -85,23 +85,31 @@ const resolveAdminSections = (
   tabs: readonly AdminTabEntry[],
   counts: AdminTabCounts
 ): readonly SidebarSection<AdminTab>[] =>
-  NAV_GROUPS.map((group) => ({
-    heading: group.label,
-    entries: group.tabs
-      .filter((tab) => tabs.some((entry) => entry.value === tab))
-      .map((tab) => {
-        const entry = tabs.find((candidate) => candidate.value === tab);
-        const { count, suffix } = countForTab(tab, counts);
+  NAV_GROUPS.flatMap((group) => {
+    // One pass over the group's tabs: an entry that is not in `tabs` is hidden,
+    // so there is no reason to filter and then map it back to its label.
+    const entries = group.tabs.flatMap((tab) => {
+      const entry = tabs.find((candidate) => candidate.value === tab);
 
-        return {
-          value: tab,
-          label: entry?.label ?? tab,
-          icon: TAB_ICONS[tab],
+      if (!entry) {
+        return [];
+      }
+
+      const { count, suffix } = countForTab(tab, counts);
+
+      return [
+        {
           count,
           suffix,
-        };
-      }),
-  })).filter((section) => section.entries.length > 0);
+          icon: TAB_ICONS[tab],
+          label: entry.label ?? tab,
+          value: tab,
+        },
+      ];
+    });
+
+    return entries.length > 0 ? [{ entries, heading: group.label }] : [];
+  });
 
 export const AdminSidebar = (props: AdminSidebarProps) => {
   const sections = resolveAdminSections(props.tabs, props.counts);

@@ -47,6 +47,7 @@ const requireWriteQuota = async (userId: string): Promise<void> => {
     `user:${userId}`,
     RATE_LIMITS.write
   );
+
   if (quota) {
     throw new Error(RATE_LIMIT_MESSAGE);
   }
@@ -214,9 +215,11 @@ export const searchPosts = createServerFn({ method: "GET" })
       rateLimitIdentity(getRequestHeaders(), TRUST_PROXY),
       RATE_LIMITS.read
     );
+
     if (quota) {
       throw new Error(RATE_LIMIT_MESSAGE);
     }
+
     return searchPostsInDatabase({ query: data.query });
   });
 
@@ -372,9 +375,11 @@ const staysUnpublished = async (
     .from(posts)
     .where(eq(posts.id, id))
     .limit(1);
+
   if (!existing) {
     throw new Error(POST_NOT_FOUND);
   }
+
   return requested || existing.published;
 };
 
@@ -396,10 +401,10 @@ export const updatePost = createServerFn({ method: "POST" })
     const [row] = await db
       .update(posts)
       .set({
+        published,
         category: data.category ?? null,
         content: data.content,
         excerpt: data.excerpt ?? null,
-        published,
         slug: data.slug,
         title: data.title,
       })

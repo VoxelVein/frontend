@@ -9,6 +9,8 @@ function AspectRatio({
     <div
       data-slot="aspect-ratio"
       style={
+        // SAFETY: CSSProperties has no index signature for custom properties,
+        // so the single custom property is asserted after construction.
         {
           "--ratio": ratio,
         } as React.CSSProperties

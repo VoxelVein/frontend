@@ -260,9 +260,11 @@ const emptyStateIcon = (type: ProjectType, isFiltered: boolean) => {
   }
 
   const Icon = categoryIconForPath(PROJECT_TYPE_PATHS[type]);
+
   if (Icon) {
     return <Icon size={24} aria-hidden="true" />;
   }
+
   return <IconPackage size={24} aria-hidden="true" />;
 };
 
@@ -432,15 +434,19 @@ const searchReducer = (
     case "SEARCH_START": {
       return { ...state, error: null, isSearching: true };
     }
+
     case "SEARCH_SUCCESS": {
       return { error: null, isSearching: false, result: action.payload };
     }
+
     case "SEARCH_ERROR": {
       return { ...state, error: action.payload, isSearching: false };
     }
+
     case "RETRY": {
       return { error: null, isSearching: true, result: null };
     }
+
     default: {
       return state;
     }
@@ -550,6 +556,7 @@ const Results = ({
 }: ResultsProps) => {
   const projectIds =
     type === "server" ? result.hits.map((project) => project.id) : [];
+
   const { data: serverStatuses } = useQuery({
     enabled: projectIds.length > 0,
     queryFn: () => getMinecraftServerStatuses({ data: { projectIds } }),
@@ -614,15 +621,18 @@ export const ProjectBrowser = ({
   const [sort, setSort] = useState(DEFAULT_SORT);
   const [page, setPage] = useState(1);
   const [liveEvent, setLiveEvent] = useState<LiveModEvent | null>(null);
+
   const [state, dispatch] = useReducer(searchReducer, {
     error: initialError,
     isSearching: false,
     result: initial,
   });
+
   const hasMountedRef = useRef(false);
   const requestIdRef = useRef(0);
 
   const { result, error, isSearching } = state;
+
   const categories = [
     ...new Set([
       ...CATEGORIES_BY_TYPE[type],
@@ -638,10 +648,12 @@ export const ProjectBrowser = ({
     dispatch({ type: "SEARCH_START" });
 
     const cached = projectSearchCache.get(params);
+
     if (cached) {
       if (requestIdRef.current === thisRequestId) {
         dispatch({ payload: cached, type: "SEARCH_SUCCESS" });
       }
+
       return;
     }
 
@@ -667,6 +679,7 @@ export const ProjectBrowser = ({
     // mount-time run so the initial data is not re-fetched on the client.
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
+
       return;
     }
 
@@ -696,6 +709,7 @@ export const ProjectBrowser = ({
     if (API_URL === undefined) {
       return noEventCleanup;
     }
+
     const source = new EventSource(`${API_URL}/api/events`);
     let hasReportedConnectionIssue = false;
 
@@ -707,6 +721,7 @@ export const ProjectBrowser = ({
       if (hasReportedConnectionIssue) {
         return;
       }
+
       hasReportedConnectionIssue = true;
       toast.error(
         "Live updates are temporarily unavailable. You can keep browsing; we’ll retry automatically."
@@ -746,14 +761,18 @@ export const ProjectBrowser = ({
     loader,
     query,
   ].some(Boolean);
+
   // Shared by the heading, the empty state, and the result count so the three
   // cannot disagree on what this section is called.
   const label = PROJECT_TYPE_LABELS[type].plural;
   const showSkeletons = isSearching && !result && !error;
+
   const showEmpty =
     !isSearching && !error && result && result.hits.length === 0;
+
   const showResults =
     !isSearching && !error && result && result.hits.length > 0;
+
   // If the loader returned no data and no error (e.g. first paint before the
   // client search resolves), keep skeletons visible instead of a blank page.
   const showInitialSkeletons = !isSearching && !error && !result;
@@ -788,6 +807,7 @@ export const ProjectBrowser = ({
 
   const refreshFromLiveEvent = () => {
     setLiveEvent(null);
+
     const params = {
       category,
       clientRequirement,
@@ -798,6 +818,7 @@ export const ProjectBrowser = ({
       sort,
       type,
     };
+
     projectSearchCache.delete(params);
     runSearch(params);
   };

@@ -44,6 +44,7 @@ describe(pixelRevealFrame, () => {
       PIXEL_SWAP_PRESET.duration / 2,
       PIXEL_SWAP_PRESET
     );
+
     const layers = layerCount(frame.maskSize);
 
     expect(layers).toBeGreaterThan(0);

@@ -50,24 +50,25 @@ const Reveal = ({
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) {
-      return;
+    let observer: IntersectionObserver | null = null;
+
+    if (element) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer?.disconnect();
+          }
+        },
+        // 48px past the bottom edge, so a block has to genuinely be arriving
+        // rather than being caught by a viewport that was already scrolled down.
+        { rootMargin: "0px 0px -48px 0px", threshold: 0 }
+      );
+
+      observer.observe(element);
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      // 48px past the bottom edge, so a block has to genuinely be arriving
-      // rather than being caught by a viewport that was already scrolled down.
-      { rootMargin: "0px 0px -48px 0px", threshold: 0 }
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
+    return () => observer?.disconnect();
   }, []);
 
   const style: RevealStyle = {

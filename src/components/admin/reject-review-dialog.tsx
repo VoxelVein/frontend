@@ -55,8 +55,10 @@ export const RejectReviewDialog = ({
     if (!review || !canSubmit) {
       return;
     }
+
     setIsSubmitting(true);
     setError(null);
+
     try {
       await rejectProject({
         data: { projectId: review.id, reason: trimmed },
@@ -72,6 +74,7 @@ export const RejectReviewDialog = ({
         )
       );
     }
+
     setIsSubmitting(false);
   };
 

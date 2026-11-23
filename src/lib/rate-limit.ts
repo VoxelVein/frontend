@@ -136,6 +136,7 @@ export const consumeRateLimit = async (
     // One good call closes the breaker again, so the limiter recovers on its
     // own the moment Valkey does.
     failuresUntil = 0;
+
     return {
       limited: count > limit,
       remaining: Math.max(0, limit - count),
@@ -146,6 +147,7 @@ export const consumeRateLimit = async (
   } catch (error) {
     failuresUntil = Date.now() + BREAKER_COOLDOWN_MS;
     console.error("Rate limit check failed, allowing the request", error);
+
     return allow;
   }
 };

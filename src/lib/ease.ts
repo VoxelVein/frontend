@@ -24,14 +24,19 @@ export const cubicBezier = (
   return (progress) => {
     // Solve x(t) = progress for t with Newton's method, then return y(t).
     let t = progress;
+
     for (let step = 0; step < NEWTON_ITERATIONS; step += 1) {
       const slope = (3 * ax * t + 2 * bx) * t + cx;
+
       if (slope === 0) {
         break;
       }
+
       t -= (((ax * t + bx) * t + cx) * t - progress) / slope;
     }
+
     t = Math.min(Math.max(t, 0), 1);
+
     return ((ay * t + by) * t + cy) * t;
   };
 };
@@ -65,9 +70,11 @@ export const springEasingCss = ({
 
   const position = (seconds: number): number => {
     const decay = Math.exp(-zeta * omega * seconds);
+
     if (dampedOmega === 0) {
       return 1 - decay * (1 + omega * seconds);
     }
+
     return (
       1 -
       decay *
@@ -77,10 +84,13 @@ export const springEasingCss = ({
   };
 
   const stops: string[] = [];
+
   for (let sample = 0; sample < SPRING_SAMPLES; sample += 1) {
     const seconds = (sample / SPRING_SAMPLES) * (durationMs / MS_PER_SECOND);
     stops.push(position(seconds).toFixed(4));
   }
+
   stops.push("1");
+
   return `linear(${stops.join(", ")})`;
 };

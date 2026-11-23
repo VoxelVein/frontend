@@ -19,6 +19,7 @@ const Harness = ({
   onChange?: (values: string[]) => void;
 }) => {
   const [values, setValues] = useState(initial);
+
   return (
     <GameVersionPicker
       id="versions"
@@ -36,6 +37,7 @@ const typeQuery = (value: string) => {
   fireEvent.change(input, { target: { value } });
   // jsdom input events do not open the popup the way real typing does.
   fireEvent.keyDown(input, { key: "ArrowDown" });
+
   return input;
 };
 

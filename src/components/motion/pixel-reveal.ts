@@ -34,8 +34,10 @@ export const PIXEL_SWAP_PRESET: PixelRevealOptions = {
 // PixelSwap's defaults: its cap on grid cells and its easing curve.
 const MAX_PIXELS = 220;
 const PIXEL_EASE = cubicBezier(0.22, 1, 0.36, 1);
+
 // A pixel is fully opaque once it is this far through its eased growth.
 const FADE_GAIN = 1.6;
+
 // Grown pixels overlap by a pixel so no hairline seams show between them.
 const SEAM_OVERLAP_PX = 1;
 const MIN_DURATION_MS = 200;
@@ -62,6 +64,7 @@ export interface PixelMaskFrame {
 const HIDDEN_FRAME: PixelMaskFrame = {
   maskImage: "linear-gradient(transparent, transparent)",
 };
+
 const VISIBLE_FRAME: PixelMaskFrame = { maskImage: "none" };
 
 const clamp = (value: number, min: number, max: number) =>
@@ -70,6 +73,7 @@ const clamp = (value: number, min: number, max: number) =>
 // PixelSwap's deterministic hash; with the "random" pattern it is the order.
 const noise = (seed: number): number => {
   const value = Math.sin(seed * 127.1 + 311.7) * 43_758.5453;
+
   return value - Math.floor(value);
 };
 
@@ -91,6 +95,7 @@ export const buildPixelGrid = (
     size = Math.ceil(size * Math.sqrt((columns * rows) / MAX_PIXELS));
     ({ columns, rows } = countCells(width, height, size));
   }
+
   // Rounding each axis up can still overshoot the cap by a row or column.
   while (columns * rows > MAX_PIXELS) {
     size += 1;
@@ -134,9 +139,11 @@ export const pixelRevealFrame = (
 
   for (const cell of grid.cells) {
     const progress = clamp((elapsed - cell.offset * spread) / pixelMs, 0, 1);
+
     if (progress === 0) {
       continue;
     }
+
     const eased = PIXEL_EASE(progress);
     const alpha = options.fade ? Math.min(1, eased * FADE_GAIN) : 1;
     const side = fullSide * (startScale + (1 - startScale) * eased);
@@ -153,6 +160,7 @@ export const pixelRevealFrame = (
   if (images.length === 0) {
     return HIDDEN_FRAME;
   }
+
   return {
     maskImage: images.join(", "),
     maskPosition: positions.join(", "),
@@ -180,11 +188,13 @@ export const playPixelReveal = async (
   }
 
   const total = Math.max(MIN_DURATION_MS, options.duration);
+
   const grid = buildPixelGrid(
     window.innerWidth,
     window.innerHeight,
     options.pixelSize
   );
+
   const animation = document.documentElement.animate(
     [{ ...HIDDEN_FRAME }, { ...HIDDEN_FRAME }],
     {
@@ -193,7 +203,9 @@ export const playPixelReveal = async (
       pseudoElement: "::view-transition-new(root)",
     }
   );
+
   const { effect } = animation;
+
   if (!(effect instanceof KeyframeEffect)) {
     return;
   }
@@ -201,17 +213,22 @@ export const playPixelReveal = async (
   // The animation only keeps the transition open for `total` ms; the frames
   // themselves are swapped in from requestAnimationFrame.
   const start = performance.now();
+
   const tick = (now: number) => {
     const elapsed = now - start;
+
     const frame =
       elapsed >= total
         ? VISIBLE_FRAME
         : pixelRevealFrame(grid, elapsed, options);
+
     effect.setKeyframes([{ ...frame }, { ...frame }]);
+
     if (elapsed < total) {
       requestAnimationFrame(tick);
     }
   };
+
   requestAnimationFrame(tick);
 
   try {

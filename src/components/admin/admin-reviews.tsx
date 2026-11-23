@@ -124,6 +124,7 @@ const ReviewRow = ({
  * public, and it stays hidden from the site until an admin approves it here.
  * The list is ordered oldest request first so nothing waits indefinitely.
  */
+// oxlint-disable-next-line react-doctor/no-giant-component -- The queue, approval dialog and detail dialog share one list state and one mutation flag
 export const AdminReviews = ({
   onDecided,
 }: {
@@ -137,9 +138,11 @@ export const AdminReviews = ({
   const [rejecting, setRejecting] = useState<PendingReview | null>(null);
   const [isMutating, setIsMutating] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
   const [selectedReview, setSelectedReview] = useState<PendingReview | null>(
     null
   );
+
   const [reviewDetails, setReviewDetails] = useState<ProjectView | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState<string | null>(null);
@@ -149,8 +152,10 @@ export const AdminReviews = ({
     setReviewDetails(null);
     setDetailsError(null);
     setIsLoadingDetails(true);
+
     try {
       const project = await getProject({ data: { slug: review.slug } });
+
       if (project) {
         setReviewDetails(project);
       } else {
@@ -160,20 +165,24 @@ export const AdminReviews = ({
       }
     } catch {
       setDetailsError("Could not load project details. Try again.");
-    } finally {
-      setIsLoadingDetails(false);
     }
+
+    setIsLoadingDetails(false);
   };
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       const next = await fetchReviews();
+
       if (isCurrent) {
         setList(next);
       }
     };
+
     void loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -188,9 +197,11 @@ export const AdminReviews = ({
     if (!approving) {
       return;
     }
+
     const { id, name } = approving;
     setIsMutating(true);
     setActionError(null);
+
     try {
       await approveProject({ data: { projectId: id } });
       setList((current) => ({
@@ -205,6 +216,7 @@ export const AdminReviews = ({
     } catch (error) {
       setActionError(errorMessage(error, "Could not approve the project."));
     }
+
     setIsMutating(false);
   };
 
@@ -251,7 +263,7 @@ export const AdminReviews = ({
               setActionError(null);
               setRejecting(target);
             }}
-            onReview={(target) => void handleReview(target)}
+            onReview={handleReview}
             review={review}
           />
         ))}
@@ -262,8 +274,86 @@ export const AdminReviews = ({
   const waiting = `${reviews.length} ${
     reviews.length === 1 ? "project is" : "projects are"
   } waiting, oldest first. None of them are public yet.`;
+
   const idle =
     "Projects submitted for publishing are held here until a decision is made.";
+
+  const renderDetails = (): ReactNode => {
+    if (isLoadingDetails) {
+      return (
+        <div aria-busy="true" className="grid gap-3 py-3">
+          <Skeleton className="h-5 w-2/3" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-16" />
+        </div>
+      );
+    }
+
+    if (detailsError) {
+      return (
+        <p role="alert" className="text-destructive py-3">
+          {detailsError}
+        </p>
+      );
+    }
+
+    if (reviewDetails) {
+      return (
+        <div className="max-h-[65svh] space-y-5 overflow-y-auto pr-1">
+          <section>
+            <h3 className="text-sm font-semibold">Description</h3>
+            <div className="markdown-body mt-2 text-sm">
+              <MarkdownBody>{reviewDetails.description}</MarkdownBody>
+            </div>
+          </section>
+          <section>
+            <h3 className="text-sm font-semibold">Summary</h3>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {reviewDetails.summary}
+            </p>
+          </section>
+          {reviewDetails.tags.length > 0 ? (
+            <p className="text-muted-foreground text-sm">
+              Tags: {reviewDetails.tags.join(", ")}
+            </p>
+          ) : null}
+          <section className="grid gap-3">
+            <h3 className="text-sm font-semibold">Versions and files</h3>
+            {reviewDetails.versions.map((version) => (
+              <div
+                className="border-border rounded-md border p-3"
+                key={version.id}
+              >
+                <p className="font-medium">
+                  {version.name} · {version.versionNumber}
+                </p>
+                {version.changelog ? (
+                  <p className="text-muted-foreground mt-1 text-sm whitespace-pre-wrap">
+                    {version.changelog}
+                  </p>
+                ) : null}
+                <ul className="mt-2 grid gap-1">
+                  {version.files.map((file) => (
+                    <li key={file.id}>
+                      <a
+                        className="text-primary inline-flex min-h-10 items-center gap-2 text-sm hover:underline"
+                        href={`/api/download/${file.id}`}
+                      >
+                        <IconDownload aria-hidden size={15} />
+                        {file.filename}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <section aria-labelledby="admin-reviews-heading">
@@ -347,70 +437,7 @@ export const AdminReviews = ({
                     : "Submission details"}
                 </DialogDescription>
               </DialogHeader>
-              {isLoadingDetails ? (
-                <div aria-busy="true" className="grid gap-3 py-3">
-                  <Skeleton className="h-5 w-2/3" />
-                  <Skeleton className="h-24" />
-                  <Skeleton className="h-16" />
-                </div>
-              ) : detailsError ? (
-                <p role="alert" className="text-destructive py-3">
-                  {detailsError}
-                </p>
-              ) : reviewDetails ? (
-                <div className="max-h-[65svh] space-y-5 overflow-y-auto pr-1">
-                  <section>
-                    <h3 className="text-sm font-semibold">Description</h3>
-                    <div className="markdown-body mt-2 text-sm">
-                      <MarkdownBody>{reviewDetails.description}</MarkdownBody>
-                    </div>
-                  </section>
-                  <section>
-                    <h3 className="text-sm font-semibold">Summary</h3>
-                    <p className="text-muted-foreground mt-2 text-sm">
-                      {reviewDetails.summary}
-                    </p>
-                  </section>
-                  {reviewDetails.tags.length > 0 ? (
-                    <p className="text-muted-foreground text-sm">
-                      Tags: {reviewDetails.tags.join(", ")}
-                    </p>
-                  ) : null}
-                  <section className="grid gap-3">
-                    <h3 className="text-sm font-semibold">
-                      Versions and files
-                    </h3>
-                    {reviewDetails.versions.map((version) => (
-                      <div
-                        className="border-border rounded-md border p-3"
-                        key={version.id}
-                      >
-                        <p className="font-medium">
-                          {version.name} · {version.versionNumber}
-                        </p>
-                        {version.changelog ? (
-                          <p className="text-muted-foreground mt-1 text-sm whitespace-pre-wrap">
-                            {version.changelog}
-                          </p>
-                        ) : null}
-                        <ul className="mt-2 grid gap-1">
-                          {version.files.map((file) => (
-                            <li key={file.id}>
-                              <a
-                                className="text-primary inline-flex min-h-10 items-center gap-2 text-sm hover:underline"
-                                href={`/api/download/${file.id}`}
-                              >
-                                <IconDownload aria-hidden size={15} />
-                                {file.filename}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </section>
-                </div>
-              ) : null}
+              {renderDetails()}
             </DialogContent>
           </Dialog>
         </CardContent>

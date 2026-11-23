@@ -7,6 +7,7 @@ import type { TooltipValueType } from "recharts";
 const THEMES = { light: "", dark: ".dark" } as const;
 
 const INITIAL_DIMENSION = { width: 320, height: 200 } as const;
+
 type TooltipNameType = number | string;
 
 export type ChartConfig = Record<
@@ -96,9 +97,11 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
+    // SAFETY: `theme` originates from THEMES, so it is a valid theme key.
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color;
+
     return color ? `  --color-${key}: ${color};` : null;
   })
   .join("\n")}
@@ -151,6 +154,7 @@ function ChartTooltipContent({
     const [item] = payload;
     const key = `${labelKey ?? item?.dataKey ?? item?.name ?? "value"}`;
     const itemConfig = getPayloadConfigFromPayload(config, item, key);
+
     const value =
       !labelKey && typeof label === "string"
         ? (config[label]?.label ?? label)
@@ -229,6 +233,7 @@ function ChartTooltipContent({
                             }
                           )}
                           style={
+                            // SAFETY: CSSProperties has no index signature for custom properties.
                             {
                               "--color-bg": indicatorColor,
                               "--color-border": indicatorColor,
@@ -249,7 +254,7 @@ function ChartTooltipContent({
                           {itemConfig?.label ?? item.name}
                         </span>
                       </div>
-                      {item.value != null && (
+                      {item.value !== null && item.value !== undefined && (
                         <span className="text-foreground font-mono font-medium tabular-nums">
                           {typeof item.value === "number"
                             ? item.value.toLocaleString()
@@ -344,14 +349,18 @@ function getPayloadConfigFromPayload(
 
   if (
     key in payload &&
+    // SAFETY: `key in payload` proves the index exists on this object.
     typeof payload[key as keyof typeof payload] === "string"
   ) {
+    // SAFETY: the typeof guard directly above proves this value is a string.
     configLabelKey = payload[key as keyof typeof payload] as string;
   } else if (
     payloadPayload &&
     key in payloadPayload &&
+    // SAFETY: `key in payloadPayload` proves the index exists on this object.
     typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
   ) {
+    // SAFETY: the typeof guard directly above proves this value is a string.
     configLabelKey = payloadPayload[
       key as keyof typeof payloadPayload
     ] as string;

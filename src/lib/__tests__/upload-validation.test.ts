@@ -14,15 +14,18 @@ const streamOf = (...chunks: number[][]) =>
       for (const chunk of chunks) {
         controller.enqueue(new Uint8Array(chunk));
       }
+
       controller.close();
     },
   });
 
 const collect = async (source: AsyncIterable<Uint8Array>) => {
   const bytes: number[] = [];
+
   for await (const chunk of source) {
     bytes.push(...chunk);
   }
+
   return bytes;
 };
 

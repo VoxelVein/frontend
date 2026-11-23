@@ -103,6 +103,7 @@ const toReportStatus = (value: string | null): ReportStatus => {
   if (value === "resolved" || value === "dismissed") {
     return value;
   }
+
   return "open";
 };
 
@@ -125,6 +126,7 @@ const toReportResolution = (value: string | null): ReportResolution | null => {
   if (value === null || !isReportResolution(value)) {
     return null;
   }
+
   return value;
 };
 
@@ -208,18 +210,22 @@ const validateReportTarget = (input: ReportInput): string | null => {
     if (!hasProject) {
       return "Choose which project to report.";
     }
+
     if (hasUser) {
       return "A project report cannot also name a user.";
     }
+
     return null;
   }
 
   if (!hasUser) {
     return "Choose which user to report.";
   }
+
   if (hasProject) {
     return "A user report cannot also name a project.";
   }
+
   return null;
 };
 
@@ -260,4 +266,5 @@ export {
   toReportTarget,
   validateReportTarget,
 };
+
 export type { ReportInput };

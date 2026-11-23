@@ -36,6 +36,7 @@ describe(createProjectSearchCache, () => {
 
   it("stores and returns a value for the same params", () => {
     const cache = createProjectSearchCache();
+
     const params = {
       query: "sodium",
       sort: "downloads:desc",
@@ -49,6 +50,7 @@ describe(createProjectSearchCache, () => {
 
   it("treats different filter combinations as distinct keys", () => {
     const cache = createProjectSearchCache();
+
     const base = {
       query: "sodium",
       sort: "downloads:desc",
@@ -78,6 +80,7 @@ describe(createProjectSearchCache, () => {
 
   it("expires entries after the TTL", () => {
     const cache = createProjectSearchCache({ ttlMs: 1000 });
+
     const params = {
       query: "sodium",
       sort: "downloads:desc",
@@ -126,6 +129,7 @@ describe(createProjectSearchCache, () => {
 
   it("delete removes a single entry", () => {
     const cache = createProjectSearchCache();
+
     const params = {
       query: "sodium",
       sort: "downloads:desc",
@@ -140,6 +144,7 @@ describe(createProjectSearchCache, () => {
 
   it("delete only removes the matching entry", () => {
     const cache = createProjectSearchCache();
+
     const base = {
       query: "sodium",
       sort: "downloads:desc",
@@ -157,6 +162,7 @@ describe(createProjectSearchCache, () => {
 
   it("clear removes all entries", () => {
     const cache = createProjectSearchCache();
+
     const params = {
       query: "sodium",
       sort: "downloads:desc",

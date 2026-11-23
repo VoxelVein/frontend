@@ -90,6 +90,7 @@ const submitPost = async (
     // The form keeps its values so the draft is not lost, and the reason is a
     // toast: this page has no inline error block to put it in.
     toast.error(errorMessage(saveError, "Could not save the post."));
+
     return;
   }
 
@@ -147,6 +148,7 @@ const EditorSkeleton = () => (
  */
 const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
   const slugTouchedRef = useRef(false);
+
   const { data: selectableAuthors } = useQuery({
     queryKey: ["selectable-post-authors"],
     queryFn: () => listSelectableAuthors(),
@@ -168,6 +170,7 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
   // author the editor picked or unticked in the meantime, and skipped entirely
   // for an existing post, whose byline is already decided.
   const seededAuthorRef = useRef(false);
+
   const currentUserId = selectableAuthors?.find(
     (author) => author.isCurrentUser
   )?.id;
@@ -226,6 +229,7 @@ const PostFormPage = ({ isLoading = false, post }: PostFormPageProps) => {
                 value={state.value}
                 onChange={(event) => {
                   handleChange(event.target.value);
+
                   if (!slugTouchedRef.current) {
                     form.setFieldValue("slug", slugify(event.target.value));
                   }

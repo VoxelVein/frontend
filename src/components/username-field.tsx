@@ -33,6 +33,7 @@ const AvailabilityStatus = ({
         </>
       );
     }
+
     case "available": {
       return (
         <>
@@ -41,6 +42,7 @@ const AvailabilityStatus = ({
         </>
       );
     }
+
     case "unavailable":
     case "error": {
       return (
@@ -50,6 +52,7 @@ const AvailabilityStatus = ({
         </>
       );
     }
+
     default: {
       return null;
     }
@@ -76,6 +79,7 @@ const UsernameField = ({
   const statusId = `${id}-status`;
   const isTaken = availability.status === "unavailable";
   const isInvalid = Boolean(error) || isTaken;
+
   const describedBy = [
     error ? errorId : null,
     helperText ? helperId : null,

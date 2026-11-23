@@ -53,6 +53,7 @@ vi.mock("sonner", () => ({
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Rows link through the router and the New post button navigates; stubbing both keeps this suite on what the list renders
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve Link's siblings; the cast only widens the type for the mock factory
   return {
     ...(actual as object),

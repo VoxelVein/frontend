@@ -43,6 +43,7 @@ if (result.rowCount === 0) {
 }
 
 const [user] = result.rows;
+
 console.log(
   `✓ Set role="${user.role}" for ${user.name} <${user.email}> (${user.id})`
 );

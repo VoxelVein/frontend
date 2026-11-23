@@ -57,27 +57,30 @@ interface ListState {
   rows: ReportRow[];
 }
 
-const LOADING_STATE: ListState = {
+// Built per mount, not once at module load: a frozen timestamp would make
+// every SSR request report the same "just loaded" instant.
+const createLoadingState = (): ListState => ({
   error: null,
   isLoading: true,
   loadedAt: Date.now(),
   rows: [],
-};
+});
 
 const fetchReports = async (): Promise<ListState> => {
   const loadedAt = Date.now();
+
   try {
     return {
+      loadedAt,
       error: null,
       isLoading: false,
-      loadedAt,
       rows: await listReports(),
     };
   } catch (error) {
     return {
+      loadedAt,
       error: errorMessage(error, "Could not load reports."),
       isLoading: false,
-      loadedAt,
       rows: [],
     };
   }
@@ -121,6 +124,7 @@ const Target = ({ report }: { report: ReportRow }) => {
     if (!report.projectSlug) {
       return <span className="text-sm">Deleted project</span>;
     }
+
     return (
       <span className="text-sm">
         <span className="text-foreground font-medium">
@@ -239,24 +243,30 @@ interface AdminReportsProps {
 }
 
 const AdminReports = ({ onResolved }: AdminReportsProps) => {
-  const [list, setList] = useState<ListState>(LOADING_STATE);
+  const [list, setList] = useState<ListState>(createLoadingState);
   const { error: loadError, isLoading, loadedAt, rows: reports } = list;
   const [isMutating, setIsMutating] = useState(false);
+
   const [pending, setPending] = useState<{
     report: ReportRow;
     resolution: ReportResolution;
   } | null>(null);
+
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       const next = await fetchReports();
+
       if (isCurrent) {
         setList(next);
       }
     };
+
     void loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -271,9 +281,11 @@ const AdminReports = ({ onResolved }: AdminReportsProps) => {
     if (!pending) {
       return;
     }
+
     const { report, resolution } = pending;
     setIsMutating(true);
     setActionError(null);
+
     try {
       await resolveReport({ data: { id: report.id, resolution } });
       setList((current) => ({
@@ -299,6 +311,7 @@ const AdminReports = ({ onResolved }: AdminReportsProps) => {
     } catch (error) {
       setActionError(errorMessage(error, "Could not update the report."));
     }
+
     setIsMutating(false);
   };
 

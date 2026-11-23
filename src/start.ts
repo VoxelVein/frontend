@@ -36,15 +36,18 @@ const SECURITY_HEADERS = {
 // into a fresh Response before setting anything.
 const withSecurityHeaders = (original: Response): Response => {
   const response = new Response(original.body, original);
+
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     response.headers.set(name, value);
   }
+
   return response;
 };
 
 const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
   async ({ next: runHandler }) => {
     const { response, ...result } = await runHandler();
+
     return { ...result, response: withSecurityHeaders(response) };
   }
 );

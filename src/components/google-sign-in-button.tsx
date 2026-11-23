@@ -41,26 +41,31 @@ const GoogleSignInButtonContent = () => {
     setIsPending(true);
     setError(null);
 
-    const { error: signInError } = await authClient.signIn.social({
-      callbackURL: "/",
-      // New accounts get a generated username and choose their own first.
-      newUserCallbackURL: "/welcome",
-      provider: "google",
-    });
+    try {
+      const { error: signInError } = await authClient.signIn.social({
+        callbackURL: "/",
+        // New accounts get a generated username and choose their own first.
+        newUserCallbackURL: "/welcome",
+        provider: "google",
+      });
 
-    setIsPending(false);
-
-    if (signInError) {
+      if (signInError) {
+        setError(
+          signInError.message ??
+            "Could not sign you in with Google. Check your connection and try again."
+        );
+      } else {
+        await authClient.getSession();
+        await router.invalidate();
+        await router.navigate({ to: "/" });
+      }
+    } catch {
       setError(
-        signInError.message ??
-          "Could not sign you in with Google. Check your connection and try again."
+        "Could not sign you in with Google. Check your connection and try again."
       );
-      return;
     }
 
-    await authClient.getSession();
-    await router.invalidate();
-    await router.navigate({ to: "/" });
+    setIsPending(false);
   };
 
   return (

@@ -161,6 +161,7 @@ const UrlPreview = ({ url }: { url: string }) => {
  * avatar surface reads. One source of truth beats a second copy in this
  * component.
  */
+// oxlint-disable-next-line react-doctor/no-giant-component -- The upload, URL and crop flows share one busy flag and one dialog stack; splitting them would need a larger refactor
 const AvatarCard = ({ image, name }: AvatarCardProps) => {
   const refreshSession = useRefreshSession();
   const { isAvailable: isStorageAvailable } = useStorageAvailable();
@@ -171,29 +172,27 @@ const AvatarCard = ({ image, name }: AvatarCardProps) => {
   const [cropFile, setCropFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // `catch` rather than a rejection handler, and no `finally`: the React
-  // compiler cannot lower a finalizer clause, and clearing the flag on each
-  // branch says the same thing.
+  // No `finally`: the React compiler cannot lower a finalizer clause, so the
+  // flag is cleared after the try/catch, which runs on both the success and
+  // rejection paths.
   const withBusy = async (action: () => Promise<void>) => {
     toast.dismiss();
     setIsBusy(true);
 
     try {
       await action();
+
+      // Notifies the cached session rather than fetching it again: the navbar,
+      // the account menu, and the public profile all read `users.image` through
+      // `useSession`, and a plain `getSession()` call left them showing the old
+      // picture until the page was reloaded.
+      await refreshSession();
     } catch (actionError) {
       toast.error(
         storageFailureMessage(actionError, "The avatar could not be saved.")
       );
-      setIsBusy(false);
-
-      return;
     }
 
-    // Notifies the cached session rather than fetching it again: the navbar,
-    // the account menu, and the public profile all read `users.image` through
-    // `useSession`, and a plain `getSession()` call left them showing the old
-    // picture until the page was reloaded.
-    await refreshSession();
     setIsBusy(false);
   };
 

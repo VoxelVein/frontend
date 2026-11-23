@@ -22,6 +22,7 @@ const snapshotCount = (): number => {
   const snapshots = readdirSync(path.join(MIGRATIONS_DIR, "meta")).filter(
     (file) => file.endsWith("_snapshot.json")
   );
+
   return snapshots.length;
 };
 
@@ -48,6 +49,7 @@ try {
 }
 
 const afterMigrations = readdirSync(MIGRATIONS_DIR);
+
 const wroteSql = afterMigrations.some(
   (file) => file.endsWith(".sql") && !beforeMigrations.has(file)
 );

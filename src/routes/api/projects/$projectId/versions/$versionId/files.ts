@@ -62,6 +62,7 @@ const uploadWithinQuota = async (
       error.code === STORAGE_ERROR.fileTooLarge &&
       input.maxBytes !== undefined &&
       input.maxBytes < loadStorageConfig().maxFileBytes;
+
     throw hitQuota ? quotaExceededError() : error;
   }
 };
@@ -79,6 +80,7 @@ const handleUpload = async (
   if (!isSameOrigin(request)) {
     return errorResponse(403, "Cross-origin uploads are not allowed.");
   }
+
   if (
     !safeParse(uuidSchema, params.projectId).success ||
     !safeParse(uuidSchema, params.versionId).success
@@ -97,6 +99,7 @@ const handleUpload = async (
     `user:${session.user.id}`,
     RATE_LIMITS.upload
   );
+
   if (quota.limited) {
     return rateLimitedResponse(quota.retryAfterSeconds);
   }
@@ -111,36 +114,44 @@ const handleUpload = async (
       )
     )
     .limit(1);
+
   if (!version) {
     return errorResponse(404, "Version not found.");
   }
 
   const extensions = ALLOWED_EXTENSIONS_BY_TYPE[project.type];
+
   if (extensions.length === 0) {
     return errorResponse(415, "This project type does not take files.");
   }
+
   const search = new URL(request.url).searchParams;
   const platformValue = search.get("platform");
+
   if (
     project.type === "modpack" &&
     (!platformValue || !isPlatformId(platformValue))
   ) {
     return errorResponse(400, "Choose a valid platform for this modpack file.");
   }
+
   if (project.type !== "modpack" && platformValue !== null) {
     return errorResponse(
       400,
       "Platform targets are only available for modpacks."
     );
   }
+
   const platform = project.type === "modpack" ? platformValue : null;
   const filename = sanitizeFilename(search.get("filename"), project.type);
+
   if (!filename) {
     return errorResponse(
       415,
       `Upload a ${extensions.join(" or ")} file whose name uses only letters, numbers, dots, dashes, underscores, and plus signs.`
     );
   }
+
   if (
     platform &&
     !platformExtensions(platform).some((extension) =>
@@ -155,9 +166,11 @@ const handleUpload = async (
 
   const { maxFileBytes, quotaBytes } = loadStorageConfig();
   const declaredLength = Number(request.headers.get("content-length") ?? "0");
+
   if (declaredLength > maxFileBytes) {
     return errorResponse(413, `Files can be at most ${maxFileBytes} bytes.`);
   }
+
   const [existingPlatformFile] = platform
     ? await db
         .select({ id: projectFiles.id, size: projectFiles.size })
@@ -170,17 +183,21 @@ const handleUpload = async (
         )
         .limit(1)
     : [];
+
   const remainingBytes = await getRemainingBytes(quotaBytes);
+
   const uploadAllowance =
     remainingBytes === null
       ? null
       : remainingBytes + (existingPlatformFile?.size ?? 0);
+
   if (
     uploadAllowance !== null &&
     (uploadAllowance === 0 || declaredLength > uploadAllowance)
   ) {
     throw quotaExceededError();
   }
+
   if (!request.body) {
     return errorResponse(400, "The upload is empty.");
   }
@@ -196,37 +213,41 @@ const handleUpload = async (
       )
     )
     .limit(1);
+
   if (duplicate && (platform === null || duplicate.platform === null)) {
     throw new DuplicateFilenameError();
   }
 
   const { head, stream } = await peekStream(request.body, ZIP_MAGIC_LENGTH);
+
   if (!hasZipMagic(head)) {
     return errorResponse(415, "The file is not a valid archive.");
   }
 
   const fileId = crypto.randomUUID();
   const storageKey = `projects/${project.id}/${version.id}/${fileId}/${filename}`;
+
   const stored = await uploadWithinQuota({
+    filename,
     body: stream,
     contentType: contentTypeFor(filename),
-    filename,
     key: storageKey,
     maxBytes: uploadAllowance ?? undefined,
   });
 
   let primary: boolean;
   let replacedStorageKey: string | null;
+
   try {
     ({ primary, replacedStorageKey } = await insertFileWithinQuota(
       {
         filename,
-        id: fileId,
         platform,
+        storageKey,
+        id: fileId,
         sha1: stored.sha1,
         sha512: stored.sha512,
         size: stored.size,
-        storageKey,
         versionId: version.id,
       },
       quotaBytes
@@ -237,9 +258,11 @@ const handleUpload = async (
     await deleteObjects([storageKey]).catch(() => null);
     throw error;
   }
+
   if (replacedStorageKey) {
     await deleteObjects([replacedStorageKey]).catch(() => null);
   }
+
   await db
     .update(projects)
     .set({ updatedAt: new Date() })
@@ -247,13 +270,14 @@ const handleUpload = async (
 
   const file: ProjectFileView = {
     filename,
-    id: fileId,
     platform,
     primary,
+    id: fileId,
     sha1: stored.sha1,
     sha512: stored.sha512,
     size: stored.size,
   };
+
   return Response.json(file, { status: 201 });
 };
 
@@ -266,18 +290,23 @@ const handleDelete = async (
   if (!isSameOrigin(request)) {
     return errorResponse(403, CROSS_ORIGIN_MESSAGE);
   }
+
   if (
     !safeParse(uuidSchema, params.projectId).success ||
     !safeParse(uuidSchema, params.versionId).success
   ) {
     return errorResponse(404, FILE_NOT_FOUND_MESSAGE);
   }
+
   const fileId = new URL(request.url).searchParams.get("fileId");
+
   if (!fileId || !safeParse(uuidSchema, fileId).success) {
     return errorResponse(404, FILE_NOT_FOUND_MESSAGE);
   }
+
   const session = await requireUploader(request.headers);
   const project = await requireEditableProject(session, params.projectId);
+
   const [file] = await db
     .select({
       id: projectFiles.id,
@@ -294,16 +323,20 @@ const handleDelete = async (
       )
     )
     .limit(1);
+
   if (!file) {
     return errorResponse(404, FILE_NOT_FOUND_MESSAGE);
   }
+
   await db.delete(projectFiles).where(eq(projectFiles.id, file.id));
+
   if (file.primary) {
     const [replacement] = await db
       .select({ id: projectFiles.id })
       .from(projectFiles)
       .where(eq(projectFiles.versionId, params.versionId))
       .limit(1);
+
     if (replacement) {
       await db
         .update(projectFiles)
@@ -311,21 +344,26 @@ const handleDelete = async (
         .where(eq(projectFiles.id, replacement.id));
     }
   }
+
   await deleteObjects([file.storageKey]).catch(() => null);
+
   const [remaining] = await db
     .select({ id: projectFiles.id })
     .from(projectFiles)
     .innerJoin(projectVersions, eq(projectVersions.id, projectFiles.versionId))
     .where(eq(projectVersions.projectId, project.id))
     .limit(1);
+
   const projectUpdate =
     project.status === "published" && !remaining
       ? { updatedAt: new Date(), status: "draft" as const }
       : { updatedAt: new Date() };
+
   await db
     .update(projects)
     .set(projectUpdate)
     .where(eq(projects.id, project.id));
+
   return new Response(null, { status: 204 });
 };
 
@@ -351,13 +389,17 @@ export const Route = createFileRoute(
               error.message
             );
           }
+
           if (error instanceof StorageError) {
             return storageErrorResponse(error, "file");
           }
+
           if (error instanceof DuplicateFilenameError) {
             return errorResponse(409, error.message);
           }
+
           console.error("Upload failed", error);
+
           return errorResponse(500, "The upload failed. Try again.");
         }
       },
@@ -378,7 +420,9 @@ export const Route = createFileRoute(
               error.message
             );
           }
+
           console.error("File delete failed", error);
+
           return errorResponse(500, "The file could not be deleted.");
         }
       },

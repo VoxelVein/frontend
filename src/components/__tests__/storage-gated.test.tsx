@@ -20,6 +20,7 @@ const wrapper = ({ children }: { children: ReactNode }) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>{children}</TooltipProvider>
@@ -57,6 +58,7 @@ const settled = async (
   // remounts the control, so a reference taken on the first frame is detached by
   // the time the answer is known.
   await waitFor(() => assert(screen.getByRole("button", { name })));
+
   return screen.getByRole("button", { name });
 };
 

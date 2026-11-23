@@ -16,6 +16,7 @@ const pngBytes = (width: number, height: number) => {
   const view = new DataView(bytes.buffer);
   view.setUint32(16, width);
   view.setUint32(20, height);
+
   return bytes;
 };
 
@@ -25,6 +26,7 @@ const gifBytes = (width: number, height: number) => {
   const view = new DataView(bytes.buffer);
   view.setUint16(6, width, true);
   view.setUint16(8, height, true);
+
   return bytes;
 };
 
@@ -38,6 +40,7 @@ const jpegBytes = (width: number, height: number) => {
   view.setUint16(4, 17);
   view.setUint16(7, height);
   view.setUint16(9, width);
+
   return bytes;
 };
 
@@ -54,6 +57,7 @@ const webpBytes = (width: number, height: number) => {
   const view = new DataView(bytes.buffer);
   view.setUint16(24, width - 1, true);
   view.setUint16(27, height - 1, true);
+
   return bytes;
 };
 
@@ -73,6 +77,7 @@ describe(sniffImageType, () => {
     const svg = new TextEncoder().encode(
       '<svg xmlns="http://www.w3.org/2000/svg"><script/></svg>'
     );
+
     expect(sniffImageType(svg)).toBeNull();
   });
 

@@ -272,10 +272,12 @@ const toDocument = ({
     loaders: hit.loaders ?? [],
     updatedAt: new Date(hit.updatedAt).toISOString(),
   };
+
   // Only servers have one; other hits leave the key out entirely.
   if (clientRequirement) {
     document.clientRequirement = clientRequirement;
   }
+
   return document;
 };
 
@@ -292,10 +294,12 @@ export const searchProjectsInDatabase = async (
   const q = params.query.trim();
   const page = Math.min(Math.max(1, params.page ?? 1), MAX_PAGE);
   const offset = (page - 1) * PAGE_SIZE;
+
   // SAFETY: SORT_SQL is keyed by the same allowlist the caller validated the
   // sort against, so an unknown value cannot reach this lookup.
   const sortSQL =
     SORT_SQL[params.sort as keyof typeof SORT_SQL] ?? SORT_SQL[DEFAULT_SORT];
+
   // Relevance leads only when the visitor actually typed something. With an
   // empty box the list is a browse view, and the chosen sort is the point.
   const orderSQL =

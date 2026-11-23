@@ -37,6 +37,7 @@ const pendingSession = () => {
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Router context is unavailable in unit tests; string path avoids strict factory type-checking against the router module
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute/redirect; the cast only widens the type for the mock factory
   return {
     ...(actual as object),
@@ -53,10 +54,12 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 });
 
 const BROWSE_PROJECTS = /browse projects/iu;
+
 // Built from the registry so the assertion tracks the category list instead of
 // freezing a copy of it  -  the old literal silently went stale when a category
 // was added or reordered.
 const HEADLINE_PREFIX = "find your next";
+
 const HEADING = new RegExp(
   `${HEADLINE_PREFIX} ${categoryLabelSentence()}`,
   "iu"

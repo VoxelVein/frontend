@@ -24,6 +24,7 @@ const EditPostPage = () => {
 export const Route = createFileRoute("/admin/posts/$postId/edit")({
   loader: async ({ params }): Promise<EditPostLoaderData> => {
     const post = await getPostById({ data: { id: params.postId } });
+
     return { post };
   },
   head: ({ loaderData }) => ({

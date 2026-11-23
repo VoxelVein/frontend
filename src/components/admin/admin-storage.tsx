@@ -11,6 +11,7 @@ import type { StorageUsage } from "@/lib/storage-quota";
 import { getStorageUsage } from "@/lib/storage.functions";
 
 const PERCENT = 100;
+
 // Above this share of the quota, warn that uploads will soon be refused.
 const WARNING_RATIO = 0.9;
 
@@ -22,6 +23,7 @@ const usageRatio = (usedBytes: number, quotaBytes: number | null): number => {
   if (quotaBytes === null) {
     return 0;
   }
+
   return quotaBytes === 0 ? 1 : Math.min(1, usedBytes / quotaBytes);
 };
 
@@ -52,6 +54,7 @@ const KindRow = ({
   unit,
 }: KindRowProps) => {
   const share = ratio === 0 ? 0 : Math.round((bytes / ratio) * PERCENT);
+
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
@@ -224,6 +227,7 @@ export const AdminStorage = () => {
     const loadOnMount = async () => {
       try {
         const loaded = await getStorageUsage();
+
         if (isCurrent) {
           setUsage(loaded);
           setError(null);
@@ -235,6 +239,7 @@ export const AdminStorage = () => {
         }
       }
     };
+
     void loadOnMount();
 
     return () => {

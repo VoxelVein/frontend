@@ -24,6 +24,7 @@ import { can } from "@/lib/roles";
 const NewProjectPage = () => {
   const { session } = useRouteContext({ from: "/dashboard/projects/new" });
   const navigate = useNavigate();
+
   const canUpload =
     session.user.emailVerified || can(session.user.role, "reviewProjects");
 

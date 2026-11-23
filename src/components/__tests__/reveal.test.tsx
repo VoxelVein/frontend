@@ -19,6 +19,7 @@ let disconnectCount = 0;
  */
 const intersect = () => {
   const report = reporters.at(-1);
+
   if (report) {
     act(() => {
       report([{ isIntersecting: true }]);

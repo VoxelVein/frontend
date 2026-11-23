@@ -17,6 +17,7 @@ const storeIsReachable = await (async () => {
   try {
     const { getValkey } = await import("@/lib/valkey");
     const valkey = await getValkey();
+
     return valkey.isReady;
   } catch {
     return false;

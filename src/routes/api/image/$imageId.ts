@@ -54,12 +54,14 @@ const handleImage = async (imageId: string): Promise<Response> => {
   }
 
   let object: Awaited<ReturnType<typeof getObjectBytes>>;
+
   try {
     object = await getObjectBytes(image.storageKey);
   } catch (error) {
     if (error instanceof StorageError) {
       return notFound();
     }
+
     throw error;
   }
 
@@ -70,9 +72,11 @@ const handleImage = async (imageId: string): Promise<Response> => {
     "content-security-policy": "default-src 'none'; sandbox",
     "x-content-type-options": "nosniff",
   });
+
   if (object.contentLength !== null) {
     headers.set("content-length", String(object.contentLength));
   }
+
   if (object.etag) {
     headers.set("etag", object.etag);
   }
@@ -89,6 +93,7 @@ export const Route = createFileRoute("/api/image/$imageId")({
           return await handleImage(params.imageId);
         } catch (error) {
           console.error("Image request failed", error);
+
           return new Response("Image unavailable", { status: 503 });
         }
       },

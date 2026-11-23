@@ -65,6 +65,7 @@ const renderMethods = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+
   return render(
     <QueryClientProvider client={queryClient}>
       <SettingsSignInMethods />
@@ -89,6 +90,7 @@ describe(SettingsSignInMethods, () => {
     const unlink = await screen.findByRole("button", {
       name: /unlink google/iu,
     });
+
     expect(unlink).toBeDisabled();
     expect(unlink).toHaveAccessibleDescription(/only linked sign-in method/iu);
     expect(
@@ -110,6 +112,7 @@ describe(SettingsSignInMethods, () => {
     const unlink = await screen.findByRole("button", {
       name: /unlink google/iu,
     });
+
     expect(unlink).toBeEnabled();
     fireEvent.click(unlink);
 

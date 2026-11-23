@@ -18,6 +18,7 @@ export const isPrefetchRequest = (headers: Headers): boolean => {
     .filter((value) => value !== null)
     .join(",")
     .toLowerCase();
+
   return PREFETCH_PURPOSES.some((keyword) => purpose.includes(keyword));
 };
 
@@ -46,6 +47,7 @@ export const createDownloadDeduper = (
       if (expiresAt > now) {
         return;
       }
+
       expiresAtByKey.delete(key);
     }
   };
@@ -56,17 +58,21 @@ export const createDownloadDeduper = (
       evictExpired(now);
 
       const key = `${clientKey ?? ANONYMOUS_CLIENT}:${fileId}`;
+
       if (expiresAtByKey.has(key)) {
         return false;
       }
 
       if (expiresAtByKey.size >= maxEntries) {
         const oldestKey = expiresAtByKey.keys().next().value;
+
         if (oldestKey !== undefined) {
           expiresAtByKey.delete(oldestKey);
         }
       }
+
       expiresAtByKey.set(key, now + windowMs);
+
       return true;
     },
   };

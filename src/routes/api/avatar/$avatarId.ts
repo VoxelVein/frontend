@@ -49,6 +49,7 @@ const handleAvatar = async (avatarId: string): Promise<Response> => {
   }
 
   let object: Awaited<ReturnType<typeof getObjectBytes>>;
+
   try {
     object = await getObjectBytes(avatar.storageKey);
   } catch (error) {
@@ -57,6 +58,7 @@ const handleAvatar = async (avatarId: string): Promise<Response> => {
       // client will fall back to a letter tile, which is the right rendering.
       return notFound();
     }
+
     throw error;
   }
 
@@ -69,9 +71,11 @@ const handleAvatar = async (avatarId: string): Promise<Response> => {
     "content-security-policy": "default-src 'none'; sandbox",
     "x-content-type-options": "nosniff",
   });
+
   if (object.contentLength !== null) {
     headers.set("content-length", String(object.contentLength));
   }
+
   if (object.etag) {
     headers.set("etag", object.etag);
   }

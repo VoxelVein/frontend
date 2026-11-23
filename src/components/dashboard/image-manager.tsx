@@ -59,22 +59,27 @@ const ImageManager = (props: ImageManagerProps) => {
   // Split out of the union so each keeps its narrowed type; an icon project
   // has no gallery and a gallery project has no icon.
   const icon = props.kind === PROJECT_IMAGE_KIND.icon ? props.icon : null;
+
   const gallery =
     props.kind === PROJECT_IMAGE_KIND.gallery ? props.gallery : NO_IMAGES;
+
   const images: ProjectImageView[] = icon ? [icon] : gallery;
   const atLimit = gallery.length >= GALLERY_MAX_COUNT;
 
   const upload = async (file: File) => {
     toast.dismiss();
     setBusy(true);
+
     try {
       const uploaded = await uploadProjectImage({ file, kind, projectId });
+
       const view: ProjectImageView = {
         height: uploaded.height,
         id: uploaded.id,
         url: uploaded.url,
         width: uploaded.width,
       };
+
       if (isIcon) {
         // The server replaced the previous icon, so the local copy swaps too.
         onChange({ icon: view });
@@ -86,14 +91,17 @@ const ImageManager = (props: ImageManagerProps) => {
         storageFailureMessage(uploadError, "The image could not be uploaded.")
       );
     }
+
     setBusy(false);
   };
 
   const remove = async (id: string) => {
     toast.dismiss();
     setBusy(true);
+
     try {
       await deleteProjectImage(projectId, id);
+
       if (isIcon) {
         onChange({ icon: null });
       } else {
@@ -104,6 +112,7 @@ const ImageManager = (props: ImageManagerProps) => {
     } catch (deleteError) {
       toast.error(errorMessage(deleteError, "The image could not be deleted."));
     }
+
     setBusy(false);
   };
 
@@ -172,6 +181,7 @@ const ImageManager = (props: ImageManagerProps) => {
             const file = event.target.files?.[0];
             // Reset so choosing the same file twice still fires a change.
             event.target.value = "";
+
             if (file) {
               void upload(file);
             }

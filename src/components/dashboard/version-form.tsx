@@ -81,14 +81,17 @@ const collectUploads = (
   if (!isModpack) {
     return file ? [{ file, platform: null }] : [];
   }
+
   return drafts.flatMap((draft) => {
     if (!draft.file) {
       return [];
     }
+
     const platform =
       draft.platform === "other"
         ? normalizePlatformId(draft.customPlatform)
         : draft.platform;
+
     return platform ? [{ file: draft.file, platform }] : [];
   });
 };
@@ -98,18 +101,24 @@ const getModpackFileError = (drafts: ModpackFileDraft[]): string | null => {
     if (!draft.file) {
       return [];
     }
+
     if (draft.platform === "other") {
       const normalized = normalizePlatformId(draft.customPlatform);
+
       return normalized ? [normalized] : ["invalid-platform"];
     }
+
     return [draft.platform];
   });
+
   if (selectedPlatforms.includes("invalid-platform")) {
     return "Enter a valid name for each custom platform.";
   }
+
   if (new Set(selectedPlatforms).size !== selectedPlatforms.length) {
     return "Choose a different platform for each file.";
   }
+
   return null;
 };
 
@@ -128,6 +137,7 @@ const ModpackFileInputs = ({
     MODPACK_PLATFORMS.find(
       ({ id }) => !drafts.some((draft) => draft.platform === id)
     )?.id ?? "other";
+
   const addDraft = () =>
     onChange([
       ...drafts,
@@ -152,13 +162,17 @@ const ModpackFileInputs = ({
         const chosen = MODPACK_PLATFORMS.find(
           (platform) => platform.id === draft.platform
         );
+
         const update = (patch: Partial<ModpackFileDraft>) =>
           onChange(updateModpackDraft(drafts, draft.key, patch));
+
         const extensions = chosen?.extensions ?? [".mrpack", ".zip"];
+
         const accept = [
           ...extensions,
           ...extensions.map((extension) => contentTypeFor(extension)),
         ].join(",");
+
         return (
           <div
             key={draft.key}
@@ -272,9 +286,11 @@ export const VersionForm = ({
   const [loaders, setLoaders] = useState<string[]>([]);
   const [changelog, setChangelog] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
   const [modpackFiles, setModpackFiles] = useState<ModpackFileDraft[]>([
     { customPlatform: "", file: null, key: 0, platform: "modrinth" },
   ]);
+
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
   const { isAvailable: isStorageAvailable } = useStorageAvailable();
 
@@ -285,6 +301,7 @@ export const VersionForm = ({
   const isModpack = projectType === "modpack";
   const extensions = ALLOWED_EXTENSIONS_BY_TYPE[projectType];
   const extensionList = extensions.join(" or ");
+
   const accept = [
     ...extensions,
     ...new Set(extensions.map((extension) => contentTypeFor(extension))),
@@ -294,9 +311,11 @@ export const VersionForm = ({
   // because a reader who cannot upload needs the reason rather than the name of
   // a file they will never be able to send.
   let fileHelper = `A ${extensionList} file, up to 100 MB.`;
+
   if (file) {
     fileHelper = `${file.name} · ${formatBytes(file.size)}`;
   }
+
   if (!isStorageAvailable) {
     fileHelper = storageUnavailableNote("Creating a version");
   }
@@ -320,36 +339,47 @@ export const VersionForm = ({
       channel,
       gameVersions,
       loaders,
-      name: "",
       projectId,
       versionNumber,
+      name: "",
     });
+
     const fieldErrors = result.success
       ? new Map<string, string>()
       : toFieldErrors(result.issues);
+
     const uploads = collectUploads(isModpack, modpackFiles, file);
+
     if (uploads.length === 0) {
       fieldErrors.set("file", `Choose a ${extensionList} file to upload.`);
     }
+
     if (isModpack) {
       const platformError = getModpackFileError(modpackFiles);
+
       if (platformError) {
         fieldErrors.set("file", platformError);
       }
     }
+
     if (hasLoaders(projectType) && loaders.length === 0) {
       fieldErrors.set("loaders", "Choose at least one loader.");
     }
+
     if (!result.success || fieldErrors.size > 0 || uploads.length === 0) {
       setErrors(fieldErrors);
+
       return;
     }
+
     setErrors(NO_FIELD_ERRORS);
     setProgress(0);
 
     let versionId: string | null = null;
+
     try {
       ({ id: versionId } = await createVersion({ data: result.output }));
+
       for (const upload of uploads) {
         // Bound concurrent archive transfers and let all requests settle before
         // the error path removes a newly-created version.
@@ -362,6 +392,7 @@ export const VersionForm = ({
           versionId,
         });
       }
+
       reset();
       await onCreated();
     } catch (error) {
@@ -369,8 +400,10 @@ export const VersionForm = ({
       if (versionId) {
         await deleteVersion({ data: { versionId } }).catch(() => null);
       }
+
       toast.error(errorMessage(error, "Could not create the version."));
     }
+
     setProgress(null);
   };
 

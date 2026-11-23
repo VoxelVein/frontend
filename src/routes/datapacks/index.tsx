@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const DatapacksPage = () => {
   const data = useLoaderData({ from: "/datapacks/" });
+
   return <ProjectBrowser type="datapack" {...data} />;
 };
 

@@ -59,6 +59,7 @@ export const hasRole = (
   if (!role || !isRole(role)) {
     return false;
   }
+
   return ROLE_RANK[role] >= ROLE_RANK[minimum];
 };
 
@@ -172,6 +173,7 @@ export const canActOn = (
  */
 export const assertRolesInSync = (configured: readonly string[]): void => {
   const missing = ALL_ROLES.filter((role) => !configured.includes(role));
+
   if (missing.length > 0) {
     throw new Error(
       `Role ladder defines ${missing.join(", ")}, but the auth plugin does not. Add ${

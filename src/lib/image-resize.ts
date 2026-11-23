@@ -84,6 +84,7 @@ const readDimensions = async (file: Blob): Promise<Dimensions> => {
     return size;
   }
 
+  // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- Revoked in the `finally` below; the rule does not follow the await into it.
   const url = URL.createObjectURL(file);
 
   try {
@@ -113,6 +114,7 @@ const drawToBlob = async (
   size: Dimensions,
   type: string
 ): Promise<Blob | null> => {
+  // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- Revoked in the `finally` below; the rule does not follow the await into it.
   const url = URL.createObjectURL(file);
 
   try {
@@ -226,7 +228,7 @@ export const clampCropOffset = (
   windowSize: number,
   offset: { x: number; y: number },
   { height, width }: Dimensions
-): { x: number; y: number } => {
+) => {
   const maxX = Math.max(0, width * zoom - windowSize);
   const maxY = Math.max(0, height * zoom - windowSize);
 
@@ -321,7 +323,7 @@ export const zoomCropView = (
  * the image or the canvas context cannot be used, so callers fall back rather
  * than failing an otherwise valid upload.
  */
-export const renderImageToBlob = async (
+export const renderImageToBlob = (
   image: CanvasImageSource & { height: number; width: number },
   crop: CropRect,
   size: number,
@@ -334,7 +336,7 @@ export const renderImageToBlob = async (
   const context = canvas.getContext("2d");
 
   if (!context) {
-    return null;
+    return Promise.resolve(null);
   }
 
   context.drawImage(
@@ -359,7 +361,7 @@ export const renderImageToBlob = async (
  * becomes a source crop, and this turns it into the flat square avatar bytes
  * that leave the device.
  */
-export const renderAvatarBlob = async (
+export const renderAvatarBlob = (
   image: CanvasImageSource & { height: number; width: number },
   crop: CropRect,
   size: number = AVATAR_OUTPUT_SIZE

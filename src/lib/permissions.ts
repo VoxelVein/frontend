@@ -83,10 +83,13 @@ const statementsFor = (role: Role) => {
 
   for (const capability of ALL_CAPABILITIES) {
     const statements = ROLE_STATEMENTS[role][capability];
+
     if (!statements) {
       continue;
     }
+
     const resource = CAPABILITY_RESOURCE[capability];
+
     if (!resource) {
       throw new Error(
         `${capability} is granted ${role} statements, but it maps to no Better ` +
@@ -95,6 +98,7 @@ const statementsFor = (role: Role) => {
           `enforced by the plugin but is enforced by nothing.`
       );
     }
+
     grouped[resource] = [...(grouped[resource] ?? []), ...statements];
   }
 
@@ -117,6 +121,7 @@ const assertCapabilitiesAgree = (): void => {
       const offending =
         ROLE_STATEMENTS[role][capability] !== undefined &&
         !can(role, capability);
+
       if (offending) {
         // Falls back to the capability name only so the message reads when a
         // capability has no resource mapped at all.
@@ -147,4 +152,5 @@ export const staffRoles = {
 // A role in the ladder that the plugin does not know about would fail closed
 // and read as a permission bug, so surface it at startup instead.
 assertRolesInSync(Object.keys(staffRoles));
+
 assertCapabilitiesAgree();

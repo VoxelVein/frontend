@@ -24,6 +24,7 @@ export const loadServerDetails = async (
     .from(projectServers)
     .where(eq(projectServers.projectId, projectId))
     .limit(1);
+
   if (!server) {
     return null;
   }
@@ -47,8 +48,10 @@ export const loadServerDetails = async (
     );
 
   const links: ServerLinkView[] = [];
+
   for (const row of rows) {
     const visible = isVisible(row);
+
     if (isServerLinkType(row.type) && (visible || includeHidden)) {
       links.push({
         id: row.id,
@@ -62,12 +65,12 @@ export const loadServerDetails = async (
   }
 
   return {
+    links,
     address: server.address,
     clientRequirement: clientRequirementFor(
       links.filter((link) => link.published)
     ),
     gameVersions: server.gameVersions,
-    links,
     port: server.port,
   };
 };

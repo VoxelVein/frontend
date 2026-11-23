@@ -52,21 +52,18 @@ export const createProjectSearchCache = (
     get: (params) => {
       const key = buildCacheKey(params);
       const entry = entries.get(key);
+      let result: ProjectSearchResponse | undefined;
 
-      if (!entry) {
-        return;
-      }
-
-      if (entry.expiresAt <= Date.now()) {
+      if (entry && entry.expiresAt > Date.now()) {
+        // Refresh the LRU position: delete + re-insert moves the key to the tail.
         entries.delete(key);
-        return;
+        entries.set(key, entry);
+        result = entry.data;
+      } else if (entry) {
+        entries.delete(key);
       }
 
-      // Refresh the LRU position: delete + re-insert moves the key to the tail.
-      entries.delete(key);
-      entries.set(key, entry);
-
-      return entry.data;
+      return result;
     },
     set: (params, data) => {
       const key = buildCacheKey(params);
@@ -78,6 +75,7 @@ export const createProjectSearchCache = (
       // Evict the least-recently-used entry (the Map head) when at capacity.
       if (entries.size >= maxEntries) {
         const oldestKey = entries.keys().next().value;
+
         if (oldestKey !== undefined) {
           entries.delete(oldestKey);
         }

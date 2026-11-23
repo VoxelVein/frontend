@@ -115,6 +115,7 @@ export const notificationGroup = (
   }
 
   const startOfYesterday = startOfToday.getTime() - DAY_IN_MS;
+
   if (then.getTime() >= startOfYesterday) {
     return "yesterday";
   }

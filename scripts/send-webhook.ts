@@ -15,25 +15,31 @@ if (!WEBHOOK_SECRET) {
 const event = process.argv[2] ?? "mod.created";
 const name = process.argv[3] ?? "Example Mod";
 
-const payload = JSON.stringify({
-  data: { id: `webhook-${Date.now()}`, name },
-  event,
-});
+const sendWebhook = async (): Promise<void> => {
+  // Both values are per-send: a module-level timestamp would be frozen for the
+  // lifetime of the process and produce a stale signature on every later call.
+  const payload = JSON.stringify({
+    data: { id: `webhook-${Date.now()}`, name },
+    event,
+  });
 
-const timestamp = String(Math.floor(Date.now() / 1000));
+  const timestamp = String(Math.floor(Date.now() / 1000));
 
-const signature = createHmac("sha256", WEBHOOK_SECRET)
-  .update(`${timestamp}.${payload}`)
-  .digest("hex");
+  const signature = createHmac("sha256", WEBHOOK_SECRET)
+    .update(`${timestamp}.${payload}`)
+    .digest("hex");
 
-const response = await fetch(`${API_URL}/api/webhooks/mods`, {
-  body: payload,
-  headers: {
-    "Content-Type": "application/json",
-    "x-webhook-signature": signature,
-    "x-webhook-timestamp": timestamp,
-  },
-  method: "POST",
-});
+  const response = await fetch(`${API_URL}/api/webhooks/mods`, {
+    body: payload,
+    headers: {
+      "Content-Type": "application/json",
+      "x-webhook-signature": signature,
+      "x-webhook-timestamp": timestamp,
+    },
+    method: "POST",
+  });
 
-console.log(`Sent ${event} webhook for "${name}" → ${response.status}`);
+  console.log(`Sent ${event} webhook for "${name}" → ${response.status}`);
+};
+
+await sendWebhook();

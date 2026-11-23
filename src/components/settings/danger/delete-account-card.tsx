@@ -94,14 +94,17 @@ export const DeleteAccountCard = ({
 }: DeleteAccountCardProps) => {
   const { data: session } = authClient.useSession();
   const headingRef = useRef<HTMLHeadingElement>(null);
+
   const [state, dispatch] = useReducer(
     deletionReducer,
     resumeDeletion,
     initDeletionState
   );
+
   const { expectedUserId, keepProjectIds, open, password, step } = state;
 
   const sessionUserId = session?.user.id ?? null;
+
   const isDifferentAccount =
     expectedUserId !== null &&
     sessionUserId !== null &&
@@ -126,12 +129,14 @@ export const DeleteAccountCard = ({
     if (nextOpen || step === "scheduled") {
       return;
     }
+
     dispatch({ type: "close" });
     clearPendingDeletion();
   };
 
   const handleDelete = async (confirmation: string): Promise<string | null> => {
     const data: DeleteAccountInput = { confirmation, keepProjectIds };
+
     if (password) {
       data.password = password;
     }
@@ -141,25 +146,32 @@ export const DeleteAccountCard = ({
       clearPendingDeletion();
       // Sessions are already revoked on the server; this clears local state.
       await authClient.signOut().catch(() => null);
+
       if (result.status === "deleted") {
         window.location.assign("/");
+
         return null;
       }
+
       dispatch({ purgeAt: result.purgeAt, type: "scheduled" });
+
       return null;
     } catch (deleteError) {
       const message =
         deleteError instanceof Error && deleteError.message
           ? deleteError.message
           : "Could not delete your account.";
+
       if (VERIFICATION_ERROR_PATTERN.test(message)) {
         await refetch();
         dispatch({
           error: password ? message : null,
           type: "verification-failed",
         });
+
         return null;
       }
+
       return message;
     }
   };
@@ -170,9 +182,11 @@ export const DeleteAccountCard = ({
     if (contextError) {
       return <ContextError error={contextError} onRetry={() => refetch()} />;
     }
+
     if (!context) {
       return <ContextSkeleton />;
     }
+
     switch (step) {
       case "consequences": {
         return (
@@ -187,6 +201,7 @@ export const DeleteAccountCard = ({
           />
         );
       }
+
       case "verify": {
         return (
           <VerifyStep
@@ -203,6 +218,7 @@ export const DeleteAccountCard = ({
           />
         );
       }
+
       case "confirm": {
         return (
           <ConfirmStep
@@ -213,9 +229,11 @@ export const DeleteAccountCard = ({
           />
         );
       }
+
       case "scheduled": {
         return <ScheduledStep purgeAt={state.purgeAt ?? ""} />;
       }
+
       default: {
         return null;
       }

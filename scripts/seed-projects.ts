@@ -72,11 +72,13 @@ const findOwnerId = async (): Promise<string> => {
     .from(users)
     .where(eq(users.role, "admin"))
     .limit(1);
+
   if (!admin) {
     throw new Error(
       "No admin user found. Sign up, then run `pnpm db:seed:admin <email>`."
     );
   }
+
   return admin.id;
 };
 
@@ -84,11 +86,11 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
   const [project] = await db
     .insert(projects)
     .values({
+      ownerId,
       category: demo.category,
       description: `${demo.summary}\n\nThis is demo content for local development.`,
       downloads: demo.downloads,
       name: demo.name,
-      ownerId,
       publishedAt: new Date(),
       slug: demo.slug,
       status: "published",
@@ -105,6 +107,7 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
       gameVersions: demo.gameVersions,
       projectId: project.id,
     });
+
     const linked = await db
       .select({ id: projects.id, slug: projects.slug })
       .from(projects)
@@ -114,23 +117,28 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
           links.map((link) => link.slug)
         )
       );
+
     const idBySlug = new Map(linked.map((row) => [row.slug, row.id]));
+
     const rows = links.flatMap((link, index) => {
       const linkedProjectId = idBySlug.get(link.slug);
+
       return linkedProjectId
         ? [
             {
-              createdAt: new Date(Date.now() + index),
               linkedProjectId,
+              createdAt: new Date(Date.now() + index),
               required: link.required,
               serverId: project.id,
             },
           ]
         : [];
     });
+
     if (rows.length > 0) {
       await db.insert(projectServerLinks).values(rows);
     }
+
     return;
   }
 
@@ -149,25 +157,27 @@ const seedProject = async (demo: DemoProject, ownerId: string) => {
   const [extension = ".jar"] = ALLOWED_EXTENSIONS_BY_TYPE[demo.type];
   const filename = `${demo.slug}-${demo.version}${extension}`;
   const storageKey = `projects/${project.id}/${version.id}/${fileId}/${filename}`;
+
   const jar = buildJar(
     "demo.txt",
     `${demo.name} ${demo.version} (VoxelVein demo file)\n`
   );
+
   const stored = await uploadStream({
+    filename,
     body: new Blob([new Uint8Array(jar)]).stream(),
     contentType: contentTypeFor(filename),
-    filename,
     key: storageKey,
   });
 
   await db.insert(projectFiles).values({
     filename,
+    storageKey,
     id: fileId,
     primary: true,
     sha1: stored.sha1,
     sha512: stored.sha512,
     size: stored.size,
-    storageKey,
     versionId: version.id,
   });
 };
@@ -185,6 +195,7 @@ const seedProjects = async () => {
         )
       ),
   ]);
+
   const existingSlugs = new Set(existing.map((row) => row.slug));
   const missing = DEMO_PROJECTS.filter((demo) => !existingSlugs.has(demo.slug));
 
@@ -195,6 +206,7 @@ const seedProjects = async () => {
         console.log(`  + ${demo.type} ${demo.slug}`);
       })
     );
+
   // Servers link to other demo projects, so those must exist first.
   await seedAll(missing.filter((demo) => !demo.server));
   await seedAll(missing.filter((demo) => demo.server));

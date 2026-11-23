@@ -37,6 +37,7 @@ export const loadPublicProfile = async (
   requestedUsername: string
 ): Promise<PublicProfile | null> => {
   const requested = normalizeUsername(requestedUsername);
+
   if (requested.length === 0) {
     return null;
   }

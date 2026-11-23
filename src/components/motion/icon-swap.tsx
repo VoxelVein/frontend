@@ -21,6 +21,7 @@ const IconSwap = ({ value, children, className }: IconSwapProps) => {
     children,
     value,
   });
+
   const [isExiting, setIsExiting] = useState(false);
 
   // Adjust state during render: when the incoming value changes, mark the
@@ -30,15 +31,20 @@ const IconSwap = ({ value, children, className }: IconSwapProps) => {
   }
 
   useEffect(() => {
-    if (!isExiting) {
-      return;
+    let id: ReturnType<typeof setTimeout> | null = null;
+
+    if (isExiting) {
+      id = setTimeout(() => {
+        setDisplayed({ children, value });
+        setIsExiting(false);
+      }, EXIT_DURATION_MS);
     }
 
-    const id = setTimeout(() => {
-      setDisplayed({ children, value });
-      setIsExiting(false);
-    }, EXIT_DURATION_MS);
-    return () => clearTimeout(id);
+    return () => {
+      if (id !== null) {
+        clearTimeout(id);
+      }
+    };
   }, [isExiting, value, children]);
 
   return (

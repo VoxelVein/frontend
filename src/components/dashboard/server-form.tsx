@@ -69,21 +69,27 @@ const useProjectSearch = (
 
   useEffect(() => {
     let cancelled = false;
+
     const load = async () => {
       let next: LinkOption[] = [];
+
       try {
         const result = await searchProjects({
           data: { query: debounced, sort: "downloads:desc", type },
         });
+
         next = result.hits.map(({ id, name, slug }) => ({ id, name, slug }));
       } catch {
         // Search is down: offer nothing rather than a stale list.
       }
+
       if (!cancelled) {
         setOptions(next);
       }
     };
+
     void load();
+
     return () => {
       cancelled = true;
     };
@@ -106,16 +112,20 @@ const LinkedContent = ({ error, links, onChange }: LinkedContentProps) => {
   const [type, setType] = useState<ServerLinkType>("modpack");
   const [query, setQuery] = useState("");
   const linkedIds = new Set(links.map((link) => link.id));
+
   const options = useProjectSearch(type, query).filter(
     (option) => !linkedIds.has(option.id)
   );
+
   const full = links.length >= MAX_SERVER_LINKS;
 
   const add = (option: LinkOption | null) => {
     setQuery("");
+
     if (!option || linkedIds.has(option.id) || full) {
       return;
     }
+
     onChange([...links, { ...option, published: true, required: false, type }]);
   };
 
@@ -264,9 +274,11 @@ const LinkedContent = ({ error, links, onChange }: LinkedContentProps) => {
 export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
   const [address, setAddress] = useState(server?.address ?? "");
   const [port, setPort] = useState(server?.port ? String(server.port) : "");
+
   const [gameVersions, setGameVersions] = useState<string[]>(
     server?.gameVersions ?? []
   );
+
   const [links, setLinks] = useState<ServerLinkView[]>(server?.links ?? []);
   const [errors, setErrors] = useState<FieldErrors>(NO_FIELD_ERRORS);
   const [pending, setPending] = useState(false);
@@ -276,34 +288,41 @@ export const ServerForm = ({ onSaved, projectId, server }: ServerFormProps) => {
     toast.dismiss();
 
     const trimmedPort = port.trim();
+
     if (trimmedPort && !PORT_PATTERN.test(trimmedPort)) {
       setErrors(new Map([["port", "The port must be a whole number."]]));
+
       return;
     }
 
     const result = safeParse(serverInputSchema, {
       address,
       gameVersions,
+      projectId,
       links: links.map((link) => ({
         projectId: link.id,
         required: link.required,
       })),
       port: trimmedPort ? Number(trimmedPort) : null,
-      projectId,
     });
+
     if (!result.success) {
       setErrors(toFieldErrors(result.issues));
+
       return;
     }
+
     setErrors(NO_FIELD_ERRORS);
 
     setPending(true);
+
     try {
       await saveServerDetails({ data: result.output });
       await onSaved();
     } catch (error) {
       toast.error(errorMessage(error, "Could not save the server."));
     }
+
     setPending(false);
   };
 

@@ -14,6 +14,7 @@ const LINE_QUERY = /^(?<line>\d+\.\d+)(?:\.x?)?$/u;
 /** Puts known ids newest first, the way Mojang lists them. */
 export const newestFirst = (ids: Iterable<string>): string[] => {
   const chosen = new Set(ids);
+
   return GAME_VERSIONS.filter((id) => chosen.has(id));
 };
 
@@ -44,14 +45,17 @@ export const resolveVersionSelectionInput = (
     /^(?<start>\d+(?:\.\d+){1,2})\s*-\s*(?<end>\d+(?:\.\d+){1,2})$/u.exec(
       value
     );
+
   const startVersion = range?.groups?.start;
   const endVersion = range?.groups?.end;
+
   if (!startVersion || !endVersion) {
     return { kind: "not-selection" };
   }
 
   const start = pool.indexOf(startVersion);
   const end = pool.indexOf(endVersion);
+
   if (start === -1 || end === -1) {
     return {
       kind: "invalid",
@@ -76,9 +80,11 @@ export const filterGameVersions = (
 ): string[] => {
   const needle = query.trim().toLowerCase();
   const pool = includeSnapshots ? GAME_VERSIONS : RELEASE_GAME_VERSIONS;
+
   const matches = needle
     ? pool.filter((id) => id.toLowerCase().includes(needle))
     : [...pool];
+
   // Versions that start with the query are what people mean by "1.20".
   const ranked = [
     ...matches.filter((id) => id.toLowerCase().startsWith(needle)),
@@ -86,9 +92,11 @@ export const filterGameVersions = (
   ];
 
   const line = LINE_QUERY.exec(needle)?.groups?.line;
+
   const shortcut =
     withLineShortcut && line && getReleasesInLine(line).length > 1
       ? [lineOption(line)]
       : [];
+
   return [...shortcut, ...ranked].slice(0, MAX_VISIBLE_VERSIONS);
 };

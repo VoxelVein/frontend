@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ServersPage = () => {
   const data = useLoaderData({ from: "/servers/" });
+
   return <ProjectBrowser type="server" {...data} />;
 };
 

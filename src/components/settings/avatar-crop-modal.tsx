@@ -224,6 +224,7 @@ interface AvatarCropModalProps {
  * shape. Zoom covers the slider, the wheel, and pinch; panning covers drags.
  * Leaving the dialog revokes the temporary object URL.
  */
+// oxlint-disable-next-line react-doctor/no-giant-component -- The crop preview, gesture handling and save flow share one view reducer; splitting them would need a larger refactor
 export const AvatarCropModal = ({
   file,
   onCancel,
@@ -232,10 +233,12 @@ export const AvatarCropModal = ({
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+
   const [view, dispatch] = useReducer(cropViewReducer, {
     offset: { x: 0, y: 0 },
     zoom: 1,
   });
+
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -245,21 +248,30 @@ export const AvatarCropModal = ({
   const pinchDistanceRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!file) {
-      return;
-    }
-
-    // Created here rather than in render so StrictMode's mount/unmount/mount
-    // cycle gets a fresh URL each time instead of one that was just revoked.
-    const url = URL.createObjectURL(file);
-    setObjectUrl(url);
-    const element = new Image();
-    element.src = url;
     let cancelled = false;
+    let url: string | null = null;
 
-    element
-      .decode()
-      .then(() => {
+    if (file) {
+      // Created here rather than in render so StrictMode's mount/unmount/mount
+      // cycle gets a fresh URL each time instead of one that was just revoked.
+      // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- Revoked in the cleanup returned by this effect.
+      url = URL.createObjectURL(file);
+      // oxlint-disable-next-line react/set-state-in-effect -- The URL is an external browser resource created per mount; publishing it to state is the synchronization itself and cannot cascade a render.
+      setObjectUrl(url);
+      const element = new Image();
+      element.src = url;
+
+      const decodeImage = async () => {
+        try {
+          await element.decode();
+        } catch {
+          if (!cancelled) {
+            setFailed(true);
+          }
+
+          return;
+        }
+
         if (cancelled) {
           return;
         }
@@ -279,16 +291,18 @@ export const AvatarCropModal = ({
           zoom: cropZoomBounds(size).min,
           dimensions: size,
         });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-        }
-      });
+      };
+
+      void decodeImage();
+    }
 
     return () => {
       cancelled = true;
-      URL.revokeObjectURL(url);
+
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+
       setObjectUrl(null);
     };
   }, [file]);
@@ -310,28 +324,28 @@ export const AvatarCropModal = ({
 
   useEffect(() => {
     const viewport = viewportRef.current;
+    let detach: (() => void) | null = null;
 
-    if (!(viewport && bounds && dimensions)) {
-      return;
+    if (viewport && bounds && dimensions) {
+      const handleWheel = (event: WheelEvent) => {
+        event.preventDefault();
+        // One notch is a small multiplicative step. Clamping the delta stops a
+        // trackpad flick from crossing the whole range in one event.
+        const delta = Math.min(100, Math.max(-100, event.deltaY));
+
+        dispatch({
+          type: "zoomBy",
+          factor: Math.exp(-delta * 0.0018),
+          bounds,
+          dimensions,
+        });
+      };
+
+      viewport.addEventListener("wheel", handleWheel, { passive: false });
+      detach = () => viewport.removeEventListener("wheel", handleWheel);
     }
 
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      // One notch is a small multiplicative step. Clamping the delta stops a
-      // trackpad flick from crossing the whole range in one event.
-      const delta = Math.min(100, Math.max(-100, event.deltaY));
-
-      dispatch({
-        type: "zoomBy",
-        factor: Math.exp(-delta * 0.0018),
-        bounds,
-        dimensions,
-      });
-    };
-
-    viewport.addEventListener("wheel", handleWheel, { passive: false });
-
-    return () => viewport.removeEventListener("wheel", handleWheel);
+    return () => detach?.();
   }, [bounds, dimensions]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {

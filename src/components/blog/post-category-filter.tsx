@@ -24,6 +24,7 @@ interface PostCategoryFilterProps {
  */
 const categoriesIn = (posts: PostSummary[]): string[] => {
   const present = new Set<string>();
+
   for (const post of posts) {
     if (post.category !== null) {
       present.add(post.category);
@@ -31,6 +32,7 @@ const categoriesIn = (posts: PostSummary[]): string[] => {
   }
 
   const declared: string[] = [];
+
   for (const category of POST_CATEGORIES) {
     if (present.has(category.value)) {
       declared.push(category.value);
@@ -38,6 +40,7 @@ const categoriesIn = (posts: PostSummary[]): string[] => {
   }
 
   const undeclared: string[] = [];
+
   for (const value of present) {
     if (!POST_CATEGORIES.some((category) => category.value === value)) {
       undeclared.push(value);
@@ -97,6 +100,7 @@ const PostCategoryFilter = ({
   }
 
   const counts = new Map<string, number>();
+
   for (const post of posts) {
     if (post.category !== null) {
       counts.set(post.category, (counts.get(post.category) ?? 0) + 1);

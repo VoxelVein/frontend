@@ -39,8 +39,10 @@ const computeTrending = async (): Promise<ProjectDocument[]> => {
   // stopped being public between the two queries are simply absent, which is
   // what the old per-id `null` filter did too.
   const byId = new Map(documents.map((document) => [document.id, document]));
+
   return ids.flatMap((id) => {
     const document = byId.get(id);
+
     return document ? [document] : [];
   });
 };
@@ -49,11 +51,14 @@ const computeTrending = async (): Promise<ProjectDocument[]> => {
 export const getTrendingProjects = createServerFn({ method: "GET" }).handler(
   async (): Promise<ProjectDocument[]> => {
     const now = Date.now();
+
     if (cached && cached.expiresAt > now) {
       return cached.projects;
     }
+
     const trending = await computeTrending();
     cached = { expiresAt: now + TRENDING_REFRESH_MS, projects: trending };
+
     return trending;
   }
 );

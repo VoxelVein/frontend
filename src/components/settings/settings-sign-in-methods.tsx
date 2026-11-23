@@ -58,12 +58,15 @@ const SetPasswordForm = ({ onDone }: SetPasswordFormProps) => {
     defaultValues: { confirmPassword: "", newPassword: "" },
     onSubmit: async ({ value }) => {
       toast.dismiss();
+
       try {
         await setPassword({ data: { newPassword: value.newPassword } });
       } catch (submitError) {
         toast.error(errorMessage(submitError, "Could not set your password."));
+
         return;
       }
+
       form.reset();
       onDone("Password set. You can now sign in with it.");
     },
@@ -184,21 +187,27 @@ const MethodRow = ({ icon: Icon, label, status, children }: MethodRowProps) => (
 
 const SettingsSignInMethods = () => {
   const queryClient = useQueryClient();
+
   const {
     data: accounts,
     error: listError,
     isPending,
     refetch,
   } = useLinkedAccounts();
+
   const [status, setStatus] = useState<StatusMessage>({ type: "idle" });
+
   const [busyProvider, setBusyProvider] = useState<SocialProviderId | null>(
     null
   );
+
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   const providers = getConfiguredSocialProviders();
+
   const hasPassword =
     accounts?.some((account) => account.providerId === "credential") ?? false;
+
   const isOnlyAccount = (accounts?.length ?? 0) <= 1;
 
   const refreshAccounts = async () => {
@@ -213,11 +222,14 @@ const SettingsSignInMethods = () => {
   const handleLink = async (provider: SocialProvider) => {
     setStatus({ type: "idle" });
     setBusyProvider(provider.id);
+
     const { error } = await authClient.linkSocial({
       callbackURL: LINK_CALLBACK_URL,
       provider: provider.id,
     });
+
     setBusyProvider(null);
+
     if (error) {
       toast.error(error.message ?? `Could not link ${provider.label}.`);
     }
@@ -232,10 +244,13 @@ const SettingsSignInMethods = () => {
     // Better Auth identifies the link by its own account row id.
     const { error } = await authClient.unlinkAccount({ accountId: account.id });
     setBusyProvider(null);
+
     if (error) {
       toast.error(error.message ?? `Could not unlink ${provider.label}.`);
+
       return;
     }
+
     setStatus({ message: `${provider.label} unlinked.`, type: "success" });
     await refreshAccounts();
   };
@@ -324,6 +339,7 @@ const SettingsSignInMethods = () => {
                 const account = accounts.find(
                   (item) => item.providerId === provider.id
                 );
+
                 const isBusy = busyProvider === provider.id;
 
                 return (

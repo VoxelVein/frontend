@@ -8,6 +8,12 @@ overrides:
   # (>= 0.0.9) would otherwise resolve to 1.x, so exact-mirror is also a direct
   # dependency pinned to 0.2.x. Drop both once Elysia supports 1.x.
   "elysia>exact-mirror": "^0.2.7"
+  # Security patches for vulnerable transitive dev-tooling versions reported
+  # by pnpm audit / Dependabot. Scoped to the vulnerable ranges so packages
+  # that rely on older major APIs keep the version they declare.
+  "glob@>=9.0.0 <=14.0.1": ">=14.0.2"
+  "minimatch@>=7.0.0 <11.0.1": ">=11.0.1"
+  "katex@>=0.11.0 <0.18.2": ">=0.18.2"
 
 allowBuilds:
   esbuild: true

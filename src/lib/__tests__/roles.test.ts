@@ -165,6 +165,7 @@ describe(canActOn, () => {
     for (const target of ALL_ROLES) {
       expect(canActOn("user", target)).toBeFalsy();
     }
+
     expect(canActOn(null, "user")).toBeFalsy();
   });
 

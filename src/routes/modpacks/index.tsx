@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ModpacksPage = () => {
   const data = useLoaderData({ from: "/modpacks/" });
+
   return <ProjectBrowser type="modpack" {...data} />;
 };
 

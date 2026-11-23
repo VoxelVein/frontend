@@ -15,10 +15,12 @@ describe(trendingScore, () => {
   it("halves the release boost every half-life", () => {
     const base = { downloads: 990, id: "a" };
     const fresh = trendingScore({ ...base, lastActivityAt: NOW }, NOW);
+
     const halfLife = trendingScore(
       { ...base, lastActivityAt: daysAgo(TRENDING_HALF_LIFE_DAYS) },
       NOW
     );
+
     const stale = trendingScore({ ...base, lastActivityAt: daysAgo(365) }, NOW);
 
     // log10(1000) = 3; boost 4 → ×5, then ×3, then ≈ ×1.
@@ -32,6 +34,7 @@ describe(trendingScore, () => {
       { downloads: 0, id: "a", lastActivityAt: daysAgo(-1) },
       NOW
     );
+
     expect(score).toBeCloseTo(5);
   });
 });
@@ -45,6 +48,7 @@ describe(pickTrending, () => {
       ],
       NOW
     );
+
     expect(ids).toStrictEqual(["fresh", "stale-big"]);
   });
 
@@ -54,6 +58,7 @@ describe(pickTrending, () => {
       id: `p${index}`,
       lastActivityAt: daysAgo(30),
     }));
+
     expect(pickTrending(candidates, NOW, 3)).toStrictEqual(["p7", "p6", "p5"]);
     expect(pickTrending([], NOW)).toStrictEqual([]);
   });

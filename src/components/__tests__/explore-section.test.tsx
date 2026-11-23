@@ -8,6 +8,7 @@ import { MINECRAFT_CATEGORIES } from "@/lib/categories";
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Router context is unavailable in unit tests; string path avoids strict factory type-checking against the router module
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute/redirect; the cast only widens the type for the mock factory
   return {
     ...(actual as object),
@@ -73,6 +74,7 @@ describe(ExploreSection, () => {
     const headings = within(region).getAllByRole("heading", { level: 3 });
 
     expect(headings).toHaveLength(MINECRAFT_CATEGORIES.length);
+
     for (const category of MINECRAFT_CATEGORIES) {
       expect(
         within(region).getByRole("heading", { level: 3, name: category.label })
@@ -122,6 +124,7 @@ describe(ExploreSection, () => {
     expect(screen.queryAllByText("Soon")).toHaveLength(
       UNAVAILABLE_LABELS.length
     );
+
     for (const label of UNAVAILABLE_LABELS) {
       expect(
         screen.queryByRole("link", {

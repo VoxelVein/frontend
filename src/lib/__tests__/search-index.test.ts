@@ -203,10 +203,12 @@ describe("wildcard escaping in the substring branches", () => {
     const projects = ilikeBranches(
       render(matchProject("100%", toTextQuery("100%")))
     );
+
     const posts = ilikeBranches(render(matchPost("100%", toTextQuery("100%"))));
 
     expect(projects).toHaveLength(2);
     expect(posts).toHaveLength(1);
+
     for (const branch of [...projects, ...posts]) {
       expect(withoutPlaceholders(branch)).toContain(ESCAPE_CHAIN);
     }
@@ -293,9 +295,11 @@ describe("fuzzy matching", () => {
     // predicate without one still returns correct results, so nothing fails
     // loudly. The search just gets slower as the table grows.
     const indexed = trgmIndexedFields();
+
     const forProjects = new Set(
       [...indexed].filter((field) => field.startsWith("projects."))
     );
+
     const forPosts = new Set(
       [...indexed].filter((field) => field.startsWith("posts."))
     );

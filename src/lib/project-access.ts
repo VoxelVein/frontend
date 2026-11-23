@@ -56,12 +56,15 @@ export const isAdmin = (session: Session): boolean =>
 /** Signed-in user allowed to publish content: verified email or staff. */
 export const requireUploader = async (headers: Headers): Promise<Session> => {
   const session = await auth.api.getSession({ headers });
+
   if (!session) {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.unauthenticated);
   }
+
   if (!session.user.emailVerified && !hasSessionRole(session, "moderator")) {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.unverified);
   }
+
   return session;
 };
 
@@ -84,11 +87,13 @@ export const requireEditableProject = async (
   if (!project || project.status === "removed") {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.notFound);
   }
+
   if (
     project.ownerId !== session.user.id &&
     !hasSessionRole(session, "moderator")
   ) {
     throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
   }
+
   return project;
 };

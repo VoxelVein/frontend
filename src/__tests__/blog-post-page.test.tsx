@@ -39,6 +39,7 @@ const resolvePath = (to: string, params: Record<string, string>): string => {
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route reads loader data through the router and renders router Links; stubbing both avoids standing up a router in this test
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute; the cast only widens the type for the mock factory
   return {
     ...(actual as object),
@@ -56,6 +57,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 });
 
 const BlogPostPage = Route.options.component;
+
 if (!BlogPostPage) {
   throw new Error("BlogPostPage component not found");
 }

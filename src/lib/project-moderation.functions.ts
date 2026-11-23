@@ -49,6 +49,7 @@ const requireReviewQuota = async (session: Session): Promise<void> => {
     `user:${session.user.id}`,
     RATE_LIMITS.write
   );
+
   if (quota) {
     throw new Error(RATE_LIMIT_MESSAGE);
   }
@@ -60,6 +61,7 @@ const getOwner = (): Promise<Session> => requireUploader(getRequestHeaders());
 export const listPendingReviews = createServerFn({ method: "GET" }).handler(
   async (): Promise<PendingReview[]> => {
     await requireReviewer();
+
     return listPendingReviewsInDb();
   }
 );
@@ -68,10 +70,12 @@ export const listPendingReviews = createServerFn({ method: "GET" }).handler(
 export const countPendingReviews = createServerFn({ method: "GET" }).handler(
   async (): Promise<number> => {
     await requireReviewer();
+
     const [row] = await db
       .select({ pending: count() })
       .from(projects)
       .where(eq(projects.status, "pending"));
+
     return row?.pending ?? 0;
   }
 );
@@ -117,6 +121,7 @@ export const submitProjectForReview = createServerFn({ method: "POST" })
     const session = await getOwner();
     await requireReviewQuota(session);
     await requireEditableProject(session, data.projectId);
+
     return requestPublication(data.projectId);
   });
 

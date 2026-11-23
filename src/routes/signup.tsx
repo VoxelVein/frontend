@@ -30,6 +30,7 @@ import {
 const EMAIL_PATTERN = /^[^\s@]{1,64}@(?:[^\s@.]{1,63}\.)+[^\s@.]{1,63}$/u;
 const MIN_PASSWORD_LENGTH = 8;
 const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{3,32}$/u;
+
 const MISSING_VERIFICATION_MESSAGE =
   "Complete the human verification check before creating your account.";
 
@@ -69,6 +70,7 @@ const SignupPage = () => {
   // state read there would always be the initial null.
   const turnstileTokenRef = useRef<string | null>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+
   const handleTurnstileToken = (token: string | null) => {
     turnstileTokenRef.current = token;
   };
@@ -84,12 +86,15 @@ const SignupPage = () => {
       toast.dismiss();
 
       const turnstileToken = turnstileTokenRef.current;
+
       if (isTurnstileEnabled() && !turnstileToken) {
         toast.error(MISSING_VERIFICATION_MESSAGE);
+
         return;
       }
 
       let error: { message?: string } | null;
+
       try {
         ({ error } = await authClient.signUp.email({
           ...value,
@@ -99,25 +104,32 @@ const SignupPage = () => {
       } catch {
         turnstileRef.current?.reset();
         toast.error("Could not reach the account service. Please try again.");
+
         return;
       }
+
       if (error) {
         // Turnstile tokens are single-use, so every retry needs a fresh one.
         turnstileRef.current?.reset();
         toast.error(
           authErrorMessage(error.message, "Could not create your account.")
         );
+
         return;
       }
+
       try {
         const { data: session, error: sessionError } =
           await authClient.getSession();
+
         if (sessionError || !session) {
           toast.error(
             "Your account was created, but we couldn’t sign you in. Please sign in with your new account."
           );
+
           return;
         }
+
         await router.invalidate();
         await router.navigate({ to: "/" });
       } catch {
@@ -309,6 +321,7 @@ const SignupPage = () => {
 export const Route = createFileRoute("/signup")({
   beforeLoad: async () => {
     const session = await getSession();
+
     if (session) {
       throw redirect({ to: "/" });
     }

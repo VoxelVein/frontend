@@ -33,20 +33,29 @@ export const ConfirmStep = ({
 
   const matches =
     confirmation.trim().toLowerCase() === expected.trim().toLowerCase();
+
   const actionLabel =
     mode === "immediate" ? "Delete account" : "Schedule deletion";
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     if (!matches) {
       setError(`Type ${expected} to confirm.`);
+
       return;
     }
+
     setError(null);
     setIsSubmitting(true);
-    const submitError = await onSubmit(confirmation.trim());
+
+    try {
+      setError(await onSubmit(confirmation.trim()));
+    } catch {
+      setError("Could not finish the request. Please try again.");
+    }
+
     setIsSubmitting(false);
-    setError(submitError);
   };
 
   return (

@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ModsPage = () => {
   const data = useLoaderData({ from: "/mods/" });
+
   return <ProjectBrowser type="mod" {...data} />;
 };
 

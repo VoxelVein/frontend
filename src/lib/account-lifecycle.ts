@@ -51,6 +51,7 @@ export const isUsernameFree = async (
   exceptUserId?: string
 ): Promise<boolean> => {
   const name = normalizeUsername(username);
+
   const [current] = await db
     .select({ id: users.id })
     .from(users)
@@ -60,6 +61,7 @@ export const isUsernameFree = async (
         : eq(users.username, name)
     )
     .limit(1);
+
   if (current) {
     return false;
   }
@@ -75,6 +77,7 @@ export const isUsernameFree = async (
       )
     )
     .limit(1);
+
   return !reserved;
 };
 
@@ -88,12 +91,15 @@ export const checkUsernameFor = async (
   userId?: string
 ): Promise<UsernameCheck> => {
   const problem = getUsernameProblem(username);
+
   if (problem) {
     return { available: false, message: USERNAME_PROBLEM_MESSAGES[problem] };
   }
+
   if (!(await isUsernameFree(username, userId))) {
     return { available: false, message: "This username is already taken." };
   }
+
   return { available: true };
 };
 
@@ -104,6 +110,7 @@ const firstFreeUsername = async (
   if (candidates.length === 0) {
     return null;
   }
+
   const [current, reserved] = await Promise.all([
     db
       .select({ username: users.username })
@@ -119,9 +126,11 @@ const firstFreeUsername = async (
         )
       ),
   ]);
+
   const taken = new Set(
     [...current, ...reserved].map(({ username }) => username)
   );
+
   return candidates.find((candidate) => !taken.has(candidate)) ?? null;
 };
 
@@ -134,11 +143,10 @@ export const findAvailableUsername = async (
 ): Promise<string> => {
   const bases = [
     ...new Set(
-      hints
-        .filter((hint): hint is string => Boolean(hint?.trim()))
-        .map(toUsernameBase)
+      hints.flatMap((hint) => (hint?.trim() ? [toUsernameBase(hint)] : []))
     ),
   ];
+
   if (bases.length === 0) {
     bases.push("user");
   }
@@ -146,11 +154,13 @@ export const findAvailableUsername = async (
   const plain = await firstFreeUsername(
     bases.filter((base) => !getUsernameProblem(base))
   );
+
   if (plain) {
     return plain;
   }
 
   const [base = "user"] = bases;
+
   const suffixed = await firstFreeUsername(
     Array.from({ length: SUFFIX_ATTEMPTS }, () =>
       withUsernameSuffix(
@@ -159,9 +169,11 @@ export const findAvailableUsername = async (
       )
     )
   );
+
   if (!suffixed) {
     throw new Error("Could not find a free username.");
   }
+
   return suffixed;
 };
 
@@ -173,11 +185,13 @@ export const resolveReservedUsername = async (
   username: string
 ): Promise<string | null> => {
   const name = normalizeUsername(username);
+
   const [current] = await db
     .select({ id: users.id })
     .from(users)
     .where(eq(users.username, name))
     .limit(1);
+
   if (current) {
     return null;
   }
@@ -193,6 +207,7 @@ export const resolveReservedUsername = async (
       )
     )
     .limit(1);
+
   return entry?.username ?? null;
 };
 
@@ -221,9 +236,11 @@ const loadUsernameOwner = async (userId: string): Promise<UsernameOwner> => {
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
+
   if (!user) {
     throw new AccountError("Account not found.");
   }
+
   return user;
 };
 
@@ -237,10 +254,13 @@ export const confirmUsername = async (
   requested: string
 ): Promise<string> => {
   const user = await loadUsernameOwner(userId);
+
   if (user.usernameConfirmed) {
     throw new AccountError("Your username is already set.");
   }
+
   const check = await checkUsernameFor(requested, userId);
+
   if (!check.available) {
     throw new AccountError(check.message);
   }
@@ -249,11 +269,12 @@ export const confirmUsername = async (
   await db
     .update(users)
     .set({
-      displayUsername: requested.trim(),
       username,
+      displayUsername: requested.trim(),
       usernameConfirmed: true,
     })
     .where(eq(users.id, userId));
+
   return username;
 };
 
@@ -266,26 +287,33 @@ export const changeUsername = async (
   requested: string
 ): Promise<string> => {
   const user = await loadUsernameOwner(userId);
+
   if (!user.usernameConfirmed) {
     throw new AccountError("Choose your username first.");
   }
+
   const username = normalizeUsername(requested);
+
   if (username === user.username) {
     // Only the capitalisation changed: no new name, so no cooldown.
     await db
       .update(users)
       .set({ displayUsername: requested.trim() })
       .where(eq(users.id, userId));
+
     return username;
   }
 
   const nextChange = getNextUsernameChange(user.usernameChangedAt);
+
   if (nextChange) {
     throw new AccountError(
       `You can change your username again on ${nextChange.toISOString().slice(0, 10)}.`
     );
   }
+
   const check = await checkUsernameFor(requested, userId);
+
   if (!check.available) {
     throw new AccountError(check.message);
   }
@@ -301,22 +329,25 @@ export const changeUsername = async (
           eq(usernameHistory.username, username)
         )
       );
+
     if (user.username) {
       await tx.insert(usernameHistory).values({
-        expiresAt: new Date(now.getTime() + USERNAME_RESERVATION_MS),
         userId,
+        expiresAt: new Date(now.getTime() + USERNAME_RESERVATION_MS),
         username: user.username,
       });
     }
+
     await tx
       .update(users)
       .set({
-        displayUsername: requested.trim(),
         username,
+        displayUsername: requested.trim(),
         usernameChangedAt: now,
       })
       .where(eq(users.id, userId));
   });
+
   return username;
 };
 
@@ -338,6 +369,7 @@ export const notifyAdmins = async (
   if (notifications.length === 0) {
     return;
   }
+
   await db.insert(adminNotifications).values(notifications);
 };
 
@@ -371,10 +403,12 @@ const deleteProjectsCompletely = async (projectIds: string[]) => {
   if (projectIds.length === 0) {
     return;
   }
+
   const versionIds = db
     .select({ id: projectVersions.id })
     .from(projectVersions)
     .where(inArray(projectVersions.projectId, projectIds));
+
   const [files, images] = await Promise.all([
     db
       .select({ storageKey: projectFiles.storageKey })
@@ -384,10 +418,12 @@ const deleteProjectsCompletely = async (projectIds: string[]) => {
   ]);
 
   await db.delete(projects).where(inArray(projects.id, projectIds));
+
   const keys = [
     ...files.map((file) => file.storageKey),
     ...images.map((image) => image.storageKey),
   ];
+
   if (keys.length > 0) {
     try {
       await deleteObjects(keys);
@@ -413,6 +449,7 @@ export const purgeAccount = async (userId: string): Promise<void> => {
     .where(eq(projects.ownerId, userId));
 
   const doomed: string[] = [];
+
   for (const project of owned) {
     if (project.pendingDeletion) {
       doomed.push(project.id);
@@ -456,22 +493,27 @@ export const requestAccountDeletion = async ({
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
+
   if (!user) {
     throw new AccountError("Account not found.");
   }
+
   if (user.deletionRequestedAt) {
     throw new AccountError("This account is already scheduled for deletion.");
   }
 
   const owned = await listOwnedProjects(userId);
+
   if (!user.hasOwnedProject && owned.length === 0) {
     await purgeAccount(userId);
+
     return { status: "deleted" };
   }
 
   const keep = new Set(keepProjectIds);
   const toDelete: string[] = [];
   const protectedProjects: OwnedProject[] = [];
+
   for (const project of owned) {
     if (project.isProtected) {
       protectedProjects.push(project);
@@ -494,6 +536,7 @@ export const requestAccountDeletion = async ({
         .set({ pendingDeletion: true })
         .where(inArray(projects.id, toDelete));
     }
+
     await tx
       .update(users)
       .set({
@@ -526,6 +569,7 @@ export const restoreAccount = async (userId: string): Promise<void> => {
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
+
   if (!user?.deletionRequestedAt) {
     throw new AccountError("This account is not scheduled for deletion.");
   }
@@ -572,6 +616,7 @@ export const listPendingDeletions = async (): Promise<PendingDeletion[]> => {
     .from(users)
     .where(isNotNull(users.deletionRequestedAt))
     .orderBy(users.deletionRequestedAt);
+
   if (pending.length === 0) {
     return [];
   }
@@ -592,16 +637,18 @@ export const listPendingDeletions = async (): Promise<PendingDeletion[]> => {
   return pending.map((user) => {
     const requestedAt = user.deletionRequestedAt ?? new Date();
     const mine = owned.filter((project) => project.ownerId === user.id);
+
     const projectsToDelete = mine.filter(
       (project) => project.pendingDeletion
     ).length;
+
     return {
+      projectsToDelete,
       deletionRequestedAt: requestedAt.toISOString(),
       email: user.email,
       id: user.id,
       keptProjects: mine.length - projectsToDelete,
       name: user.name,
-      projectsToDelete,
       purgeAt: new Date(
         requestedAt.getTime() + ACCOUNT_DELETION_GRACE_MS
       ).toISOString(),
@@ -615,6 +662,7 @@ export const purgeExpiredAccounts = async (
   now: Date = new Date()
 ): Promise<number> => {
   const cutoff = new Date(now.getTime() - ACCOUNT_DELETION_GRACE_MS);
+
   const expired = await db
     .select({ id: users.id })
     .from(users)
@@ -628,7 +676,9 @@ export const purgeExpiredAccounts = async (
   const results = await Promise.allSettled(
     expired.map(({ id }) => purgeAccount(id))
   );
+
   let purged = 0;
+
   for (const [index, result] of results.entries()) {
     if (result.status === "fulfilled") {
       purged += 1;
@@ -640,6 +690,7 @@ export const purgeExpiredAccounts = async (
       );
     }
   }
+
   return purged;
 };
 

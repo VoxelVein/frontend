@@ -15,6 +15,7 @@ import { requirePostAuthor } from "@/lib/auth.functions";
 export const Route = createFileRoute("/admin/posts")({
   beforeLoad: async () => {
     const session = await requirePostAuthor();
+
     if (!session) {
       throw redirect({ to: "/login" });
     }

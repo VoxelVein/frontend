@@ -64,10 +64,13 @@ export const formatDate = (value: string): string =>
 export const formatBytes = (bytes: number): string => {
   let value = bytes;
   let unit = 0;
+
   while (value >= BYTES_PER_UNIT && unit < BYTE_UNITS.length - 1) {
     value /= BYTES_PER_UNIT;
     unit += 1;
   }
+
   const digits = unit === 0 || value >= 10 ? 0 : 1;
+
   return `${value.toFixed(digits)} ${BYTE_UNITS[unit]}`;
 };

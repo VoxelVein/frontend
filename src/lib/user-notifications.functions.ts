@@ -21,9 +21,11 @@ const NOTIFICATION_LIMIT = 50;
  */
 const requireUser = async (): Promise<Session> => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
+
   if (!session) {
     throw new Error("Sign in to see your notifications.");
   }
+
   return session;
 };
 
@@ -83,6 +85,7 @@ export const listUserNotifications = createServerFn({
   method: "GET",
 }).handler(async (): Promise<UserNotification[]> => {
   const session = await requireUser();
+
   const rows = await db
     .select({
       createdAt: userNotifications.createdAt,
@@ -100,6 +103,7 @@ export const listUserNotifications = createServerFn({
     .where(eq(userNotifications.userId, session.user.id))
     .orderBy(desc(userNotifications.createdAt))
     .limit(NOTIFICATION_LIMIT);
+
   return rows.map(toNotification);
 });
 
@@ -108,6 +112,7 @@ export const countUnreadUserNotifications = createServerFn({
   method: "GET",
 }).handler(async (): Promise<number> => {
   const session = await requireUser();
+
   const [row] = await db
     .select({ unread: count() })
     .from(userNotifications)
@@ -117,6 +122,7 @@ export const countUnreadUserNotifications = createServerFn({
         isNull(userNotifications.readAt)
       )
     );
+
   return row?.unread ?? 0;
 });
 

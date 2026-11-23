@@ -107,6 +107,7 @@ const DisplayNameForm = ({ user }: SettingsProfileProps) => {
     defaultValues: { bio: user.bio ?? "", name: user.name },
     onSubmit: async ({ value }) => {
       toast.dismiss();
+
       // Only the name and the bio: usernames go through their own server
       // functions, which enforce the cooldown and reservations.
       const { error } = await authClient.updateUser({
@@ -115,10 +116,13 @@ const DisplayNameForm = ({ user }: SettingsProfileProps) => {
         bio: normalizeBio(value.bio),
         name: value.name.trim(),
       });
+
       if (error) {
         toast.error(error.message ?? "Could not update your profile.");
+
         return;
       }
+
       toast.success("Profile updated.");
       // Rebased onto what was stored rather than what was typed, so the fields
       // show what the server has instead of the whitespace it trimmed away.
@@ -139,6 +143,7 @@ const DisplayNameForm = ({ user }: SettingsProfileProps) => {
   const bio = useStore(form.store, (state) => state.values.bio);
   const name = useStore(form.store, (state) => state.values.name);
   const isDirty = normalizeBio(bio) !== saved.bio || name.trim() !== saved.name;
+
   // The preview re-parses and re-sanitises Markdown on every change, which is far
   // more work per keystroke than the field itself, so it trails the typing.
   const [debouncedBio] = useDebouncedValue(bio, {
@@ -256,9 +261,11 @@ const UsernameForm = ({ user }: SettingsProfileProps) => {
   // Accounts from Google or GitHub that never confirmed their generated name
   // make a first-time choice, which has no cooldown.
   const isFirstChoice = user.usernameConfirmed === false;
+
   const nextChange = isFirstChoice
     ? null
     : getNextUsernameChange(user.usernameChangedAt);
+
   const isLocked = nextChange !== null;
 
   const form = useForm({
@@ -266,18 +273,23 @@ const UsernameForm = ({ user }: SettingsProfileProps) => {
     onSubmit: async ({ value }) => {
       toast.dismiss();
       const username = value.username.trim();
+
       if (username === currentUsername) {
         toast.success("That is already your username.");
+
         return;
       }
+
       try {
         await (isFirstChoice
           ? confirmUsername({ data: { username } })
           : changeUsername({ data: { username } }));
       } catch (error) {
         toast.error(errorMessage(error, "Could not change your username."));
+
         return;
       }
+
       toast.success("Username updated.");
       await refreshSession();
     },
@@ -289,6 +301,7 @@ const UsernameForm = ({ user }: SettingsProfileProps) => {
 
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
   const username = useStore(form.store, (state) => state.values.username);
+
   const availability = useUsernameAvailability(username, {
     currentUsername,
     enabled: !isLocked,

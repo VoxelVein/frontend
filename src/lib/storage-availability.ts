@@ -73,12 +73,15 @@ export const storageFailureMessage = (
     if (cause.code === "unreachable") {
       return STORAGE_UNREACHABLE_TOAST;
     }
+
     if (cause.code === "not-configured") {
       return STORAGE_UNAVAILABLE_REASON;
     }
   }
+
   if (cause instanceof Error && cause.message) {
     return cause.message;
   }
+
   return fallback;
 };

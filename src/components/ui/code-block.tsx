@@ -100,6 +100,7 @@ function CodeBlockCopyButton({
     }
 
     const timeout = setTimeout(() => setCopied(false), 2000);
+
     return () => clearTimeout(timeout);
   }, [copied]);
 
@@ -163,7 +164,7 @@ function CodeBlockContent({
       >
         {lineNumbers && typeof children === "string"
           ? children
-              .replace(/\n$/, "")
+              .replace(/\n$/u, "")
               .split("\n")
               .map((line, index) => (
                 <CodeBlockLine key={index}>{line}</CodeBlockLine>

@@ -76,11 +76,13 @@ describe(deletionReducer, () => {
       type: "verified",
       password: "hunter2",
     });
+
     const kept = deletionReducer(verified, {
       type: "keep",
       keep: true,
       projectId: "p1",
     });
+
     const closed = deletionReducer(kept, { type: "close" });
 
     expect(closed.open).toBeFalsy();
@@ -114,6 +116,7 @@ describe(deletionReducer, () => {
       type: "verified",
       password: "wrong",
     });
+
     const failed = deletionReducer(verified, {
       type: "verification-failed",
       error: "Wrong password",
@@ -132,6 +135,7 @@ describe(deletionReducer, () => {
       keep: true,
       projectId: "p1",
     });
+
     const both = deletionReducer(first, {
       type: "keep",
       keep: true,
@@ -145,6 +149,7 @@ describe(deletionReducer, () => {
       keep: false,
       projectId: "p1",
     });
+
     expect(dropped.keepProjectIds).toStrictEqual(["p2"]);
   });
 
@@ -154,6 +159,7 @@ describe(deletionReducer, () => {
       keep: true,
       projectId: "p1",
     });
+
     const twice = deletionReducer(once, {
       type: "keep",
       keep: true,

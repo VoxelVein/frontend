@@ -118,17 +118,22 @@ export const categoryLabelSentence = (): string => {
   const labels = MINECRAFT_CATEGORIES.map((category) =>
     category.label.toLowerCase()
   );
+
   const last = labels.at(-1);
+
   if (last === undefined) {
     // An emptied registry degrades the sentence instead of crashing a render.
     return "";
   }
+
   const head = labels.slice(0, -1).join(", ");
+
   // One category is just its own name; two or more read as an Oxford list.
   return head === "" ? last : `${head}, and ${last}`;
 };
 
 export { MINECRAFT_CATEGORIES };
+
 export type { MinecraftCategory };
 
 /**

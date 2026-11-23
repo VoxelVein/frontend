@@ -36,6 +36,7 @@ vi.mock("@aws-sdk/lib-storage", () => ({
     async done() {
       // Drain the stream like a real upload would.
       await this.body.toArray();
+
       return {};
     }
   },
@@ -58,7 +59,9 @@ const fakeClient = () => {
     credentials: { accessKeyId: "key", secretAccessKey: "secret" },
     region: "auto",
   });
+
   const send = vi.spyOn(client, "send").mockImplementation(async () => {});
+
   return { client, send };
 };
 

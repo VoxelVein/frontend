@@ -11,14 +11,17 @@ export const readTrustProxy = (
   if (value === "true") {
     return true;
   }
+
   if (value === "false") {
     return false;
   }
+
   if (production) {
     throw new Error(
       'TRUST_PROXY must be set to "true" (behind a reverse proxy that sets X-Forwarded-For) or "false" (no per-client limits) in production.'
     );
   }
+
   return false;
 };
 
@@ -36,6 +39,8 @@ export const getForwardedClientIp = (
   if (!trustProxy) {
     return null;
   }
+
   const forwarded = headers.get("x-forwarded-for");
+
   return forwarded?.split(",").at(-1)?.trim() || null;
 };

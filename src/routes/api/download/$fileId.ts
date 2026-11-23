@@ -28,10 +28,13 @@ const getClientKey = async (request: Request): Promise<string | null> => {
   const session = await auth.api
     .getSession({ headers: request.headers })
     .catch(() => null);
+
   if (session) {
     return `user:${session.user.id}`;
   }
+
   const ip = getForwardedClientIp(request.headers, TRUST_PROXY);
+
   return ip ? `ip:${ip}` : null;
 };
 
@@ -74,6 +77,7 @@ const handleDownload = async (
     (await getClientKey(request)) ?? "unknown",
     RATE_LIMITS.download
   );
+
   if (quota.limited) {
     return rateLimitedResponse(quota.retryAfterSeconds);
   }
@@ -100,6 +104,7 @@ const handleDownload = async (
     const session = await auth.api
       .getSession({ headers: request.headers })
       .catch(() => null);
+
     if (
       file.status !== "pending" ||
       !session ||

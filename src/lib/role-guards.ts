@@ -25,9 +25,11 @@ export const getRoleSession = async (
   minimum: MinimumRole
 ): Promise<StaffSession | null> => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
+
   if (!session || !hasRole(session.user.role, minimum)) {
     return null;
   }
+
   return session;
 };
 
@@ -36,9 +38,11 @@ export const requireRole = async (
   minimum: MinimumRole
 ): Promise<StaffSession> => {
   const session = await getRoleSession(minimum);
+
   if (!session) {
     throw new Error("Unauthorized");
   }
+
   return session;
 };
 
@@ -60,9 +64,11 @@ export const requireStaff = async (
   minimum: Exclude<MinimumRole, "user">
 ): Promise<StaffSession> => {
   const session = await getRoleSession(minimum);
+
   if (!session) {
     throw new Error(DENIAL[minimum]);
   }
+
   return session;
 };
 
@@ -82,8 +88,10 @@ export const requireCapability = async (
   capability: Capability
 ): Promise<StaffSession> => {
   const session = await getRoleSession(CAPABILITY_MINIMUM[capability]);
+
   if (!session) {
     throw new Error(DENIAL[CAPABILITY_MINIMUM[capability]]);
   }
+
   return session;
 };

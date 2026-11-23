@@ -53,6 +53,7 @@ describe("server join details", () => {
       serverInputSchema,
       input({ address: "  Play.Example.NET " })
     );
+
     expect(result.success && result.output.address).toBe("play.example.net");
   });
 

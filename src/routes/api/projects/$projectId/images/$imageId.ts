@@ -31,6 +31,7 @@ const handle = async (
     if (!isSameOrigin(request)) {
       return errorResponse(403, "Cross-origin requests are not allowed.");
     }
+
     if (
       !safeParse(uuidSchema, params.projectId).success ||
       !safeParse(uuidSchema, params.imageId).success
@@ -51,12 +52,14 @@ const handle = async (
         )
       )
       .limit(1);
+
     if (!image) {
       return notFound();
     }
 
     await db.delete(projectImages).where(eq(projectImages.id, image.id));
     await deleteObjects([image.storageKey]).catch(() => null);
+
     return new Response(null, { status: 204 });
   } catch (error) {
     if (error instanceof ProjectAccessError) {
@@ -65,7 +68,9 @@ const handle = async (
         error.message
       );
     }
+
     console.error("Image delete failed", error);
+
     return errorResponse(500, "The image could not be deleted.");
   }
 };

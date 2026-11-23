@@ -10,9 +10,11 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ModpackDetailPage = () => {
   const project = useLoaderData({ from: "/modpacks/$slug" });
+
   if (!project) {
     return <ProjectNotFound type="modpack" />;
   }
+
   return <ProjectDetail project={project} />;
 };
 
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/modpacks/$slug")({
     const project = await getProject({ data: { slug: params.slug } }).catch(
       () => null
     );
+
     // A slug belongs to one project type; other types are not found here.
     return project?.type === "modpack" ? project : null;
   },

@@ -60,6 +60,7 @@ export const useUsernameAvailability = (
   { currentUsername, enabled = true }: UsernameAvailabilityOptions = {}
 ): UsernameAvailability => {
   const trimmed = value.trim();
+
   const [debounced] = useDebouncedValue(trimmed, {
     wait: USERNAME_CHECK_DEBOUNCE_MS,
   });
@@ -79,18 +80,22 @@ export const useUsernameAvailability = (
   if (!isCheckable) {
     return IDLE;
   }
+
   if (!isSettled) {
     return CHECKING;
   }
+
   if (isError) {
     return {
       message: "Could not check availability right now.",
       status: "error",
     };
   }
+
   if (!data) {
     return CHECKING;
   }
+
   return data.available
     ? { status: "available" }
     : { message: data.message, status: "unavailable" };

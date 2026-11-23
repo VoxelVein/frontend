@@ -163,11 +163,13 @@ describe(verifyTurnstileToken, () => {
         productionConfig,
         fetchMock
       );
+
       expect(result).toStrictEqual({
         ok: false,
         reason: TURNSTILE_FAILURE.missingToken,
       });
     }
+
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -187,6 +189,7 @@ describe(verifyTurnstileToken, () => {
         productionConfig,
         fetchMock
       );
+
       expect(result).toStrictEqual({
         ok: false,
         reason: TURNSTILE_FAILURE.siteverifyUnavailable,
@@ -222,6 +225,7 @@ describe(verifyTurnstileToken, () => {
       developmentConfig,
       siteverifyReturning(testingResult)
     );
+
     const inProduction = await verifyTurnstileToken(
       { expectedAction: "login", token: "XXXX.DUMMY.TOKEN.XXXX" },
       productionConfig,

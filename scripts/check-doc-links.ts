@@ -11,6 +11,7 @@ import path from "node:path";
  */
 
 const ROOTS = ["docs"];
+
 const ROOT_FILES = [
   "README.md",
   "ROADMAP.md",
@@ -23,6 +24,7 @@ const ROOT_FILES = [
 const exists = (file: string): boolean => {
   try {
     statSync(file);
+
     return true;
   } catch {
     return false;
@@ -32,9 +34,11 @@ const exists = (file: string): boolean => {
 const markdownFiles = (dir: string): string[] =>
   readdirSync(dir).flatMap((entry) => {
     const full = path.join(dir, entry);
+
     if (statSync(full).isDirectory()) {
       return markdownFiles(full);
     }
+
     return full.endsWith(".md") ? [full] : [];
   });
 
@@ -49,9 +53,11 @@ const anchorFor = (heading: string): string =>
 const anchorsIn = (file: string): Set<string> => {
   const anchors = new Set<string>();
   const text = readFileSync(file, "utf-8");
+
   for (const match of text.matchAll(/^#{1,6}\s+(?<heading>.*)$/gmu)) {
     anchors.add(anchorFor(match.groups?.heading ?? ""));
   }
+
   return anchors;
 };
 
@@ -96,6 +102,7 @@ for (const file of files) {
     const [target, anchor] = link.split("#");
     const resolved = path.join(dir, target);
     const missingFile = !exists(resolved);
+
     // A renamed heading leaves the anchor pointing at nothing, and
     // markdownlint has no rule for it.
     const missingAnchor =

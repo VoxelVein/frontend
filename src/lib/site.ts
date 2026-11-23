@@ -7,8 +7,10 @@
  */
 
 export const SITE_NAME = "VoxelVein";
+
 export const SITE_TITLE =
   "VoxelVein | Free & Open-Source Minecraft Mod Platform";
+
 // The list matched the hero's own copy rather than the category registry, and
 // had already drifted: it omitted datapacks. This description is the one string
 // a visitor reads without ever loading the page, so it leads with the promise

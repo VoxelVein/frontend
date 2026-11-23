@@ -114,10 +114,12 @@ export const PublishPanel = ({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isServer = !hasVersions(project.type);
+
   // Servers are listings: saved join details stand in for an uploaded file.
   const isReady = isServer
     ? project.server !== null
     : project.versions.some((version) => version.files.length);
+
   const visibility = VISIBILITY[project.status];
 
   // The one transition this status allows, or null when there is none. Held as
@@ -139,6 +141,7 @@ export const PublishPanel = ({
             }
           : null;
       }
+
       case "pending": {
         return {
           kind: "plain",
@@ -146,6 +149,7 @@ export const PublishPanel = ({
           success: "Moved back to drafts",
         };
       }
+
       case "published": {
         return {
           kind: "plain",
@@ -153,9 +157,11 @@ export const PublishPanel = ({
           success: "Moved back to drafts",
         };
       }
+
       case "removed": {
         return null;
       }
+
       default: {
         return null;
       }
@@ -165,8 +171,10 @@ export const PublishPanel = ({
   const run = async (action: Transition) => {
     setError(null);
     setIsPending(true);
+
     try {
       let message = action.success;
+
       if (action.kind === "publish") {
         message =
           (await action.run()) === "published"
@@ -175,11 +183,13 @@ export const PublishPanel = ({
       } else {
         await action.run();
       }
+
       await onChange();
       toast.success(message);
     } catch (actionError) {
       setError(errorMessage(actionError, "Could not change visibility."));
     }
+
     setIsPending(false);
   };
 

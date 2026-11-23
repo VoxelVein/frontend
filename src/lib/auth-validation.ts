@@ -103,6 +103,7 @@ const validateProfileInput = (
     // and "Use letters, numbers, underscores, or periods."  -  three sentences
     // for one rule, and the one on screen was not this one.
     const problem = getUsernameProblem(username);
+
     if (problem) {
       errors.username = USERNAME_PROBLEM_MESSAGES[problem];
     }

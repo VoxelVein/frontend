@@ -21,6 +21,7 @@ export const ServerPlayerCount = ({
       const statuses = await getMinecraftServerStatuses({
         data: { projectIds: [projectId] },
       });
+
       return statuses[projectId];
     },
     queryKey: ["minecraft-server-status", projectId],
@@ -30,14 +31,18 @@ export const ServerPlayerCount = ({
   });
 
   const status = providedStatus ?? data;
+
   const playerCount =
     status?.online === true &&
     status.onlinePlayers !== null &&
     status.maxPlayers !== null;
+
   const countLabel = playerCount
     ? `${status.onlinePlayers}/${status.maxPlayers}`
     : null;
+
   let label = "Player count unavailable";
+
   if (isPending && !providedStatus) {
     label = "Checking server status";
   } else if (countLabel) {
@@ -47,6 +52,7 @@ export const ServerPlayerCount = ({
   }
 
   let count = "—";
+
   if (isPending && !providedStatus) {
     count = "…";
   } else if (countLabel) {

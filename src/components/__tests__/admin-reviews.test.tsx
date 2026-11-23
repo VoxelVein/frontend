@@ -22,6 +22,11 @@ vi.mock("@/lib/project-moderation.functions", () => ({
   rejectProject: rejectProjectMock,
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The project-details query pulls in the database; this suite is about the review queue
+vi.mock("@/lib/projects.functions", () => ({
+  getProject: vi.fn<() => Promise<null>>(() => Promise.resolve(null)),
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Toasts render into a portal outside the component tree; a stub keeps the test on the component
 vi.mock("sonner", () => ({
   toast: {
@@ -107,6 +112,7 @@ describe(AdminReviews, () => {
     const confirm = await screen.findByRole("button", {
       name: "Send back to draft",
     });
+
     // Disabled while the reason box is empty, and submitting is a no-op even
     // if the click lands.
     expect(confirm.hasAttribute("disabled")).toBeTruthy();

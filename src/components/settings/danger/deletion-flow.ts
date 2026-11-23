@@ -57,10 +57,13 @@ interface PendingDeletion {
 export const readPendingDeletion = (): PendingDeletion | null => {
   try {
     const raw = window.sessionStorage.getItem(PENDING_DELETION_STORAGE_KEY);
+
     if (!raw) {
       return null;
     }
+
     const result = safeParse(pendingDeletionSchema, JSON.parse(raw));
+
     return result.success ? result.output : null;
   } catch {
     return null;
@@ -130,21 +133,26 @@ export const deletionReducer = (
         open: true,
       };
     }
+
     case "close": {
       return { ...state, open: false };
     }
+
     case "go": {
       return { ...state, step: action.step };
     }
+
     case "keep": {
       const others = state.keepProjectIds.filter(
         (id) => id !== action.projectId
       );
+
       return {
         ...state,
         keepProjectIds: action.keep ? [...others, action.projectId] : others,
       };
     }
+
     case "verified": {
       return {
         ...state,
@@ -153,6 +161,7 @@ export const deletionReducer = (
         step: "confirm",
       };
     }
+
     case "verification-failed": {
       return {
         ...state,
@@ -161,9 +170,11 @@ export const deletionReducer = (
         step: "verify",
       };
     }
+
     case "scheduled": {
       return { ...state, purgeAt: action.purgeAt, step: "scheduled" };
     }
+
     default: {
       return state;
     }
@@ -178,7 +189,9 @@ export const initDeletionState = (resumeDeletion: boolean): DeletionState => {
   if (!resumeDeletion) {
     return closedDeletionState;
   }
+
   const pending = readPendingDeletion();
+
   return {
     ...closedDeletionState,
     expectedUserId: pending?.userId ?? null,

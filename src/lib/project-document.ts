@@ -76,8 +76,10 @@ export const buildProjectDocuments = async (
 
   // Newest version first, so the first entry per project is its latest.
   const versionsByProject = new Map<string, typeof versions>();
+
   for (const version of versions) {
     const existing = versionsByProject.get(version.projectId);
+
     if (existing) {
       existing.push(version);
     } else {
@@ -103,8 +105,10 @@ export const buildProjectDocuments = async (
     .orderBy(asc(projectImages.createdAt));
 
   const imagesByProject = new Map<string, typeof images>();
+
   for (const image of images) {
     const existing = imagesByProject.get(image.projectId);
+
     if (existing) {
       existing.push(image);
     } else {
@@ -114,6 +118,7 @@ export const buildProjectDocuments = async (
 
   return published.map((project) => {
     const projectVersionsForProject = versionsByProject.get(project.id) ?? [];
+
     return {
       author:
         project.authorDisplayUsername ??
@@ -157,5 +162,6 @@ export const buildProjectDocument = async (
   projectId: string
 ): Promise<ProjectDocument | null> => {
   const [document] = await buildProjectDocuments([projectId]);
+
   return document ?? null;
 };

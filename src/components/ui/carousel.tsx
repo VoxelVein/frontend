@@ -8,8 +8,11 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 
 type CarouselApi = UseEmblaCarouselType[1];
+
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
+
 type CarouselOptions = UseCarouselParameters[0];
+
 type CarouselPlugin = UseCarouselParameters[1];
 
 interface CarouselProps {
@@ -56,6 +59,7 @@ function Carousel({
     },
     plugins
   );
+
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
 
@@ -63,6 +67,7 @@ function Carousel({
     if (!api) {
       return;
     }
+
     setCanScrollPrev(api.canScrollPrev());
     setCanScrollNext(api.canScrollNext());
   }, []);
@@ -92,6 +97,7 @@ function Carousel({
     if (!api || !setApi) {
       return;
     }
+
     setApi(api);
   }, [api, setApi]);
 
@@ -99,6 +105,7 @@ function Carousel({
     if (!api) {
       return;
     }
+
     onSelect(api);
     api.on("reInit", onSelect);
     api.on("select", onSelect);

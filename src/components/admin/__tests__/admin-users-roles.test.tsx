@@ -267,6 +267,7 @@ describe("AdminUsers role visibility", () => {
       banned: true,
       role: "admin",
     };
+
     listUsersMock.mockResolvedValue({
       data: { total: 1, users: [bannedSelf] },
       error: null,

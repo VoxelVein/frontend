@@ -124,6 +124,7 @@ const LOADING_STATE: ListState = {
 const fetchDeletions = async (): Promise<ListState> => {
   try {
     const rows = await listPendingDeletions();
+
     return { error: null, isLoading: false, rows };
   } catch (error) {
     return {
@@ -138,6 +139,7 @@ export const AdminAccountDeletions = () => {
   const [pendingRestore, setPendingRestore] = useState<PendingDeletion | null>(
     null
   );
+
   const [isMutating, setIsMutating] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
 
@@ -146,13 +148,17 @@ export const AdminAccountDeletions = () => {
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       const next = await fetchDeletions();
+
       if (isCurrent) {
         setList(next);
       }
     };
+
     void loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -168,9 +174,11 @@ export const AdminAccountDeletions = () => {
     if (!pendingRestore) {
       return;
     }
+
     const { id, name } = pendingRestore;
     setIsMutating(true);
     setRestoreError(null);
+
     try {
       await restoreAccount({ data: { userId: id } });
       setList((current) => ({
@@ -182,6 +190,7 @@ export const AdminAccountDeletions = () => {
     } catch (error) {
       setRestoreError(errorMessage(error, "Could not restore the account."));
     }
+
     setIsMutating(false);
   };
 

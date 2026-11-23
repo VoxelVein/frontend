@@ -89,18 +89,23 @@ export const getUsernameProblem = (
   username: string
 ): UsernameProblem | null => {
   const trimmed = username.trim();
+
   if (trimmed.length < USERNAME_MIN_LENGTH) {
     return "too-short";
   }
+
   if (trimmed.length > USERNAME_MAX_LENGTH) {
     return "too-long";
   }
+
   if (!USERNAME_PATTERN.test(trimmed)) {
     return "invalid";
   }
+
   if (isReservedUsername(trimmed)) {
     return "reserved";
   }
+
   return null;
 };
 
@@ -118,6 +123,7 @@ export const toUsernameBase = (raw: string): string => {
   if (cleaned.length < USERNAME_MIN_LENGTH || isReservedUsername(cleaned)) {
     return "user";
   }
+
   return cleaned;
 };
 
@@ -136,8 +142,10 @@ export const getNextUsernameChange = (
   if (!usernameChangedAt) {
     return null;
   }
+
   const next = new Date(
     new Date(usernameChangedAt).getTime() + USERNAME_CHANGE_COOLDOWN_MS
   );
+
   return next > now ? next : null;
 };

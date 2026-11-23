@@ -25,6 +25,7 @@ export const ScheduledStep = ({ purgeAt }: ScheduledStepProps) => {
     const timer = window.setTimeout(() => {
       window.location.assign("/");
     }, SCHEDULED_REDIRECT_DELAY_MS);
+
     return () => window.clearTimeout(timer);
   }, []);
 

@@ -21,6 +21,7 @@ const FormTextarea = ({
 }: FormTextareaProps) => {
   const errorId = `${id}-error`;
   const helperId = `${id}-helper`;
+
   const describedBy = [error ? errorId : null, helperText ? helperId : null]
     .filter(Boolean)
     .join(" ");

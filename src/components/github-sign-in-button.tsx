@@ -29,20 +29,27 @@ const GitHubSignInButtonContent = () => {
     setIsPending(true);
     setError(null);
 
-    const { error: signInError } = await authClient.signIn.social({
-      callbackURL: "/",
-      // New accounts get a generated username and choose their own first.
-      newUserCallbackURL: "/welcome",
-      provider: "github",
-    });
+    try {
+      const { error: signInError } = await authClient.signIn.social({
+        callbackURL: "/",
+        // New accounts get a generated username and choose their own first.
+        newUserCallbackURL: "/welcome",
+        provider: "github",
+      });
 
-    if (signInError) {
-      setIsPending(false);
+      if (signInError) {
+        setError(
+          signInError.message ??
+            "Could not sign you in with GitHub. Check your connection and try again."
+        );
+      }
+    } catch {
       setError(
-        signInError.message ??
-          "Could not sign you in with GitHub. Check your connection and try again."
+        "Could not sign you in with GitHub. Check your connection and try again."
       );
     }
+
+    setIsPending(false);
   };
 
   return (

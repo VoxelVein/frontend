@@ -30,6 +30,7 @@ const describeVersion = (id: string): string | null => {
   if (isSnapshotVersion(id)) {
     return "Snapshot";
   }
+
   return getMinecraftVersion(id)?.update || null;
 };
 
@@ -56,9 +57,11 @@ export const GameVersionPicker = ({
 }: GameVersionPickerProps) => {
   const [query, setQuery] = useState("");
   const [selectionError, setSelectionError] = useState<string | null>(null);
+
   const [includeSnapshots, setIncludeSnapshots] = useState(() =>
     values.some(isSnapshotVersion)
   );
+
   const snapshotToggleId = useId();
   const inputId = `${id}-input`;
   const helpId = `${id}-help`;
@@ -67,6 +70,7 @@ export const GameVersionPicker = ({
   const allVersions = getAllGameVersions(includeSnapshots);
   const selectedVersions = new Set(values);
   const selectedVersionLabel = values.length === 1 ? "version" : "versions";
+
   const helpText =
     values.length === 0
       ? "Search or add the latest release. Enter a line like 1.20 to add every release in it."
@@ -79,10 +83,13 @@ export const GameVersionPicker = ({
         ? getReleasesInLine(value.slice(LINE_PREFIX.length))
         : [value]
     );
+
     const addedLine = next.some((value) => value.startsWith(LINE_PREFIX));
+
     if (addedLine) {
       setQuery("");
     }
+
     onChange(newestFirst(expanded));
   };
 
@@ -101,14 +108,17 @@ export const GameVersionPicker = ({
     }
 
     const selection = resolveVersionSelectionInput(query, includeSnapshots);
+
     if (selection.kind === "not-selection") {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
+
     if (selection.kind === "invalid") {
       setSelectionError(selection.message);
+
       return;
     }
 
@@ -213,6 +223,7 @@ export const GameVersionPicker = ({
             {(value: string) => {
               if (value.startsWith(LINE_PREFIX)) {
                 const line = value.slice(LINE_PREFIX.length);
+
                 return (
                   <ComboboxItem
                     key={value}
@@ -226,7 +237,9 @@ export const GameVersionPicker = ({
                   </ComboboxItem>
                 );
               }
+
               const detail = describeVersion(value);
+
               return (
                 <ComboboxItem key={value} value={value}>
                   {value}

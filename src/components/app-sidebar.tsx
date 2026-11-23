@@ -91,7 +91,7 @@ interface NavItemProps<T extends string> {
   value: T;
 }
 
-function NavItem<T extends string>({
+const NavItem = <T extends string>({
   active,
   collapsed,
   count,
@@ -100,7 +100,7 @@ function NavItem<T extends string>({
   onSelect,
   suffix,
   value,
-}: NavItemProps<T>) {
+}: NavItemProps<T>) => {
   const countLabel = count && count > 0 ? `, ${count} ${suffix}` : "";
 
   const button = (
@@ -153,7 +153,7 @@ function NavItem<T extends string>({
       </TooltipContent>
     </Tooltip>
   );
-}
+};
 
 interface NavListProps<T extends string> extends SidebarNavProps<T> {
   collapsed: boolean;

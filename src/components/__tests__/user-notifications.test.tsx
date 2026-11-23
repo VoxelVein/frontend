@@ -201,6 +201,7 @@ describe(NotificationsBody, () => {
       ...APPROVED,
       createdAt: new Date(NOW - 5 * 60 * 1000).toISOString(),
     };
+
     openMenu({ items: [recent], unread: 1 });
 
     // The question a reader has is "is this new?", which a date only answers by
@@ -356,6 +357,7 @@ describe(NotificationsBody, () => {
       ...APPROVED,
       id: `notification-${index}`,
     }));
+
     openMenu({ items: many, unread: 1 });
 
     // A long list has to scroll rather than growing the panel without bound.

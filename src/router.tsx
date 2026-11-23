@@ -17,13 +17,13 @@ export const getRouter = () => {
   });
 
   const router = createTanStackRouter({
+    routeTree,
+
     defaultErrorComponent: RouteError,
 
     defaultPreload: "intent",
 
     defaultPreloadStaleTime: 0,
-
-    routeTree,
 
     scrollRestoration: true,
   });

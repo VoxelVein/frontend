@@ -20,7 +20,9 @@ export const platformLabel = (id: string | null | undefined): string => {
   if (!id) {
     return "General download";
   }
+
   const known = MODPACK_PLATFORMS.find((platform) => platform.id === id);
+
   return (
     known?.label ??
     id.replaceAll("-", " ").replaceAll(/\b\w/gu, (c) => c.toUpperCase())

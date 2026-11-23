@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ShadersPage = () => {
   const data = useLoaderData({ from: "/shaders/" });
+
   return <ProjectBrowser type="shader" {...data} />;
 };
 

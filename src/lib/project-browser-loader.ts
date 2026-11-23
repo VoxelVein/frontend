@@ -51,6 +51,7 @@ export const loadProjectBrowser = async (
 ): Promise<ProjectBrowserData> => {
   const params = defaultSearchParams(type);
   const cached = projectSearchCache.get(params);
+
   if (cached) {
     return { initial: cached, initialError: null };
   }
@@ -58,6 +59,7 @@ export const loadProjectBrowser = async (
   try {
     const data = await searchProjects({ data: params });
     projectSearchCache.set(params, data);
+
     return { initial: data, initialError: null };
   } catch (loaderError) {
     return { initial: null, initialError: toSearchErrorMessage(loaderError) };

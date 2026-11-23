@@ -113,6 +113,7 @@ describe("foreign key indexes", () => {
         )
       )
     );
+
     const orphaned = leadingIndexColumns.filter((key) => !known.has(key));
 
     expect(orphaned).toStrictEqual([]);

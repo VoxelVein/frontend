@@ -12,12 +12,15 @@ import { cn } from "@/lib/utils";
 // React Bits demo preset: spring (damping 30, stiffness 400), 25ms stagger
 // from the last character, 2s per text.
 const TRANSITION_MS = 400;
+
 const SPRING_EASING = springEasingCss({
   damping: 30,
   durationMs: TRANSITION_MS,
   stiffness: 400,
 });
+
 const DEFAULT_ROTATION_INTERVAL_MS = 2000;
+
 // By this point in the transition the exiting spring has cleared the clip.
 const EXIT_VISIBLE_MS = TRANSITION_MS / 2;
 const DEFAULT_STAGGER_MS = 25;
@@ -57,10 +60,12 @@ const splitText = (text: string): SplitText => {
 
   for (const [wordIndex, part] of parts.entries()) {
     const glyphs: Glyph[] = [];
+
     for (const [charIndex, char] of splitGraphemes(part).entries()) {
-      glyphs.push({ char, id: `${wordIndex}-${charIndex}`, order });
+      glyphs.push({ id: `${wordIndex}-${charIndex}`, char, order });
       order += 1;
     }
+
     words.push({
       glyphs,
       id: String(wordIndex),
@@ -117,42 +122,58 @@ const RotatingText = ({
   // too, so the observer covers that as well.
   useLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container) {
-      return;
+    let observer: ResizeObserver | null = null;
+
+    if (container) {
+      const measure = () => {
+        setWidths(sizerRefs.current.map((sizer) => sizer?.offsetWidth ?? 0));
+      };
+
+      measure();
+      observer = new ResizeObserver(measure);
+      observer.observe(container);
     }
-    const measure = () => {
-      setWidths(sizerRefs.current.map((sizer) => sizer?.offsetWidth ?? 0));
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(container);
-    return () => observer.disconnect();
+
+    return () => observer?.disconnect();
   }, []);
 
   // Each swap clears isExiting, which re-arms the timer for the next text.
   useEffect(() => {
-    if (paused || isExiting || texts.length < 2) {
-      return;
+    let exitTimer: ReturnType<typeof setTimeout> | null = null;
+
+    if (!(paused || isExiting || texts.length < 2)) {
+      exitTimer = setTimeout(() => setIsExiting(true), rotationInterval);
     }
-    const exitTimer = setTimeout(() => setIsExiting(true), rotationInterval);
-    return () => clearTimeout(exitTimer);
+
+    return () => {
+      if (exitTimer !== null) {
+        clearTimeout(exitTimer);
+      }
+    };
   }, [isExiting, paused, rotationInterval, texts.length]);
 
   useEffect(() => {
-    if (!isExiting) {
-      return;
+    let swapTimer: ReturnType<typeof setTimeout> | null = null;
+
+    if (isExiting) {
+      swapTimer = setTimeout(() => {
+        setIndex((current) => (current + 1) % texts.length);
+        setIsExiting(false);
+      }, exitDurationMs);
     }
-    const swapTimer = setTimeout(() => {
-      setIndex((current) => (current + 1) % texts.length);
-      setIsExiting(false);
-    }, exitDurationMs);
-    return () => clearTimeout(swapTimer);
+
+    return () => {
+      if (swapTimer !== null) {
+        clearTimeout(swapTimer);
+      }
+    };
   }, [exitDurationMs, isExiting, texts.length]);
 
   // Until the texts are measured (server render, first paint) the pill spans
   // the widest text, so the light-on-primary text stays readable. Going from
   // no clip-path to an inset is not interpolated, so it does not animate.
   const width = widths[index];
+
   const pillStyle: CSSProperties = {
     clipPath:
       width === undefined

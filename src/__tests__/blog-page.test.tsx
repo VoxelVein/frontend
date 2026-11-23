@@ -64,6 +64,7 @@ vi.mock("@/lib/auth-client", () => ({
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The route component reads loader data through the router and PostCard renders a router Link; stubbing both avoids standing up a router in this test
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute; the cast only widens the type for the mock factory
   return {
     ...(actual as object),
@@ -93,6 +94,7 @@ const chooseCategory = (name: string | RegExp) => {
 };
 
 const BlogPage = Route.options.component;
+
 if (!BlogPage) {
   throw new Error("BlogPage component not found");
 }
@@ -254,12 +256,14 @@ describe("BlogPage category filter", () => {
     id: "post-eng",
     title: "Shipping the API",
   };
+
   const security: PostSummary = {
     ...postSummary,
     category: "security",
     id: "post-sec",
     title: "Rotating a leaked key",
   };
+
   const uncategorised: PostSummary = {
     ...postSummary,
     category: null,

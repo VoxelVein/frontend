@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getSession } from "@/lib/auth.functions";
+import { formatDate } from "@/lib/format";
 import type { TicketRow, TicketThread } from "@/lib/tickets.functions";
 import {
   closeTicket,
@@ -41,6 +42,7 @@ const SupportPage = () => {
   const load = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
     try {
       setTickets(await listMyTickets());
     } catch (caughtError) {
@@ -50,16 +52,20 @@ const SupportPage = () => {
           : "Could not load tickets."
       );
     }
+
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       setIsLoading(true);
       setError(null);
+
       try {
         const next = await listMyTickets();
+
         if (isCurrent) {
           setTickets(next);
         }
@@ -72,11 +78,14 @@ const SupportPage = () => {
           );
         }
       }
+
       if (isCurrent) {
         setIsLoading(false);
       }
     };
+
     loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -86,6 +95,7 @@ const SupportPage = () => {
 
   const handleCreate = async () => {
     setIsSubmitting(true);
+
     try {
       const created = await openTicket({
         data: {
@@ -97,6 +107,7 @@ const SupportPage = () => {
             .filter(Boolean),
         },
       });
+
       setIsCreateOpen(false);
       setSubject("");
       setMessage("");
@@ -111,6 +122,7 @@ const SupportPage = () => {
           : "Could not open ticket."
       );
     }
+
     setIsSubmitting(false);
   };
 
@@ -118,6 +130,7 @@ const SupportPage = () => {
     setSelectedId(id);
     setThread(null);
     setReply("");
+
     try {
       setThread(await getTicketThread({ data: { ticketId: id } }));
     } catch (caughtError) {
@@ -133,7 +146,9 @@ const SupportPage = () => {
     if (!selectedId || !reply.trim()) {
       return;
     }
+
     setIsMutating(true);
+
     try {
       await replyToTicket({
         data: { body: reply.trim(), ticketId: selectedId },
@@ -148,6 +163,7 @@ const SupportPage = () => {
           : "Could not send reply."
       );
     }
+
     setIsMutating(false);
   };
 
@@ -155,7 +171,9 @@ const SupportPage = () => {
     if (!selectedId) {
       return;
     }
+
     setIsMutating(true);
+
     try {
       await closeTicket({ data: { ticketId: selectedId } });
       setThread(await getTicketThread({ data: { ticketId: selectedId } }));
@@ -167,6 +185,7 @@ const SupportPage = () => {
           : "Could not close ticket."
       );
     }
+
     setIsMutating(false);
   };
 
@@ -199,6 +218,7 @@ const SupportPage = () => {
             </div>
           );
         }
+
         if (error) {
           return (
             <p className="text-muted-foreground mt-6 text-sm">
@@ -215,6 +235,7 @@ const SupportPage = () => {
             </p>
           );
         }
+
         if (tickets.length === 0) {
           return (
             <p className="text-muted-foreground mt-6 text-sm">
@@ -222,6 +243,7 @@ const SupportPage = () => {
             </p>
           );
         }
+
         return (
           <div className="mt-6 grid gap-3">
             {tickets.map((ticket) => (
@@ -242,7 +264,7 @@ const SupportPage = () => {
                   </span>
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  {new Date(ticket.updatedAt).toLocaleDateString()}
+                  {formatDate(new Date(ticket.updatedAt).toISOString())}
                 </span>
               </button>
             ))}
@@ -428,9 +450,11 @@ const SupportPage = () => {
 export const Route = createFileRoute("/support")({
   beforeLoad: async () => {
     const session = await getSession();
+
     if (!session) {
       throw redirect({ to: "/login" });
     }
+
     return { session };
   },
   component: SupportPage,

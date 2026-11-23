@@ -9,6 +9,7 @@ import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const PluginsPage = () => {
   const data = useLoaderData({ from: "/plugins/" });
+
   return <ProjectBrowser type="plugin" {...data} />;
 };
 

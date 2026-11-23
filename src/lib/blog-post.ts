@@ -13,8 +13,10 @@ import { getPost } from "@/lib/posts.functions";
  */
 export const loadPost = async (slug: string): Promise<Post> => {
   const post = await getPost({ data: { slug } });
+
   if (!post) {
     throw notFound();
   }
+
   return post;
 };

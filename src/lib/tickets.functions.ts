@@ -51,9 +51,11 @@ const TICKET_NOT_FOUND = "Ticket not found.";
 
 const requireMember = async (): Promise<StaffSession> => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
+
   if (!session) {
     throw new Error("Sign in to use support tickets.");
   }
+
   // SAFETY: `auth.api.getSession` returns a session compatible with StaffSession.
   return session as StaffSession;
 };
@@ -72,11 +74,13 @@ export const openTicket = createServerFn({ method: "POST" })
       data: { message: string; subject: string; tags?: string[] };
     }) => {
       const session = await requireMember();
+
       const quota = await consumeServerLimit(
         "ticket-open",
         `user:${session.user.id}`,
         RATE_LIMITS.ticketOpen
       );
+
       if (quota) {
         throw new Error(RATE_LIMIT_MESSAGE);
       }
@@ -90,6 +94,7 @@ export const openTicket = createServerFn({ method: "POST" })
             eq(supportTickets.status, OPEN_STATUS)
           )
         );
+
       if ((row?.total ?? 0) >= 5) {
         throw new Error(
           "You already have 5 open tickets. Close one before opening another."
@@ -103,22 +108,27 @@ export const openTicket = createServerFn({ method: "POST" })
             subject: data.subject.trim(),
             tags: (() => {
               const normalized: string[] = [];
+
               for (const tag of data.tags ?? []) {
                 const value = tag.trim();
+
                 if (value) {
                   normalized.push(value);
                 }
               }
+
               return normalized;
             })(),
             userId: session.user.id,
           })
           .returning();
+
         await tx.insert(supportTicketMessages).values({
           authorUserId: session.user.id,
           body: data.message.trim(),
           ticketId: inserted.id,
         });
+
         return inserted;
       });
 
@@ -129,6 +139,7 @@ export const openTicket = createServerFn({ method: "POST" })
 export const listMyTickets = createServerFn({ method: "GET" }).handler(
   async (): Promise<TicketRow[]> => {
     const session = await requireMember();
+
     const rows = await db
       .select({
         createdAt: supportTickets.createdAt,
@@ -189,10 +200,13 @@ export const listAllTickets = createServerFn({ method: "GET" })
       const status = data?.status;
       const tag = data?.tag?.trim();
       const conditions = [];
+
       if (status === OPEN_STATUS || status === "closed") {
         conditions.push(eq(supportTickets.status, status));
       }
+
       const where = conditions.length > 0 ? and(...conditions) : undefined;
+
       const rows = await db
         .select({
           createdAt: supportTickets.createdAt,
@@ -218,6 +232,7 @@ export const listAllTickets = createServerFn({ method: "GET" })
         .orderBy(desc(supportTickets.updatedAt));
 
       const normalized = (tag ?? "").toLowerCase();
+
       const mapped = rows.map((row) => ({
         createdAt: row.createdAt,
         id: row.id,
@@ -231,9 +246,11 @@ export const listAllTickets = createServerFn({ method: "GET" })
         tags: row.tags ?? [],
         updatedAt: row.updatedAt,
       }));
+
       if (!normalized) {
         return mapped;
       }
+
       return mapped.filter((ticket) =>
         ticket.tags.some((tagName) =>
           tagName.toLowerCase().includes(normalized)
@@ -249,17 +266,21 @@ export const getTicketThread = createServerFn({ method: "GET" })
   .handler(async ({ data }: { data: { ticketId: string } }) => {
     const session = await requireMember();
     const staff = isStaff(session.user.role);
+
     const [ticket] = await db
       .select()
       .from(supportTickets)
       .where(eq(supportTickets.id, data.ticketId))
       .limit(1);
+
     if (!ticket) {
       throw new Error(TICKET_NOT_FOUND);
     }
+
     if (!staff && ticket.userId !== session.user.id) {
       throw new Error("You cannot view this ticket.");
     }
+
     const rows = await db
       .select({
         authorId: supportTicketMessages.authorUserId,
@@ -276,6 +297,7 @@ export const getTicketThread = createServerFn({ method: "GET" })
       .orderBy(asc(supportTicketMessages.createdAt));
 
     const messages: TicketMessageRow[] = [];
+
     for (const row of rows) {
       if (staff || !row.internal) {
         messages.push({
@@ -291,8 +313,8 @@ export const getTicketThread = createServerFn({ method: "GET" })
     }
 
     return {
-      canReply: staff || ticket.status === OPEN_STATUS,
       messages,
+      canReply: staff || ticket.status === OPEN_STATUS,
       ticket: {
         createdAt: ticket.createdAt,
         id: ticket.id,
@@ -312,17 +334,21 @@ export const replyToTicket = createServerFn({ method: "POST" })
   .handler(async ({ data }: { data: { body: string; ticketId: string } }) => {
     const session = await requireMember();
     const staff = isStaff(session.user.role);
+
     const [ticket] = await db
       .select()
       .from(supportTickets)
       .where(eq(supportTickets.id, data.ticketId))
       .limit(1);
+
     if (!ticket) {
       throw new Error(TICKET_NOT_FOUND);
     }
+
     if (!staff && ticket.userId !== session.user.id) {
       throw new Error("You cannot reply to this ticket.");
     }
+
     if (!staff && ticket.status === "closed") {
       throw new Error("This ticket is closed.");
     }
@@ -332,6 +358,7 @@ export const replyToTicket = createServerFn({ method: "POST" })
       `user:${session.user.id}`,
       RATE_LIMITS.ticketReply
     );
+
     if (quota) {
       throw new Error(RATE_LIMIT_MESSAGE);
     }
@@ -361,21 +388,26 @@ export const closeTicket = createServerFn({ method: "POST" })
   .handler(async ({ data }: { data: { ticketId: string } }) => {
     const session = await requireMember();
     const staff = isStaff(session.user.role);
+
     const [ticket] = await db
       .select()
       .from(supportTickets)
       .where(eq(supportTickets.id, data.ticketId))
       .limit(1);
+
     if (!ticket) {
       throw new Error(TICKET_NOT_FOUND);
     }
+
     if (!staff && ticket.userId !== session.user.id) {
       throw new Error("You cannot close this ticket.");
     }
+
     await db
       .update(supportTickets)
       .set({ closedAt: new Date(), status: "closed", updatedAt: new Date() })
       .where(eq(supportTickets.id, data.ticketId));
+
     return { ok: true };
   });
 
@@ -390,17 +422,21 @@ export const updateTicketTags = createServerFn({ method: "POST" })
       .set({
         tags: (() => {
           const normalized: string[] = [];
+
           for (const tag of data.tags) {
             const value = tag.trim();
+
             if (value) {
               normalized.push(value);
             }
           }
+
           return normalized;
         })(),
         updatedAt: new Date(),
       })
       .where(eq(supportTickets.id, data.ticketId));
+
     return { ok: true };
   });
 

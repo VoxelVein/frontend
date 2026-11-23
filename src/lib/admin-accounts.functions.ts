@@ -38,6 +38,7 @@ const notificationIdSchema = object({ id: pipe(string(), uuid()) });
 export const listPendingDeletions = createServerFn({ method: "GET" }).handler(
   async (): Promise<PendingDeletion[]> => {
     await requireAccountCapability("manageDeletions");
+
     return listPendingDeletionsFromDb();
   }
 );
@@ -65,11 +66,13 @@ export const listAdminNotifications = createServerFn({
   method: "GET",
 }).handler(async (): Promise<AdminNotification[]> => {
   await requireAccountCapability("manageNotifications");
+
   const rows = await db
     .select()
     .from(adminNotifications)
     .orderBy(desc(adminNotifications.createdAt))
     .limit(NOTIFICATION_LIMIT);
+
   return rows.map((row) => ({
     ...row,
     createdAt: row.createdAt.toISOString(),
@@ -81,10 +84,12 @@ export const countUnreadAdminNotifications = createServerFn({
   method: "GET",
 }).handler(async (): Promise<number> => {
   await requireAccountCapability("manageNotifications");
+
   const [row] = await db
     .select({ unread: count() })
     .from(adminNotifications)
     .where(isNull(adminNotifications.readAt));
+
   return row?.unread ?? 0;
 });
 

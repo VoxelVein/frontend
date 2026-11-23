@@ -29,8 +29,8 @@ interface ImageRow {
 const toView = ({ height, id, width }: ImageRow): ProjectImageView => ({
   height,
   id,
-  url: imageUrl(id),
   width,
+  url: imageUrl(id),
 });
 
 /**
@@ -43,6 +43,7 @@ const toView = ({ height, id, width }: ImageRow): ProjectImageView => ({
 export const toProjectImages = (rows: ImageRow[]): ProjectImagesView => {
   const gallery: ProjectImageView[] = [];
   let icon: ProjectImageView | null = null;
+
   for (const row of rows) {
     if (row.kind === "icon") {
       // A project has at most one icon, so the first one wins and a corrupt
@@ -52,6 +53,7 @@ export const toProjectImages = (rows: ImageRow[]): ProjectImagesView => {
       gallery.push(toView(row));
     }
   }
+
   return { gallery, icon };
 };
 
@@ -69,5 +71,6 @@ export const getProjectImages = async (
     .from(projectImages)
     .where(eq(projectImages.projectId, projectId))
     .orderBy(asc(projectImages.createdAt));
+
   return toProjectImages(rows);
 };

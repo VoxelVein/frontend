@@ -29,6 +29,7 @@ describe(resolveAdminTab, () => {
 
   it("never returns a tab outside the panel", () => {
     const values = ADMIN_TABS.map((tab) => tab.value);
+
     for (const role of ["user", "moderator", "admin"]) {
       for (const requested of [...values, "nonsense"]) {
         expect(values).toContain(resolveAdminTab(requested, role));

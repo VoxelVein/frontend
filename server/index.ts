@@ -8,6 +8,7 @@ import { healthRoute } from "./routes/health";
 import { webhooksRoute } from "./routes/webhooks";
 
 const port = Number(process.env.API_PORT ?? 3002);
+
 const allowedOrigins = (
   process.env.CORS_ORIGIN ?? "http://localhost:3000,http://localhost:3001"
 )

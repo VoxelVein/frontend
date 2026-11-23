@@ -41,12 +41,12 @@ const summary = (id: string, title: string): PostSummary => ({
   category: null,
   createdAt: "2026-01-15T10:30:00.000Z",
   excerpt: null,
-  id,
   preview: `Preview of ${title}.`,
   published: true,
   slug: id,
-  title,
   updatedAt: "2026-01-15T10:30:00.000Z",
+  id,
+  title,
 });
 
 /**
@@ -198,6 +198,7 @@ describe(useAdminPosts, () => {
     const inFlightRefresh = new Promise<PostSummary[]>((resolve) => {
       heldRefresh.resolve = resolve;
     });
+
     listPostsMock.mockReturnValueOnce(inFlightRefresh);
 
     await settle(POLL_INTERVAL_MS);
@@ -224,6 +225,7 @@ describe(useAdminPosts, () => {
     const inFlightRefresh = new Promise<PostSummary[]>((resolve) => {
       heldRefresh.resolve = resolve;
     });
+
     listPostsMock.mockReturnValueOnce(inFlightRefresh);
 
     await settle(POLL_INTERVAL_MS);

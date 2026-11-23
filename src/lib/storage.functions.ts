@@ -10,6 +10,7 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
   async (): Promise<StorageUsage> => {
     // Site-wide usage, so it stays admin-only rather than moderator-readable.
     await requireCapability("manageStorage");
+
     const {
       avatarBytes,
       avatarCount,
@@ -19,6 +20,7 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
       imageCount,
       usedBytes,
     } = await getUsedBytes();
+
     return {
       avatarBytes,
       avatarCount,
@@ -26,8 +28,8 @@ export const getStorageUsage = createServerFn({ method: "GET" }).handler(
       fileCount,
       imageBytes,
       imageCount,
-      quotaBytes: loadStorageConfig().quotaBytes,
       usedBytes,
+      quotaBytes: loadStorageConfig().quotaBytes,
     };
   }
 );
@@ -50,6 +52,7 @@ export const storageIsConfigured = createServerFn({
 }).handler((): boolean => {
   try {
     loadStorageConfig();
+
     return true;
   } catch {
     // Every failure here is a misconfiguration as far as the UI is concerned:

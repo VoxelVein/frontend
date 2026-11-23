@@ -32,8 +32,8 @@ const author = (
   name: string,
   username: string | null
 ): PostAuthor => ({
-  id,
   image: null,
+  id,
   name,
   username,
 });

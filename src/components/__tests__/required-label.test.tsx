@@ -9,6 +9,7 @@ describe("required field marker", () => {
     render(<FormField id="name" label="Name" required />);
 
     const label = screen.getByText("Name");
+
     const marker = label.parentElement?.querySelector(
       'span[aria-hidden="true"]'
     );
@@ -20,6 +21,7 @@ describe("required field marker", () => {
     render(<FormField id="tags" label="Tags" />);
 
     const label = screen.getByText("Tags");
+
     const marker = label.parentElement?.querySelector(
       'span[aria-hidden="true"]'
     );
@@ -31,6 +33,7 @@ describe("required field marker", () => {
     render(<FormTextarea id="summary" label="Summary" required />);
 
     const label = screen.getByText("Summary");
+
     const marker = label.parentElement?.querySelector(
       'span[aria-hidden="true"]'
     );

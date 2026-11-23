@@ -79,6 +79,7 @@ export const Route = createFileRoute("/")({
     if (latestPostsResult.status === "rejected") {
       console.error("Failed to load latest posts:", latestPostsResult.reason);
     }
+
     if (trendingResult.status === "rejected") {
       console.error("Failed to load trending projects:", trendingResult.reason);
     }

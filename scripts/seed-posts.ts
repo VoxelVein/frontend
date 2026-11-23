@@ -24,11 +24,13 @@ const findAuthorId = async (): Promise<string> => {
     .from(users)
     .where(eq(users.role, "admin"))
     .limit(1);
+
   if (!admin) {
     throw new Error(
       "No admin user found. Sign up, then run `pnpm db:seed:admin <email>`."
     );
   }
+
   return admin.id;
 };
 
@@ -40,8 +42,8 @@ const seedPost = async (demo: DemoPost, authorId: string, now: Date) => {
   const [row] = await db
     .insert(posts)
     .values({
-      content: demo.content,
       createdAt,
+      content: demo.content,
       excerpt: demo.excerpt,
       published: true,
       slug: demo.slug,
@@ -72,6 +74,7 @@ const seedPosts = async () => {
         )
       ),
   ]);
+
   const existingSlugs = new Set(existing.map((row) => row.slug));
   const missing = DEMO_POSTS.filter((demo) => !existingSlugs.has(demo.slug));
   const now = new Date();

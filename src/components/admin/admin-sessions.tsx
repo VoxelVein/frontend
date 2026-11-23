@@ -93,12 +93,15 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
     case "SEARCH_START": {
       return { ...state, isSearching: true };
     }
+
     case "LOAD_SUCCESS": {
       return { error: null, isSearching: false, users: action.users };
     }
+
     case "LOAD_ERROR": {
       return { ...state, error: action.error, isSearching: false };
     }
+
     default: {
       return state;
     }
@@ -115,9 +118,11 @@ const sessionsReducer = (
       // cleared rather than carried over.
       return { ...state, error: null, isLoading: true };
     }
+
     case "LOAD_START": {
       return { ...state, error: null, isLoading: true };
     }
+
     case "LOAD_SUCCESS": {
       // Spread so `errorCount` survives: dropping it would make the next
       // failure compute `undefined + 1` (NaN), and React compares effect deps
@@ -130,6 +135,7 @@ const sessionsReducer = (
         sessions: action.sessions,
       };
     }
+
     case "LOAD_ERROR": {
       return {
         ...state,
@@ -139,6 +145,7 @@ const sessionsReducer = (
         isLoading: false,
       };
     }
+
     case "REVOKE_SUCCESS": {
       return {
         ...state,
@@ -148,6 +155,7 @@ const sessionsReducer = (
         ),
       };
     }
+
     case "REVOKE_ERROR": {
       return {
         ...state,
@@ -156,9 +164,11 @@ const sessionsReducer = (
         failedUserId: action.userId,
       };
     }
+
     case "REVOKE_ALL_SUCCESS": {
       return { ...state, error: null, sessions: [] };
     }
+
     default: {
       return state;
     }
@@ -173,6 +183,7 @@ const sessionsReducer = (
  */
 const userLabel = (user: AdminUser): string => {
   const handle = user.displayUsername ?? user.username;
+
   return handle
     ? `${user.name} (@${handle}) · ${user.email}`
     : `${user.name} · ${user.email}`;
@@ -275,10 +286,12 @@ const AdminSessions = () => {
     isSearching: false,
     users: [],
   });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [isRevokingAll, setIsRevokingAll] = useState(false);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
+
   const [state, dispatch] = useReducer(sessionsReducer, {
     error: null,
     errorCount: 0,
@@ -341,6 +354,7 @@ const AdminSessions = () => {
         error: loadError.message ?? "Could not load users.",
         type: "LOAD_ERROR",
       });
+
       return;
     }
 
@@ -369,6 +383,7 @@ const AdminSessions = () => {
         type: "LOAD_ERROR",
         userId,
       });
+
       return;
     }
 
@@ -398,9 +413,11 @@ const AdminSessions = () => {
 
   const handleRevoke = async (token: string) => {
     setRevokingToken(token);
+
     const { error: revokeError } = await authClient.admin.revokeUserSession({
       sessionToken: token,
     });
+
     setRevokingToken(null);
 
     if (revokeError) {
@@ -409,6 +426,7 @@ const AdminSessions = () => {
         type: "REVOKE_ERROR",
         userId: selectedUserId,
       });
+
       return;
     }
 
@@ -425,9 +443,11 @@ const AdminSessions = () => {
    */
   const handleRevokeAll = async () => {
     setIsRevokingAll(true);
+
     const { error: revokeError } = await authClient.admin.revokeUserSessions({
       userId: selectedUserId,
     });
+
     setIsRevokingAll(false);
 
     if (revokeError) {
@@ -436,6 +456,7 @@ const AdminSessions = () => {
         type: "REVOKE_ERROR",
         userId: selectedUserId,
       });
+
       return;
     }
 
@@ -606,6 +627,7 @@ const AdminSessions = () => {
             <ul aria-label="Matching users" className="mt-3 grid gap-1">
               {usersState.users.map((user) => {
                 const isSelected = user.id === selectedUserId;
+
                 return (
                   <li key={user.id}>
                     <button

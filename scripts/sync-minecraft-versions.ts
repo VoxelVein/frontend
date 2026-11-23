@@ -13,9 +13,11 @@ import { fileURLToPath } from "node:url";
 
 const MANIFEST_URL =
   "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+
 const OUTPUT = fileURLToPath(
   new URL("../src/lib/minecraft-version-manifest.ts", import.meta.url)
 );
+
 const KEPT_KINDS = new Set(["release", "snapshot"]);
 
 interface ManifestEntry {
@@ -37,16 +39,20 @@ const main = async () => {
   const response = await fetch(MANIFEST_URL, {
     signal: AbortSignal.timeout(15_000),
   });
+
   if (!response.ok) {
     throw new Error(`Mojang manifest request failed (${response.status}).`);
   }
+
   const manifest: unknown = await response.json();
+
   if (!isManifest(manifest)) {
     throw new Error("Mojang manifest has an unexpected shape.");
   }
 
   // Mojang lists versions newest first; keep that order.
   const rows: string[] = [];
+
   for (const entry of manifest.versions) {
     if (KEPT_KINDS.has(entry.type)) {
       const kind = entry.type === "release" ? "R" : "S";

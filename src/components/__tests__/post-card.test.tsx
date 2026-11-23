@@ -7,6 +7,7 @@ import { PostCard } from "@/components/blog/post-card";
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The card renders a router Link; a stub keeps this test on the card's own behaviour instead of standing up a router
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute; the cast only widens the type for the mock factory
   return {
     ...(actual as object),

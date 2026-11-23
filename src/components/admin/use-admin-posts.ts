@@ -32,22 +32,26 @@ type PostsAction =
   | { type: "DELETE_SUCCESS"; id: string }
   | { type: "ERROR"; error: string };
 
-const initialState: PostsState = {
+// Built per mount, not once at module load: a frozen timestamp would make
+// every SSR request report the same "just loaded" instant.
+const createInitialState = (): PostsState => ({
   error: null,
   isInitialLoading: true,
   isRefreshing: false,
   loadedAt: Date.now(),
   posts: [],
-};
+});
 
 const postsReducer = (state: PostsState, action: PostsAction): PostsState => {
   switch (action.type) {
     case "LOAD_START": {
       return { ...state, error: null, isInitialLoading: true };
     }
+
     case "REFRESH_START": {
       return { ...state, isRefreshing: true };
     }
+
     case "LOAD_SUCCESS": {
       return {
         ...state,
@@ -58,6 +62,7 @@ const postsReducer = (state: PostsState, action: PostsAction): PostsState => {
         loadedAt: Date.now(),
       };
     }
+
     case "DELETE_SUCCESS": {
       return {
         ...state,
@@ -66,9 +71,11 @@ const postsReducer = (state: PostsState, action: PostsAction): PostsState => {
         loadedAt: Date.now(),
       };
     }
+
     case "ERROR": {
       return { ...state, error: action.error };
     }
+
     default: {
       return state;
     }
@@ -137,7 +144,12 @@ export interface UseAdminPostsResult {
  * landed while its request was in flight.
  */
 export const useAdminPosts = (): UseAdminPostsResult => {
-  const [state, dispatch] = useReducer(postsReducer, initialState);
+  const [state, dispatch] = useReducer(
+    postsReducer,
+    undefined,
+    createInitialState
+  );
+
   const [isMutating, setIsMutating] = useState(false);
   const loadInFlightRef = useRef(false);
   /** Bumped by every mutation so a concurrent load can detect it went stale. */
@@ -238,16 +250,16 @@ export const useAdminPosts = (): UseAdminPostsResult => {
   };
 
   return {
-    error: error ?? searchError,
     isInitialLoading,
-    loadedAt: state.loadedAt,
     isMutating,
     isRefreshing,
     isSearching,
     onQueryChange,
-    posts: isActive ? hits : posts,
     query,
     removePost,
+    error: error ?? searchError,
+    loadedAt: state.loadedAt,
+    posts: isActive ? hits : posts,
     reportError: (loadError: string) =>
       dispatch({ error: loadError, type: "ERROR" }),
     searchAvailable: isAvailable,

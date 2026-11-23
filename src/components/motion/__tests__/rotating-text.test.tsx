@@ -5,6 +5,7 @@ import { RotatingText } from "@/components/motion/rotating-text";
 
 const TEXTS = ["Alpha", "Beta"];
 const INTERVAL_MS = 1000;
+
 // One 400ms transition with no stagger, plus slack.
 const EXIT_MS = 500;
 

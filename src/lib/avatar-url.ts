@@ -88,6 +88,7 @@ const parseAvatarUrl = (
   }
 
   let parsed: URL;
+
   try {
     parsed = new URL(trimmed);
   } catch {

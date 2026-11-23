@@ -10,11 +10,13 @@ type Consent = "accepted" | "declined";
 
 const subscribe = (onStoreChange: () => void) => {
   window.addEventListener(CONSENT_EVENT, onStoreChange);
+
   return () => window.removeEventListener(CONSENT_EVENT, onStoreChange);
 };
 
 const getSnapshot = (): boolean => {
   const stored = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+
   return stored === "accepted" || stored === "declined";
 };
 

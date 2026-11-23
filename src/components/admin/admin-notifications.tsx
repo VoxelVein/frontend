@@ -119,6 +119,7 @@ const fetchNotifications = async (): Promise<ListState> => {
   try {
     // The server returns the inbox newest first.
     const rows = await listAdminNotifications();
+
     return { error: null, isLoading: false, loadedAt: Date.now(), rows };
   } catch (error) {
     return {
@@ -145,13 +146,17 @@ export const AdminNotifications = ({
 
   useEffect(() => {
     let isCurrent = true;
+
     const loadOnMount = async () => {
       const next = await fetchNotifications();
+
       if (isCurrent) {
         setList(next);
       }
     };
+
     void loadOnMount();
+
     return () => {
       isCurrent = false;
     };
@@ -165,6 +170,7 @@ export const AdminNotifications = ({
 
   const markRead = async (id: string) => {
     setIsMutating(true);
+
     try {
       await markAdminNotificationRead({ data: { id } });
       const readAt = new Date().toISOString();
@@ -180,11 +186,13 @@ export const AdminNotifications = ({
         errorMessage(error, "Could not mark the notification as read.")
       );
     }
+
     setIsMutating(false);
   };
 
   const markAllRead = async () => {
     setIsMutating(true);
+
     try {
       await markAllAdminNotificationsRead();
       const readAt = new Date().toISOString();
@@ -199,6 +207,7 @@ export const AdminNotifications = ({
     } catch (error) {
       toast.error(errorMessage(error, "Could not mark notifications as read."));
     }
+
     setIsMutating(false);
   };
 

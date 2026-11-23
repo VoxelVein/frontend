@@ -44,9 +44,11 @@ describe("project type registry", () => {
 
   it("gives every type a unique lowercase URL path", () => {
     const paths = PROJECT_TYPES.map((type) => PROJECT_TYPE_PATHS[type]);
+
     for (const path of paths) {
       expect(path, "URL path").toMatch(/^\/[a-z0-9-]+$/u);
     }
+
     expect(new Set(paths).size).toBe(PROJECT_TYPES.length);
   });
 
@@ -64,6 +66,7 @@ describe("project type registry", () => {
       if (!hasVersions(type)) {
         continue;
       }
+
       expect(
         ALLOWED_EXTENSIONS_BY_TYPE[type].length,
         `${type} allowed extensions`
@@ -73,6 +76,7 @@ describe("project type registry", () => {
 
   it("keys every registry by exactly the declared types", () => {
     const expected = new Set<string>(PROJECT_TYPES);
+
     for (const registry of [
       CATEGORIES_BY_TYPE,
       LOADERS_BY_TYPE,
@@ -109,6 +113,7 @@ describe("MINECRAFT_CATEGORIES against the type registry", () => {
         PROJECT_TYPE_LABELS[type].plural,
       ])
     );
+
     const actual = Object.fromEntries(
       MINECRAFT_CATEGORIES.map((entry) => [entry.href, entry.label])
     );

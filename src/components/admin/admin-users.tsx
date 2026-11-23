@@ -106,9 +106,11 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
     case "LOAD_START": {
       return { ...state, failure: null, isLoading: true };
     }
+
     case "LOAD_SUCCESS": {
       return { ...state, failure: null, isLoading: false, users: action.users };
     }
+
     case "LOAD_ERROR": {
       return {
         ...state,
@@ -117,6 +119,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         isLoading: false,
       };
     }
+
     case "ROLE_SUCCESS": {
       return {
         ...state,
@@ -126,6 +129,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         ),
       };
     }
+
     case "BAN_SUCCESS": {
       return {
         ...state,
@@ -135,6 +139,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         ),
       };
     }
+
     case "UNBAN_SUCCESS": {
       return {
         ...state,
@@ -146,6 +151,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         ),
       };
     }
+
     case "REMOVE_SUCCESS": {
       return {
         ...state,
@@ -153,6 +159,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         users: state.users.filter((user) => user.id !== action.userId),
       };
     }
+
     case "UPDATE_SUCCESS": {
       return {
         ...state,
@@ -169,6 +176,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         ),
       };
     }
+
     case "ACTION_ERROR": {
       return {
         ...state,
@@ -176,6 +184,7 @@ const usersReducer = (state: UsersState, action: UsersAction): UsersState => {
         failureId: state.failureId + 1,
       };
     }
+
     default: {
       return state;
     }
@@ -227,6 +236,7 @@ const UserStatusBadge = ({
       </span>
     );
   }
+
   if (isBanned) {
     return (
       <span
@@ -237,6 +247,7 @@ const UserStatusBadge = ({
       </span>
     );
   }
+
   return null;
 };
 
@@ -281,12 +292,14 @@ const BanAction = ({
       </Link>
     );
   }
+
   // The whole component is admin-only: a moderator reaching this panel gets a
   // read-only list, and Better Auth refuses `/admin/ban-user` for them anyway.
   // Checked here so the gate cannot be forgotten at a fourth call site.
   if (!canManageUsers) {
     return null;
   }
+
   if (isBanned) {
     // Not gated on `isBanInert`: unban has to work on your own row.
     return (
@@ -302,6 +315,7 @@ const BanAction = ({
       </Button>
     );
   }
+
   return (
     <Button
       type="button"
@@ -367,8 +381,10 @@ const AdminUserRow = ({
   onUnban,
 }: AdminUserRowProps) => {
   const isBanned = user.banned === true;
+
   const isPendingDeletion =
     isBanned && user.banReason === PENDING_DELETION_BAN_REASON;
+
   // Unban is the one action that leaves the admin able to act, so it stays
   // available on your own row: it is also the only way back if another admin
   // ever bans you.
@@ -506,9 +522,11 @@ const removalBlockReason = (
   if (target === null) {
     return null;
   }
+
   if (target.id === callerId) {
     return SELF_ACTION_HINT;
   }
+
   return canActOn(callerRole, target.role) ? null : RANK_ACTION_HINT;
 };
 
@@ -635,10 +653,12 @@ const AdminUsers = () => {
     isLoading: true,
     users: [],
   });
+
   const [pendingRole, setPendingRole] = useState<{
     userId: string;
     role: Role;
   } | null>(null);
+
   const [pendingBan, setPendingBan] = useState<AdminUser | null>(null);
   const [pendingRemove, setPendingRemove] = useState<AdminUser | null>(null);
   const [pendingEdit, setPendingEdit] = useState<AdminUser | null>(null);
@@ -687,6 +707,7 @@ const AdminUsers = () => {
         error: loadError.message ?? "Could not load users.",
         type: "LOAD_ERROR",
       });
+
       return;
     }
 
@@ -732,10 +753,11 @@ const AdminUsers = () => {
         error: roleError.message ?? "Could not change this user's role.",
         type: "ACTION_ERROR",
       });
+
       return;
     }
 
-    dispatch({ role, type: "ROLE_SUCCESS", userId });
+    dispatch({ role, userId, type: "ROLE_SUCCESS" });
   };
 
   const handleBan = async (user: AdminUser) => {
@@ -753,6 +775,7 @@ const AdminUsers = () => {
         error: banError.message ?? "Could not ban this user.",
         type: "ACTION_ERROR",
       });
+
       return;
     }
 
@@ -773,6 +796,7 @@ const AdminUsers = () => {
         error: unbanError.message ?? "Could not unban this user.",
         type: "ACTION_ERROR",
       });
+
       return;
     }
 
@@ -794,6 +818,7 @@ const AdminUsers = () => {
         error: removeError.message ?? "Could not delete this user.",
         type: "ACTION_ERROR",
       });
+
       return;
     }
 
@@ -804,6 +829,7 @@ const AdminUsers = () => {
     if (!pendingEdit) {
       return;
     }
+
     setIsMutating(true);
 
     const { error: updateError } = await authClient.admin.updateUser({
@@ -822,6 +848,7 @@ const AdminUsers = () => {
         error: updateError.message ?? "Could not update this user.",
         type: "ACTION_ERROR",
       });
+
       return;
     }
 
@@ -986,6 +1013,7 @@ const AdminUsers = () => {
             <div className="flex flex-wrap items-center gap-2">
               {(["all", ...ALL_ROLES] as const).map((role) => {
                 const isActive = roleFilter === role;
+
                 return (
                   <button
                     key={role}

@@ -33,13 +33,13 @@ const notification = (
   readAt: string | null
 ): AdminNotification => ({
   createdAt: "2026-09-20T10:00:00.000Z",
-  id,
   message: `${title} will lose its owner.`,
   projectId: null,
-  readAt,
-  title,
   type: "protected-project-orphaned",
   userId: null,
+  id,
+  readAt,
+  title,
 });
 
 describe(AdminNotifications, () => {

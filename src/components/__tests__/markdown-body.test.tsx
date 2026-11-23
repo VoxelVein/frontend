@@ -10,6 +10,7 @@ const SCRIPT_SCHEME = "javascript:";
 /** Renders a post body and hands back the container to inspect. */
 const renderMarkdown = (markdown: string): HTMLElement => {
   const { container } = render(<MarkdownBody>{markdown}</MarkdownBody>);
+
   return container;
 };
 
@@ -91,11 +92,15 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
       '<div onclick="steal()"><p onmouseover="steal()">hover</p><img src="/a.png" alt="a" onerror="steal()"></div>'
     );
 
-    const handlers = [...container.querySelectorAll("*")].flatMap((element) =>
-      [...element.attributes]
-        .filter((attribute) => attribute.name.startsWith("on"))
-        .map((attribute) => `${element.tagName}@${attribute.name}`)
-    );
+    const handlers: string[] = [];
+
+    for (const element of container.querySelectorAll("*")) {
+      for (const attribute of element.attributes) {
+        if (attribute.name.startsWith("on")) {
+          handlers.push(`${element.tagName}@${attribute.name}`);
+        }
+      }
+    }
 
     expect(handlers).toStrictEqual([]);
   });
@@ -118,6 +123,7 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
     const container = renderMarkdown(
       '<a href="/a" id="location" name="x" target="_blank" style="position:fixed">y</a>'
     );
+
     const anchor = container.querySelector("a");
 
     expect(anchor?.getAttribute("style")).toBeNull();

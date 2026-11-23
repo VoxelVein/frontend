@@ -55,47 +55,65 @@ export const VerifyStep = ({
   const [isBusy, setIsBusy] = useState(false);
 
   const isVerified = context.reauthenticatedUntil !== null;
+
   const linkedProviders = getConfiguredSocialProviders().filter((provider) =>
     accounts?.some((account) => account.providerId === provider.id)
   );
 
   const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     if (!password) {
       setPasswordError("Enter your password to continue.");
+
       return;
     }
+
     onVerified(password);
   };
 
   const handlePasskey = async () => {
     setActionError(null);
     setIsBusy(true);
-    const { error } = await authClient.signIn.passkey();
-    if (error) {
-      setIsBusy(false);
-      setActionError(error.message ?? "Could not verify with a passkey.");
-      return;
+
+    try {
+      const { error } = await authClient.signIn.passkey();
+
+      if (error) {
+        setActionError(error.message ?? "Could not verify with a passkey.");
+      } else {
+        authClient.$store.notify("$sessionSignal");
+        await onRefresh();
+      }
+    } catch {
+      setActionError("Could not verify with a passkey.");
     }
-    authClient.$store.notify("$sessionSignal");
-    await onRefresh();
+
     setIsBusy(false);
   };
 
   const handleSocial = async (providerId: SocialProviderId) => {
     setActionError(null);
     setIsBusy(true);
+
     if (userId) {
       writePendingDeletion({ keepProjectIds, userId });
     }
-    const { error } = await authClient.signIn.social({
-      callbackURL: REAUTH_CALLBACK_URL,
-      provider: providerId,
-    });
-    if (error) {
-      setIsBusy(false);
-      setActionError(error.message ?? "Could not start signing in.");
+
+    try {
+      const { error } = await authClient.signIn.social({
+        callbackURL: REAUTH_CALLBACK_URL,
+        provider: providerId,
+      });
+
+      if (error) {
+        setActionError(error.message ?? "Could not start signing in.");
+      }
+    } catch {
+      setActionError("Could not start signing in.");
     }
+
+    setIsBusy(false);
   };
 
   if (isDifferentAccount) {

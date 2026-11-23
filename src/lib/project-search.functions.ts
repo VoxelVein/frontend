@@ -72,6 +72,7 @@ export const searchProjects = createServerFn({ method: "GET" })
     if (!isProjectType(data.type)) {
       throw new Error("Unknown project type.");
     }
+
     return data;
   })
   .handler(async ({ data }): Promise<ProjectSearchResponse> => {
@@ -83,11 +84,13 @@ export const searchProjects = createServerFn({ method: "GET" })
       rateLimitIdentity(getRequestHeaders(), TRUST_PROXY),
       RATE_LIMITS.read
     );
+
     if (quota) {
       throw new Error(RATE_LIMIT_MESSAGE);
     }
 
     const loaders = new Set<string>(LOADERS_BY_TYPE[data.type]);
+
     // SAFETY: SORTS is a readonly tuple of strings; widening to readonly
     // string[] is safe for the membership check below.
     const sort = (SORTS as readonly string[]).includes(data.sort)

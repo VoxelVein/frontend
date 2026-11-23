@@ -26,12 +26,15 @@ describe("Minecraft version catalog", () => {
     const outOfOrder = MINECRAFT_VERSIONS.flatMap((version, index, all) => {
       const previous = all[index - 1];
       const now = version.fullRelease ? Date.parse(version.fullRelease) : null;
+
       const before = previous?.fullRelease
         ? Date.parse(previous.fullRelease)
         : null;
+
       if (now === null || before === null || before >= now) {
         return [];
       }
+
       return [`${version.id} is listed below the newer ${previous?.id}`];
     });
 
@@ -45,6 +48,7 @@ describe("Minecraft version catalog", () => {
       const missing = MINECRAFT_VERSIONS.filter(
         (version) => version.stable && !isGameVersion(version.id)
       ).map((version) => version.id);
+
       expect(missing).toStrictEqual([]);
     });
 

@@ -19,6 +19,7 @@ vi.mock("@/lib/posts.functions", () => ({
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Router context is unavailable in unit tests; string path avoids strict factory type-checking against the router module
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
+
   // SAFETY: The actual module is spread at runtime to preserve createFileRoute; the cast only widens the type for the mock factory
   return {
     ...(actual as object),
@@ -46,12 +47,12 @@ const makePost = (
   category: null,
   createdAt: `2026-01-${day}T10:30:00.000Z`,
   excerpt: null,
-  id,
   preview: `Preview of ${title}.`,
   published: true,
+  updatedAt: `2026-01-${day}T10:30:00.000Z`,
+  id,
   slug,
   title,
-  updatedAt: `2026-01-${day}T10:30:00.000Z`,
 });
 
 /** Newest first, the order getLatestPosts returns them in. */
@@ -65,6 +66,7 @@ const renderSection = (initialPosts: PostSummary[]) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -136,6 +138,7 @@ describe(NewsSection, () => {
     renderSection(POSTS);
 
     const region = screen.getByRole("region", { name: SECTION_NAME });
+
     const titles = within(region)
       .getAllByRole("heading", { level: 3 })
       .map((heading) => heading.textContent);
@@ -152,10 +155,12 @@ describe(NewsSection, () => {
     const times = within(region).getAllByRole("time");
 
     expect(times).toHaveLength(POSTS.length);
+
     for (const post of POSTS) {
       const match = times.find(
         (element) => element.getAttribute("datetime") === post.createdAt
       );
+
       expect(match).toBeDefined();
       expect(match?.textContent).toBeTruthy();
     }
@@ -179,6 +184,7 @@ describe(NewsSection, () => {
     const lead = screen
       .getByRole("heading", { level: 3, name: "Sodium is here" })
       .closest("article");
+
     expect(lead).toBeInTheDocument();
 
     // SAFETY: `closest` can miss; the toBeInTheDocument assertion directly
@@ -187,6 +193,7 @@ describe(NewsSection, () => {
       (content, element) =>
         element?.tagName === "P" && content.startsWith("A very long summary")
     );
+
     // truncate() keeps the summary under the cap and marks the cut with the
     // ellipsis, so a long body still reads as a teaser.
     expect(previewText.textContent).toMatch(/…$/u);

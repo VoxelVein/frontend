@@ -11,6 +11,7 @@ import path from "node:path";
 
 const ASSETS = path.resolve(".output/public/assets");
 const mapName = readdirSync(ASSETS).find((f) => /^index-.*\.js\.map$/u.test(f));
+
 if (!mapName) {
   throw new Error("no sourcemap for the entry chunk");
 }
@@ -21,6 +22,7 @@ const code = readFileSync(path.join(ASSETS, codeName), "utf-8");
 
 /** Absolute byte offset of the start of each generated line. */
 const lineStarts = [0];
+
 for (let i = 0; i < code.length; i += 1) {
   if (code[i] === "\n") {
     lineStarts.push(i + 1);
@@ -42,13 +44,17 @@ const decodeVlq = (segment) => {
   const values = [];
   let shift = 0;
   let accumulator = 0;
+
   for (const char of segment) {
     const digit = CHARS.indexOf(char);
+
     if (digit === -1) {
       throw new Error(`bad VLQ char ${char}`);
     }
+
     const hasContinuation = digit & 32;
     accumulator += (digit & 31) << shift;
+
     if (hasContinuation) {
       shift += 5;
     } else {
@@ -59,6 +65,7 @@ const decodeVlq = (segment) => {
       values.push(negative ? -value : value);
     }
   }
+
   return values;
 };
 
@@ -69,19 +76,23 @@ const decodeVlq = (segment) => {
  * from where its first mapping starts to where the next module's begins.
  */
 const segments = [];
+
 {
   let sourceIndex = 0;
   const lines = map.mappings.split(";");
+
   for (
     let generatedLine = 0;
     generatedLine < lines.length;
     generatedLine += 1
   ) {
     let generatedColumn = 0;
+
     for (const segment of lines[generatedLine].split(",")) {
       if (segment !== "") {
         const fields = decodeVlq(segment);
         generatedColumn += fields[0];
+
         if (fields.length >= 4) {
           sourceIndex += fields[1];
           segments.push({
@@ -97,6 +108,7 @@ const segments = [];
 segments.toSorted((a, b) => a.offset - b.offset);
 
 const perSource = new Map();
+
 for (const [index, { offset, source }] of segments.entries()) {
   const next = segments[index + 1];
   const size = (next?.offset ?? code.length) - offset;
@@ -113,19 +125,24 @@ const packageOf = (source) => {
     /node_modules\/\.pnpm\/[^/]+\/node_modules\/(?<name>(?:@[^/]+\/)?[^/]+)/u.exec(
       source
     );
+
   if (scoped?.groups) {
     return scoped.groups.name;
   }
+
   const plain = /node_modules\/(?<name>(?:@[^/]+\/)?[^/]+)/u.exec(source);
+
   if (plain?.groups) {
     return plain.groups.name;
   }
+
   return source.includes("src/") || source.startsWith("..")
     ? "app source"
     : "other";
 };
 
 const byPackage = new Map();
+
 for (const [source, size] of perSource) {
   const pkg = packageOf(source);
   byPackage.set(pkg, (byPackage.get(pkg) ?? 0) + size);
@@ -135,7 +152,9 @@ const total = [...perSource].reduce((sum, [, size]) => sum + size, 0);
 const kb = (bytes) => `${(bytes / 1000).toFixed(1)} kB`;
 
 console.log(`entry chunk ${kb(code.length)}, mapped ${kb(total)}\n`);
+
 console.log("bytes by package (top 20):");
+
 for (const [pkg, size] of [...byPackage]
   .toSorted((a, b) => b[1] - a[1])
   .slice(0, 20)) {
@@ -143,7 +162,9 @@ for (const [pkg, size] of [...byPackage]
     `  ${kb(size).padStart(9)}  ${String(Math.round((size / total) * 100)).padStart(3)}%  ${pkg}`
   );
 }
+
 console.log("\nbytes by source file (top 15):");
+
 for (const [source, size] of [...perSource]
   .toSorted((a, b) => b[1] - a[1])
   .slice(0, 15)) {

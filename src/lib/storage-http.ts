@@ -38,9 +38,11 @@ export const storageErrorResponse = (
   if (error.code === STORAGE_ERROR.fileTooLarge) {
     return json(413, error.message, error.code);
   }
+
   if (error.code === STORAGE_ERROR.quotaExceeded) {
     return json(HTTP_INSUFFICIENT_STORAGE, error.message, error.code);
   }
+
   if (error.code === STORAGE_ERROR.unreachable) {
     // The only failure that is somebody else's fault and worth reporting, so it
     // is the only one answered with a message that says so. The code travels
@@ -51,6 +53,7 @@ export const storageErrorResponse = (
       error.code
     );
   }
+
   if (error.code === STORAGE_ERROR.notConfigured) {
     return json(
       HTTP_SERVICE_UNAVAILABLE,
@@ -58,6 +61,7 @@ export const storageErrorResponse = (
       error.code
     );
   }
+
   return json(
     HTTP_SERVICE_UNAVAILABLE,
     `The ${noun} could not be stored right now.`,

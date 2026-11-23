@@ -24,6 +24,7 @@ export const CheckboxGroup = ({
 }: CheckboxGroupProps) => {
   const errorId = `${id}-error`;
   const selected = new Set(values);
+
   const toggle = (option: string, checked: boolean) =>
     onChange(
       checked ? [...values, option] : values.filter((value) => value !== option)
@@ -41,6 +42,7 @@ export const CheckboxGroup = ({
       <div className="flex flex-wrap gap-x-4">
         {options.map((option) => {
           const optionId = `${id}-${option}`;
+
           return (
             <div key={option} className="flex min-h-11 items-center gap-2">
               <Checkbox

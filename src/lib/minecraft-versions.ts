@@ -190,9 +190,11 @@ export const getMinecraftVersion = (id: string): MinecraftVersion | undefined =>
 /** `"1.21.8 (Chase the Skies)"`, or just the id when the release has no name. */
 export const formatMinecraftVersion = (id: string): string => {
   const version = getMinecraftVersion(id);
+
   if (!version?.update) {
     return `Minecraft ${id}`;
   }
+
   return `Minecraft ${version.id} (${version.update})`;
 };
 
@@ -220,6 +222,7 @@ export const getVersionLine = (id: string): string | null => {
   if (!RELEASE_ID.test(id)) {
     return null;
   }
+
   return id.split(".").slice(0, 2).join(".");
 };
 

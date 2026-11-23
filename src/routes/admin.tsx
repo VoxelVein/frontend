@@ -15,9 +15,11 @@ import { requireAdmin } from "@/lib/auth.functions";
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
     const session = await requireAdmin();
+
     if (!session) {
       throw redirect({ to: "/login" });
     }
+
     return { session };
   },
   component: Outlet,

@@ -149,6 +149,7 @@ const AdminPosts = () => {
     reportError,
     searchAvailable,
   } = useAdminPosts();
+
   const [pendingDelete, setPendingDelete] = useState<PostSummary | null>(null);
 
   useEffect(() => {

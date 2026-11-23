@@ -32,9 +32,12 @@ export const trendingScore = (
 ): number => {
   const ageDays =
     Math.max(0, now.getTime() - lastActivityAt.getTime()) / DAY_IN_MS;
+
   const releaseBoost =
     MAX_RELEASE_BOOST * 0.5 ** (ageDays / TRENDING_HALF_LIFE_DAYS);
+
   const popularity = Math.log10(Math.max(0, downloads) + DOWNLOAD_PRIOR);
+
   return popularity * (1 + releaseBoost);
 };
 
@@ -57,19 +60,25 @@ export const pickTrending = (
   limit: number = TRENDING_LIMIT
 ): string[] => {
   const top: Ranked[] = [];
+
   for (const candidate of candidates) {
     const entry = { candidate, score: trendingScore(candidate, now) };
     const index = top.findIndex((existing) => ranksAbove(entry, existing));
+
     if (index === -1) {
       if (top.length < limit) {
         top.push(entry);
       }
+
       continue;
     }
+
     top.splice(index, 0, entry);
+
     if (top.length > limit) {
       top.pop();
     }
   }
+
   return top.map(({ candidate }) => candidate.id);
 };

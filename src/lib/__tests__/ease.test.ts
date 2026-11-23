@@ -27,6 +27,7 @@ describe(springEasingCss, () => {
       durationMs: 400,
       stiffness: 400,
     });
+
     const stops = LINEAR_STOPS.exec(css)?.groups?.stops.split(", ").map(Number);
 
     expect(stops?.[0]).toBe(0);
@@ -39,6 +40,7 @@ describe(springEasingCss, () => {
       durationMs: 400,
       stiffness: 400,
     });
+
     const stops =
       LINEAR_STOPS.exec(css)?.groups?.stops.split(", ").map(Number) ?? [];
 

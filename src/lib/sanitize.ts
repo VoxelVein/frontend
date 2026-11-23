@@ -170,11 +170,11 @@ const FORBID_ATTR = ["id", "name", "srcset", "style", "target"];
 const SANITIZE_CONFIG = {
   ALLOWED_ATTR,
   ALLOWED_TAGS,
+  FORBID_ATTR,
+  FORBID_TAGS,
   ALLOW_ARIA_ATTR: false,
   ALLOW_DATA_ATTR: false,
   ALLOW_UNKNOWN_PROTOCOLS: false,
-  FORBID_ATTR,
-  FORBID_TAGS,
   SANITIZE_DOM: true,
 } as const;
 
@@ -223,7 +223,7 @@ const SAFE_SCHEMES = new Set(["http", "https", "mailto", "tel"]);
  * `data:` on an `<img>` is otherwise tolerable.
  */
 const SAFE_IMAGE_DATA_URL =
-  /^data:image\/(?:avif|gif|jpeg|jpg|png|webp);base64,[A-Za-z\d+/=\s]*$/iu;
+  /^data:image\/(?:avif|gif|jpeg|jpg|png|webp);base64,[a-z\d+/=\s]*$/iu;
 
 /** Whether a URL may be used for a link or for an image. */
 type UrlKind = "image" | "link";

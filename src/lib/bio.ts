@@ -50,5 +50,6 @@ export const bioInputSchema = pipe(
  */
 export const normalizeBio = (value: string): string | null => {
   const trimmed = value.trim();
+
   return trimmed.length > 0 ? trimmed : null;
 };

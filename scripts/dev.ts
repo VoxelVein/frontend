@@ -34,9 +34,18 @@ const services: readonly { name: Source; script: string }[] = [
 ];
 
 mkdirSync(LOG_DIR, { recursive: true });
-const stamp = new Date().toISOString().replaceAll(/[:.]/gu, "-");
-const logPath = path.join(LOG_DIR, `dev-${stamp}.log`);
-const logFile = createWriteStream(logPath, { flags: "a" });
+
+// One log file per process launch, named from the time this function runs
+// rather than from a value captured when the module was first evaluated.
+const openLogFile = () => {
+  const stamp = new Date().toISOString().replaceAll(/[:.]/gu, "-");
+  const logPath = path.join(LOG_DIR, `dev-${stamp}.log`);
+  const logFile = createWriteStream(logPath, { flags: "a" });
+
+  return { logFile, logPath };
+};
+
+const { logFile, logPath } = openLogFile();
 
 const timestamp = (): string => new Date().toTimeString().slice(0, 8);
 
@@ -57,12 +66,14 @@ for (const service of services) {
     // directly unless it goes through the command shell.
     shell: process.platform === "win32",
   });
+
   children.push(child);
 
   for (const stream of [child.stdout, child.stderr]) {
     if (!stream) {
       continue;
     }
+
     const lines = createInterface({ input: stream });
     lines.on("line", (line) => write(service.name, line));
   }
@@ -80,6 +91,7 @@ const stopAll = (): void => {
 };
 
 process.on("SIGINT", stopAll);
+
 process.on("SIGTERM", stopAll);
 
 process.stdout.write(`${COLORS.system}Full log: ${logPath}${COLORS.reset}\n`);

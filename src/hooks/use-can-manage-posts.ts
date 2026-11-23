@@ -11,5 +11,6 @@ import { can } from "@/lib/roles";
  */
 export const useCanManagePosts = (): boolean => {
   const { data: session } = authClient.useSession();
+
   return can(session?.user.role, "managePosts");
 };

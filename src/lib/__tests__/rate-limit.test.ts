@@ -27,6 +27,7 @@ describe.runIf(Boolean(URL))("consumeRateLimit against a real Valkey", () => {
     const limit = { limit: 3, windowMs: 60_000 };
 
     const results = [];
+
     for (let index = 0; index < 4; index += 1) {
       // Sequential on purpose: the point is the running count.
       results.push(
@@ -82,6 +83,7 @@ describe.runIf(Boolean(URL))("consumeRateLimit against a real Valkey", () => {
       `test-zero-${crypto.randomUUID()}`,
       { limit: 0, windowMs: 60_000 }
     );
+
     expect(result.limited).toBeTruthy();
     expect(result.remaining).toBe(0);
   });

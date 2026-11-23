@@ -70,15 +70,17 @@ export const getUsedBytes = async (executor: Executor = db) => {
       .select({ avatars: count(), used: sum(userImages.size) })
       .from(userImages),
   ]);
+
   const fileBytes = Number(file?.used ?? 0);
   const imageBytes = Number(image?.used ?? 0);
   const avatarBytes = Number(avatar?.used ?? 0);
+
   return {
     avatarBytes,
-    avatarCount: avatar?.avatars ?? 0,
     fileBytes,
-    fileCount: file?.files ?? 0,
     imageBytes,
+    avatarCount: avatar?.avatars ?? 0,
+    fileCount: file?.files ?? 0,
     imageCount: image?.images ?? 0,
     usedBytes: fileBytes + imageBytes + avatarBytes,
   };
@@ -97,7 +99,9 @@ export const getRemainingBytes = async (
   if (quotaBytes === null) {
     return null;
   }
+
   const { usedBytes } = await getUsedBytes();
+
   return Math.max(0, quotaBytes - usedBytes);
 };
 
@@ -118,6 +122,7 @@ export const insertImageWithinQuota = async (
     await tx.execute(
       sql`select pg_advisory_xact_lock(${IMAGE_LOCK_NAMESPACE}, hashtext(${values.projectId}))`
     );
+
     if (values.kind === "icon") {
       await tx
         .delete(projectImages)
@@ -128,13 +133,16 @@ export const insertImageWithinQuota = async (
           )
         );
     }
+
     if (quotaBytes !== null) {
       await tx.execute(sql`select pg_advisory_xact_lock(${QUOTA_LOCK_KEY})`);
       const { usedBytes } = await getUsedBytes(tx);
+
       if (usedBytes + values.size > quotaBytes) {
         throw quotaExceededError();
       }
     }
+
     await tx.insert(projectImages).values(values);
   });
 };
@@ -174,11 +182,13 @@ export const insertAvatarWithinQuota = async (
       .from(userImages)
       .where(eq(userImages.userId, values.userId))
       .limit(1);
+
     superseded = previous?.storageKey ?? null;
 
     if (quotaBytes !== null) {
       await tx.execute(sql`select pg_advisory_xact_lock(${QUOTA_LOCK_KEY})`);
       const { usedBytes } = await getUsedBytes(tx);
+
       // The superseded row is still counted, since it has not been deleted yet.
       // Subtracting it is what lets a user replace a large avatar without
       // needing room for both at once.
@@ -189,7 +199,9 @@ export const insertAvatarWithinQuota = async (
             .where(eq(userImages.storageKey, superseded))
             .limit(1)
         : [];
+
       const freed = Number(replaced[0]?.size ?? 0);
+
       if (usedBytes - freed + values.size > quotaBytes) {
         throw quotaExceededError();
       }
@@ -219,6 +231,7 @@ export const removeAvatar = async (userId: string): Promise<string | null> => {
     .delete(userImages)
     .where(eq(userImages.userId, userId))
     .returning({ storageKey: userImages.storageKey });
+
   return row?.storageKey ?? null;
 };
 
@@ -227,6 +240,7 @@ export const getProjectImageKeys = async (projectIds: string[]) => {
   if (projectIds.length === 0) {
     return [];
   }
+
   return await db
     .select({ storageKey: projectImages.storageKey })
     .from(projectImages)
@@ -250,6 +264,7 @@ export const isDuplicateFilenameViolation = (cause: unknown): boolean => {
   if (!(cause instanceof Error)) {
     return false;
   }
+
   if (
     "code" in cause &&
     cause.code === PG_UNIQUE_VIOLATION &&
@@ -258,6 +273,7 @@ export const isDuplicateFilenameViolation = (cause: unknown): boolean => {
   ) {
     return true;
   }
+
   return isDuplicateFilenameViolation(cause.cause);
 };
 
@@ -279,6 +295,7 @@ export const insertFileWithinQuota = async (
       await tx.execute(
         sql`select pg_advisory_xact_lock(${VERSION_LOCK_NAMESPACE}, hashtext(${values.versionId}))`
       );
+
       const existing = await tx
         .select({
           filename: projectFiles.filename,
@@ -290,9 +307,11 @@ export const insertFileWithinQuota = async (
         })
         .from(projectFiles)
         .where(eq(projectFiles.versionId, values.versionId));
+
       const replaced = values.platform
         ? existing.find((file) => file.platform === values.platform)
         : undefined;
+
       if (
         existing.some(
           (file) =>
@@ -307,16 +326,20 @@ export const insertFileWithinQuota = async (
       if (quotaBytes !== null) {
         await tx.execute(sql`select pg_advisory_xact_lock(${QUOTA_LOCK_KEY})`);
         const { usedBytes } = await getUsedBytes(tx);
+
         if (usedBytes - (replaced?.size ?? 0) + values.size > quotaBytes) {
           throw quotaExceededError();
         }
       }
 
       const primary = replaced?.primary ?? existing.length === 0;
+
       if (replaced) {
         await tx.delete(projectFiles).where(eq(projectFiles.id, replaced.id));
       }
+
       await tx.insert(projectFiles).values({ ...values, primary });
+
       return { primary, replacedStorageKey: replaced?.storageKey ?? null };
     });
   } catch (error) {

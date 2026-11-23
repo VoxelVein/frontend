@@ -27,17 +27,20 @@ export const relativeTime = (
   if (magnitude < SECONDS_PER_MINUTE) {
     return relativeFormatter.format(seconds, "second");
   }
+
   if (magnitude < SECONDS_PER_HOUR) {
     return relativeFormatter.format(
       Math.round(seconds / SECONDS_PER_MINUTE),
       "minute"
     );
   }
+
   if (magnitude < SECONDS_PER_DAY) {
     return relativeFormatter.format(
       Math.round(seconds / SECONDS_PER_HOUR),
       "hour"
     );
   }
+
   return relativeFormatter.format(Math.round(seconds / SECONDS_PER_DAY), "day");
 };

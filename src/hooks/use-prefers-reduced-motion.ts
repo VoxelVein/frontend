@@ -6,6 +6,7 @@ let mediaQueryList: MediaQueryList | undefined;
 
 const getMediaQueryList = () => {
   mediaQueryList ??= window.matchMedia(MEDIA_QUERY);
+
   return mediaQueryList;
 };
 
@@ -13,6 +14,7 @@ const getMediaQueryList = () => {
 const subscribe = (callback: () => void) => {
   const media = getMediaQueryList();
   media.addEventListener("change", callback);
+
   return () => media.removeEventListener("change", callback);
 };
 

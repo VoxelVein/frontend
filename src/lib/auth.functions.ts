@@ -7,9 +7,8 @@ import { can } from "@/lib/roles";
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
     const headers = getRequestHeaders();
-    const session = await auth.api.getSession({ headers });
 
-    return session;
+    return await auth.api.getSession({ headers });
   }
 );
 

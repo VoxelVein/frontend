@@ -71,8 +71,10 @@ const ReportDialog = ({
     if (!reason) {
       return;
     }
+
     setIsBusy(true);
     setError(null);
+
     try {
       await createReport({
         data: {
@@ -91,6 +93,7 @@ const ReportDialog = ({
       // behind the overlay on a small screen.
       setError(errorMessage(submitError, "Could not send the report."));
     }
+
     setIsBusy(false);
   };
 
@@ -110,6 +113,7 @@ const ReportDialog = ({
       open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
+
         if (!open) {
           reset();
         }
