@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
 
 import { ServerVoteButton } from "@/components/projects/server-vote-button";
+import type { VoteDeliveryStatus } from "@/lib/server-voting.functions";
 
 interface VotingSession {
   user: { id: string; emailVerified: boolean };
@@ -23,7 +24,7 @@ interface VotingMocks {
     () => Promise<{
       totalVotes: number;
       nextVoteAt: string;
-      rewardDelivered: boolean;
+      deliveryStatus: VoteDeliveryStatus;
     }>
   >;
 }
@@ -41,7 +42,7 @@ const mocks = vi.hoisted((): VotingMocks => ({
     () => Promise<{
       totalVotes: number;
       nextVoteAt: string;
-      rewardDelivered: boolean;
+      deliveryStatus: VoteDeliveryStatus;
     }>
   >(),
 }));
@@ -120,7 +121,7 @@ describe("server voting flow", () => {
     mocks.vote.mockResolvedValue({
       totalVotes: 13,
       nextVoteAt: new Date(Date.now() + 86_400_000).toISOString(),
-      rewardDelivered: true,
+      deliveryStatus: "sent",
     });
     mocks.status
       .mockResolvedValueOnce({

@@ -61,6 +61,9 @@ describe("Votifier destination protection", () => {
     "fc00::1",
     "2001:db8::1",
     "2002:7f00:1::",
+    // Start with "2" or "3" but sit outside 2000::/3 (first hextet < 0x2000).
+    "2::1",
+    "3a::1",
   ])("blocks %s", (address) =>
     expect(isPublicVoteAddress(address)).toBeFalsy()
   );

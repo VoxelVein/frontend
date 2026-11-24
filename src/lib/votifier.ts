@@ -40,6 +40,15 @@ for (const [address, prefix] of [
   blocked.addSubnet(address, prefix, "ipv4");
 }
 
+const globalUnicastV6 = new BlockList();
+globalUnicastV6.addSubnet("2000::", 3, "ipv6");
+
+const deniedV6 = new BlockList();
+deniedV6.addSubnet("2001::", 23, "ipv6");
+deniedV6.addSubnet("2001:db8::", 32, "ipv6");
+deniedV6.addSubnet("2002::", 16, "ipv6");
+deniedV6.addSubnet("3fff::", 20, "ipv6");
+
 export const isPublicVoteAddress = (address: string): boolean => {
   const family = isIP(address);
 
@@ -48,17 +57,46 @@ export const isPublicVoteAddress = (address: string): boolean => {
   }
 
   // Restrict IPv6 to global unicast, excluding documentation and transition ranges.
-  if (family !== 6 || !/^[23]/u.test(address)) {
-    return false;
+  return (
+    family === 6 &&
+    globalUnicastV6.check(address, "ipv6") &&
+    !deniedV6.check(address, "ipv6")
+  );
+};
+
+/** One deadline covers DNS resolution, connecting and the acknowledgement. */
+const DELIVERY_TIMEOUT_MS = 5000;
+
+/** PKCS#1 v1.5 leaves 245 plaintext bytes in a 2048-bit RSA block. */
+const V1_MAX_PAYLOAD_BYTES = 245;
+
+/**
+ * The longest a v1 payload is without its service name: "VOTE", a 16-byte
+ * player name, a 45-byte IPv6 address, a 13-digit timestamp and five newlines.
+ */
+const V1_FIXED_PAYLOAD_BYTES = 4 + 16 + 45 + 13 + 5;
+
+/** The service name's UTF-8 budget, so any v1 vote fits in one RSA block. */
+export const VOTE_SERVICE_NAME_MAX_BYTES =
+  V1_MAX_PAYLOAD_BYTES - V1_FIXED_PAYLOAD_BYTES;
+
+const lookupWithin = async (host: string, timeoutMs: number) => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      lookup(host, { all: true }),
+      // oxlint-disable-next-line promise/avoid-new -- A timer has no promise API that can be cleared on success.
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("Votifier lookup timed out.")),
+          timeoutMs
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
   }
-
-  const denied = new BlockList();
-  denied.addSubnet("2001::", 23, "ipv6");
-  denied.addSubnet("2001:db8::", 32, "ipv6");
-  denied.addSubnet("2002::", 16, "ipv6");
-  denied.addSubnet("3fff::", 20, "ipv6");
-
-  return !denied.check(address, "ipv6");
 };
 
 const encodeV1Vote = (vote: VotifierVote, publicKey = ""): Buffer => {
@@ -96,8 +134,12 @@ export const sendVoteNotification = async (
   vote: VotifierVote,
   credentials: { token?: string | null; publicKey?: string | null }
 ): Promise<VotifierResult> => {
+  const deadline = Date.now() + DELIVERY_TIMEOUT_MS;
+
   try {
-    const addresses = await lookup(host, { all: true });
+    // A late lookup result is dropped: the race already rejected, so no
+    // socket is ever opened for it.
+    const addresses = await lookupWithin(host, DELIVERY_TIMEOUT_MS);
     const [destination] = addresses;
 
     if (
@@ -122,7 +164,7 @@ export const sendVoteNotification = async (
 
       const timer = setTimeout(
         () => finish(false, "Votifier connection timed out."),
-        5000
+        Math.max(0, deadline - Date.now())
       );
 
       socket.on("error", (error) => finish(false, error.message));
@@ -171,12 +213,18 @@ export const sendVoteNotification = async (
             if (protocol === "v1") {
               const packet = encodeV1Vote(vote, credentials.publicKey ?? "");
 
-              socket.write(packet, () =>
+              socket.write(packet, (error) => {
+                if (error) {
+                  finish(false, error.message);
+
+                  return;
+                }
+
                 finish(
                   true,
                   "Sent; classic Votifier cannot acknowledge rewards."
-                )
-              );
+                );
+              });
             } else {
               const challenge = /^VOTIFIER 2 (?<challenge>\S+)$/u.exec(line)
                 ?.groups?.challenge;

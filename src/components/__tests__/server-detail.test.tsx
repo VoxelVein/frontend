@@ -1,8 +1,3 @@
-// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Voting is independently covered; keep this layout suite isolated from server functions.
-vi.mock("@/components/projects/server-vote-button", () => ({
-  ServerVoteButton: () => <button type="button">Vote</button>,
-}));
-
 import {
   fireEvent,
   render,
@@ -18,6 +13,11 @@ import type { ProjectServerView, ProjectView } from "@/lib/projects";
 
 const { useSessionMock } = vi.hoisted(() => ({
   useSessionMock: vi.fn<() => { data: { user: { id: string } } | null }>(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Voting is independently covered; keep this layout suite isolated from server functions.
+vi.mock("@/components/projects/server-vote-button", () => ({
+  ServerVoteButton: () => <button type="button">Vote</button>,
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The session comes from Better Auth over the network; this suite is about layout and copy

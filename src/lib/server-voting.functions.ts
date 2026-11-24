@@ -41,8 +41,32 @@ import {
   timeframeWindowMs,
 } from "@/lib/server-voting";
 import { parseHostnames, verifyTurnstileToken } from "@/lib/turnstile";
-import { sendVoteNotification } from "@/lib/votifier";
+import type { VoteProtocol } from "@/lib/server-voting";
+import {
+  sendVoteNotification,
+  VOTE_SERVICE_NAME_MAX_BYTES,
+} from "@/lib/votifier";
 import { decryptVoteToken, encryptVoteToken } from "@/lib/voting-credentials";
+
+/**
+ * How a vote's reward notification ended. `unconfirmed` is written before
+ * delivery starts, so a vote whose final status could not be saved stays
+ * distinct from one that was never attempted.
+ */
+export type VoteDeliveryStatus = "disabled" | "unconfirmed" | "sent" | "failed";
+
+/** Only v2 signs with the shared token; v1 encrypts with the RSA public key. */
+const deliveryCredentials = (config: {
+  protocol: VoteProtocol;
+  token: string | null;
+  publicKey: string | null;
+}) => ({
+  token:
+    config.protocol === "v2" && config.token
+      ? decryptVoteToken(config.token)
+      : null,
+  publicKey: config.publicKey,
+});
 
 const projectSchema = object({ projectId: pipe(string(), uuid()) });
 
@@ -191,6 +215,7 @@ export const castVote = createServerFn({ method: "POST" })
           minecraftUsername: data.minecraftUsername,
           edition: data.edition,
           votedAt: now,
+          deliveryStatus: config.host ? "unconfirmed" : "disabled",
         })
         .returning();
 
@@ -226,19 +251,14 @@ export const castVote = createServerFn({ method: "POST" })
             address: address ?? "0.0.0.0",
             timestamp: recorded.vote.votedAt.getTime(),
           },
-          {
-            token: recorded.config.token
-              ? decryptVoteToken(recorded.config.token)
-              : null,
-            publicKey: recorded.config.publicKey,
-          }
+          deliveryCredentials(recorded.config)
         );
       }
     } catch {
       delivery = { ok: false, detail: "Reward credential could not be read." };
     }
 
-    let deliveryStatus = "disabled";
+    let deliveryStatus: VoteDeliveryStatus = "disabled";
 
     if (recorded.config.host) {
       deliveryStatus = delivery.ok ? "sent" : "failed";
@@ -253,6 +273,8 @@ export const castVote = createServerFn({ method: "POST" })
         })
         .where(eq(serverVotes.id, recorded.vote.id));
     } catch (error) {
+      // The row keeps "unconfirmed", so the owner sees an unresolved vote
+      // rather than one that looks unattempted. Resending would double reward.
       console.error(
         "Vote accepted but delivery outcome could not be recorded",
         recorded.vote.id,
@@ -260,10 +282,12 @@ export const castVote = createServerFn({ method: "POST" })
       );
     }
 
+    // "sent" means the packet reached the listener; neither protocol confirms
+    // that a reward was actually granted in game.
     return {
       totalVotes: recorded.totalVotes,
       nextVoteAt: recorded.nextVoteAt,
-      rewardDelivered: delivery.ok,
+      deliveryStatus,
     };
   });
 
@@ -344,7 +368,11 @@ const configSchema = object({
     trim(),
     minLength(1),
     maxLength(64),
-    check((value) => !/[\r\n]/u.test(value))
+    check((value) => !/[\r\n]/u.test(value)),
+    check(
+      (value) => Buffer.byteLength(value, "utf8") <= VOTE_SERVICE_NAME_MAX_BYTES,
+      `Keep the service name within ${VOTE_SERVICE_NAME_MAX_BYTES} bytes.`
+    )
   ),
   token: optional(pipe(string(), maxLength(1024))),
   publicKey: pipe(string(), trim(), maxLength(4096)),
@@ -496,10 +524,7 @@ export const testVoteConnection = createServerFn({ method: "POST" })
         address: "0.0.0.0",
         timestamp: Date.now(),
       },
-      {
-        token: config.token ? decryptVoteToken(config.token) : null,
-        publicKey: config.publicKey,
-      }
+      deliveryCredentials(config)
     );
   });
 
