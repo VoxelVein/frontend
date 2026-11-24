@@ -72,12 +72,15 @@ required.
 NuVotifier v2 signs the server challenge on the same TCP connection and waits
 for an acknowledgement. Classic Votifier v1 encrypts a 2048-bit RSA packet;
 its protocol cannot confirm reward execution. A successful write is recorded
-as sent. Notification attempts have a five-second TCP deadline.
+as sent. Each notification attempt, DNS lookup included, has one five-second
+deadline. Neither protocol confirms that a reward was granted in game. Service
+names are limited to 162 UTF-8 bytes so a v1 vote always fits one RSA block.
 
 Votes commit before notification delivery. Failed deliveries remain counted
 and are visible to the owner. There is no automatic retry: these protocols
 have no idempotency key, so retrying an uncertain delivery can grant duplicate
-rewards. A process crash between commit and recording the delivery outcome
-leaves `pending`, meaning the outcome is unknown. Owners can investigate their
-plugin logs and compensate players manually. No website vote is fabricated
+rewards. A vote with a reward host is recorded as `unconfirmed` before
+delivery starts. If the process crashes or the final status cannot be saved,
+it stays `unconfirmed`, meaning the outcome is unknown. Owners can investigate
+their plugin logs and compensate players manually. No website vote is fabricated
 for a connection test or failed submission.

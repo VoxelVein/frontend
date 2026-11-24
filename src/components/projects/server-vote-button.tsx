@@ -60,11 +60,13 @@ export const ServerVoteButton = ({ projectId }: ServerVoteButtonProps) => {
         },
       }),
     onSuccess: async (result) => {
-      toast.success(
-        result.rewardDelivered
-          ? "Thanks for voting!"
-          : "Vote counted. The server could not receive its reward notification."
-      );
+      if (result.deliveryStatus === "failed") {
+        toast.success(
+          "Vote counted. The server could not receive its reward notification."
+        );
+      } else {
+        toast.success("Thanks for voting!");
+      }
       client.setQueryData([VOTE_QUERY_KEY, projectId, session?.user.id], {
         enabled: true,
         totalVotes: result.totalVotes,
@@ -86,15 +88,18 @@ export const ServerVoteButton = ({ projectId }: ServerVoteButtonProps) => {
   }
 
   if (status.isError) {
+    // Same stacking as the loaded state, so the button sits above card links.
     return (
-      <Button
-        variant="outline"
-        onClick={() => {
-          status.refetch();
-        }}
-      >
-        Retry voting status
-      </Button>
+      <div className="relative z-20">
+        <Button
+          variant="outline"
+          onClick={() => {
+            status.refetch();
+          }}
+        >
+          Retry voting status
+        </Button>
+      </div>
     );
   }
 

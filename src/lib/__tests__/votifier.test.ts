@@ -51,7 +51,7 @@ describe("Votifier wire protocol", () => {
   });
 
   it("signs the challenge on the same connection and waits for a fragmented acknowledgement", async () => {
-    let received: unknown;
+    let frame: Buffer | undefined;
 
     const server = createServer((socket) => {
       socket.write("VOTIFIER 2 ");
@@ -64,14 +64,8 @@ describe("Votifier wire protocol", () => {
           return;
         }
 
-        expect(buffer.readUInt16BE(0)).toBe(0x73_3a);
-        const wrapper = JSON.parse(buffer.subarray(4).toString());
-        expect(wrapper.signature).toBe(
-          createHmac("sha256", "secret")
-            .update(wrapper.payload)
-            .digest("base64")
-        );
-        received = JSON.parse(wrapper.payload);
+        // Capture only; the awaited test body validates the frame.
+        frame = buffer;
         socket.write('{"status":');
         setTimeout(() => socket.end('"ok"}\n'), 5);
       });
@@ -99,7 +93,31 @@ describe("Votifier wire protocol", () => {
       protocol: "v2",
       detail: "Vote acknowledged by NuVotifier.",
     });
-    expect(received).toStrictEqual({ ...vote, challenge: "challenge" });
+
+    expect(frame?.readUInt16BE(0)).toBe(0x73_3a);
+    const wrapper: unknown = JSON.parse(frame?.subarray(4).toString() ?? "");
+    expect(wrapper).toStrictEqual({
+      payload: expect.any(String),
+      signature: expect.any(String),
+    });
+
+    if (
+      typeof wrapper !== "object" ||
+      wrapper === null ||
+      !("payload" in wrapper) ||
+      !("signature" in wrapper) ||
+      typeof wrapper.payload !== "string"
+    ) {
+      throw new TypeError("Votifier frame has no string payload.");
+    }
+
+    expect(wrapper.signature).toBe(
+      createHmac("sha256", "secret").update(wrapper.payload).digest("base64")
+    );
+    expect(JSON.parse(wrapper.payload)).toStrictEqual({
+      ...vote,
+      challenge: "challenge",
+    });
   });
 
   it("encrypts a classic Votifier vote after reading its greeting", async () => {
@@ -150,9 +168,14 @@ describe("Votifier wire protocol", () => {
   });
 
   it("rejects a malformed acknowledgement", async () => {
+    let receivedPacket = false;
+
     const server = createServer((socket) => {
       socket.write("VOTIFIER 2 challenge\n");
-      socket.on("data", () => socket.end("garbage\n"));
+      socket.on("data", () => {
+        receivedPacket = true;
+        socket.end("garbage\n");
+      });
     });
 
     listeners.push(server);
@@ -172,6 +195,9 @@ describe("Votifier wire protocol", () => {
       { token: "secret" }
     );
 
+    // The vote was sent, so the failure came from parsing the acknowledgement.
+    expect(receivedPacket).toBeTruthy();
     expect(result.ok).toBeFalsy();
+    expect(result.detail).toMatch(/JSON/u);
   });
 });
