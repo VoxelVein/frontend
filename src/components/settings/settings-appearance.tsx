@@ -34,9 +34,14 @@ export const SettingsAppearance = () => {
         <CardContent>
           <Field orientation="horizontal">
             <FieldContent>
-              <FieldLabel htmlFor="custom-cursor-switch">
-                Custom cursor
-              </FieldLabel>
+              <div className="flex flex-wrap items-center gap-2">
+                <FieldLabel htmlFor="custom-cursor-switch">
+                  Custom cursor
+                </FieldLabel>
+                <span className="inline-flex min-h-5 items-center rounded border border-yellow-500/30 bg-yellow-400/15 px-1.5 text-[10px] font-bold tracking-wide text-yellow-700 uppercase dark:text-yellow-400">
+                  Beta
+                </span>
+              </div>
               <FieldDescription id="custom-cursor-description">
                 Show the VoxelVein arrow across the site. Links, text fields and
                 resize handles keep their usual cursor.

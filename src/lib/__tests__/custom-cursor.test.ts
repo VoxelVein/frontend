@@ -16,30 +16,30 @@ describe("custom cursor preference", () => {
     delete document.documentElement.dataset.customCursor;
   });
 
-  it("defaults to enabled when nothing was stored", () => {
-    expect(readCustomCursorEnabled()).toBeTruthy();
+  it("defaults to disabled when nothing was stored", () => {
+    expect(readCustomCursorEnabled()).toBeFalsy();
   });
 
-  it("is disabled only by the explicit off value", () => {
+  it("is enabled only by the explicit on value", () => {
+    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "on");
+
+    expect(readCustomCursorEnabled()).toBeTruthy();
+
     window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "off");
 
     expect(readCustomCursorEnabled()).toBeFalsy();
-
-    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "anything-else");
-
-    expect(readCustomCursorEnabled()).toBeTruthy();
   });
 
-  it("stores only the off value and marks the document root", () => {
-    setCustomCursorEnabled(false);
-
-    expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBe("off");
-    expect(customCursor()).toBe("off");
-
+  it("stores the on value and clears the key when disabled", () => {
     setCustomCursorEnabled(true);
 
-    expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBe("on");
     expect(customCursor()).toBeUndefined();
+
+    setCustomCursorEnabled(false);
+
+    expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBeNull();
+    expect(customCursor()).toBe("off");
   });
 
   it("notifies subscribers when the preference changes on this page", () => {
@@ -57,12 +57,12 @@ describe("custom cursor preference", () => {
     const listener = vi.fn<() => void>();
     const unsubscribe = subscribeToCustomCursor(listener);
 
-    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "off");
+    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "on");
     window.dispatchEvent(
       new StorageEvent("storage", { key: CUSTOM_CURSOR_STORAGE_KEY })
     );
 
-    expect(customCursor()).toBe("off");
+    expect(customCursor()).toBeUndefined();
     expect(listener).toHaveBeenCalledOnce();
 
     unsubscribe();
@@ -80,7 +80,11 @@ describe("custom cursor preference", () => {
     unsubscribe();
   });
 
-  it("applies the stored value before hydration without changing the default", () => {
+  it("applies the stored value before hydration", () => {
+    applyStoredCursorPreference();
+    expect(customCursor()).toBe("off");
+
+    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "on");
     applyStoredCursorPreference();
     expect(customCursor()).toBeUndefined();
 

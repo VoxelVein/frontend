@@ -3,22 +3,24 @@
  *
  * The cursor is a local UI preference, like the theme: it is stored in
  * localStorage and applied to the document root before hydration so a visitor
- * who turned it off never sees the custom arrow flash on first paint. Only the
- * "off" value is stored; an absent key means the cursor is enabled.
+ * who turned it on never sees the native arrow flash on first paint. The
+ * feature is opt-in and still marked beta, so only the "on" value enables it;
+ * an absent key means the cursor is disabled.
  */
 
 export const CUSTOM_CURSOR_STORAGE_KEY = "voxelvein-custom-cursor";
+const CURSOR_ENABLED = "on";
 const CURSOR_DISABLED = "off";
 
 export const readCustomCursorEnabled = (): boolean => {
   try {
     return (
-      window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY) !== CURSOR_DISABLED
+      window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY) === CURSOR_ENABLED
     );
   } catch {
     // Storage can be blocked (private mode, strict cookie settings). The
-    // default cursor stays on instead of failing the page.
-    return true;
+    // cursor stays off, which is the default for every visitor.
+    return false;
   }
 };
 
@@ -67,9 +69,11 @@ export const subscribeToCustomCursor = (listener: () => void): (() => void) => {
 export const setCustomCursorEnabled = (enabled: boolean): void => {
   try {
     if (enabled) {
-      window.localStorage.removeItem(CUSTOM_CURSOR_STORAGE_KEY);
+      window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, CURSOR_ENABLED);
     } else {
-      window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, CURSOR_DISABLED);
+      // Absence is the default, so clearing the key is enough; an older "off"
+      // value is removed too rather than left behind as a stale preference.
+      window.localStorage.removeItem(CUSTOM_CURSOR_STORAGE_KEY);
     }
   } catch {
     // Still update this page when storage is unavailable.
@@ -85,10 +89,13 @@ export const setCustomCursorEnabled = (enabled: boolean): void => {
  */
 export const applyStoredCursorPreference = (): void => {
   try {
-    if (window.localStorage.getItem("voxelvein-custom-cursor") === "off") {
+    if (window.localStorage.getItem("voxelvein-custom-cursor") === "on") {
+      delete document.documentElement.dataset.customCursor;
+    } else {
       document.documentElement.dataset.customCursor = "off";
     }
   } catch {
-    // Leave the default cursor in place if storage cannot be read.
+    // Storage cannot be read: keep the default, which is the native cursor.
+    document.documentElement.dataset.customCursor = "off";
   }
 };

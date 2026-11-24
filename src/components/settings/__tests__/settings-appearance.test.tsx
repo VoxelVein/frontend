@@ -13,50 +13,51 @@ describe(SettingsAppearance, () => {
     delete document.documentElement.dataset.customCursor;
   });
 
-  it("describes the setting and starts enabled", () => {
+  it("describes the setting and starts disabled", () => {
     render(<SettingsAppearance />);
 
-    expect(cursorSwitch()).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText(/beta/iu)).toBeInTheDocument();
+    expect(cursorSwitch()).toHaveAttribute("aria-checked", "false");
     expect(cursorSwitch()).toHaveAccessibleDescription(
       /Links, text fields and resize handles keep their usual cursor/u
     );
   });
 
-  it("persists a disabled preference across a remount", () => {
+  it("persists an enabled preference across a remount", () => {
     const first = render(<SettingsAppearance />);
     fireEvent.click(cursorSwitch());
 
-    expect(cursorSwitch()).toHaveAttribute("aria-checked", "false");
-    expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBe("off");
-    expect(document.documentElement.dataset.customCursor).toBe("off");
+    expect(cursorSwitch()).toHaveAttribute("aria-checked", "true");
+    expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBe("on");
+    expect(document.documentElement.dataset.customCursor).toBeUndefined();
 
     first.unmount();
     render(<SettingsAppearance />);
 
-    expect(cursorSwitch()).toHaveAttribute("aria-checked", "false");
+    expect(cursorSwitch()).toHaveAttribute("aria-checked", "true");
   });
 
-  it("restores the default when switched back on", () => {
-    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "off");
-    document.documentElement.dataset.customCursor = "off";
+  it("clears the stored preference when switched back off", () => {
+    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "on");
+    delete document.documentElement.dataset.customCursor;
     render(<SettingsAppearance />);
 
     fireEvent.click(cursorSwitch());
 
     expect(window.localStorage.getItem(CUSTOM_CURSOR_STORAGE_KEY)).toBeNull();
-    expect(document.documentElement.dataset.customCursor).toBeUndefined();
+    expect(document.documentElement.dataset.customCursor).toBe("off");
   });
 
   it("follows a change made in another tab", async () => {
     render(<SettingsAppearance />);
 
-    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "off");
+    window.localStorage.setItem(CUSTOM_CURSOR_STORAGE_KEY, "on");
     window.dispatchEvent(
       new StorageEvent("storage", { key: CUSTOM_CURSOR_STORAGE_KEY })
     );
 
     await waitFor(() => {
-      expect(cursorSwitch()).toHaveAttribute("aria-checked", "false");
+      expect(cursorSwitch()).toHaveAttribute("aria-checked", "true");
     });
   });
 });

@@ -139,11 +139,14 @@ and a utility-layer override maps shadcn's `cursor-default` class to the
 same property. Because `cursor` inherits, elements that declare their own
 value (links, text fields, resize handles) keep their natural cursor.
 
-The Appearance tab in Settings stores a `voxelvein-custom-cursor`
-localStorage preference. Turning it off sets `data-custom-cursor="off"`
-on the document root, which redefines `--cursor-default` to `auto` and
-restores the platform arrow. A script in the document head applies the
-stored value before hydration so it never flashes on first paint.
+The cursor is opt-in and marked BETA in the Appearance tab. That tab
+stores a `voxelvein-custom-cursor` localStorage preference: only the
+value `on` enables it, and an absent key means the native cursor. Turning
+it on removes `data-custom-cursor="off"` from the document root, where
+`--cursor-default` resolves to the SVG; turning it off puts the attribute
+back so the platform arrow returns. A script in the document head applies
+the stored value before hydration so the choice never flashes on first
+paint.
 
 ## Verify
 
