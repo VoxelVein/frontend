@@ -17,7 +17,13 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { applyStoredCursorPreference } from "@/lib/custom-cursor";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import {
+  SITE_DESCRIPTION,
+  SITE_IMAGE,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site";
 
 import appCss from "../styles.css?url";
 
@@ -106,9 +112,8 @@ export const Route = createRootRoute({
         media: "(prefers-color-scheme: dark)",
       },
 
-      // Open Graph. og:image is intentionally absent: there is no share image
-      // in public/, and pointing at a missing file makes some scrapers cache a
-      // broken preview. Add one and fill this in alongside it.
+      // Open Graph. The share image is public/og-image.png; regenerate it with
+      // `pnpm og:image` when the logo or tagline changes.
       {
         property: "og:type",
         content: "website",
@@ -133,10 +138,38 @@ export const Route = createRootRoute({
         property: "og:locale",
         content: "en_US",
       },
+      {
+        property: "og:image",
+        content: SITE_IMAGE.url,
+      },
+      {
+        property: "og:image:type",
+        content: SITE_IMAGE.type,
+      },
+      {
+        property: "og:image:width",
+        content: String(SITE_IMAGE.width),
+      },
+      {
+        property: "og:image:height",
+        content: String(SITE_IMAGE.height),
+      },
+      {
+        property: "og:image:alt",
+        content: SITE_IMAGE.alt,
+      },
 
       {
         name: "twitter:card",
-        content: "summary",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:image",
+        content: SITE_IMAGE.url,
+      },
+      {
+        name: "twitter:image:alt",
+        content: SITE_IMAGE.alt,
       },
       {
         name: "twitter:title",

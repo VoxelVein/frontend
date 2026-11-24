@@ -35,8 +35,8 @@
 * Notification email (review decisions, deletion confirmations)
 * Email change flow
 * Creator dashboards and per-project analytics
-* Sitemap and per-route Open Graph tags. `og:image` is deliberately
-  absent today rather than pointing at a missing file.
+* Sitemap and per-route Open Graph tags. A site-wide `og:image` exists;
+  per-page share images (project icons, blog covers) do not yet.
 * A status page and a public changelog page, both of which the footer
   already reserves a "Soon" slot for
 * RBAC beyond the current `user` / `moderator` / `admin` ladder. The roles are

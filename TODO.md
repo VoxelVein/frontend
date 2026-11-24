@@ -20,8 +20,7 @@ for the longer-term plan.
 
 ## Bugs and inconsistencies
 
-* [ ] No `og:image`; `twitter:card` is `summary` rather than
-      `summary_large_image`
+None open.
 
 ## Quality
 
