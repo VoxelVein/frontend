@@ -8,6 +8,9 @@ names match the repository's `ALPHA-*` git tags.
 
 ### Added
 
+* Project ownership transfers: owners re-authenticate to offer a project and
+  the recipient accepts within seven days, while admins can move projects
+  immediately. Both sides get notifications and a transfers inbox.
 * A dedicated Top Voted Servers section on the home page, with timeframe tabs,
   a lead card and compact ranked rows.
 * Compact vote counters on server cards, matching the online-player counter.

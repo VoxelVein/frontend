@@ -61,9 +61,13 @@ the small ElysiaJS event server behind the wider
 * Three roles on one ladder: `user`, `moderator` and `admin`. The same
   permissions are enforced server-side so a moderator cannot reach admin-only
   actions.
-* An admin panel with nine URL-driven sections: users, sessions, posts,
-  storage, notifications, account deletions, reviews, reports and support
-  tickets, each hidden from roles that cannot use it.
+* Ownership transfers: owners offer a project to another member after
+  re-authenticating, and the recipient must accept; admins can move projects
+  immediately. Offers and outcomes appear in a transfers inbox and the
+  notification bell.
+* An admin panel with ten URL-driven sections: users, transfers, sessions,
+  posts, storage, notifications, account deletions, reviews, reports and
+  support tickets, each hidden from roles that cannot use it.
 * Support tickets at `/support` (at most five open per member), a notification
   bell with per-item and bulk mark-as-read, legal pages and a cookie consent
   banner.

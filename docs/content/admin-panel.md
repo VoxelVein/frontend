@@ -2,7 +2,7 @@
 
 `/admin` is the whole back office: user management, account recovery,
 blog posts, storage usage, the notification inbox, and the publishing
-review queue. One panel, nine URL-driven sections, reached from a
+review queue. One panel, ten URL-driven sections, reached from a
 collapsible sidebar.
 
 ## Routes
@@ -57,7 +57,7 @@ The tab comes from `?tab=`, validated with a Valibot `picklist`,
 defaulting to `users`:
 
 ```text
-/admin?tab=users|sessions|posts|storage|notifications|deletions|reviews|reports|tickets
+/admin?tab=users|transfers|sessions|posts|storage|notifications|deletions|reviews|reports|tickets
 ```
 
 Better Auth's admin plugin provides the underlying primitives
@@ -84,8 +84,11 @@ CAPABILITY_MINIMUM = {
   manageNotifications: "admin",
   managePosts: "admin",
   manageProtectedProjects: "admin",
+  manageReports: "moderator",
   manageSessions: "admin",
   manageStorage: "admin",
+  manageTickets: "admin",
+  manageTransfers: "admin",
   manageUsers: "admin",
   publishPosts: "admin",
   reviewProjects: "moderator",

@@ -73,6 +73,8 @@ already shipped.
 
 ## Completed
 
+* [x] Project ownership transfers with owner re-authentication, recipient
+      acceptance, an admin-only immediate transfer, and notifications.
 * [x] Rebuilt voting UI with shadcn primitives and shadcn-only form controls.
 * [x] Announced server and query failures with Sonner toasts.
 * [x] Folded long supported-version lists on the server page and manager.

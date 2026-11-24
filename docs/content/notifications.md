@@ -17,12 +17,15 @@ somewhere else is noise, and noise is what makes people stop opening the bell.
 
 `USER_NOTIFICATION_TYPES` in `src/lib/notifications.ts`:
 
-| Kind               | Says                                            |
-| ------------------ | ----------------------------------------------- |
-| `project-approved` | An admin approved their submitted project       |
-| `project-rejected` | An admin asked for changes, with the reason     |
-| `report-resolved`  | A moderator dealt with something they reported  |
-| `report-dismissed` | A moderator looked and did not agree            |
+| Kind                        | Says                                     |
+| --------------------------- | ---------------------------------------- |
+| `project-approved`          | An admin approved a submitted project    |
+| `project-rejected`          | An admin asked for changes, with reasons |
+| `report-resolved`           | A moderator actioned something reported  |
+| `report-dismissed`          | A moderator looked and disagreed         |
+| `project-transfer-offered`  | A project offer awaits their decision    |
+| `project-transfer-accepted` | Their offer was accepted                 |
+| `project-transfer-declined` | Their offer was declined                 |
 
 Each has a `tone`, and the tone drives the row's icon tile and its unread
 background from one place, so the two cannot disagree. Approval and rejection
