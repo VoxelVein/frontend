@@ -67,6 +67,7 @@ export const ServerVoteButton = ({ projectId }: ServerVoteButtonProps) => {
       } else {
         toast.success("Thanks for voting!");
       }
+
       client.setQueryData([VOTE_QUERY_KEY, projectId, session?.user.id], {
         enabled: true,
         totalVotes: result.totalVotes,

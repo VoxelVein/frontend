@@ -8,6 +8,7 @@ import {
 import { createServer } from "node:net";
 import type { AddressInfo } from "node:net";
 
+import { object, parse, string } from "valibot";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sendVoteNotification } from "@/lib/votifier";
@@ -95,21 +96,11 @@ describe("Votifier wire protocol", () => {
     });
 
     expect(frame?.readUInt16BE(0)).toBe(0x73_3a);
-    const wrapper: unknown = JSON.parse(frame?.subarray(4).toString() ?? "");
-    expect(wrapper).toStrictEqual({
-      payload: expect.any(String),
-      signature: expect.any(String),
-    });
 
-    if (
-      typeof wrapper !== "object" ||
-      wrapper === null ||
-      !("payload" in wrapper) ||
-      !("signature" in wrapper) ||
-      typeof wrapper.payload !== "string"
-    ) {
-      throw new TypeError("Votifier frame has no string payload.");
-    }
+    const wrapper = parse(
+      object({ payload: string(), signature: string() }),
+      JSON.parse(frame?.subarray(4).toString() ?? "")
+    );
 
     expect(wrapper.signature).toBe(
       createHmac("sha256", "secret").update(wrapper.payload).digest("base64")

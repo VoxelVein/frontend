@@ -40,14 +40,26 @@ for (const [address, prefix] of [
   blocked.addSubnet(address, prefix, "ipv4");
 }
 
-const globalUnicastV6 = new BlockList();
-globalUnicastV6.addSubnet("2000::", 3, "ipv6");
+const ipv6List = (
+  subnets: readonly (readonly [string, number])[]
+): BlockList => {
+  const list = new BlockList();
 
-const deniedV6 = new BlockList();
-deniedV6.addSubnet("2001::", 23, "ipv6");
-deniedV6.addSubnet("2001:db8::", 32, "ipv6");
-deniedV6.addSubnet("2002::", 16, "ipv6");
-deniedV6.addSubnet("3fff::", 20, "ipv6");
+  for (const [address, prefix] of subnets) {
+    list.addSubnet(address, prefix, "ipv6");
+  }
+
+  return list;
+};
+
+const globalUnicastV6 = ipv6List([["2000::", 3]]);
+
+const deniedV6 = ipv6List([
+  ["2001::", 23],
+  ["2001:db8::", 32],
+  ["2002::", 16],
+  ["3fff::", 20],
+]);
 
 export const isPublicVoteAddress = (address: string): boolean => {
   const family = isIP(address);
@@ -87,7 +99,7 @@ const lookupWithin = async (host: string, timeoutMs: number) => {
     return await Promise.race([
       lookup(host, { all: true }),
       // oxlint-disable-next-line promise/avoid-new -- A timer has no promise API that can be cleared on success.
-      new Promise<never>((_, reject) => {
+      new Promise<never>((_resolve, reject) => {
         timer = setTimeout(
           () => reject(new Error("Votifier lookup timed out.")),
           timeoutMs

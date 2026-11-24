@@ -40,8 +40,8 @@ import {
   VOTE_TIMEFRAMES,
   timeframeWindowMs,
 } from "@/lib/server-voting";
-import { parseHostnames, verifyTurnstileToken } from "@/lib/turnstile";
 import type { VoteProtocol } from "@/lib/server-voting";
+import { parseHostnames, verifyTurnstileToken } from "@/lib/turnstile";
 import {
   sendVoteNotification,
   VOTE_SERVICE_NAME_MAX_BYTES,
@@ -370,7 +370,8 @@ const configSchema = object({
     maxLength(64),
     check((value) => !/[\r\n]/u.test(value)),
     check(
-      (value) => Buffer.byteLength(value, "utf8") <= VOTE_SERVICE_NAME_MAX_BYTES,
+      (value) =>
+        Buffer.byteLength(value, "utf-8") <= VOTE_SERVICE_NAME_MAX_BYTES,
       `Keep the service name within ${VOTE_SERVICE_NAME_MAX_BYTES} bytes.`
     )
   ),

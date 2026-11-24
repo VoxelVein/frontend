@@ -97,12 +97,22 @@ const LIVE_EVENT_LABELS = {
   "mod.updated": "Project updated",
 } as const satisfies Record<LiveModEvent["event"], string>;
 
+/** Only servers collect votes, so other project types never offer this sort. */
+const VOTES_SORT = "votes:desc";
+
 const SORT_OPTIONS = [
-  { label: "Most voted", value: "votes:desc" },
+  { label: "Most voted", value: VOTES_SORT },
   { label: "Most downloaded", value: DEFAULT_SORT },
   { label: "Recently updated", value: "updatedAt:desc" },
   { label: "Name (A–Z)", value: "name:asc" },
 ] as const;
+
+const NON_SERVER_SORT_OPTIONS = SORT_OPTIONS.filter(
+  (option) => option.value !== VOTES_SORT
+);
+
+const sortOptionsFor = (type: ProjectType) =>
+  type === "server" ? SORT_OPTIONS : NON_SERVER_SORT_OPTIONS;
 
 const SearchBar = ({
   query,
@@ -401,9 +411,7 @@ const Filters = ({
         Sort by
       </label>
       <Select
-        items={SORT_OPTIONS.filter(
-          (option) => type === "server" || option.value !== "votes:desc"
-        )}
+        items={sortOptionsFor(type)}
         value={sort}
         onValueChange={onSortChange}
       >
@@ -411,9 +419,7 @@ const Filters = ({
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
-          {SORT_OPTIONS.filter(
-            (option) => type === "server" || option.value !== "votes:desc"
-          ).map((option) => (
+          {sortOptionsFor(type).map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
