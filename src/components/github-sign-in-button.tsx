@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -23,11 +24,9 @@ const isConfigured = (key: string): boolean => key.trim().length > 0;
 
 const GitHubSignInButtonContent = () => {
   const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = async () => {
     setIsPending(true);
-    setError(null);
 
     try {
       const { error: signInError } = await authClient.signIn.social({
@@ -38,13 +37,13 @@ const GitHubSignInButtonContent = () => {
       });
 
       if (signInError) {
-        setError(
+        toast.error(
           signInError.message ??
             "Could not sign you in with GitHub. Check your connection and try again."
         );
       }
     } catch {
-      setError(
+      toast.error(
         "Could not sign you in with GitHub. Check your connection and try again."
       );
     }
@@ -65,12 +64,6 @@ const GitHubSignInButtonContent = () => {
         <GitHubIcon />
         {isPending ? "Redirecting…" : "Continue with GitHub"}
       </Button>
-
-      {error ? (
-        <p role="alert" className="text-destructive text-sm">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 };

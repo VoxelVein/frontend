@@ -145,12 +145,10 @@ export const AdminReviews = ({
 
   const [reviewDetails, setReviewDetails] = useState<ProjectView | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   const handleReview = async (review: PendingReview) => {
     setSelectedReview(review);
     setReviewDetails(null);
-    setDetailsError(null);
     setIsLoadingDetails(true);
 
     try {
@@ -159,12 +157,12 @@ export const AdminReviews = ({
       if (project) {
         setReviewDetails(project);
       } else {
-        setDetailsError(
+        toast.error(
           "This submission is no longer available. Refresh the queue."
         );
       }
     } catch {
-      setDetailsError("Could not load project details. Try again.");
+      toast.error("Could not load project details. Try again.");
     }
 
     setIsLoadingDetails(false);
@@ -286,14 +284,6 @@ export const AdminReviews = ({
           <Skeleton className="h-24" />
           <Skeleton className="h-16" />
         </div>
-      );
-    }
-
-    if (detailsError) {
-      return (
-        <p role="alert" className="text-destructive py-3">
-          {detailsError}
-        </p>
       );
     }
 

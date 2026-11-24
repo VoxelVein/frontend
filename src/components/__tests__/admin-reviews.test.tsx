@@ -4,16 +4,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminReviews } from "@/components/admin/admin-reviews";
 import type { PendingReview } from "@/lib/project-moderation";
 
-const { approveProjectMock, listPendingReviewsMock, rejectProjectMock } =
-  vi.hoisted(() => ({
-    approveProjectMock:
-      vi.fn<(o: { data: { projectId: string } }) => Promise<void>>(),
-    listPendingReviewsMock: vi.fn<() => Promise<PendingReview[]>>(),
-    rejectProjectMock:
-      vi.fn<
-        (o: { data: { projectId: string; reason: string } }) => Promise<void>
-      >(),
-  }));
+interface ToastCallOptions {
+  id?: string;
+}
+
+const {
+  approveProjectMock,
+  listPendingReviewsMock,
+  rejectProjectMock,
+  toastErrorMock,
+} = vi.hoisted(() => ({
+  approveProjectMock:
+    vi.fn<(o: { data: { projectId: string } }) => Promise<void>>(),
+  listPendingReviewsMock: vi.fn<() => Promise<PendingReview[]>>(),
+  rejectProjectMock:
+    vi.fn<
+      (o: { data: { projectId: string; reason: string } }) => Promise<void>
+    >(),
+  toastErrorMock: vi.fn<(message: string, options?: ToastCallOptions) => void>(),
+}));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The component talks to server functions; string paths avoid strict factory type-checking against the server function types
 vi.mock("@/lib/project-moderation.functions", () => ({
@@ -30,7 +39,7 @@ vi.mock("@/lib/projects.functions", () => ({
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Toasts render into a portal outside the component tree; a stub keeps the test on the component
 vi.mock("sonner", () => ({
   toast: {
-    error: vi.fn<(message: string) => void>(),
+    error: toastErrorMock,
     success: vi.fn<(message: string) => void>(),
   },
 }));
@@ -57,6 +66,7 @@ describe(AdminReviews, () => {
     listPendingReviewsMock.mockReset().mockResolvedValue([]);
     onDecided.mockReset().mockResolvedValue();
     rejectProjectMock.mockReset().mockResolvedValue();
+    toastErrorMock.mockReset();
   });
 
   it("shows an empty state when nothing is waiting", async () => {
@@ -148,9 +158,13 @@ describe(AdminReviews, () => {
     listPendingReviewsMock.mockRejectedValueOnce(new Error("boom"));
     render(<AdminReviews onDecided={onDecided} />);
 
-    // The underlying message wins over the fallback, so the admin sees why it
-    // failed rather than a generic sentence.
-    await expect(screen.findByText("boom")).resolves.toBeTruthy();
+    // The underlying message is announced by Sonner, not left inline.
+    await waitFor(() => {
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        "boom",
+        expect.any(Object)
+      );
+    });
 
     listPendingReviewsMock.mockResolvedValue([SODIUM]);
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
