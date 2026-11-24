@@ -117,7 +117,13 @@ const NotificationRow = ({
 }: NotificationRowProps) => {
   const { headline, tone } = presentationFor(item.type);
   const Icon = TONE_ICON[tone];
-  const canOpen = item.projectSlug !== null;
+
+  const isTransfer =
+    item.type === "project-transfer-offered" ||
+    item.type === "project-transfer-accepted" ||
+    item.type === "project-transfer-declined";
+
+  const canOpen = isTransfer || item.projectSlug !== null;
   const absolute = formatDate(item.createdAt);
 
   const body = (
@@ -170,6 +176,41 @@ const NotificationRow = ({
     </>
   );
 
+  let linkedBody: ReactNode;
+
+  if (isTransfer) {
+    linkedBody = (
+      <Link
+        className="focus-visible:ring-ring min-w-0 flex-1 rounded-md focus-visible:ring-2 focus-visible:outline-none"
+        onClick={() => onOpen(item.id)}
+        to="/dashboard/transfers"
+      >
+        {body}
+        <span className="sr-only">
+          {headline}. Open your transfers, created {absolute}.
+        </span>
+      </Link>
+    );
+  } else if (canOpen) {
+    linkedBody = (
+      <Link
+        className="focus-visible:ring-ring min-w-0 flex-1 rounded-md focus-visible:ring-2 focus-visible:outline-none"
+        onClick={() => onOpen(item.id)}
+        params={{ projectId: item.projectId ?? "" }}
+        to="/dashboard/projects/$projectId"
+      >
+        {body}
+        <span className="sr-only">
+          {headline}. Open {item.projectName}, created {absolute}.
+        </span>
+      </Link>
+    );
+  } else {
+    // No destination, so not a link: a control that goes nowhere is worse
+    // than no control, and the message is the whole notification.
+    linkedBody = <div className="min-w-0 flex-1">{body}</div>;
+  }
+
   return (
     <div
       className={cn(
@@ -177,23 +218,7 @@ const NotificationRow = ({
         ROW_CLASS[item.isRead ? "read" : "unread"]
       )}
     >
-      {canOpen ? (
-        <Link
-          className="focus-visible:ring-ring min-w-0 flex-1 rounded-md focus-visible:ring-2 focus-visible:outline-none"
-          onClick={() => onOpen(item.id)}
-          params={{ projectId: item.projectId ?? "" }}
-          to="/dashboard/projects/$projectId"
-        >
-          {body}
-          <span className="sr-only">
-            {headline}. Open {item.projectName}, created {absolute}.
-          </span>
-        </Link>
-      ) : (
-        // No destination, so not a link: a control that goes nowhere is worse
-        // than no control, and the message is the whole notification.
-        <div className="min-w-0 flex-1">{body}</div>
-      )}
+      {linkedBody}
 
       <div className="flex shrink-0 items-center gap-0.5">
         {item.isRead ? null : (

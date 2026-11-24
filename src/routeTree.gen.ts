@@ -32,6 +32,7 @@ import { Route as AdminPostsRouteImport } from './routes/admin/posts'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardTransfersRouteImport } from './routes/dashboard/transfers'
 import { Route as DatapacksIndexRouteImport } from './routes/datapacks/index'
 import { Route as DatapacksSlugRouteImport } from './routes/datapacks/$slug'
 import { Route as ModpacksIndexRouteImport } from './routes/modpacks/index'
@@ -202,6 +203,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTransfersRoute = DashboardTransfersRouteImport.update({
+  id: '/transfers',
+  path: '/transfers',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DatapacksIndexRoute = DatapacksIndexRouteImport.update({
@@ -512,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/transfers': typeof DashboardTransfersRoute
   '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -590,6 +597,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/transfers': typeof DashboardTransfersRoute
   '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -672,6 +680,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/transfers': typeof DashboardTransfersRoute
   '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -755,6 +764,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/dashboard/transfers'
     | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -833,6 +843,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/dashboard/transfers'
     | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -914,6 +925,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/dashboard/transfers'
     | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -1193,6 +1205,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/transfers': {
+      id: '/dashboard/transfers'
+      path: '/transfers'
+      fullPath: '/dashboard/transfers'
+      preLoaderRoute: typeof DashboardTransfersRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/datapacks/': {
@@ -1629,6 +1648,7 @@ const BlogRouteChildren: BlogRouteChildren = {
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
 interface DashboardRouteChildren {
+  DashboardTransfersRoute: typeof DashboardTransfersRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardProjectsProjectIdRoute: typeof DashboardProjectsProjectIdRoute
   DashboardProjectsNewRoute: typeof DashboardProjectsNewRoute
@@ -1636,6 +1656,7 @@ interface DashboardRouteChildren {
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardTransfersRoute: DashboardTransfersRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardProjectsProjectIdRoute: DashboardProjectsProjectIdRoute,
   DashboardProjectsNewRoute: DashboardProjectsNewRoute,

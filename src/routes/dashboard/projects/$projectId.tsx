@@ -1,4 +1,9 @@
-import { IconArrowLeft, IconTrash, IconVersions } from "@tabler/icons-react";
+import {
+  IconArrowsExchange,
+  IconArrowLeft,
+  IconTrash,
+  IconVersions,
+} from "@tabler/icons-react";
 import {
   createFileRoute,
   Link,
@@ -28,6 +33,13 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -35,6 +47,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 import { errorMessage } from "@/lib/form-errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import type { ProjectImagesView } from "@/lib/project-images";
@@ -44,6 +57,7 @@ import {
   resolveProjectTab,
 } from "@/lib/project-tabs";
 import type { ProjectTab } from "@/lib/project-tabs";
+import { requestProjectTransfer } from "@/lib/project-transfers.functions";
 import {
   PROJECT_IMAGE_KIND,
   hasVersions,
@@ -410,6 +424,134 @@ const VersionList = ({
   );
 };
 
+const TransferOwnership = ({ project }: { project: ProjectView }) => {
+  const { data: session } = authClient.useSession();
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [recipient, setRecipient] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  if (session?.user.id !== project.ownerId) {
+    return null;
+  }
+
+  const submit = async () => {
+    setPending(true);
+    setError(null);
+
+    try {
+      const result = await requestProjectTransfer({
+        data: {
+          password: password || undefined,
+          projectId: project.id,
+          recipient,
+        },
+      });
+
+      toast.success(
+        `Offer sent to ${result.recipientName}. They have seven days to accept.`
+      );
+      setOpen(false);
+      setRecipient("");
+      setPassword("");
+    } catch (transferError) {
+      setError(errorMessage(transferError, "Could not send the offer."));
+    }
+
+    setPending(false);
+  };
+
+  return (
+    <section
+      aria-labelledby="transfer-heading"
+      className="border-border bg-card rounded-xl border p-6"
+    >
+      <h2
+        className="text-foreground text-lg font-semibold"
+        id="transfer-heading"
+      >
+        Transfer ownership
+      </h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Offer this project to another member. Nothing changes until they accept,
+        and the offer expires after seven days.
+      </p>
+      <Button
+        className="mt-4 min-h-11"
+        onClick={() => setOpen(true)}
+        type="button"
+        variant="outline"
+      >
+        <IconArrowsExchange aria-hidden size={16} />
+        Transfer project
+      </Button>
+
+      <Dialog
+        onOpenChange={(next) => {
+          setOpen(next);
+
+          if (!next) {
+            setError(null);
+          }
+        }}
+        open={open}
+      >
+        <DialogContent>
+          <DialogTitle>Transfer {project.name}</DialogTitle>
+          <DialogDescription>
+            Enter the username or email of the member who should own this
+            project. They can decline.
+          </DialogDescription>
+          <form
+            className="grid gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submit();
+            }}
+          >
+            <FormField
+              helperText="Their username or email address."
+              id={`transfer-recipient-${project.id}`}
+              label="Recipient"
+              onChange={(event) => setRecipient(event.target.value)}
+              required
+              value={recipient}
+            />
+            <FormField
+              autoComplete="current-password"
+              helperText="A sign-in within the last ten minutes also counts."
+              id={`transfer-password-${project.id}`}
+              label="Confirm your password"
+              onChange={(event) => setPassword(event.target.value)}
+              type="password"
+              value={password}
+            />
+            {error ? (
+              <p className="text-destructive text-sm" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <DialogFooter>
+              <Button
+                disabled={pending}
+                onClick={() => setOpen(false)}
+                type="button"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending ? "Sending…" : "Send offer"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+};
+
 const DangerZone = ({ project }: { project: ProjectView }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -432,47 +574,50 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
   };
 
   return (
-    <section
-      aria-labelledby="delete-heading"
-      className="border-destructive/40 bg-destructive/5 rounded-xl border p-6"
-    >
-      <h2
-        id="delete-heading"
-        className="text-destructive text-lg font-semibold"
+    <>
+      <TransferOwnership project={project} />
+      <section
+        aria-labelledby="delete-heading"
+        className="border-destructive/40 bg-destructive/5 mt-6 rounded-xl border p-6"
       >
-        Delete project
-      </h2>
-      <p className="text-muted-foreground mt-1 text-sm">
-        Permanently deletes {project.name}, all of its versions, and every
-        uploaded file.
-      </p>
-      <Button
-        type="button"
-        variant="destructive"
-        className="mt-4 min-h-11"
-        onClick={() => setOpen(true)}
-      >
-        <IconTrash size={16} aria-hidden="true" />
-        Delete project
-      </Button>
-      <ConfirmDialog
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
+        <h2
+          id="delete-heading"
+          className="text-destructive text-lg font-semibold"
+        >
+          Delete project
+        </h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Permanently deletes {project.name}, all of its versions, and every
+          uploaded file.
+        </p>
+        <Button
+          type="button"
+          variant="destructive"
+          className="mt-4 min-h-11"
+          onClick={() => setOpen(true)}
+        >
+          <IconTrash size={16} aria-hidden="true" />
+          Delete project
+        </Button>
+        <ConfirmDialog
+          open={open}
+          onOpenChange={(next) => {
+            setOpen(next);
 
-          if (!next) {
-            setError(null);
-          }
-        }}
-        title="Delete project"
-        description={`Delete ${project.name}? All versions and files are deleted permanently, and the project's URL becomes available to others. This can't be undone.`}
-        confirmLabel="Delete project"
-        size="md"
-        onConfirm={confirmDelete}
-        pending={pending}
-        error={error}
-      />
-    </section>
+            if (!next) {
+              setError(null);
+            }
+          }}
+          title="Delete project"
+          description={`Delete ${project.name}? All versions and files are deleted permanently, and the project's URL becomes available to others. This can't be undone.`}
+          confirmLabel="Delete project"
+          size="md"
+          onConfirm={confirmDelete}
+          pending={pending}
+          error={error}
+        />
+      </section>
+    </>
   );
 };
 

@@ -1,4 +1,5 @@
 import {
+  IconArrowsExchange,
   IconHelp,
   IconLogin2,
   IconPackage,
@@ -152,6 +153,21 @@ const MobileAccountLinks = ({
         stroke={1.8}
       />
       My projects
+    </Link>
+
+    <Link
+      className={cn(MOBILE_LINK_CLASS, "gap-3")}
+      onClick={onClose}
+      preload="intent"
+      to="/dashboard/transfers"
+    >
+      <IconArrowsExchange
+        aria-hidden="true"
+        className="text-muted-foreground shrink-0"
+        size={18}
+        stroke={1.8}
+      />
+      Transfers
     </Link>
 
     <Link
