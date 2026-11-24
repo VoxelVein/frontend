@@ -70,12 +70,6 @@ import {
 import { deleteVersionFile, uploadVersionFile } from "@/lib/upload-client";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
-<<<<<<< Updated upstream
-=======
-const TABS = ["details", "images", "versions", "danger"] as const;
-
-type Tab = (typeof TABS)[number];
->>>>>>> Stashed changes
 
 const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
   const ids = new Set<string>();
@@ -485,14 +479,8 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
 const ManageProjectPage = () => {
   const project = useLoaderData({ from: ROUTE_ID });
 
-<<<<<<< Updated upstream
   const activeTab = resolveProjectTab(useSearch({ from: ROUTE_ID }));
   const hasReleaseVersions = hasVersions(project.type);
-=======
-  const { tab = "details" } = useSearch({
-    from: ROUTE_ID,
-  });
->>>>>>> Stashed changes
 
   const navigate = useNavigate({ from: ROUTE_ID });
   const router = useRouter();
@@ -590,13 +578,7 @@ const ManageProjectPage = () => {
               }}
               onSubmit={handleDetails}
             />
-<<<<<<< Updated upstream
           ) : null}
-=======
-            <VotingSettings projectId={project.id} />
-          </TabsContent>
-        )}
->>>>>>> Stashed changes
 
           {activeTab === "images" ? (
             <div className="grid max-w-3xl gap-8">
@@ -638,6 +620,9 @@ const ManageProjectPage = () => {
                   toast.success("Server saved");
                 }}
               />
+              <div className="mt-10">
+                <VotingSettings projectId={project.id} />
+              </div>
             </section>
           ) : null}
 

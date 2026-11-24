@@ -35,7 +35,6 @@ const services: readonly { name: Source; script: string }[] = [
 
 mkdirSync(LOG_DIR, { recursive: true });
 
-<<<<<<< Updated upstream
 // One log file per process launch, named from the time this function runs
 // rather than from a value captured when the module was first evaluated.
 const openLogFile = () => {
@@ -47,11 +46,6 @@ const openLogFile = () => {
 };
 
 const { logFile, logPath } = openLogFile();
-=======
-const stamp = new Date().toISOString().replaceAll(/[:.]/gu, "-");
-const logPath = path.join(LOG_DIR, `dev-${stamp}.log`);
-const logFile = createWriteStream(logPath, { flags: "a" });
->>>>>>> Stashed changes
 
 const timestamp = (): string => new Date().toTimeString().slice(0, 8);
 

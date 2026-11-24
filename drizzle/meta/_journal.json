@@ -208,13 +208,15 @@
     {
       "idx": 29,
       "version": "7",
-<<<<<<< Updated upstream
       "when": 1795446511429,
       "tag": "0029_project_disclosures",
-=======
-      "when": 1795297299853,
-      "tag": "0029_server_voting",
->>>>>>> Stashed changes
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795537437760,
+      "tag": "0030_server_voting",
       "breakpoints": true
     }
   ]

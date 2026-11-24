@@ -7,23 +7,8 @@ const subscribe = (onStoreChange: () => void): (() => void) => {
   const mediaQuery = window.matchMedia(MOBILE_QUERY);
   mediaQuery.addEventListener("change", onStoreChange);
 
-<<<<<<< Updated upstream
   return () => mediaQuery.removeEventListener("change", onStoreChange);
 };
-=======
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-
-    mql.addEventListener("change", onChange);
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
->>>>>>> Stashed changes
 
 const getSnapshot = (): boolean => window.matchMedia(MOBILE_QUERY).matches;
 

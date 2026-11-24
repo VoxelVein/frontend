@@ -726,25 +726,6 @@ export const ProjectBrowser = ({
     }
 
     const source = new EventSource(`${API_URL}/api/events`);
-<<<<<<< Updated upstream
-=======
-    let hasReportedConnectionIssue = false;
-
-    const handleOpen = () => {
-      hasReportedConnectionIssue = false;
-    };
-
-    const handleError = () => {
-      if (hasReportedConnectionIssue) {
-        return;
-      }
-
-      hasReportedConnectionIssue = true;
-      toast.error(
-        "Live updates are temporarily unavailable. You can keep browsing; we’ll retry automatically."
-      );
-    };
->>>>>>> Stashed changes
 
     // A dropped stream is silent by design: browsing, filtering and searching
     // all still work, and EventSource reconnects on its own. Infrastructure
