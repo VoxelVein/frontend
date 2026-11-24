@@ -10,6 +10,7 @@ import {
   ServerJoinPanel,
   ServerRequirements,
 } from "@/components/projects/server-detail-panels";
+import { ServerVoteButton } from "@/components/projects/server-vote-button";
 import { authClient } from "@/lib/auth-client";
 import type { ProjectView } from "@/lib/projects";
 import { can } from "@/lib/roles";
@@ -24,6 +25,7 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
 
   return (
     <ProjectDetailPageFrame>
+      <ServerVoteButton projectId={project.id} />
       {project.status === "published" ? null : (
         <output className="border-primary/20 bg-primary/5 text-foreground mb-4 block rounded-lg border px-4 py-3 text-sm">
           This server is{" "}

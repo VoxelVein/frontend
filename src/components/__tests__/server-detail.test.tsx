@@ -1,3 +1,8 @@
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Voting is independently covered; keep this layout suite isolated from server functions.
+vi.mock("@/components/projects/server-vote-button", () => ({
+  ServerVoteButton: () => <button type="button">Vote</button>,
+}));
+
 import {
   fireEvent,
   render,

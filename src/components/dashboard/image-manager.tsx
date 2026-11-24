@@ -197,10 +197,64 @@ const ImageManager = (props: ImageManagerProps) => {
                 } else {
                   void upload(file);
                 }
+<<<<<<< Updated upstream
               }
             }}
           />
           {/* Gated on object storage; without it there is nowhere to put the
+=======
+                ratio="square"
+                className="border-border aspect-square rounded-lg border"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                disabled={busy}
+                onClick={() => {
+                  void remove(image.id);
+                }}
+                className="absolute top-1 right-1"
+              >
+                <IconTrash size={16} aria-hidden="true" />
+                <span className="sr-only">
+                  {isIcon
+                    ? "Remove the project icon"
+                    : `Remove gallery image ${index + 1}`}
+                </span>
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-muted-foreground flex items-center gap-2 text-sm">
+          <IconPhoto size={16} aria-hidden="true" />
+          {isIcon
+            ? "No icon yet. Without one, a letter tile is shown."
+            : "No images yet."}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPT}
+          className="sr-only"
+          id={`project-${kind}-upload`}
+          disabled={busy || atLimit}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            // Reset so choosing the same file twice still fires a change.
+            event.target.value = "";
+
+            if (file) {
+              void upload(file);
+            }
+          }}
+        />
+        {/* Gated on object storage; without it there is nowhere to put the
+>>>>>>> Stashed changes
             bytes, so the control is disabled rather than failing after the
             reader has picked a file. */}
           <StorageGated reason={STORAGE_UNAVAILABLE_REASON}>

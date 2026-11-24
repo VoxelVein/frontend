@@ -11,6 +11,7 @@
  * site" told the reader nothing they could not see for themselves.
  */
 export const USER_NOTIFICATION_TYPES = [
+  "server-voting-updated",
   /** An admin approved a project the user submitted for review. */
   "project-approved",
   /** An admin sent a submitted project back to draft, with a reason. */
@@ -45,6 +46,10 @@ interface NotificationPresentation {
  * error rather than a row that quietly renders with no icon.
  */
 const PRESENTATION = {
+  "server-voting-updated": {
+    headline: "Voting settings updated",
+    tone: "attention",
+  },
   "project-approved": {
     headline: "Project approved",
     tone: "positive",

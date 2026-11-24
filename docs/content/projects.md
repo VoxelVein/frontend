@@ -583,3 +583,8 @@ required first: both seeders attach their content to the first admin.
 * [Accounts](../authentication/accounts.md)
 * [Architecture Overview](../architecture/overview.md)
 * [API Server](../architecture/api.md)
+
+## Server voting
+
+Servers support voting, rolling leaderboards, and optional Votifier rewards.
+See [Server voting](server-voting.md) for player flows, cooldowns and deployment.

@@ -3,6 +3,7 @@ import { IconDownload, IconTag } from "@tabler/icons-react";
 import { ProjectImage } from "@/components/projects/project-image";
 import { ProjectLink } from "@/components/projects/project-link";
 import { ServerPlayerCount } from "@/components/projects/server-player-count";
+import { ServerVoteButton } from "@/components/projects/server-vote-button";
 import { formatCount } from "@/lib/format";
 import type { ProjectDocument } from "@/lib/projects";
 import type { MinecraftServerStatus } from "@/lib/server-status.functions";
@@ -60,6 +61,9 @@ const ProjectCard = ({
       {project.description}
     </p>
 
+    {project.type === "server" ? (
+      <ServerVoteButton projectId={project.id} />
+    ) : null}
     {/* Footer Metadata */}
     <div className="border-border/60 text-muted-foreground mt-4 flex items-center justify-between gap-3 border-t pt-3.5 text-xs">
       <div className="flex items-center gap-3.5">

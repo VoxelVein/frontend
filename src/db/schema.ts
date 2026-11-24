@@ -247,6 +247,7 @@ export const projects = pgTable(
       .default([])
       .notNull(),
     downloads: integer("downloads").default(0).notNull(),
+    totalVotes: integer("total_votes").default(0).notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
     // Admin-marked protected project: never deleted along with its owner's
@@ -344,6 +345,55 @@ export const projectServers = pgTable("project_servers", {
  * Mods, modpacks, shaders, and resource packs a server links to, each either
  * required to join or only recommended.
  */
+/**
+ * Append-only history. Transactions serialize on the project before checking cooldowns.
+ */
+export const serverVotes = pgTable(
+  "server_votes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    minecraftUsername: text("minecraft_username").notNull(),
+    address: text("address"),
+    edition: text("edition").notNull().$type<"java" | "bedrock">(),
+    deliveryStatus: text("delivery_status").default("pending").notNull(),
+    deliveryDetail: text("delivery_detail"),
+    votedAt: timestamp("voted_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("server_votes_project_id_idx").on(table.projectId, table.votedAt),
+    index("server_votes_user_id_idx").on(table.userId),
+  ]
+);
+
+/**
+ * Per-server Votifier / NuVotifier configuration and voting toggle, owned by
+ * the server's owner and managed from the dashboard.
+ */
+export const serverVoteConfig = pgTable(
+  "server_vote_config",
+  {
+    projectId: uuid("project_id")
+      .primaryKey()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    votingEnabled: boolean("voting_enabled").default(false).notNull(),
+    host: text("host"),
+    port: integer("port"),
+    // NuVotifier v2 uses HMAC tokens, classic Votifier v1 uses RSA public keys.
+    protocol: text("protocol").default("v2").notNull().$type<"v1" | "v2">(),
+    serviceName: text("service_name"),
+    token: text("token"),
+    publicKey: text("public_key"),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("server_vote_config_project_id_idx").on(table.projectId)]
+);
+
 export const projectServerLinks = pgTable(
   "project_server_links",
   {
@@ -727,6 +777,27 @@ export const projectImagesRelations = relations(projectImages, ({ one }) => ({
     references: [projects.id],
   }),
 }));
+
+export const serverVotesRelations = relations(serverVotes, ({ one }) => ({
+  project: one(projects, {
+    fields: [serverVotes.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [serverVotes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const serverVoteConfigRelations = relations(
+  serverVoteConfig,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [serverVoteConfig.projectId],
+      references: [projects.id],
+    }),
+  })
+);
 
 export const projectVersionsRelations = relations(
   projectVersions,

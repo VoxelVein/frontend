@@ -22,6 +22,7 @@ const AvatarCropModal = ({
   file,
   onCancel,
   onConfirm,
+<<<<<<< Updated upstream
 }: AvatarCropModalProps) => (
   <ImageCropModal
     areaLabel="Avatar crop area"
@@ -36,5 +37,19 @@ const AvatarCropModal = ({
     title="Crop your picture"
   />
 );
+=======
+}: AvatarCropModalProps) => {
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const [view, dispatch] = useReducer(cropViewReducer, {
+    offset: { x: 0, y: 0 },
+    zoom: 1,
+  });
+
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+>>>>>>> Stashed changes
 
 export { AvatarCropModal };

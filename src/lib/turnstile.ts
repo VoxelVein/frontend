@@ -18,7 +18,7 @@ const TESTING_SECRET_PREFIXES = ["1x", "2x", "3x"] as const;
 // `cf-turnstile-response` form field.
 export const TURNSTILE_TOKEN_HEADER = "cf-turnstile-response";
 
-export type TurnstileAction = "login" | "signup";
+export type TurnstileAction = "login" | "signup" | "vote";
 
 export interface TurnstileConfig {
   hostnames: ReadonlySet<string>;
