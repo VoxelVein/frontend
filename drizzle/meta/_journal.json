@@ -218,6 +218,13 @@
       "when": 1795537437760,
       "tag": "0030_server_voting",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795551093337,
+      "tag": "0031_project_transfers",
+      "breakpoints": true
     }
   ]
 }

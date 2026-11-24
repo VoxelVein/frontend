@@ -15,6 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import type { UserNotificationType } from "../lib/notifications";
+import type { ProjectTransferStatus } from "../lib/project-transfers";
 import type {
   ProjectDisclosure,
   ProjectImageKind,
@@ -857,6 +858,71 @@ export const userNotifications = pgTable(
     // sequential-scans every notification ever sent about it.
     index("user_notifications_projectId_idx").on(table.projectId),
   ]
+);
+
+/**
+ * An ownership hand-off. User-initiated transfers wait for the recipient to
+ * accept; an admin transfer applies immediately, so it is recorded with the
+ * accepted status and no offer to answer.
+ */
+export const projectTransfers = pgTable(
+  "project_transfers",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    fromUserId: text("from_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .references(() => projects.id, { onDelete: "cascade" })
+      .notNull(),
+    resolvedAt: timestamp("resolved_at"),
+    status: text("status")
+      .$type<ProjectTransferStatus>()
+      .default("pending")
+      .notNull(),
+    toUserId: text("to_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => [
+    // One open offer per project: a second request must not leave two people
+    // able to accept the same hand-off.
+    uniqueIndex("project_transfers_pending_project_idx")
+      .on(table.projectId)
+      .where(sql`${table.status} = 'pending'`),
+    index("project_transfers_projectId_status_idx").on(
+      table.projectId,
+      table.status
+    ),
+    index("project_transfers_toUserId_status_idx").on(
+      table.toUserId,
+      table.status
+    ),
+    index("project_transfers_fromUserId_status_idx").on(
+      table.fromUserId,
+      table.status
+    ),
+  ]
+);
+
+export const projectTransfersRelations = relations(
+  projectTransfers,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [projectTransfers.projectId],
+      references: [projects.id],
+    }),
+    fromUser: one(users, {
+      fields: [projectTransfers.fromUserId],
+      references: [users.id],
+    }),
+    toUser: one(users, {
+      fields: [projectTransfers.toUserId],
+      references: [users.id],
+    }),
+  })
 );
 
 export const projectFilesRelations = relations(projectFiles, ({ one }) => ({
