@@ -4,6 +4,27 @@ All notable changes to the VoxelVein frontend are documented here. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and release
 names match the repository's `ALPHA-*` git tags.
 
+## [Unreleased]
+
+### Added
+
+* A dedicated Top Voted Servers section on the home page, with timeframe tabs,
+  a lead card and compact ranked rows.
+* Compact vote counters on server cards, matching the online-player counter.
+
+### Changed
+
+* Server voting and its settings use shadcn components throughout, and the
+  listener cards dim when voting is off.
+* Long supported-version lists fold behind an expand button on the public
+  server page and in the server manager.
+
+### Fixed
+
+* Server and query failures are announced with Sonner toasts instead of inline
+  errors; field validation and not-configured notices stay inline.
+* The "All versions" filter now matches the other browse filters' size.
+
 ## [ALPHA-0.17.0] - 2026-11-24
 
 Changes on `main` since `ALPHA-0.16.1`.

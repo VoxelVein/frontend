@@ -73,6 +73,12 @@ already shipped.
 
 ## Completed
 
+* [x] Rebuilt voting UI with shadcn primitives and shadcn-only form controls.
+* [x] Announced server and query failures with Sonner toasts.
+* [x] Folded long supported-version lists on the server page and manager.
+* [x] Replaced the nested vote card on server cards with a compact counter.
+* [x] Redesigned the homepage Top Voted Servers section and removed it from
+      `/p/servers`.
 * [x] Standardized the version at `ALPHA-0.17.0` and added a changelog.
 * [x] Seven project types: browse, detail and gallery pages, creator forms,
       filters and search.
