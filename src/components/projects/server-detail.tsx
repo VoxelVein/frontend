@@ -25,7 +25,6 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
 
   return (
     <ProjectDetailPageFrame>
-      <ServerVoteButton projectId={project.id} />
       {project.status === "published" ? null : (
         <output className="border-primary/20 bg-primary/5 text-foreground mb-4 block rounded-lg border px-4 py-3 text-sm">
           This server is{" "}
@@ -42,7 +41,12 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
       />
 
       <ProjectDetailColumns
-        sidebar={<ServerJoinPanel server={project.server} />}
+        sidebar={
+          <div className="grid gap-4">
+            <ServerJoinPanel server={project.server} />
+            <ServerVoteButton projectId={project.id} />
+          </div>
+        }
       >
         <section
           aria-labelledby="server-description-heading"

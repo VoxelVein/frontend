@@ -139,9 +139,17 @@ describe("server voting flow", () => {
     fireEvent.change(await screen.findByLabelText("Minecraft username"), {
       target: { value: ".BedrockUser" },
     });
-    fireEvent.change(screen.getByLabelText("Minecraft edition"), {
-      target: { value: "bedrock" },
+    fireEvent.click(
+      screen.getByRole("combobox", { name: "Minecraft edition" })
+    );
+
+    const bedrock = await screen.findByRole("option", {
+      name: "Bedrock Edition",
     });
+
+    // Base UI only commits a mouse selection after a pointer down on the item.
+    fireEvent.pointerDown(bedrock, { pointerType: "mouse" });
+    fireEvent.click(bedrock);
     fireEvent.click(screen.getByRole("button", { name: "Confirm vote" }));
     await waitFor(() =>
       expect(mocks.vote).toHaveBeenCalledWith({
