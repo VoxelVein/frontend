@@ -63,11 +63,6 @@ const GoogleSignInButtonContent = () => {
       setError(
         "Could not sign you in with Google. Check your connection and try again."
       );
-<<<<<<< Updated upstream
-=======
-
-      return;
->>>>>>> Stashed changes
     }
 
     setIsPending(false);

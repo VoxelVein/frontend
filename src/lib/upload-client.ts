@@ -55,13 +55,9 @@ const toFailure = (body: { code?: string; error?: string }): Error => {
     );
   }
 
-<<<<<<< Updated upstream
   // The status is already in the response, not in the sentence: a reader who
   // sees "The upload failed (200)." cannot tell what to do with the number.
   return new Error(body.error ?? UPLOAD_FAILED_MESSAGE);
-=======
-  return new Error(body.error ?? `The upload failed (${status}).`);
->>>>>>> Stashed changes
 };
 
 const readError = (request: XMLHttpRequest): Error => {
@@ -119,7 +115,6 @@ export const uploadVersionFile = ({
       }
     });
     request.addEventListener("load", () => {
-<<<<<<< Updated upstream
       if (isSuccess(request.status)) {
         try {
           // SAFETY: a successful upload route always carries a ProjectFileView.
@@ -127,11 +122,6 @@ export const uploadVersionFile = ({
         } catch {
           reject(new Error(UPLOAD_FAILED_MESSAGE));
         }
-=======
-      if (request.status === 201) {
-        // SAFETY: a 201 from the upload route always carries a ProjectFileView.
-        resolve(JSON.parse(request.responseText) as ProjectFileView);
->>>>>>> Stashed changes
 
         return;
       }
@@ -198,7 +188,6 @@ export const uploadProjectImage = async ({
       }
     });
     request.addEventListener("load", () => {
-<<<<<<< Updated upstream
       if (isSuccess(request.status)) {
         try {
           // SAFETY: a successful image route always carries an image record.
@@ -206,11 +195,6 @@ export const uploadProjectImage = async ({
         } catch {
           reject(new Error(UPLOAD_FAILED_MESSAGE));
         }
-=======
-      if (request.status === 201) {
-        // SAFETY: a 201 from the image route always carries an image record.
-        resolve(JSON.parse(request.responseText) as UploadedProjectImage);
->>>>>>> Stashed changes
 
         return;
       }
@@ -262,7 +246,6 @@ export const uploadAvatar = async ({
       }
     });
     request.addEventListener("load", () => {
-<<<<<<< Updated upstream
       if (isSuccess(request.status)) {
         try {
           // SAFETY: a successful avatar route always carries an avatar record.
@@ -270,11 +253,6 @@ export const uploadAvatar = async ({
         } catch {
           reject(new Error(UPLOAD_FAILED_MESSAGE));
         }
-=======
-      if (request.status === 201) {
-        // SAFETY: a 201 from the avatar route always carries an avatar record.
-        resolve(JSON.parse(request.responseText) as UploadedAvatar);
->>>>>>> Stashed changes
 
         return;
       }

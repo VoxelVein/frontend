@@ -40,20 +40,11 @@ const IconSwap = ({ value, children, className }: IconSwapProps) => {
       }, EXIT_DURATION_MS);
     }
 
-<<<<<<< Updated upstream
     return () => {
       if (id !== null) {
         clearTimeout(id);
       }
     };
-=======
-    const id = setTimeout(() => {
-      setDisplayed({ children, value });
-      setIsExiting(false);
-    }, EXIT_DURATION_MS);
-
-    return () => clearTimeout(id);
->>>>>>> Stashed changes
   }, [isExiting, value, children]);
 
   return (

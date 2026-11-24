@@ -122,7 +122,6 @@ const RotatingText = ({
   // too, so the observer covers that as well.
   useLayoutEffect(() => {
     const container = containerRef.current;
-<<<<<<< Updated upstream
     let observer: ResizeObserver | null = null;
 
     if (container) {
@@ -136,22 +135,6 @@ const RotatingText = ({
     }
 
     return () => observer?.disconnect();
-=======
-
-    if (!container) {
-      return;
-    }
-
-    const measure = () => {
-      setWidths(sizerRefs.current.map((sizer) => sizer?.offsetWidth ?? 0));
-    };
-
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(container);
-
-    return () => observer.disconnect();
->>>>>>> Stashed changes
   }, []);
 
   // Each swap clears isExiting, which re-arms the timer for the next text.
@@ -162,17 +145,11 @@ const RotatingText = ({
       exitTimer = setTimeout(() => setIsExiting(true), rotationInterval);
     }
 
-<<<<<<< Updated upstream
     return () => {
       if (exitTimer !== null) {
         clearTimeout(exitTimer);
       }
     };
-=======
-    const exitTimer = setTimeout(() => setIsExiting(true), rotationInterval);
-
-    return () => clearTimeout(exitTimer);
->>>>>>> Stashed changes
   }, [isExiting, paused, rotationInterval, texts.length]);
 
   useEffect(() => {
@@ -185,20 +162,11 @@ const RotatingText = ({
       }, exitDurationMs);
     }
 
-<<<<<<< Updated upstream
     return () => {
       if (swapTimer !== null) {
         clearTimeout(swapTimer);
       }
     };
-=======
-    const swapTimer = setTimeout(() => {
-      setIndex((current) => (current + 1) % texts.length);
-      setIsExiting(false);
-    }, exitDurationMs);
-
-    return () => clearTimeout(swapTimer);
->>>>>>> Stashed changes
   }, [exitDurationMs, isExiting, texts.length]);
 
   // Until the texts are measured (server render, first paint) the pill spans

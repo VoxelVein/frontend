@@ -35,7 +35,6 @@ export const VerificationNotice = ({ email }: VerificationNoticeProps) => {
         email,
       });
 
-<<<<<<< Updated upstream
       if (error) {
         toast.error(
           error.message ??
@@ -46,16 +45,6 @@ export const VerificationNotice = ({ email }: VerificationNoticeProps) => {
       }
     } catch {
       toast.error("Could not send another verification email. Try again.");
-=======
-    setIsSending(false);
-
-    if (error) {
-      toast.error(
-        error.message ?? "Could not send another verification email. Try again."
-      );
-
-      return;
->>>>>>> Stashed changes
     }
 
     setIsSending(false);
