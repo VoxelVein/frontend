@@ -1,5 +1,7 @@
 import {
   IconCheck,
+  IconChevronDown,
+  IconChevronUp,
   IconCopy,
   IconPackage,
   IconPlugConnected,
@@ -125,15 +127,26 @@ const ServerAddress = ({ server }: { server: ProjectServerView }) => {
   );
 };
 
+const VERSION_COLLAPSE_THRESHOLD = 8;
+const VERSION_PREVIEW_COUNT = 5;
+
 /**
  * The Minecraft versions a server accepts.
  *
- * Pills rather than the comma-separated sentence the old page used. A version
- * is something a player matches against their own launcher, so it has to be
- * scannable at a glance  -  "can I join with what I have?" is the question, and
- * reading a run of text does not answer it.
+ * Pills rather than a comma-separated sentence: a version is something a
+ * player matches against their own launcher, so it has to be scannable at a
+ * glance. Long lists are folded behind a short button, with a fade instead of
+ * a hard cut so the clipped row reads as "more below" rather than a broken
+ * layout.
  */
 const ServerVersions = ({ versions }: { versions: string[] }) => {
+  const [expanded, setExpanded] = useState(false);
+  const collapsible = versions.length > VERSION_COLLAPSE_THRESHOLD && !expanded;
+
+  const shown = collapsible
+    ? versions.slice(0, VERSION_PREVIEW_COUNT)
+    : versions;
+
   if (versions.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
@@ -143,16 +156,46 @@ const ServerVersions = ({ versions }: { versions: string[] }) => {
   }
 
   return (
-    <ul className="flex flex-wrap gap-2">
-      {versions.map((version) => (
-        <li
-          className="border-border bg-muted text-foreground inline-flex items-center rounded-full border px-3 py-1 font-mono text-sm"
-          key={version}
+    <div className="grid justify-items-start gap-3">
+      <div
+        className={cn("relative", collapsible && "max-h-11 overflow-hidden")}
+      >
+        <ul className="flex flex-wrap gap-2">
+          {shown.map((version) => (
+            <li
+              className="border-border bg-muted text-foreground inline-flex items-center rounded-full border px-3 py-1 font-mono text-sm"
+              key={version}
+            >
+              {version}
+            </li>
+          ))}
+        </ul>
+        {collapsible ? (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black to-transparent"
+          />
+        ) : null}
+      </div>
+
+      {versions.length > VERSION_COLLAPSE_THRESHOLD ? (
+        <Button
+          onClick={() => setExpanded((current) => !current)}
+          size="sm"
+          type="button"
+          variant="ghost"
         >
-          {version}
-        </li>
-      ))}
-    </ul>
+          {expanded ? (
+            <IconChevronUp aria-hidden="true" size={16} />
+          ) : (
+            <IconChevronDown aria-hidden="true" size={16} />
+          )}
+          {expanded
+            ? "Show fewer versions"
+            : `Show all ${versions.length} versions`}
+        </Button>
+      ) : null}
+    </div>
   );
 };
 

@@ -90,6 +90,29 @@ describe(GameVersionPicker, () => {
     ).not.toBeInTheDocument();
   });
 
+  it("folds a long selection and expands it on click", () => {
+    const values = Array.from({ length: 10 }, (_, index) => `1.21.${index}`);
+    render(<Harness initial={values} />);
+
+    expect(
+      screen.getByRole("button", { name: "Show all 10 versions" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove 1.21.8" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Show all 10 versions" })
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Remove 1.21.8" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show fewer versions" })
+    ).toBeInTheDocument();
+  });
+
   it("announces errors on the input", () => {
     render(
       <GameVersionPicker
