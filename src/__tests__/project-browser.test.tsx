@@ -32,7 +32,8 @@ const {
     vi.fn<
       (opts: { data: ProjectSearchParams }) => Promise<ProjectSearchResponse>
     >(),
-  toastErrorMock: vi.fn<(message: string, options?: ToastCallOptions) => void>(),
+  toastErrorMock:
+    vi.fn<(message: string, options?: ToastCallOptions) => void>(),
   useLoaderDataMock: vi.fn<() => ProjectBrowserData>(),
 }));
 

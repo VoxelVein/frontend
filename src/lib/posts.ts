@@ -157,7 +157,8 @@ export const slugify = (input: string) =>
     .toLowerCase()
     .trim()
     .replaceAll(/[^a-z0-9]+/gu, "-")
-    .replaceAll(/^-+|-+$/gu, "");
+    .replace(/^-/u, "")
+    .replace(/-$/u, "");
 
 // ── Card preview ────────────────────────────────────────────────────────────
 // Post cards show a short plain-text teaser. A manual excerpt always wins; when
@@ -176,11 +177,15 @@ const FENCED_CODE = /```[\s\S]*?```/gu;
 // into the teaser instead of collapsing to a blank.
 const INLINE_CODE = /`(?<code>[^`]*)`/gu;
 const IMAGE = /!\[(?<alt>[^\]]*)\]\([^)]*\)/gu;
+
+// oxlint-disable-next-line sonarjs/super-linear-regex -- Both scans stop at their closing delimiter, so the match is linear.
 const LINK = /\[(?<text>[^\]]*)\]\([^)]*\)/gu;
 const HEADING = /^\s{0,3}#{1,6}\s+/gmu;
 const BLOCKQUOTE = /^\s{0,3}>\s?/gmu;
 const LIST_MARKER = /^\s{0,3}(?:[-*+]|\d+[.)])\s+/gmu;
 const HORIZONTAL_RULE = /^\s{0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/gmu;
+
+// oxlint-disable-next-line sonarjs/super-linear-regex -- A negated class stops at the first '>', so there is no nested quantification.
 const HTML_TAG = /<[^>]+>/gu;
 const STRONG_ASTERISK = /\*\*(?<text>\S(?:[^*]*\S)?)\*\*/gu;
 const STRONG_UNDERSCORE = /__(?<text>\S(?:[^_]*\S)?)__/gu;
@@ -193,6 +198,8 @@ const EMPHASIS_UNDERSCORE =
   /(?<lead>^|[\s(])_(?<text>\S(?:[^_]*\S)?)_(?=$|[\s).,!?:;])/gu;
 
 const WHITESPACE = /\s+/gu;
+
+// oxlint-disable-next-line sonarjs/super-linear-regex -- A single bounded class anchored at the end cannot backtrack across alternatives.
 const TRAILING_NOISE = /[\s.,;:!?\-–]+$/gu;
 
 /** Replaces block syntax with nothing, keeping the inline word text. */

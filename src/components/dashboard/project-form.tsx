@@ -78,8 +78,8 @@ const slugify = (value: string): string =>
     .toLowerCase()
     .normalize("NFKD")
     .replaceAll(/[^a-z0-9]+/gu, "-")
-    .replaceAll(/^-+/gu, "")
-    .replaceAll(/-+$/gu, "")
+    .replace(/^-/u, "")
+    .replace(/-$/u, "")
     .slice(0, SLUG_MAX_LENGTH);
 
 const splitTags = (value: string): string[] => [

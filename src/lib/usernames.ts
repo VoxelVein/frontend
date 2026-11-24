@@ -9,7 +9,22 @@ export const USERNAME_MAX_LENGTH = 30;
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_.]+$/u;
 const INVALID_USERNAME_CHARACTERS = /[^a-z0-9_.]+/gu;
-const EDGE_SEPARATORS = /^[_.]+|[_.]+$/gu;
+
+/** Trims edge separators with a scan, without a backtracking regex. */
+const trimEdgeSeparators = (value: string): string => {
+  let start = 0;
+  let end = value.length;
+
+  while (start < end && (value[start] === "_" || value[start] === ".")) {
+    start += 1;
+  }
+
+  while (end > start && (value[end - 1] === "_" || value[end - 1] === ".")) {
+    end -= 1;
+  }
+
+  return value.slice(start, end);
+};
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -114,11 +129,11 @@ export const getUsernameProblem = (
  * username base. Always returns something usable, falling back to "user".
  */
 export const toUsernameBase = (raw: string): string => {
-  const cleaned = raw
-    .toLowerCase()
-    .replaceAll(INVALID_USERNAME_CHARACTERS, "_")
-    .replaceAll(EDGE_SEPARATORS, "")
-    .slice(0, USERNAME_MAX_LENGTH);
+  const trimmed = trimEdgeSeparators(
+    raw.toLowerCase().replaceAll(INVALID_USERNAME_CHARACTERS, "_")
+  );
+
+  const cleaned = trimmed.slice(0, USERNAME_MAX_LENGTH);
 
   if (cleaned.length < USERNAME_MIN_LENGTH || isReservedUsername(cleaned)) {
     return "user";

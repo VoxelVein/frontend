@@ -21,7 +21,8 @@ const {
     vi.fn<
       (o: { data: { projectId: string; reason: string } }) => Promise<void>
     >(),
-  toastErrorMock: vi.fn<(message: string, options?: ToastCallOptions) => void>(),
+  toastErrorMock:
+    vi.fn<(message: string, options?: ToastCallOptions) => void>(),
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The component talks to server functions; string paths avoid strict factory type-checking against the server function types
@@ -160,10 +161,7 @@ describe(AdminReviews, () => {
 
     // The underlying message is announced by Sonner, not left inline.
     await waitFor(() => {
-      expect(toastErrorMock).toHaveBeenCalledWith(
-        "boom",
-        expect.any(Object)
-      );
+      expect(toastErrorMock).toHaveBeenCalledWith("boom", expect.any(Object));
     });
 
     listPendingReviewsMock.mockResolvedValue([SODIUM]);

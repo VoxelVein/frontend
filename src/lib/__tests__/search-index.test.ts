@@ -87,6 +87,7 @@ const fuzzyFields = (predicate: string): Set<string> =>
   new Set(
     [
       ...predicate.matchAll(
+        // oxlint-disable-next-line sonarjs/super-linear-regex -- Each \w+ ends at a literal quote, so the scan is bounded.
         /(?<table>\w+)\."(?<column>\w+)"\s+(?:%|ilike)\s/gu
       ),
     ].map(({ groups }) => `${groups?.table}.${groups?.column}`)
