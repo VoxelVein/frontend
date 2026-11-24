@@ -109,11 +109,46 @@ const TurnstileWidget = ({
   useEffect(() => {
     let isCancelled = false;
 
+<<<<<<< Updated upstream
     if (siteKey) {
       const renderWidget = async () => {
         try {
           const turnstile = await loadTurnstile();
           const container = containerRef.current;
+=======
+    const renderWidget = async () => {
+      try {
+        const turnstile = await loadTurnstile();
+        const container = containerRef.current;
+
+        if (isCancelled || !container) {
+          return;
+        }
+
+        setHasError(false);
+        widgetIdRef.current =
+          turnstile.render(container, {
+            action,
+            callback: (token) => {
+              setHasError(false);
+              onTokenChangeRef.current(token);
+            },
+            "error-callback": () => {
+              setHasError(true);
+              onTokenChangeRef.current(null);
+            },
+            "expired-callback": () => onTokenChangeRef.current(null),
+            sitekey: siteKey,
+            size: "flexible",
+            theme,
+          }) ?? null;
+      } catch {
+        if (!isCancelled) {
+          setHasError(true);
+        }
+      }
+    };
+>>>>>>> Stashed changes
 
           if (isCancelled || !container) {
             return;
@@ -148,6 +183,7 @@ const TurnstileWidget = ({
 
     return () => {
       isCancelled = true;
+<<<<<<< Updated upstream
 
       if (siteKey) {
         onTokenChangeRef.current(null);
@@ -158,6 +194,15 @@ const TurnstileWidget = ({
 
         widgetIdRef.current = null;
       }
+=======
+      onTokenChangeRef.current(null);
+
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+      }
+
+      widgetIdRef.current = null;
+>>>>>>> Stashed changes
     };
   }, [action, siteKey, theme]);
 

@@ -61,6 +61,11 @@ export const createProjectSearchCache = (
         result = entry.data;
       } else if (entry) {
         entries.delete(key);
+<<<<<<< Updated upstream
+=======
+
+        return;
+>>>>>>> Stashed changes
       }
 
       return result;

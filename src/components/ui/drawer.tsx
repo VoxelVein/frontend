@@ -32,8 +32,12 @@ function Drawer({
 }: DrawerPrimitive.Root.Props & {
   showSwipeHandle?: boolean;
 }) {
+<<<<<<< Updated upstream
   const hasSnapPoints =
     snapPoints !== null && snapPoints !== undefined && snapPoints.length > 0;
+=======
+  const hasSnapPoints = snapPoints != null && snapPoints.length > 0;
+>>>>>>> Stashed changes
 
   const contextValue = React.useMemo(
     () => ({ hasSnapPoints, modal, showSwipeHandle, swipeDirection }),

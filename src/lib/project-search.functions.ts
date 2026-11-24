@@ -25,7 +25,13 @@ const TRUST_PROXY = readTrustProxy(
 const GAME_VERSIONS = new Set<string>(ALL_GAME_VERSIONS);
 
 const DEFAULT_SORT = "downloads:desc";
-const SORTS = ["downloads:desc", "updatedAt:desc", "name:asc"] as const;
+
+const SORTS = [
+  "votes:desc",
+  "downloads:desc",
+  "updatedAt:desc",
+  "name:asc",
+] as const;
 
 export interface ProjectSearchParams {
   category?: string;

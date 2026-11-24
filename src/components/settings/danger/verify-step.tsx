@@ -75,6 +75,7 @@ export const VerifyStep = ({
   const handlePasskey = async () => {
     setActionError(null);
     setIsBusy(true);
+<<<<<<< Updated upstream
 
     try {
       const { error } = await authClient.signIn.passkey();
@@ -89,6 +90,19 @@ export const VerifyStep = ({
       setActionError("Could not verify with a passkey.");
     }
 
+=======
+    const { error } = await authClient.signIn.passkey();
+
+    if (error) {
+      setIsBusy(false);
+      setActionError(error.message ?? "Could not verify with a passkey.");
+
+      return;
+    }
+
+    authClient.$store.notify("$sessionSignal");
+    await onRefresh();
+>>>>>>> Stashed changes
     setIsBusy(false);
   };
 
@@ -100,6 +114,7 @@ export const VerifyStep = ({
       writePendingDeletion({ keepProjectIds, userId });
     }
 
+<<<<<<< Updated upstream
     try {
       const { error } = await authClient.signIn.social({
         callbackURL: REAUTH_CALLBACK_URL,
@@ -111,6 +126,16 @@ export const VerifyStep = ({
       }
     } catch {
       setActionError("Could not start signing in.");
+=======
+    const { error } = await authClient.signIn.social({
+      callbackURL: REAUTH_CALLBACK_URL,
+      provider: providerId,
+    });
+
+    if (error) {
+      setIsBusy(false);
+      setActionError(error.message ?? "Could not start signing in.");
+>>>>>>> Stashed changes
     }
 
     setIsBusy(false);

@@ -20,6 +20,7 @@ import {
 import { PublishPanel } from "@/components/dashboard/publish-panel";
 import { ServerForm } from "@/components/dashboard/server-form";
 import { VersionForm } from "@/components/dashboard/version-form";
+import { VotingSettings } from "@/components/dashboard/voting-settings";
 import { EmptyState } from "@/components/empty-state";
 import { FilledPill } from "@/components/filled-pill";
 import { FormField } from "@/components/form-field";
@@ -69,6 +70,12 @@ import {
 import { deleteVersionFile, uploadVersionFile } from "@/lib/upload-client";
 
 const ROUTE_ID = "/dashboard/projects/$projectId";
+<<<<<<< Updated upstream
+=======
+const TABS = ["details", "images", "versions", "danger"] as const;
+
+type Tab = (typeof TABS)[number];
+>>>>>>> Stashed changes
 
 const getCustomPlatformIds = (versions: ProjectVersionView[]): string[] => {
   const ids = new Set<string>();
@@ -478,8 +485,14 @@ const DangerZone = ({ project }: { project: ProjectView }) => {
 const ManageProjectPage = () => {
   const project = useLoaderData({ from: ROUTE_ID });
 
+<<<<<<< Updated upstream
   const activeTab = resolveProjectTab(useSearch({ from: ROUTE_ID }));
   const hasReleaseVersions = hasVersions(project.type);
+=======
+  const { tab = "details" } = useSearch({
+    from: ROUTE_ID,
+  });
+>>>>>>> Stashed changes
 
   const navigate = useNavigate({ from: ROUTE_ID });
   const router = useRouter();
@@ -577,7 +590,13 @@ const ManageProjectPage = () => {
               }}
               onSubmit={handleDetails}
             />
+<<<<<<< Updated upstream
           ) : null}
+=======
+            <VotingSettings projectId={project.id} />
+          </TabsContent>
+        )}
+>>>>>>> Stashed changes
 
           {activeTab === "images" ? (
             <div className="grid max-w-3xl gap-8">

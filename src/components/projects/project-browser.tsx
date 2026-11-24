@@ -98,6 +98,7 @@ const LIVE_EVENT_LABELS = {
 } as const satisfies Record<LiveModEvent["event"], string>;
 
 const SORT_OPTIONS = [
+  { label: "Most voted", value: "votes:desc" },
   { label: "Most downloaded", value: DEFAULT_SORT },
   { label: "Recently updated", value: "updatedAt:desc" },
   { label: "Name (A–Z)", value: "name:asc" },
@@ -399,12 +400,20 @@ const Filters = ({
       <label className="sr-only" htmlFor={`${type}-sort`}>
         Sort by
       </label>
-      <Select items={SORT_OPTIONS} value={sort} onValueChange={onSortChange}>
+      <Select
+        items={SORT_OPTIONS.filter(
+          (option) => type === "server" || option.value !== "votes:desc"
+        )}
+        value={sort}
+        onValueChange={onSortChange}
+      >
         <SelectTrigger id={`${type}-sort`} className="min-h-11 w-full">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
-          {SORT_OPTIONS.map((option) => (
+          {SORT_OPTIONS.filter(
+            (option) => type === "server" || option.value !== "votes:desc"
+          ).map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
@@ -717,6 +726,25 @@ export const ProjectBrowser = ({
     }
 
     const source = new EventSource(`${API_URL}/api/events`);
+<<<<<<< Updated upstream
+=======
+    let hasReportedConnectionIssue = false;
+
+    const handleOpen = () => {
+      hasReportedConnectionIssue = false;
+    };
+
+    const handleError = () => {
+      if (hasReportedConnectionIssue) {
+        return;
+      }
+
+      hasReportedConnectionIssue = true;
+      toast.error(
+        "Live updates are temporarily unavailable. You can keep browsing; we’ll retry automatically."
+      );
+    };
+>>>>>>> Stashed changes
 
     // A dropped stream is silent by design: browsing, filtering and searching
     // all still work, and EventSource reconnects on its own. Infrastructure

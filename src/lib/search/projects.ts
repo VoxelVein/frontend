@@ -27,6 +27,7 @@ const PAGE_SIZE = 12;
 const MAX_PAGE = 1000;
 
 const SORT_SQL = {
+  "votes:desc": sql`matched.total_votes desc`,
   "downloads:desc": sql`matched.downloads desc`,
   "name:asc": sql`matched.name asc`,
   "updatedAt:desc": sql`matched."updatedAt" desc`,
@@ -110,6 +111,7 @@ const matchedProjects = (params: ProjectSearchParams, q: string) => {
       select
         projects.category,
         projects.downloads,
+        projects.total_votes,
         projects.id,
         project_images.id as "iconId",
         project_images.width as "iconWidth",

@@ -4,6 +4,7 @@ import { ComparisonSection } from "@/components/comparison-section";
 import { ExploreSection } from "@/components/explore-section";
 import { Hero } from "@/components/hero";
 import { NewsSection } from "@/components/news-section";
+import { VotingLeaderboard } from "@/components/projects/voting-leaderboard";
 import { TrendingProjects } from "@/components/trending-projects";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLatestPosts } from "@/lib/posts.functions";
@@ -56,6 +57,7 @@ const HomePage = () => {
       <Hero />
       <TrendingProjects initialProjects={trending} />
       <ExploreSection />
+      <VotingLeaderboard limit={6} />
       <ComparisonSection />
       <NewsSection initialPosts={latestPosts} />
     </>

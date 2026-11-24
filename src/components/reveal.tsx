@@ -50,6 +50,7 @@ const Reveal = ({
 
   useEffect(() => {
     const element = ref.current;
+<<<<<<< Updated upstream
     let observer: IntersectionObserver | null = null;
 
     if (element) {
@@ -69,6 +70,28 @@ const Reveal = ({
     }
 
     return () => observer?.disconnect();
+=======
+
+    if (!element) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      // 48px past the bottom edge, so a block has to genuinely be arriving
+      // rather than being caught by a viewport that was already scrolled down.
+      { rootMargin: "0px 0px -48px 0px", threshold: 0 }
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+>>>>>>> Stashed changes
   }, []);
 
   const style: RevealStyle = {
