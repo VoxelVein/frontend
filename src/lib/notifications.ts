@@ -20,6 +20,12 @@ export const USER_NOTIFICATION_TYPES = [
   "report-resolved",
   /** A moderator looked at a report the user filed and disagreed with it. */
   "report-dismissed",
+  /** The recipient has a project transfer waiting for their decision. */
+  "project-transfer-offered",
+  /** The sender's transfer was accepted and the project has a new owner. */
+  "project-transfer-accepted",
+  /** The sender's transfer was declined by the recipient. */
+  "project-transfer-declined",
 ] as const;
 
 export type UserNotificationType = (typeof USER_NOTIFICATION_TYPES)[number];
@@ -65,6 +71,18 @@ const PRESENTATION = {
   "report-resolved": {
     headline: "Report actioned",
     tone: "positive",
+  },
+  "project-transfer-offered": {
+    headline: "Project transfer offered",
+    tone: "attention",
+  },
+  "project-transfer-accepted": {
+    headline: "Project transferred",
+    tone: "positive",
+  },
+  "project-transfer-declined": {
+    headline: "Transfer declined",
+    tone: "neutral",
   },
 } as const satisfies Record<UserNotificationType, NotificationPresentation>;
 

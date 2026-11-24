@@ -180,6 +180,7 @@ describe("capability statements", () => {
         "manageSessions",
         "manageStorage",
         "manageTickets",
+        "manageTransfers",
         "manageUsers",
         "publishPosts",
         "reviewProjects",

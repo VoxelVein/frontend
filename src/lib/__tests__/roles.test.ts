@@ -34,6 +34,7 @@ const EXPECTED = {
     "manageSessions",
     "manageStorage",
     "manageTickets",
+    "manageTransfers",
     "manageUsers",
     "publishPosts",
     "reviewProjects",

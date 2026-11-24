@@ -44,5 +44,11 @@ describe(resolveAdminTab, () => {
       "reviews",
       "reports",
     ]);
+    expect(
+      visibleTabsFor("admin").some((tab) => tab.value === "transfers")
+    ).toBeTruthy();
+    expect(
+      visibleTabsFor("moderator").some((tab) => tab.value === "transfers")
+    ).toBeFalsy();
   });
 });

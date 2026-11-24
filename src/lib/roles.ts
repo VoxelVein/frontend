@@ -98,6 +98,7 @@ export const CAPABILITY_MINIMUM = {
   manageSessions: "admin",
   manageStorage: "admin",
   manageTickets: "admin",
+  manageTransfers: "admin",
   manageUsers: "admin",
   // Split from `managePosts` because publishing makes a post public, which is a
   // different decision from writing one. Same minimum today, kept separate so
@@ -125,6 +126,7 @@ export const ALL_CAPABILITIES = [
   "manageSessions",
   "manageStorage",
   "manageTickets",
+  "manageTransfers",
   "manageUsers",
   "publishPosts",
   "reviewProjects",
