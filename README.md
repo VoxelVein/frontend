@@ -1,503 +1,107 @@
-<p align="center">
-  <img
-    alt="header"
-    src="https://shieldcn.dev/header/gradient.svg?title=VoxelVein+Frontend&amp;subtitle=The+frontend+of+a+modern%2C+open-source+marketplace+for+Minecraft+creators.&amp;mode=dark&amp;image=https%3A%2F%2Fi.postimg.cc%2FC5MrrnwD%2Fvscode.jpg"
-  />
-</p>
+# VoxelVein Frontend
 
-<p align="center">
-  <strong>The modern, open-source marketplace for Minecraft creators.</strong>
-  <br />
-  Discover, share, and manage community-created Minecraft content.
-</p>
+**The modern, open-source marketplace for Minecraft creators.**
 
-<p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="GitHub Stars"
-      src="https://shieldcn.dev/github/stars/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="GitHub Forks"
-      src="https://shieldcn.dev/github/forks/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="Watchers"
-      src="https://shieldcn.dev/github/watchers/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost"
-    />
-    <img
-      alt="Branches"
-      src="https://shieldcn.dev/github/branches/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald"
-    />
-    <img
-      alt="Contributors"
-      src="https://shieldcn.dev/github/contributors/VoxelVein/frontend.svg?theme=emerald&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="Last commit"
-      src="https://shieldcn.dev/github/last-commit/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="Commits"
-      src="https://shieldcn.dev/github/commits/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="Open issues"
-      src="https://shieldcn.dev/github/open-issues/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost"
-    />
-    <img
-      alt="Closed issues"
-      src="https://shieldcn.dev/github/closed-issues/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="Open PRs"
-      src="https://shieldcn.dev/github/open-prs/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost"
-    />
-    <img
-      alt="Closed PRs"
-      src="https://shieldcn.dev/github/closed-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost"
-    />
-    <img
-      alt="Merged PRs"
-      src="https://shieldcn.dev/github/merged-prs/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/release/VoxelVein/frontend.svg"
-    />
-    <img
-      alt="Release"
-      src="https://shieldcn.dev/github/release/VoxelVein/frontend.svg?mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary"
-    />
-    <img
-      alt="CI"
-      src="https://shieldcn.dev/github/ci/VoxelVein/frontend.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost"
-    />
-    <img
-      alt="License"
-      src="https://shieldcn.dev/github/license/VoxelVein/frontend.svg?variant=ghost&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;logo=pnpm"
-    />
-    <img
-      alt="Package mgr · pnpm"
-      src="https://shieldcn.dev/badge/Package_mgr-pnpm-F69220.svg?variant=branded&amp;mode=light&amp;logo=pnpm"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;logo=docker"
-    />
-    <img
-      alt="Container · Docker"
-      src="https://shieldcn.dev/badge/Container-Docker-2496ED.svg?variant=branded&amp;mode=light&amp;logo=docker"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;logo=typescript"
-    />
-    <img
-      alt="Language · TypeScript"
-      src="https://shieldcn.dev/badge/Language-TypeScript-3178C6.svg?variant=branded&amp;mode=light&amp;logo=typescript"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;logo=vite"
-    />
-    <img
-      alt="Bundler · Vite"
-      src="https://shieldcn.dev/badge/Bundler-Vite-646CFF.svg?variant=branded&amp;mode=light&amp;logo=vite"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;logo=vitest"
-    />
-    <img
-      alt="Tests · Vitest"
-      src="https://shieldcn.dev/badge/Tests-Vitest-6E9F18.svg?variant=branded&amp;mode=light&amp;logo=vitest"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;logo=reactquery"
-    />
-    <img
-      alt="TanStack Query"
-      src="https://shieldcn.dev/badge/Stack-TanStack_Query-FF4154.svg?variant=branded&amp;mode=light&amp;logo=reactquery"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;logo=ri%3ARiShieldKeyholeFill"
-    />
-    <img
-      alt="Better Auth"
-      src="https://shieldcn.dev/badge/Stack-Better_Auth-000000.svg?variant=branded&amp;mode=light&amp;logo=ri%3ARiShieldKeyholeFill"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;logo=drizzle"
-    />
-    <img
-      alt="Drizzle"
-      src="https://shieldcn.dev/badge/Stack-Drizzle-C5F74F.svg?variant=branded&amp;mode=light&amp;logo=drizzle"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;logo=postgresql"
-    />
-    <img
-      alt="PostgreSQL"
-      src="https://shieldcn.dev/badge/Stack-PostgreSQL-4169E1.svg?variant=branded&amp;mode=light&amp;logo=postgresql"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;logo=react"
-    />
-    <img
-      alt="React"
-      src="https://shieldcn.dev/badge/Stack-React-61DAFB.svg?variant=branded&amp;mode=light&amp;logo=react"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;logo=redis"
-    />
-    <img
-      alt="Redis"
-      src="https://shieldcn.dev/badge/Stack-Redis-FF4438.svg?variant=branded&amp;mode=light&amp;logo=redis"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;logo=tailwindcss"
-    />
-    <img
-      alt="Tailwind CSS"
-      src="https://shieldcn.dev/badge/Stack-Tailwind_CSS-06B6D4.svg?variant=branded&amp;mode=light&amp;logo=tailwindcss"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;logo=valibot"
-    />
-    <img
-      alt="Valibot"
-      src="https://shieldcn.dev/badge/Stack-Valibot-0284C7.svg?variant=branded&amp;mode=light&amp;logo=valibot"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;logo=husky"
-    />
-    <img
-      alt="Husky"
-      src="https://shieldcn.dev/badge/Stack-Husky-3B82F6.svg?variant=branded&amp;mode=light&amp;logo=husky"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary"
-    />
-    <img
-      alt="ESM only"
-      src="https://shieldcn.dev/badge/ESM-only-16a34a.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-    <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary"
-    />
-    <img
-      alt="Agent-friendly AGENTS.md"
-      src="https://shieldcn.dev/badge/Agent--friendly-AGENTS.md-D97757.svg?variant=secondary&amp;mode=light"
-    />
-  </picture>
-</p>
+VoxelVein is a self-hostable marketplace where creators publish Minecraft
+mods, modpacks, plugins, resource packs, shaders, datapacks and servers, and
+players find and download them. This repository holds the web application and
+the small ElysiaJS event server behind the wider
+[VoxelVein](https://github.com/VoxelVein) platform.
 
-## Overview
+> [!NOTE]
+> The project is in alpha (`ALPHA-0.17.0`). No paid services are planned. The
+> legal pages still contain placeholder operator details and need review by a
+> qualified professional before production.
 
-**VoxelVein Frontend** is the web application for
-[VoxelVein](https://github.com/VoxelVein), an open-source marketplace for
-Minecraft creators.
+## Features
 
-This repository contains the **frontend and server-side application layer**,
-built with TanStack Start, TanStack Router, and Nitro. It is part of the
-VoxelVein platform but does not include the full infrastructure stack.
+### Content and discovery
 
-### Features
+* Seven project types: mods, modpacks, plugins, resource packs, shaders,
+  datapacks and servers. Browse, detail and gallery pages live under
+  `/p/<type>/...`; the old top-level URLs redirect so bookmarks keep working.
+* Typo-tolerant search powered by PostgreSQL full-text and trigram matching,
+  with no separate search service. Filter by category, Minecraft version,
+  loader or platform and client requirement; sort by downloads, activity or
+  name.
+* Trending projects, a news section built around cards, and an interactive
+  platform comparison on the home page.
+* Versioned releases with release channels, changelogs, game-version and
+  loader metadata, plus one independently replaceable download per launcher
+  for modpacks.
+* Server listings with a join address, port, live player counts, and links to
+  required or recommended content.
+* Server voting with optional Votifier rewards (classic v1 and NuVotifier v2),
+  a 24-hour rolling cooldown, and daily, weekly, monthly and all-time
+  leaderboards. See [server voting](docs/content/server-voting.md).
+* Creator disclosures: seven optional labels such as AI-generated content or
+  discontinued, each with an explanation, shown in a Transparency section on
+  public pages.
+* S3-compatible storage for uploads and images, with per-file and site-wide
+  quotas. Images are resized in the browser before upload (512 px for an icon,
+  1920 px for a gallery image); GIFs are left alone to preserve animation.
+* Project reporting with fixed reason codes and a moderator review inbox.
+* Download counting with per-client deduplication.
 
-#### Content
+### Creators and community
 
-* Six project types: **mods**, **modpacks**, **plugins**, **resource
-  packs**, **shaders**, and **servers**, each with a browse page and a
-  detail page
-* Typo-tolerant full-text search straight from PostgreSQL, with no
-  separate search service
-* Filter by category, Minecraft version, loader or platform, and client
-  requirement; sort by downloads, activity, or name
-* Trending projects, a redesigned news section, and an interactive
-  platform comparison section on the home page
-* S3-compatible object storage for uploads, with per-file and site-wide
-  quota enforcement
-* Project icons and gallery images in the same bucket, with client-side
-  image resizing before upload
-* Project reporting with predefined reason codes and a moderator review
-  inbox
-* Versioned releases with release channels, changelogs, and game-version
-  and loader metadata
-* Server listings with join address, port, client requirement, and links
-  to required or recommended mods
-* Download counting with per-client deduplication
+* A creator dashboard to create projects, upload versions with live progress,
+  manage images and server details, and edit slugs and disclosures.
+* Moderated publishing: `draft` to `pending` to `published`, with a review
+  queue, rejection reasons and notifications to the creator.
+* A blog with Markdown posts, categories, multiple co-authors, post search and
+  editor shortcuts for staff.
+* Public author profiles at `/u/<username>` with a Markdown bio.
 
-#### Creators and community
+### Accounts and administration
 
-* Creator dashboard: create projects, upload versions with live progress,
-  manage images, and server details
-* Moderated publishing: a project goes `draft` to `pending` to `published`
-  through a review queue
-* Blog with Markdown posts, category filtering, multiple co-authors, admin
-  editor shortcuts, and post search
-* Public author profiles at `/u/<username>` with a Markdown bio
-* Public profiles for every project type, with download-first detail pages,
-  a version picker, and download links
+* Better Auth with email/password, Google, GitHub and passkeys, including
+  passkey sign-in on the login page. Cloudflare Turnstile protects password
+  sign-in and sign-up.
+* Three roles on one ladder: `user`, `moderator` and `admin`. The same
+  permissions are enforced server-side so a moderator cannot reach admin-only
+  actions.
+* An admin panel with nine URL-driven sections: users, sessions, posts,
+  storage, notifications, account deletions, reviews, reports and support
+  tickets, each hidden from roles that cannot use it.
+* Support tickets at `/support` (at most five open per member), a notification
+  bell with per-item and bulk mark-as-read, legal pages and a cookie consent
+  banner.
+* Rate limiting through Valkey / Redis with an automatic in-memory fallback.
 
-#### Accounts and administration
+### Interface and engineering
 
-* Better Auth with email/password, Google, GitHub, and passkeys
-* Three roles on one ladder: `user`, `moderator`, and `admin`
-* A moderator reviews projects and drafts blog posts, and can disable an
-  account. Publishing a post, deleting a user, changing roles, and storage
-  settings stay admin-only
-* Cloudflare Turnstile on password sign-in and sign-up
-* Rate limiting with Valkey / Redis and an automatic in-memory fallback
-* Settings for profile, username availability checking (with cooldown and
-  reservation window), bio, sign-in methods, passkeys, sessions, and a
-  guided account-deletion flow
-* Admin panel with nine feature tabs: users, sessions, posts, storage,
-  notifications, pending account deletions, reports, support tickets, and
-  the publishing review queue, with each tab hidden from roles that cannot
-  use it
-* Support tickets: members open tickets at `/support`, admins reply, tag,
-  and filter them; members may have at most 5 open tickets at a time
-* Dedicated `/404` and `/error` error boundaries
-* Notification bell with per-item and bulk mark-as-read
-* Public legal pages and a cookie consent banner
-
-#### Interface
-
-* Server-rendered with progressive enhancement
-* Light and dark themes with a view-transition theme switch
-* Toast notification system with action buttons and status feedback
-* Responsive, mobile-first layout
-* WCAG 2.2 AA accessibility as a baseline requirement
-* Scroll reveals that respect `prefers-reduced-motion`
-* Visible required-field markers on forms, marked in the label but kept out
-  of the accessible name
-
-#### Engineering
-
-* React 19 and TypeScript
-* TanStack Start (full-stack React framework with SSR)
-* TanStack Router (file-based, type-safe routing)
-* TanStack Query and TanStack Form (server state and forms)
-* Tailwind CSS v4 with OKLCH design tokens
-* Base UI and shadcn-style components
-* Better Auth (authentication, passkeys, admin plugin)
-* Drizzle ORM and PostgreSQL
-* Redis and Valkey (caching and rate limiting)
-* ElysiaJS (standalone API server with signed webhooks and SSE)
-* Valibot (validation shared by client and server)
-* Nitro (production server runtime and scheduled tasks)
-* Vitest and Testing Library
-* Ultracite on Oxlint and Oxfmt
-* markdownlint (documentation)
-* pnpm (package management)
-
----
-
-## Tech Stack
-
-| Technology | Purpose |
-| --- | --- |
-| **React 19** | User interface |
-| **TypeScript** | Static typing |
-| **TanStack Start** | Full-stack React framework and SSR |
-| **TanStack Router** | Type-safe, file-based routing |
-| **TanStack Query** | Server state, caching, background refresh |
-| **TanStack Form** | Form state and validation |
-| **Tailwind CSS v4** | Styling |
-| **Base UI** | Accessible UI primitives |
-| **Better Auth** | Authentication, passkeys, admin plugin |
-| **Drizzle ORM** | Database access and schema management |
-| **PostgreSQL** | Relational database and search |
-| **Redis / Valkey** | Caching, session store, and rate limiting |
-| **ElysiaJS** | Standalone API server (webhooks, SSE) |
-| **Valibot** | Validation schemas shared across the stack |
-| **Vite** | Development and build tooling |
-| **Nitro** | Production server runtime and tasks |
-| **Vitest** | Testing |
-| **Oxlint** | Linting |
-| **Oxfmt** | Formatting |
-| **Ultracite** | Unified code-quality checks and fixes |
-| **markdownlint** | Documentation linting |
-| **pnpm** | Package management |
-
----
+* Server-rendered React 19 with progressive enhancement, light and dark
+  themes with a view-transition switch, and a mobile-first responsive layout.
+* WCAG 2.2 AA accessibility as a baseline, visible focus styles, reduced
+  motion support, and an opt-in beta custom cursor.
+* TypeScript in strict mode, TanStack Start and Router, TanStack Query and
+  Form, Tailwind CSS v4 with OKLCH tokens, Drizzle ORM with PostgreSQL,
+  Valibot validation shared across the stack, Vitest, Oxlint and Oxfmt.
 
 ## Requirements
 
-Before starting development, ensure you have:
+* Node.js 24 or later (pinned in `mise.toml`, the Dockerfile and CI)
+* pnpm 11.3.0, pinned through `packageManager` in `package.json`
+* PostgreSQL for server-side data
+* Optional: Redis or Valkey for shared rate limits, S3-compatible object
+  storage for uploads, Google/GitHub OAuth credentials, Cloudflare Turnstile
 
-* **Node.js 24 or later**
-* **pnpm 11.3.0**, pinned through the `packageManager` field in
-  `package.json`
-* **PostgreSQL** for local server-side database integration
-* **Redis or Valkey** (optional in development, used for rate limiting)
-* Git
-
-Node 24 is also pinned in [`mise.toml`](mise.toml), the Dockerfile, and CI.
-
----
-
-## Getting Started
-
-### Clone the repository
+## Getting started
 
 ```bash
 git clone https://github.com/VoxelVein/frontend.git
 cd frontend
-```
-
-### Install dependencies
-
-```bash
 pnpm install
-```
-
-### Configure the environment
-
-Copy the example file and fill in the values. `.env.example` documents
-every supported variable:
-
-```bash
 cp .env.example .env.local
+pnpm dev
 ```
 
-The minimum needed to boot the web app:
+The minimum configuration to boot the web app:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
-BETTER_AUTH_SECRET=your-secret-here  # at least 32 characters
+BETTER_AUTH_SECRET=your-secret-here
 BETTER_AUTH_URL=http://localhost:3000
 VITE_SITE_URL=http://localhost:3000
 API_URL=http://localhost:3002
@@ -505,511 +109,121 @@ VITE_API_URL=http://localhost:3002
 NODE_ENV=development
 ```
 
-The API server additionally requires `WEBHOOK_SECRET` (at least 32
-characters) and refuses to start without it. Object storage, Google,
-GitHub, and Cloudflare Turnstile are all optional, and each one simply
-disables its own feature when unset.
+`BETTER_AUTH_SECRET` needs at least 32 characters. The API server also needs
+`WEBHOOK_SECRET` (32+ characters) and refuses to start without it. Storage,
+OAuth providers and Turnstile each disable themselves when unset.
 
+`pnpm dev` runs the web app on port 3000 and the API server on port 3002.
+Use `pnpm dev:web` or `pnpm dev:api` to run only one. Apply migrations with
+`pnpm db:migrate`; migrations `0029_project_disclosures` and
+`0030_server_voting` must be applied before the features that use them.
+
+> [!WARNING]
 > Never commit `.env.local` or real credentials to the repository.
 
-### Start the development server
+Voting needs `VOTING_ENCRYPTION_KEY` (a base64 encoded random 32-byte key) to
+encrypt reward tokens, and production voting fails closed without Turnstile
+configuration. See [server voting](docs/content/server-voting.md) for the
+full deployment checklist.
 
-```bash
-pnpm dev
-```
-
-Or run them in separate terminals:
-
-```bash
-pnpm dev:web    # web app on http://localhost:3000
-pnpm dev:api    # API server on http://localhost:3002
-```
-
-`pnpm dev` delegates to `pnpm dev:all`, so the two cannot drift apart.
-`pnpm dev:web` starts only the Vite app.
-
----
-
-## Available Commands
-
-### Development
-
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Starts the whole dev environment (app + API) |
-| `pnpm dev:web` | Starts only the Vite app (port 3000) |
-| `pnpm dev:api` | Starts the ElysiaJS API server (watch) |
-| `pnpm dev:all` | Runs the app and API server together |
-| `pnpm dev:status` | Reports what holds the dev ports (3000 and 3002) |
-| `pnpm dev:stop` | Safely ends processes holding the local dev ports |
-| `pnpm start:api` | Starts the API server (no watch) |
-| `pnpm send:webhook` | Sends a test mod webhook to the API |
-| `pnpm build` | Builds the production bundle |
-| `pnpm preview` | Previews the production build |
-| `pnpm start` | Starts the built Nitro server from `.output/` |
-| `pnpm check:bundle` | Checks the main chunk against the size budget |
-| `pnpm analyze:bundle` | Attributes the entry chunk to packages |
-
-### Quality
-
-| Command | Description |
-| --- | --- |
-| `pnpm typecheck` | Runs the TypeScript type checker |
-| `pnpm test` | Runs the Vitest test suite |
-| `pnpm test:coverage` | Runs the Vitest suite with coverage |
-| `pnpm check` | Lint and format check (read-only) |
-| `pnpm fix` | Lint and format auto-fix |
-| `pnpm lint` | Runs the Oxlint linter only |
-| `pnpm format` | Formats source files with Oxfmt |
-| `pnpm lint:md` | Runs markdownlint on Markdown files |
-| `pnpm lint:md:fix` | Auto-fixes Markdown issues |
-| `pnpm prepare` | Initializes Husky Git hooks |
-
-### Database, content, and infrastructure
-
-| Command | Description |
-| --- | --- |
-| `pnpm db:migrate` | Applies pending Drizzle migrations |
-| `pnpm db:studio` | Opens Drizzle Studio |
-| `pnpm db:check` | Check for an ungenerated migration |
-| `pnpm db:seed` | Seeds demo projects and blog posts |
-| `pnpm db:seed:projects` | Seeds demo projects of every type |
-| `pnpm db:seed:posts` | Seeds demo blog posts |
-| `pnpm db:seed:admin` | Promotes a user to a staff role |
-| `pnpm mc:versions` | Refreshes the Minecraft version manifest |
-| `pnpm storage:init` | Prepares the local Garage bucket |
-| `pnpm docs:check` | Checks Markdown links and anchors |
-
-To generate a migration, use the project-local Drizzle binary:
-`./node_modules/.bin/drizzle-kit generate`. There is deliberately no
-`db:generate` script, and `pnpm dlx drizzle-kit` fails in a fresh
-environment without `drizzle-orm`.
-
----
-
-## Tooling
-
-### mise
-
-[`mise.toml`](mise.toml) pins the Node.js version. If you use mise:
-
-```bash
-mise install
-```
-
-### just
-
-A [`justfile`](justfile) wraps the common package scripts, so you can run
-`just dev`, `just check`, or `just test` instead of the equivalent `pnpm`
-command. Run `just` with no arguments to list every recipe.
-
----
-
-## Architecture
-
-The repository contains two servers and one shared library tree:
+## Repository layout
 
 ```text
 src/
-├── components/     # UI components, grouped by feature
-│   ├── admin/      # Admin panel tabs (users, tickets, reports, etc.)
-│   ├── blog/       # Blog cards, post authors, and search
-│   ├── dashboard/  # Creator project, version, server, and image forms
-│   ├── legal/      # Shared legal-document renderer
-│   ├── motion/     # Theme toggle, rotating text, view transitions
-│   ├── navbar/     # Navbar, mobile drawer, user menu, notifications
-│   ├── projects/   # Project browser, card, detail, image, gallery
-│   ├── settings/   # Settings tabs (profile, sessions, passkeys, danger)
-│   └── ui/         # Base UI, toasts, and shadcn primitives
-├── db/             # Drizzle client, schema, and migrations
-├── hooks/          # Reduced motion, username availability, post search
-├── lib/            # Auth, roles, tickets, search, storage, rate limiting
-├── routes/         # TanStack Start file-based routes
-├── tasks/          # Nitro scheduled tasks
-├── test/           # Vitest setup
-├── router.tsx      # Router, QueryClient, SSR query integration
-├── start.ts        # Security headers and CSRF middleware
-└── styles.css      # Tailwind theme and design tokens
-
-server/             # Standalone ElysiaJS API server
-├── index.ts        # Entry point (Node adapter, CORS)
-├── lib/            # Event registry and async queue
-└── routes/         # health, SSE events, webhooks
+  components/   UI grouped by feature (admin, blog, dashboard, projects, ...)
+  db/           Drizzle client, schema and generated migrations
+  hooks/        Small client hooks
+  lib/          Auth, roles, search, storage, voting, rate limiting
+  routes/       TanStack Start file-based routes
+  tasks/        Nitro scheduled tasks (hourly account purge)
+  styles.css    Tailwind theme and design tokens
+server/         Standalone ElysiaJS server: health, SSE events, webhooks
+scripts/        Dev helpers, seed scripts, migration and docs checks
+drizzle/        Generated SQL migrations
+public/         Static assets and manifests
+docs/           Guides for development, deployment and each feature area
 ```
 
-The Vite configuration integrates TanStack Start, TanStack Router,
-TanStack DevTools, Tailwind CSS, Nitro, and React. Nitro also runs the
-hourly account-purge scheduled task.
+See the [architecture overview](docs/architecture/overview.md) for how a
+request flows through the stack.
 
-`src/lib/roles.ts` holds the role ladder and is deliberately free of
-server imports, so client components can check a role without pulling the
-database into the browser bundle. Session-based guards live in
-`src/lib/role-guards.ts`.
+## Common commands
 
-See [docs/architecture/overview.md](docs/architecture/overview.md) for how
-a request flows through the stack.
-
----
-
-## Database
-
-The application uses **PostgreSQL** through **Drizzle ORM**.
-
-* A local PostgreSQL instance is required for server-side database
-  functionality.
-* The connection is configured through `DATABASE_URL`:
-
-  ```env
-  DATABASE_URL=postgresql://user:password@localhost:5432/voxelvein
-  ```
-
-* Migrations live in `drizzle/`. Apply them with `pnpm db:migrate`.
-* Search is part of the database rather than a separate service: `pg_trgm`
-  and full-text indexes created by the migrations back every query. See
-  [docs/search/postgres.md](docs/search/postgres.md).
-
-To bring up Postgres and local object storage together:
-
-```bash
-just infra           # docker-compose.yml: Postgres and Garage
-just storage-init    # create the bucket and access key
-```
-
-For an object storage server with a browser console, see
-[docs/storage/rustfs.md](docs/storage/rustfs.md).
-
----
-
-## Authentication and Roles
-
-The application uses **Better Auth**.
-
-* Required configuration:
-
-  ```env
-  BETTER_AUTH_SECRET=your-secret-here   # at least 32 characters
-  BETTER_AUTH_URL=http://localhost:3000
-  ```
-
-* Sign-in methods: email/password, Google, GitHub, and passkeys. Google
-  and GitHub each need their own `*_CLIENT_ID` and `*_CLIENT_SECRET`;
-  without them the provider and its button are simply absent.
-* Password sign-in and sign-up are gated by Cloudflare Turnstile. Without
-  `VITE_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET` the widget does not
-  render, and those two endpoints fail closed with `503`.
-* Usernames are separate from the display name, with a 14-day change
-  cooldown and a reservation window for a previous name.
-
-Authorization is a single ladder in `ROLE_RANK` (`src/lib/roles.ts`):
-
-| Role | Can |
+| Command | Description |
 | --- | --- |
-| `user` | Only their own projects. Nothing in the admin panel. |
-| `moderator` | Review projects, draft blog posts, disable an account. |
-| `admin` | Everything, plus publishing posts, deleting users, and roles. |
-
-Every check calls `hasRole(role, minimum)` rather than comparing role
-names, so adding a role extends the ladder without touching call sites. The
-same split is expressed a second time in Better Auth's access-control
-statements (`src/lib/permissions.ts`), which is what actually gates the
-`/admin/*` endpoints, so a moderator cannot delete a user even if an app
-guard were missed.
-
-See [docs/content/admin-panel.md](docs/content/admin-panel.md#roles) for
-the full matrix.
-
----
-
-## API Server and Real-Time Updates
-
-A standalone **ElysiaJS** API server (`server/`) handles real-time events:
-
-* `GET /api/health`, a liveness check
-* `GET /api/events`, a Server-Sent Events stream of mod events
-* `POST /api/webhooks/mods`, an HMAC-SHA256-verified webhook that
-  broadcasts `mod.created`, `mod.updated`, and `mod.deleted`
-
-Every project browse page subscribes to the SSE stream and shows a live
-banner when something changes, with a one-click refresh that bypasses the
-search cache. Send a test event with:
-
-```bash
-pnpm send:webhook mod.created "My Mod"
-```
-
-Required configuration:
-
-```env
-API_URL=http://localhost:3002
-API_PORT=3002
-WEBHOOK_SECRET=your-webhook-secret
-VITE_API_URL=http://localhost:3002
-```
-
-The server has no database connection: it publishes and streams events
-only. Search lives in Postgres. See
-[docs/architecture/api.md](docs/architecture/api.md) for the full
-reference and [docs/content/projects.md](docs/content/projects.md) for
-the web app's own upload and download endpoints.
-
----
-
-## Object Storage
-
-Uploaded files and project images live in S3-compatible object storage.
-Local development uses [Garage](https://garagehq.deuxfleurs.fr/) or
-[RustFS](docs/storage/rustfs.md), and production uses Cloudflare R2.
-
-The app only uses the S3 API, so switching providers means changing
-environment variables only. Images are proxied through the app rather than
-redirected, because the published-state check has to run on every request.
-
-> Images are resized in the browser before upload (512px for an icon,
-> 1920px for a gallery image), so the full-size original never reaches the
-> bucket. GIFs are exempt, because resizing one would drop its animation.
-
-See [docs/storage/object-storage.md](docs/storage/object-storage.md) for the
-object layout, [rustfs](docs/storage/rustfs.md) for the local console
-setup, and [cloudflare-r2](docs/storage/cloudflare-r2.md) for production.
-
----
-
-## Legal Pages
-
-These pages exist as **placeholders** and must be reviewed by a qualified
-professional before production. `/legal` still carries `Unknown` for the
-operator's name and address:
-
-* `/legal` legal notes (§ 5 DDG service-provider notice)
-* `/privacy` privacy policy
-* `/cookies` cookie policy
-* `/terms` terms of service, the single binding legal document
-* `/disclaimer` trademark and content-provenance notes, cross-referencing the
-  terms rather than restating them
-
-`/terms-of-use` redirects to `/terms`. It used to be a second, shorter set of
-terms with overlapping warranty and account rules, which left no single document
-a reader could point to as the operative one. The route is kept so existing
-links and bookmarks still resolve.
-
-All six share the renderer in
-[`src/components/legal/legal-page.tsx`](src/components/legal/legal-page.tsx)
-and name `admin@vomlabs.com` as the contact address. The cookie consent
-banner is implemented in
-[`src/components/cookie-banner.tsx`](src/components/cookie-banner.tsx).
-
----
-
-## Roadmap
-
-See [ROADMAP.md](ROADMAP.md) for the current focus, planned work, and
-completed milestones. Day-to-day work items are tracked in
-[TODO.md](TODO.md).
-
----
-
-## Development Workflow
-
-```text
-feature branch -> main -> prod -> production deployment
-```
-
-### `main`
-
-* The primary development branch.
-* New work is developed on a dedicated branch and merged into `main`
-  through pull requests.
-
-### `prod`
-
-* Represents the production branch.
-* Merging `main` into `prod` triggers the production deployment.
-* The branch is protected: changes can only land through a pull request
-  whose head branch is `main`.
-
-> [!IMPORTANT]
-> Do not develop directly on `prod`. Changes must flow through `main`
-> first.
-
----
-
-## Continuous Integration
-
-The gate lives in one place, the reusable workflow
-`.github/workflows/_quality.yml`, called by `main.yml`, `pr.yml`, and
-`deploy.yml`. Run the same checks locally before opening a pull request:
-
-```bash
-pnpm check
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm check:bundle --no-build
-pnpm lint:md
-pnpm db:check
-pnpm docs:check
-```
-
-Two of these catch things nothing else does:
-
-* `pnpm db:check` fails when the schema has a change with no generated
-  migration. Migrations apply automatically at merge time, so that
-  combination would ship code reading columns the database does not have.
-* `pnpm docs:check` resolves every relative link and heading anchor.
-  markdownlint has no rule for link targets, so a renamed section
-  otherwise leaves links quietly pointing at nothing.
-
-`pnpm fix` applies automatic lint and format fixes, and `pnpm format`
-formats source files only.
-
-The project enforces code quality with **Ultracite**, **Oxlint**, and
-**Oxfmt**, and documentation with **markdownlint** (via `markdownlint-cli2`
-with the GitHub ruleset). A Husky pre-commit hook runs `ultracite fix` and
-re-stages your files, so formatting is applied at commit time.
-
-Markdown-only changes skip the heavy jobs, and the deployed images are
-published with provenance and SBOM attestations.
-
----
-
-## Testing
-
-Tests use **Vitest** with Testing Library and jsdom:
-
-```bash
-pnpm test
-```
-
-Coverage is scoped to a hand-picked list of files with thresholds (80%
-lines, statements, and functions; 70% branches):
-
-```bash
-pnpm test:coverage
-```
-
-Tests live next to what they cover in `__tests__` folders: route tests in
-`src/__tests__`, component tests in `src/components/__tests__`, and
-library tests in `src/lib/__tests__`.
-
----
-
-## Production Build
-
-```bash
-pnpm build     # build the production bundle
-pnpm preview   # preview the generated build
-pnpm start     # start the production server
-```
-
-The application uses **Nitro** for its production server output. The
-production image also ships the standalone API server and a one-shot
-migration runner as separate build targets. See
-[docs/deployment/docker.md](docs/deployment/docker.md).
-
----
-
-## Docker
-
-### Development with Docker
-
-```bash
-docker compose -f compose.yaml -f compose.dev.yaml up
-```
-
-The development configuration mounts the source tree and runs the whole
-development environment, the Vite app and the ElysiaJS API server in the
-same container, with hot reload. Vite is pinned to container port `6001`
-and the API to `3002`:
-
-```text
-host :1112 -> container :6001 (Vite dev server)
-host :3002 -> container :3002 (API server)
-```
-
-`migrate` and the standalone `api` service sit behind a Compose profile in
-this file, so migrations stay a manual `pnpm db:migrate`.
-
-### Production with Docker
-
-```bash
-docker compose -f compose.yaml -f compose.prod.yaml up -d --build
-```
-
-`db` starts first, the one-shot `migrate` service applies pending
-migrations and exits, and `web` starts only after it succeeds, so a deploy
-never serves new code against an old schema. `api` starts independently.
-
-This stack publishes **no host ports**: under Dokploy, Traefik routes
-straight to the container network. To reach it from the host, add the
-opt-in port file:
-
-```bash
-docker compose -f compose.yaml -f compose.prod.yaml \
-  -f compose.host-ports.yaml up -d
-```
-
-```text
-host :1112 -> container :3000 (Nitro server)
-host :1113 -> container :3002 (API server)
-```
-
-> Host ports default to `1112` and `1113` to avoid clashing with other
-> services on a shared host. Override them with `WEB_PORT` and
-> `API_HOST_PORT`.
-
-For a self-contained local stack that also includes Garage for object
-storage, use `docker-compose.yml` instead.
-
----
+| `pnpm dev` | Run web app and API together |
+| `pnpm dev:web` / `pnpm dev:api` | Run one side only |
+| `pnpm build` / `pnpm start` | Build and run the Nitro production server |
+| `pnpm test` / `pnpm test:coverage` | Vitest suite, with optional coverage |
+| `pnpm typecheck` | TypeScript check |
+| `pnpm check` / `pnpm fix` | Read-only quality check / auto-fix |
+| `pnpm lint` / `pnpm format` | Oxlint / Oxfmt |
+| `pnpm lint:md` | Markdown lint |
+| `pnpm db:migrate` / `pnpm db:check` | Apply / check migrations |
+| `pnpm docs:check` | Validate relative documentation links and anchors |
+| `pnpm check:bundle` | Enforce the 780 kB raw / 250 kB gzipped budget |
+
+A [`justfile`](justfile) wraps the same scripts as `just dev`, `just check`
+and `just test`.
+
+## Authentication and roles
+
+| Role | Can do |
+| --- | --- |
+| `user` | Manage only their own content; no admin panel |
+| `moderator` | Review projects, draft blog posts, disable an account |
+| `admin` | Everything, including publishing posts, deleting users and roles |
+
+Checks use named capabilities rather than repeated role comparisons, and the
+same rules are mirrored in Better Auth's access-control statements. See
+[accounts](docs/authentication/accounts.md),
+[passkeys](docs/authentication/passkeys.md) and the
+[admin panel](docs/content/admin-panel.md).
+
+## API and live updates
+
+The standalone ElysiaJS server exposes `GET /api/health`, an SSE stream at
+`GET /api/events`, and an HMAC-verified webhook at `POST /api/webhooks/mods`.
+Browse pages subscribe to the stream and offer a one-click refresh when
+content changes. The server has no database connection; search lives in
+Postgres. See the [API reference](docs/architecture/api.md).
 
 ## Deployment
 
-```text
-main -> prod -> automatic production deployment
-```
+The main workflow is `main` to `prod`, where a merge triggers the production
+deployment. Supported targets:
 
-Changes merged from `main` into `prod` are deployed automatically. The
-`deploy` workflow builds the web, API, and migration images, pushes them to
-`ghcr.io` tagged with the `package.json` version and the commit SHA, and
-fails unless the `VITE_API_URL` and `VITE_SITE_URL` repository variables
-are set.
+* [Docker](docs/deployment/docker.md) and [Podman](docs/deployment/podman.md)
+* [Dokploy](docs/deployment/dokploy.md) with Traefik and Compose
+* [Vercel](docs/deployment/vercel.md), [Netlify](docs/deployment/netlify.md)
+  and [Cloudflare Workers](docs/deployment/cloudflare-workers.md)
 
-### Supported Platforms
+Production images include the web server, the API server and a one-shot
+migration runner. Every pull request runs lint, typecheck, tests, build, bundle
+budget, documentation links and migration drift checks through the shared
+`.github/workflows/_quality.yml`.
 
-VoxelVein supports multiple deployment strategies and hosting targets:
+## Documentation
 
-* **Dokploy / Docker Compose**: Production multi-container stack with
-  Traefik reverse proxy. See
-  [docs/deployment/dokploy.md](docs/deployment/dokploy.md).
-* **Docker / Podman**: Standalone multi-stage containers with dev, prod,
-  and host-port overrides. See
-  [docs/deployment/docker.md](docs/deployment/docker.md) and
-  [docs/deployment/podman.md](docs/deployment/podman.md).
-* **Vercel**: Deploy the web app on Vercel using `vercel.json` and Nitro's
-  Vercel preset. See [docs/deployment/vercel.md](docs/deployment/vercel.md).
-* **Netlify**: Deploy on Netlify using `netlify.toml` and Nitro's Netlify
-  preset. See [docs/deployment/netlify.md](docs/deployment/netlify.md).
-* **Cloudflare Workers**: Deploy to Cloudflare Workers using Nitro and
-  `wrangler.toml`. See
-  [docs/deployment/cloudflare-workers.md](docs/deployment/cloudflare-workers.md).
+The full guide index lives in [docs/README.md](docs/README.md). Useful
+starting points:
 
----
+* [Projects, versions, uploads and reviews](docs/content/projects.md)
+* [Server voting](docs/content/server-voting.md)
+* [Admin panel](docs/content/admin-panel.md)
+* [Postgres search](docs/search/postgres.md)
+* [Object storage](docs/storage/object-storage.md)
+* [Security hardening](docs/security/hardening.md)
+* [Roadmap](ROADMAP.md), [TODO](TODO.md) and [Changelog](CHANGELOG.md)
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-branch strategy, code-quality requirements, and the pull request process.
+Contributions are welcome. Read [AGENTS.md](AGENTS.md) for engineering
+conventions and [CONTRIBUTING.md](CONTRIBUTING.md) for the branch strategy
+and pull request process. Security issues should follow
+[SECURITY.md](SECURITY.md), and participation is governed by the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
----
+## License
 
-## Security
-
-Found a security issue? See [SECURITY.md](SECURITY.md) for the
-vulnerability reporting policy.
-
----
-
-## Code of Conduct
-
-Please review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before
-participating in the community.
+VoxelVein Frontend is open source. See [LICENSE](LICENSE).
