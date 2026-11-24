@@ -236,7 +236,10 @@ const GameVersionFilter = ({
       <ComboboxField
         id={`${type}-game-version`}
         placeholder={value ? `Minecraft ${value}` : "All versions"}
-        className={value ? "placeholder:text-foreground" : undefined}
+        className={cn(
+          "min-h-11 w-full [&>input]:h-full",
+          value && "placeholder:text-foreground"
+        )}
       />
       <ComboboxContent>
         <ComboboxEmpty>No matching versions.</ComboboxEmpty>
