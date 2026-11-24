@@ -14,6 +14,9 @@ const options = {
     // MD041 (first-line-heading): files may intentionally begin with badges,
     // HTML, or images rather than a top-level heading.
     MD041: false,
+    // MD024: Keep a Changelog repeats "Added"/"Changed"/"Fixed" under each
+    // release heading, which is only a duplicate outside its own section.
+    "no-duplicate-heading": { siblings_only: true },
   }),
   customRules: ["@github/markdownlint-github"],
   globs: ["**/*.md"],

@@ -1,141 +1,133 @@
 # TODO
 
 Current work items for the VoxelVein frontend. See [ROADMAP.md](ROADMAP.md)
-for the longer-term plan.
+for the longer-term plan and [CHANGELOG.md](CHANGELOG.md) for what has
+already shipped.
 
 ## Before Production
 
-* [ ] Legal pages, real operator name and address. `/legal` still
-      renders `Unknown` for both, which is a § 5 DDG compliance gap. The
-      contact address is now `admin@vomlabs.com` everywhere.
-* [ ] Legal review by a qualified professional before production
+* [ ] Legal pages, real operator name and address. `/legal` still renders
+      `Unknown` for both, which is a § 5 DDG compliance gap. The contact
+      address is `admin@vomlabs.com` everywhere.
+* [ ] Legal review by a qualified professional before production.
 
 ## Content
 
-* [ ] Unpic integration once real content images exist
-* [ ] Email verification for password accounts (blocks uploads for
-      non-social sign-ups)
-* [ ] Password reset
-* [ ] Notification email for review decisions
+* [ ] Unpic integration once real content images exist.
+* [ ] Email verification for password accounts. Without it, only social
+      sign-ins and admins can publish.
+* [ ] Password reset.
+* [ ] Notification email for review decisions and deletion confirmations.
+* [ ] Email change flow.
 
 ## Bugs and inconsistencies
 
 * [ ] No `og:image`; `twitter:card` is `summary` rather than
-      `summary_large_image`
+      `summary_large_image`. The missing image is deliberate rather than
+      pointing at a file that does not exist.
+* [ ] `src/routes/admin/index.tsx` fetches badge counts client-side in a
+      `useEffect` while every other route uses a loader.
+* [ ] The server voting system has not been verified end to end. Its
+      author noted this in the integrating commit; test a real vote, reward
+      delivery, cooldowns and the leaderboards before relying on it.
+* [ ] Votifier cannot confirm that an in-game reward was granted. Classic v1
+      confirms only that bytes were written, and failed deliveries are not
+      retried because the protocols have no idempotency key. Document this
+      clearly for owners.
+
+## Documentation
+
+* [ ] Bring [ROADMAP.md](ROADMAP.md) up to date: it still lists passkey
+      sign-in and project reporting as future ideas though both shipped, says
+      "six project types" instead of seven, says the admin panel has seven
+      tabs instead of nine, and records a 700 kB bundle budget while the
+      enforced raw limit is 780 kB.
+* [ ] Fix [docs/README.md](docs/README.md), which still describes "all six
+      project types".
+* [ ] [docs/content/server-voting.md](docs/content/server-voting.md) refers to
+      migration `0029_server_voting`; the file was renumbered to
+      `0030_server_voting`.
+* [ ] Add `CHANGELOG.md` to `ROOT_FILES` in `scripts/check-doc-links.ts` so
+      links in the changelog are checked like the other root documents.
 
 ## Quality
 
-* [ ] Route-level tests for `/admin`, `/settings`, and `/dashboard`. Five
-      route shells are covered in `src/__tests__/`: `login`, `signup`, the
-      blog index and post pages, and the public profile; these three are
-      not. Settings' tab policy is tested on its own in
-      `settings-tabs.test.ts`, so what is missing there is the shell, not
-      the logic.
-* [ ] `admin.tsx` fetches badge counts client-side in a `useEffect` while
-      every other route uses a loader
-* [ ] None of the six hooks in `src/hooks/` have a test:
-      `use-can-manage-posts`, `use-post-search`, `use-prefers-reduced-motion`,
-      `use-refresh-session`, `use-storage-available`, `use-username-availability`.
-      `use-post-search` is in the `coverage.include` list despite having no
-      test importing it.
-* [ ] Drop `posts.author_id`. Nullable and unwritten since `0018`, and the
-      follow-up is already spelled out in `docs/content/blog.md`. It cannot
-      go in the next release: migrations apply when the new code merges while
-      the previous deploy is still inserting into the column, so this needs a
-      release where no live instance still writes it.
-* [ ] `ProjectBrowser` is exempted from the complexity lint at ~850 lines;
-      worth splitting search state from filters
+* [ ] Route-level tests for `/admin`, `/settings` and `/dashboard`. Five
+      route shells are covered in `src/__tests__/`; these three are not.
+      Settings' tab policy is tested in `settings-tabs.test.ts`, so what is
+      missing there is the shell.
+* [ ] Eight of the nine hooks in `src/hooks/` have no test. Only
+      `custom-cursor` is covered, in `src/lib/__tests__/custom-cursor.test.ts`.
+      `use-post-search` is in `coverage.include` despite having no test.
+* [ ] `ProjectBrowser` is exempted from the complexity lint at roughly 850
+      lines; split search state from filters.
 
 ## Planned
 
-* [ ] FastStats integration: downloads (from us and some other providers,
-      if possible), Total Servers and Plugin Versions and Game Versions
-      being used
-* [ ] A sitemap
-* [ ] `/status` and `/changelog` pages (the footer reserves the slots)
-* [ ] Creator analytics
-* [ ] Migrate shadcn/ui theme to `pnpm dlx shadcn@latest add https://tweakcn.com/r/themes/claymorphism.json`
+* [ ] FastStats integration: downloads from this and other providers, total
+      servers, plugin versions and game versions in use.
+* [ ] A sitemap.
+* [ ] `/status` and `/changelog` pages (the footer reserves the slots).
+* [ ] Creator analytics.
+* [ ] Migrate the shadcn theme to the claymorphism preset.
 
 ## Completed
 
-* [x] All six project types: browse pages, detail pages, creator forms
-* [x] Server projects with join details, linked content, and derived
-      client requirement
-* [x] Moderated publishing with an admin review queue
-* [x] Blog with admin post management and post search
-* [x] Public author profiles with a Markdown bio
-* [x] Postgres search replacing Meilisearch
-* [x] Account deletion flow with grace period and hourly purge task
-* [x] Admin panel with nine tabs
-* [x] Docker multi-stage build, Compose dev/prod/host-port overrides
-* [x] justfile and mise.toml (Node 24)
-* [x] Navbar polish (active states, user menu, mobile drawer)
-* [x] Dev commands: `pnpm dev` / `dev:all` / `dev:web`
-* [x] Repo-wide Node 22 → 24 consistency
-* [x] README, ROADMAP, TODO, and `docs/` brought up to date
-* [x] Personal Gmail replaced with `admin@vomlabs.com` on the legal pages
-* [x] Dashboard and verification copy no longer narrows to two types
-* [x] Loading skeletons for the home page and both dashboard project routes
-* [x] `EmptyState` for the two bare version-list placeholders
-* [x] `cn` pass: `FormError`, `RowIcon`, `MICRO_LABEL_CLASS`, and the
-      `buttonVariants({ className })` call
-* [x] Project icons and gallery images in object storage, served through
-      `/api/image/$imageId`
-* [x] Role ladder (`user` / `moderator` / `admin`) replacing 21 ad-hoc
-      `role === "admin"` checks and four duplicated guard helpers
-* [x] Project reporting with a closed reason list and a moderator inbox
-      (`resolved` and `dismissed` kept apart)
-* [x] Indexes on the seven foreign keys that had none. Postgres never creates
-      these, so deleting a project was scanning every notification and report
-      ever filed about it. `foreign-key-indexes.test.ts` now fails on any new
-      one, in either direction, unindexed key, or an index left behind by a
-      dropped column
-* [x] Settings tab resolution extracted to `src/lib/settings-tabs.ts` and
-      tested, the `tab` / legacy `passkeys` / `confirm=delete` interaction,
-      plus the case where a tab and `confirm` disagree
-* [x] Account deletion wizard: reducer, `sessionStorage` handshake, and the
-      return-from-re-authentication resume
-* [x] Search wildcard escaping. The `ILIKE` branches escaped nothing: written
-      with single backslashes inside a tagged template, all four `replace`
-      arguments collapsed, so `100%` matched every row containing "100" and
-      `light_bearer` matched `lightxbearer`, while a query containing a
-      backslash matched nothing at all
-* [x] Hero and explore copy: the datapack mention and "watch the rest land"
-      are gone, since all six categories are live
-* [x] `project-browser-loader.ts` error copy names the failing connection
-      (`econnrefused` → database, fetch failures → app server) instead of a
-      lost "search service"
-* [x] `/blog/$slug` returns a real 404 via `notFound()`; the tailored
-      "Post not found" view moved to a route-level `notFoundComponent`
-* [x] Deleted the unused `src/components/ui/separator.tsx`
-* [x] Per-route `og:url` and Twitter tags via `socialMeta` in
-      `src/lib/site.ts` on every project, gallery, browse, blog, and profile
-      route
-* [x] News section redesigned around cards: the lead story spans the row,
-      older posts sit beside it, and the lead's summary is clipped at 75
-      characters
-* [x] Admin "New post" and "Edit" shortcuts on the reader-facing blog pages,
-      gated on `managePosts`
-* [x] Avatar ring now hugs a square box: the avatar root is block-level, so
-      the ring no longer stretches into an ellipse inside a text line box
+* [x] Standardized the version at `ALPHA-0.17.0` and added a changelog.
+* [x] Seven project types: browse, detail and gallery pages, creator forms,
+      filters and search.
+* [x] Unified all project pages under `/p/...` with redirect-only legacy
+      routes and a shared page frame.
+* [x] Server voting with Votifier v1/v2 rewards, cooldowns, leaderboards,
+      encrypted tokens and hardened outbound delivery.
+* [x] Creator disclosures with seven types and a public Transparency section.
+* [x] Opt-in beta custom cursor, using a theme-aware SVG for the default
+      pointer.
+* [x] Mojang-backed suggested Minecraft versions with Backspace re-editing.
+* [x] Admin warnings for unconfigured Redis or object storage, and removal of
+      the public SSE-unavailable toast.
+* [x] Project editor mini-sidebar and side-by-side Markdown editing.
+* [x] Passkey sign-in on the login page and account links in the mobile
+      drawer.
+* [x] About page redesign, navbar and footer refresh, and square avatars with
+      a shared cropper.
+* [x] Collapsible admin sidebar, editable project slugs and live server
+      player counts.
+* [x] Server projects with join details, linked content and a derived client
+      requirement.
+* [x] Moderated publishing with an admin review queue.
+* [x] Blog with admin post management, categories, co-authors and post search.
+* [x] Public author profiles with a Markdown bio.
+* [x] Postgres search replacing Meilisearch.
+* [x] Account deletion flow with a grace period and hourly purge task.
+* [x] Admin panel with nine tabs.
+* [x] Project reporting with a closed reason list and a moderator inbox.
+* [x] Role ladder (`user` / `moderator` / `admin`) replacing ad-hoc role
+      checks.
+* [x] Per-route Open Graph and Twitter tags on project, blog and profile
+      pages.
+* [x] Indexes on the seven foreign keys PostgreSQL never indexes for you.
+* [x] Dropped the unused `posts.author_id` column; authors now live in the
+      join table.
+* [x] Search wildcard escaping, so `%` and `_` are literal again.
+* [x] Docker multi-stage build and dev, prod and host-port Compose overrides.
+* [x] `justfile` and `mise.toml` with Node 24 across the repository.
 
 ## Known limitations
 
 * [ ] **Resizing is client-side only.** `src/lib/image-resize.ts` runs in the
       browser before upload, so the full-size original never reaches the
-      bucket. That is where the saving is, but it means anything that posts
-      straight to `/api/projects/$id/images` bypasses it and stores whatever
-      it sends, up to the 8 MB cap. A server-side resize would close that, at
-      the cost of a native dependency and CPU per upload.
-* [ ] **GIFs are never resized.** Canvas cannot preserve animation frames,
-      so a GIF is stored as uploaded. An animated GIF under the 8 MB cap can
-      still be the largest object in the bucket.
-* [ ] **Image bytes pass through the app.** `/api/image/$imageId` proxies
-      from the bucket rather than redirecting to it, because the
-      published-state check has to run on every request. That makes image
-      traffic count against Workers or container egress instead of being
-      free at the CDN, as downloads are.
-* [ ] **Search results show no icon.** `project_search` rows are built in
-      SQL and do not carry image columns, so `toDocument` in
-      `src/lib/search/projects.ts` fills in an empty gallery and a null
-      icon. Search hit cards therefore fall back to the letter tile.
+      bucket. Anything posting straight to `/api/projects/$id/images`
+      bypasses it and stores up to 8 MB as sent. Server-side resizing would
+      close that at the cost of a native dependency and CPU per upload.
+* [ ] **GIFs are never resized.** Canvas cannot preserve animation frames, so
+      a GIF under the 8 MB cap can be the largest object in the bucket.
+* [ ] **Image bytes pass through the app.** `/api/image/$imageId` proxies from
+      the bucket rather than redirecting, because the published-state check
+      has to run on every request. Image traffic counts against egress.
+* [ ] **Search results show no icon.** `project_search` rows are built in SQL
+      without image columns, so search cards fall back to the letter tile.
+* [ ] **Voting needs a Node runtime with TCP support.** Outbound DNS and TCP
+      are required, destinations are pinned to public addresses, and
+      production voting fails closed without Turnstile and shared rate
+      limiting behind a trusted proxy.
