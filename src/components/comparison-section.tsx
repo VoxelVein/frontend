@@ -2,17 +2,22 @@ import { Reveal } from "@/components/reveal";
 import { staggerDelay } from "@/lib/reveal-stagger";
 import { cn } from "@/lib/utils";
 
+/**
+ * Estimates, not measured benchmarks: library and community figures are
+ * deliberately conservative because we are still small. Revisit these when a
+ * release changes what the platform can actually do.
+ */
 const RIVALS = [
   { label: "Modrinth", points: 96, tone: "muted" },
   { label: "BuiltByBit", points: 82, tone: "muted" },
-  { label: "VoxelVein", points: 14, tone: "primary" },
+  { label: "VoxelVein", points: 28, tone: "primary" },
 ] as const;
 
 const ROWS = [
-  { label: "Content library", modrinth: 96, builtByBit: 82, voxelVein: 4 },
-  { label: "Creator community", modrinth: 98, builtByBit: 88, voxelVein: 3 },
-  { label: "Mod tooling", modrinth: 94, builtByBit: 76, voxelVein: 22 },
-  { label: "Open source", modrinth: 90, builtByBit: 10, voxelVein: 95 },
+  { label: "Content library", modrinth: 96, builtByBit: 82, voxelVein: 6 },
+  { label: "Creator community", modrinth: 98, builtByBit: 88, voxelVein: 7 },
+  { label: "Mod tooling", modrinth: 94, builtByBit: 76, voxelVein: 44 },
+  { label: "Open source", modrinth: 90, builtByBit: 10, voxelVein: 98 },
 ] as const;
 
 const ScoreBar = ({
@@ -62,9 +67,11 @@ export const ComparisonSection = () => (
           How we compare
         </h2>
         <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
-          Modrinth and BuiltByBit have years, contributors, and libraries we do
-          not have yet. Those are the honest numbers above, not a marketing
-          line.
+          Modrinth and BuiltByBit still have years, contributors, and libraries
+          we do not. We now serve all seven project types, and the tooling row
+          reflects what shipped since launch: version management, disclosures,
+          image cropping, and a shared editor. The library and community numbers
+          stay deliberately modest.
         </p>
       </Reveal>
 
@@ -116,8 +123,8 @@ export const ComparisonSection = () => (
           Those scores are today&apos;s. We are{" "}
           <strong className="text-foreground font-semibold">moving fast</strong>
           : every release adds features, content types, and polish, and the gap
-          between us and the incumbents shrinks a little every week. Join us
-          early and help shape what this platform becomes.
+          between us and the incumbents keeps shrinking. Join us early and help
+          shape what this platform becomes.
         </p>
       </Reveal>
     </div>

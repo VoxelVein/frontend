@@ -11,7 +11,7 @@ const OPERATOR = {
 const LegalNotesPage = () => (
   <LegalPage
     title="Legal Notes"
-    updated="September 11, 2026"
+    updated="November 24, 2026"
     intro={
       <>
         Legal information about the operator of VoxelVein in accordance with § 5
@@ -80,6 +80,16 @@ const LegalNotesPage = () => (
             The content and works created by the platform operators on these
             pages are subject to copyright. Third-party contributions are
             identified as such.
+          </p>
+        ),
+      },
+      {
+        heading: "Paid services",
+        body: (
+          <p>
+            VoxelVein is free to use and open source, and we are not planning to
+            introduce paid tiers, subscriptions, or advertising any time soon.
+            If that ever changes, we will say so clearly and well in advance.
           </p>
         ),
       },
