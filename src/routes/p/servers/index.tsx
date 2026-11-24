@@ -4,19 +4,13 @@ import {
   ProjectBrowser,
   ProjectBrowserSkeleton,
 } from "@/components/projects/project-browser";
-import { VotingLeaderboard } from "@/components/projects/voting-leaderboard";
 import { loadProjectBrowser } from "@/lib/project-browser-loader";
 import { SITE_DESCRIPTION, socialMeta } from "@/lib/site";
 
 const ServersPage = () => {
   const data = useLoaderData({ from: "/p/servers/" });
 
-  return (
-    <>
-      <ProjectBrowser type="server" {...data} />
-      <VotingLeaderboard />
-    </>
-  );
+  return <ProjectBrowser type="server" {...data} />;
 };
 
 export const Route = createFileRoute("/p/servers/")({
