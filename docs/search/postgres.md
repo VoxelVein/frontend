@@ -22,6 +22,10 @@ directly through server functions.
   backs browse pages
 * `src/lib/project-browser-loader.ts`, runs the first, uncached search on
   the server so the first paint has results
+* `src/lib/project-browser.ts`, the pure browse rules: sort options, filter
+  counts, request building, page counts, and SSE frame validation
+* `src/hooks/use-project-browser.ts`, the browse page state machine (filters,
+  debounce, request ordering, cache reads, and the live event stream)
 * `src/lib/posts.functions.ts`, `searchPosts`, `searchPostsAdmin`, and
   `postSearchAvailable`
 * `drizzle/0010_postgres_search.sql`, the extension, the trigram

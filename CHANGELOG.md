@@ -17,6 +17,10 @@ names match the repository's `ALPHA-*` git tags.
 
 ### Changed
 
+* The browse filter panel now uses shadcn controls with visible field labels,
+  an active-filter count and a one-click reset. Search state lives in a focused
+  hook over tested pure helpers, so the page no longer carries a complexity
+  exemption.
 * Server voting and its settings use shadcn components throughout, and the
   listener cards dim when voting is off.
 * Long supported-version lists fold behind an expand button on the public

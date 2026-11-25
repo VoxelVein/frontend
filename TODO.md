@@ -59,8 +59,6 @@ already shipped.
 * [ ] Eight of the nine hooks in `src/hooks/` have no test. Only
       `custom-cursor` is covered, in `src/lib/__tests__/custom-cursor.test.ts`.
       `use-post-search` is in `coverage.include` despite having no test.
-* [ ] `ProjectBrowser` is exempted from the complexity lint at roughly 850
-      lines; split search state from filters.
 
 ## Planned
 
@@ -73,6 +71,8 @@ already shipped.
 
 ## Completed
 
+* [x] Split `ProjectBrowser` into pure rules, a search hook, a filter panel and
+      result components; the complexity exemption is gone.
 * [x] Project ownership transfers with owner re-authentication, recipient
       acceptance, an admin-only immediate transfer, and notifications.
 * [x] Rebuilt voting UI with shadcn primitives and shadcn-only form controls.
