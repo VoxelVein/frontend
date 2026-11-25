@@ -3,7 +3,12 @@ import { eq, sql } from "drizzle-orm";
 import { pipe, safeParse, string, uuid } from "valibot";
 
 import { db } from "@/db";
-import { projectFiles, projects, projectVersions } from "@/db/schema";
+import {
+  projectDownloads,
+  projectFiles,
+  projects,
+  projectVersions,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getForwardedClientIp } from "@/lib/client-key";
 import {
@@ -22,20 +27,27 @@ const uuidSchema = pipe(string(), uuid());
 const TRUST_PROXY = process.env.TRUST_PROXY === "true";
 const downloadDeduper = createDownloadDeduper();
 
+interface DownloadClient {
+  /** The dedupe and rate-limit key: an account when signed in, else an address. */
+  key: string | null;
+  /** Only signed-in accounts can review, so only they get a download record. */
+  userId: string | null;
+}
+
 // Signed-in users are keyed by account, everyone else by the proxy-reported
 // IP. A failed session lookup must not block the download itself.
-const getClientKey = async (request: Request): Promise<string | null> => {
+const getDownloadClient = async (request: Request): Promise<DownloadClient> => {
   const session = await auth.api
     .getSession({ headers: request.headers })
     .catch(() => null);
 
   if (session) {
-    return `user:${session.user.id}`;
+    return { key: `user:${session.user.id}`, userId: session.user.id };
   }
 
   const ip = getForwardedClientIp(request.headers, TRUST_PROXY);
 
-  return ip ? `ip:${ip}` : null;
+  return { key: ip ? `ip:${ip}` : null, userId: null };
 };
 
 const incrementDownloads = async (file: {
@@ -58,6 +70,22 @@ const incrementDownloads = async (file: {
   });
 };
 
+/** Stores the last fetch time for the review gate, once per account and project. */
+const recordProjectDownload = async (
+  userId: string,
+  projectId: string
+): Promise<void> => {
+  const now = new Date();
+
+  await db
+    .insert(projectDownloads)
+    .values({ downloadedAt: now, projectId, userId })
+    .onConflictDoUpdate({
+      target: [projectDownloads.userId, projectDownloads.projectId],
+      set: { downloadedAt: now },
+    });
+};
+
 const notFound = () =>
   Response.json({ error: "File not found." }, { status: 404 });
 
@@ -70,11 +98,12 @@ const handleDownload = async (
   }
 
   // Before the database, so a throttled client costs nothing but the counter.
-  // `getClientKey` is the same identity the download dedupe uses, so a session
-  // is counted per account and an anonymous visitor per address.
+  // The same identity drives the dedupe and the account's review eligibility.
+  const client = await getDownloadClient(request);
+
   const quota = await consumeRateLimit(
     "download",
-    (await getClientKey(request)) ?? "unknown",
+    client.key ?? "unknown",
     RATE_LIMITS.download
   );
 
@@ -117,9 +146,13 @@ const handleDownload = async (
   if (
     file.status === "published" &&
     !isPrefetchRequest(request.headers) &&
-    downloadDeduper.shouldCount(await getClientKey(request), fileId)
+    downloadDeduper.shouldCount(client.key, fileId)
   ) {
     await incrementDownloads(file);
+
+    if (client.userId) {
+      await recordProjectDownload(client.userId, file.projectId);
+    }
   }
 
   return new Response(null, {
