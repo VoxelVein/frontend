@@ -8,6 +8,7 @@ import {
   IconShield,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import type { ReactNode } from "react";
 
 import { Avatar } from "@/components/avatar";
@@ -70,99 +71,115 @@ const MenuLink = ({ children, icon, to }: MenuLinkProps) => (
  * sighted pointer users and by `aria-label` for everyone else. The popup itself
  * is deliberately short: the destinations that matter, then sign out.
  */
-const UserMenu = ({ user, onSignOut }: UserMenuProps) => (
-  <DropdownMenu>
-    <Tooltip>
-      <DropdownMenuTrigger
-        render={
-          <TooltipTrigger
+const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DropdownMenu onOpenChange={setOpen} open={open}>
+      <Tooltip>
+        {/* Base UI opens menus on mousedown. Stopping that event at the wrapper
+            defers the popup until the pointer is released, while leaving the
+            button's keyboard handlers and the tooltip's hover untouched. */}
+        <div
+          className="inline-flex"
+          role="presentation"
+          onMouseDownCapture={(event) => event.stopPropagation()}
+          onMouseUp={() => setOpen((current) => !current)}
+        >
+          <DropdownMenuTrigger
             render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-10 rounded-full p-0 hover:bg-transparent"
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-12 rounded-full p-0 transition-transform duration-150 hover:bg-transparent active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
+                  />
+                }
               />
             }
-          />
-        }
-        aria-label={`Account menu for ${user.name}`}
-      >
-        <Avatar
-          className="ring-border size-full ring-1"
-          decorative={false}
-          image={user.image ?? null}
-          name={user.name}
-        />
-      </DropdownMenuTrigger>
-      <TooltipContent side="top">{user.name}</TooltipContent>
-    </Tooltip>
+            aria-label={`Account menu for ${user.name}`}
+          >
+            <Avatar
+              className="ring-border size-full ring-1"
+              decorative={false}
+              image={user.image ?? null}
+              name={user.name}
+            />
+          </DropdownMenuTrigger>
+        </div>
+        <TooltipContent side="top">{user.name}</TooltipContent>
+      </Tooltip>
 
-    <DropdownMenuContent align="end" sideOffset={12} className="min-w-56">
-      <DropdownMenuGroup>
-        <DropdownMenuLabel className="border-border/70 mb-1 border-b px-3 py-2">
-          <p className="text-foreground truncate text-sm font-medium">
-            {user.name}
-          </p>
-          {user.email ? (
-            <p className="text-muted-foreground truncate text-xs">
-              {user.email}
+      <DropdownMenuContent align="end" sideOffset={12} className="min-w-56">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="border-border/70 mb-1 border-b px-3 py-2">
+            <p className="text-foreground truncate text-sm font-medium">
+              {user.name}
             </p>
-          ) : null}
-        </DropdownMenuLabel>
-      </DropdownMenuGroup>
+            {user.email ? (
+              <p className="text-muted-foreground truncate text-xs">
+                {user.email}
+              </p>
+            ) : null}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
 
-      <MenuLink
-        icon={<IconPackage size={16} stroke={1.8} aria-hidden="true" />}
-        to="/dashboard/projects"
-      >
-        My projects
-      </MenuLink>
-      <MenuLink
-        icon={<IconArrowsExchange size={16} stroke={1.8} aria-hidden="true" />}
-        to="/dashboard/transfers"
-      >
-        Transfers
-      </MenuLink>
-      <MenuLink
-        icon={<IconBell size={16} stroke={1.8} aria-hidden="true" />}
-        to="/notifications"
-      >
-        Notifications
-      </MenuLink>
-      <MenuLink
-        icon={<IconHelp size={16} stroke={1.8} aria-hidden="true" />}
-        to="/support"
-      >
-        Support
-      </MenuLink>
-      <MenuLink
-        icon={<IconSettings size={16} stroke={1.8} aria-hidden="true" />}
-        to="/settings"
-      >
-        Settings
-      </MenuLink>
-
-      {can(user.role, "viewAdminPanel") ? (
         <MenuLink
-          icon={<IconShield size={16} stroke={1.8} aria-hidden="true" />}
-          to="/admin"
+          icon={<IconPackage size={16} stroke={1.8} aria-hidden="true" />}
+          to="/dashboard/projects"
         >
-          Admin panel
+          My projects
         </MenuLink>
-      ) : null}
+        <MenuLink
+          icon={
+            <IconArrowsExchange size={16} stroke={1.8} aria-hidden="true" />
+          }
+          to="/dashboard/transfers"
+        >
+          Transfers
+        </MenuLink>
+        <MenuLink
+          icon={<IconBell size={16} stroke={1.8} aria-hidden="true" />}
+          to="/notifications"
+        >
+          Notifications
+        </MenuLink>
+        <MenuLink
+          icon={<IconHelp size={16} stroke={1.8} aria-hidden="true" />}
+          to="/support"
+        >
+          Support
+        </MenuLink>
+        <MenuLink
+          icon={<IconSettings size={16} stroke={1.8} aria-hidden="true" />}
+          to="/settings"
+        >
+          Settings
+        </MenuLink>
 
-      <DropdownMenuSeparator className="border-border/70 my-1 border-t" />
+        {can(user.role, "viewAdminPanel") ? (
+          <MenuLink
+            icon={<IconShield size={16} stroke={1.8} aria-hidden="true" />}
+            to="/admin"
+          >
+            Admin panel
+          </MenuLink>
+        ) : null}
 
-      <DropdownMenuItem
-        onClick={onSignOut}
-        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring focus-visible:ring-destructive/50 data-highlighted:bg-destructive/10 data-highlighted:text-destructive flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      >
-        <IconLogout size={16} stroke={1.8} aria-hidden="true" />
-        Sign out
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+        <DropdownMenuSeparator className="border-border/70 my-1 border-t" />
+
+        <DropdownMenuItem
+          onClick={onSignOut}
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring focus-visible:ring-destructive/50 data-highlighted:bg-destructive/10 data-highlighted:text-destructive flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <IconLogout size={16} stroke={1.8} aria-hidden="true" />
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export { UserMenu };
