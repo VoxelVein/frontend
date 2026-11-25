@@ -171,9 +171,11 @@ const ServerVersions = ({ versions }: { versions: string[] }) => {
           ))}
         </ul>
         {collapsible ? (
+          // `from-card` fades to this panel's own surface in both themes. The
+          // black fade in the editor is deliberate and stays on the manage page.
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black to-transparent"
+            className="from-card pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent"
           />
         ) : null}
       </div>
