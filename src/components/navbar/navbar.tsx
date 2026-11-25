@@ -1,7 +1,5 @@
 import { IconMenu2, IconX } from "@tabler/icons-react";
-import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { ThemeToggle } from "@/components/motion/theme-toggle";
 import { AuthButtons } from "@/components/navbar/auth-buttons";
@@ -9,45 +7,17 @@ import { NavbarLinks } from "@/components/navbar/navbar-links";
 import { NavbarLogo } from "@/components/navbar/navbar-logo";
 import { NavbarMobileMenu } from "@/components/navbar/navbar-mobile";
 import { Button } from "@/components/ui/button";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { authClient } from "@/lib/auth-client";
 
 const Navbar = () => {
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
+  const signOut = useSignOut();
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await authClient.signOut();
-
-      if (error) {
-        toast.error(error.message ?? "Could not sign you out.", {
-          action: {
-            label: "Try again",
-            onClick: () => handleSignOut(),
-          },
-        });
-
-        return;
-      }
-    } catch {
-      toast.error("Could not sign you out.", {
-        action: {
-          label: "Try again",
-          onClick: () => handleSignOut(),
-        },
-      });
-
-      return;
-    }
-
+  const handleSignOut = () => {
     setMenuOpen(false);
-    // Force the session hook to refetch so the UI reflects the signed-out state
-    authClient.$store.notify("$sessionSignal");
-    router.invalidate();
-    await authClient.getSession();
-    await router.invalidate();
-    await router.navigate({ to: "/" });
+    void signOut();
   };
 
   return (

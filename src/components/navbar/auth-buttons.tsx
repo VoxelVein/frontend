@@ -13,7 +13,6 @@ import {
   MOBILE_LINK_CLASS,
   MOBILE_SECTION_HEADING_CLASS,
 } from "@/components/navbar/navbar-links";
-import { UserMenu } from "@/components/navbar/user-menu";
 import { UserNotifications } from "@/components/navbar/user-notifications";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -231,12 +230,9 @@ const AuthSignedIn = ({
   onClose?: () => void;
 }) => {
   if (variant === "desktop") {
-    return (
-      <div className="flex items-center gap-1">
-        <UserNotifications />
-        <UserMenu user={user} onSignOut={onSignOut} />
-      </div>
-    );
+    // The account menu moved to the floating avatar button in the corner; the
+    // navbar keeps the bell, which is still the fastest route to the inbox.
+    return <UserNotifications />;
   }
 
   return (

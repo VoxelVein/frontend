@@ -1,6 +1,6 @@
 import {
   IconArrowsExchange,
-  IconChevronDown,
+  IconBell,
   IconHelp,
   IconLogout,
   IconPackage,
@@ -8,7 +8,9 @@ import {
   IconShield,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
+import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,127 +21,147 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { can } from "@/lib/roles";
 
+interface UserMenuUser {
+  name: string;
+  email?: string | null;
+  image?: string | null;
+  role?: string | null;
+}
+
 interface UserMenuProps {
-  user: {
-    name: string;
-    email?: string | null;
-    image?: string | null;
-    role?: string | null;
-  };
+  user: UserMenuUser;
   onSignOut: () => void;
 }
 
-const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
-  const initial = user.name.charAt(0).toUpperCase();
+/**
+ * Every row in the account popup shares one treatment.
+ *
+ * The previous menu repeated the same long className five times, which is how
+ * one row drifted into a different hover colour. Keeping it here also keeps the
+ * destructive sign-out row as the only deliberate variation.
+ */
+const MENU_ITEM_CLASS =
+  "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none";
 
-  return (
-    <DropdownMenu>
+interface MenuLinkProps {
+  children: ReactNode;
+  icon: ReactNode;
+  to: string;
+}
+
+const MenuLink = ({ children, icon, to }: MenuLinkProps) => (
+  <DropdownMenuItem render={<Link to={to} />} className={MENU_ITEM_CLASS}>
+    {icon}
+    {children}
+  </DropdownMenuItem>
+);
+
+/**
+ * The account popup, opened from the small avatar button fixed to the corner.
+ *
+ * The trigger is an icon-only button, so the name is carried by the tooltip for
+ * sighted pointer users and by `aria-label` for everyone else. The popup itself
+ * is deliberately short: the destinations that matter, then sign out.
+ */
+const UserMenu = ({ user, onSignOut }: UserMenuProps) => (
+  <DropdownMenu>
+    <Tooltip>
       <DropdownMenuTrigger
-        render={(props) => (
-          <Button
-            type="button"
-            variant="ghost"
-            className="group min-h-11 gap-2 px-2"
-            {...props}
+        render={
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="border-border/70 bg-background/90 hover:bg-muted size-11 rounded-full p-0 shadow-lg backdrop-blur-sm"
+              />
+            }
           />
-        )}
-        aria-label="User menu"
+        }
+        aria-label={`Account menu for ${user.name}`}
       >
-        {user.image ? (
-          <img
-            src={user.image}
-            alt={`${user.name}'s avatar`}
-            className="size-6 rounded-full object-cover"
-          />
-        ) : (
-          <span
-            aria-hidden="true"
-            className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-full text-xs font-semibold"
-          >
-            {initial}
-          </span>
-        )}
-        <span className="text-foreground max-w-24 truncate text-sm font-medium">
-          {user.name}
-        </span>
-        <IconChevronDown
-          size={15}
-          stroke={1.8}
-          aria-hidden="true"
-          className="text-muted-foreground transition-transform duration-200 group-data-popup-open:rotate-180"
+        <Avatar
+          decorative={false}
+          image={user.image ?? null}
+          name={user.name}
         />
       </DropdownMenuTrigger>
+      <TooltipContent side="top">{user.name}</TooltipContent>
+    </Tooltip>
 
-      <DropdownMenuContent align="end" sideOffset={8} className="min-w-48">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="border-border/70 mb-1 border-b px-3 py-2">
-            <p className="text-foreground truncate text-sm font-medium">
-              {user.name}
+    <DropdownMenuContent align="end" sideOffset={12} className="min-w-56">
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="border-border/70 mb-1 border-b px-3 py-2">
+          <p className="text-foreground truncate text-sm font-medium">
+            {user.name}
+          </p>
+          {user.email ? (
+            <p className="text-muted-foreground truncate text-xs">
+              {user.email}
             </p>
-            {user.email ? (
-              <p className="text-muted-foreground truncate text-xs">
-                {user.email}
-              </p>
-            ) : null}
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
+          ) : null}
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
 
-        <DropdownMenuItem
-          render={<Link to="/dashboard/projects" />}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      <MenuLink
+        icon={<IconPackage size={16} stroke={1.8} aria-hidden="true" />}
+        to="/dashboard/projects"
+      >
+        My projects
+      </MenuLink>
+      <MenuLink
+        icon={<IconArrowsExchange size={16} stroke={1.8} aria-hidden="true" />}
+        to="/dashboard/transfers"
+      >
+        Transfers
+      </MenuLink>
+      <MenuLink
+        icon={<IconBell size={16} stroke={1.8} aria-hidden="true" />}
+        to="/notifications"
+      >
+        Notifications
+      </MenuLink>
+      <MenuLink
+        icon={<IconHelp size={16} stroke={1.8} aria-hidden="true" />}
+        to="/support"
+      >
+        Support
+      </MenuLink>
+      <MenuLink
+        icon={<IconSettings size={16} stroke={1.8} aria-hidden="true" />}
+        to="/settings"
+      >
+        Settings
+      </MenuLink>
+
+      {can(user.role, "viewAdminPanel") ? (
+        <MenuLink
+          icon={<IconShield size={16} stroke={1.8} aria-hidden="true" />}
+          to="/admin"
         >
-          <IconPackage size={16} stroke={1.8} />
-          My projects
-        </DropdownMenuItem>
+          Admin panel
+        </MenuLink>
+      ) : null}
 
-        <DropdownMenuItem
-          render={<Link to="/dashboard/transfers" />}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <IconArrowsExchange size={16} stroke={1.8} />
-          Transfers
-        </DropdownMenuItem>
+      <DropdownMenuSeparator className="border-border/70 my-1 border-t" />
 
-        <DropdownMenuItem
-          render={<Link to="/support" />}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <IconHelp size={16} stroke={1.8} />
-          Support
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          render={<Link to="/settings" />}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <IconSettings size={16} stroke={1.8} />
-          Settings
-        </DropdownMenuItem>
-
-        {can(user.role, "viewAdminPanel") ? (
-          <DropdownMenuItem
-            render={<Link to="/admin" />}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring data-highlighted:bg-muted data-highlighted:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <IconShield size={16} stroke={1.8} />
-            Admin panel
-          </DropdownMenuItem>
-        ) : null}
-
-        <DropdownMenuSeparator className="border-border/70 my-1 border-t" />
-
-        <DropdownMenuItem
-          onClick={onSignOut}
-          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring focus-visible:ring-destructive/50 data-highlighted:bg-destructive/10 data-highlighted:text-destructive flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <IconLogout size={16} stroke={1.8} />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+      <DropdownMenuItem
+        onClick={onSignOut}
+        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring focus-visible:ring-destructive/50 data-highlighted:bg-destructive/10 data-highlighted:text-destructive flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      >
+        <IconLogout size={16} stroke={1.8} aria-hidden="true" />
+        Sign out
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
 
 export { UserMenu };

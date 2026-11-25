@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 
 import { CookieBanner } from "@/components/cookie-banner";
 import { Footer } from "@/components/footer";
+import { AccountDock } from "@/components/navbar/account-dock";
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -43,6 +44,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
         </ThemeProvider>
       </TooltipProvider>
       <CookieBanner />
+      <AccountDock />
       <Toaster />
       {import.meta.env.DEV ? (
         <TanStackDevtools
