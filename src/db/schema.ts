@@ -395,6 +395,73 @@ export const serverVoteConfig = pgTable(
   (table) => [index("server_vote_config_project_id_idx").on(table.projectId)]
 );
 
+/**
+ * When an account last fetched a project's files.
+ *
+ * One row per account and project, overwritten on each download: the review
+ * gate asks "have you fetched this recently enough?", not which version or how
+ * many times. Only signed-in accounts are recorded, because only they can
+ * leave a review; anonymous traffic stays in the aggregate download counter.
+ */
+export const projectDownloads = pgTable(
+  "project_downloads",
+  {
+    downloadedAt: timestamp("downloaded_at").defaultNow().notNull(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    // Also lets one account's download of a project be replaced in place.
+    uniqueIndex("project_downloads_userId_projectId_uidx").on(
+      table.userId,
+      table.projectId
+    ),
+    // Leading projectId serves the cascade check when a project is deleted.
+    index("project_downloads_projectId_idx").on(table.projectId),
+  ]
+);
+
+/**
+ * A player's rating of a project or server, with an optional short note.
+ *
+ * The account is soft-deleted rather than cascaded: a review stays attached to
+ * the listing after its author leaves, but loses the name that went with the
+ * account. A project, in contrast, takes its reviews with it when removed.
+ */
+export const projectReviews = pgTable(
+  "project_reviews",
+  {
+    comment: text("comment"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    // 1 through 5; validated by REVIEW_RATINGS at the request boundary.
+    rating: integer("rating").notNull(),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [
+    // One review per account per listing, so an unfinished form cannot produce
+    // two rows and a later visit cannot quietly add a second rating.
+    uniqueIndex("project_reviews_userId_projectId_uidx").on(
+      table.userId,
+      table.projectId
+    ),
+    // Newest first, which is the order the public list renders.
+    index("project_reviews_projectId_createdAt_idx").on(
+      table.projectId,
+      table.createdAt
+    ),
+  ]
+);
+
 export const projectServerLinks = pgTable(
   "project_server_links",
   {
@@ -924,6 +991,31 @@ export const projectTransfersRelations = relations(
     }),
   })
 );
+
+export const projectDownloadsRelations = relations(
+  projectDownloads,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [projectDownloads.projectId],
+      references: [projects.id],
+    }),
+    user: one(users, {
+      fields: [projectDownloads.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const projectReviewsRelations = relations(projectReviews, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectReviews.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [projectReviews.userId],
+    references: [users.id],
+  }),
+}));
 
 export const projectFilesRelations = relations(projectFiles, ({ one }) => ({
   version: one(projectVersions, {

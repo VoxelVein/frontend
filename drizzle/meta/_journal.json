@@ -225,6 +225,13 @@
       "when": 1795551093337,
       "tag": "0031_project_transfers",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795628450585,
+      "tag": "0032_project_reviews",
+      "breakpoints": true
     }
   ]
 }
