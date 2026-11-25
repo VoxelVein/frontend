@@ -79,9 +79,9 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => (
             render={
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                className="border-border/70 bg-background/90 hover:bg-muted size-11 rounded-full p-0 shadow-lg backdrop-blur-sm"
+                className="size-10 rounded-full p-0 hover:bg-transparent"
               />
             }
           />
@@ -89,6 +89,7 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => (
         aria-label={`Account menu for ${user.name}`}
       >
         <Avatar
+          className="ring-border size-full ring-1"
           decorative={false}
           image={user.image ?? null}
           name={user.name}
