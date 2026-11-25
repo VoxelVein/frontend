@@ -146,6 +146,33 @@ export const notificationGroup = (
   return "earlier";
 };
 
+/**
+ * Buckets a newest-first list into day groups, preserving that order.
+ *
+ * Both the bell and the full page need exactly this split. Keeping it here
+ * means a change to the day boundary cannot make one view disagree with the
+ * other about which heading a row belongs under.
+ */
+export const groupNotifications = <T extends { createdAt: string }>(
+  items: readonly T[],
+  now: number
+): [NotificationGroup, T[]][] => {
+  const buckets = new Map<NotificationGroup, T[]>();
+
+  for (const item of items) {
+    const group = notificationGroup(item.createdAt, now);
+    const existing = buckets.get(group);
+
+    if (existing) {
+      existing.push(item);
+    } else {
+      buckets.set(group, [item]);
+    }
+  }
+
+  return [...buckets];
+};
+
 const groupLabels = {
   earlier: "Earlier",
   today: "Today",

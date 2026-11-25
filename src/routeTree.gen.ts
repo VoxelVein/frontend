@@ -20,6 +20,7 @@ import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ErrorRouteImport } from './routes/error'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -143,6 +144,11 @@ const LegalRoute = LegalRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -509,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/error': typeof ErrorRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -588,6 +595,7 @@ export interface FileRoutesByTo {
   '/error': typeof ErrorRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -671,6 +679,7 @@ export interface FileRoutesById {
   '/error': typeof ErrorRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -755,6 +764,7 @@ export interface FileRouteTypes {
     | '/error'
     | '/legal'
     | '/login'
+    | '/notifications'
     | '/privacy'
     | '/settings'
     | '/signup'
@@ -834,6 +844,7 @@ export interface FileRouteTypes {
     | '/error'
     | '/legal'
     | '/login'
+    | '/notifications'
     | '/privacy'
     | '/settings'
     | '/signup'
@@ -916,6 +927,7 @@ export interface FileRouteTypes {
     | '/error'
     | '/legal'
     | '/login'
+    | '/notifications'
     | '/privacy'
     | '/settings'
     | '/signup'
@@ -999,6 +1011,7 @@ export interface RootRouteChildren {
   ErrorRoute: typeof ErrorRoute
   LegalRoute: typeof LegalRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
@@ -1121,6 +1134,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1860,6 +1880,7 @@ const rootRouteChildren: RootRouteChildren = {
   ErrorRoute: ErrorRoute,
   LegalRoute: LegalRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
