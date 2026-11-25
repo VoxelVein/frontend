@@ -16,6 +16,7 @@ interface VotingMocks {
   status: Mock<
     () => Promise<{
       enabled: boolean;
+      configured: boolean;
       totalVotes: number;
       nextVoteAt: string | null;
     }>
@@ -34,6 +35,7 @@ const mocks = vi.hoisted((): VotingMocks => ({
   status: vi.fn<
     () => Promise<{
       enabled: boolean;
+      configured: boolean;
       totalVotes: number;
       nextVoteAt: string | null;
     }>
@@ -77,28 +79,41 @@ describe("server voting flow", () => {
     mocks.session = { user: { id: "user", emailVerified: true } };
     mocks.status.mockResolvedValue({
       enabled: true,
+      configured: true,
       totalVotes: 12,
       nextVoteAt: null,
     });
     mocks.vote.mockReset();
   });
 
-  it("shows disabled voting and totals", async () => {
+  it("hides the voting card when voting is disabled", async () => {
     mocks.status.mockResolvedValue({
       enabled: false,
+      configured: false,
       totalVotes: 12,
       nextVoteAt: null,
     });
-    mount();
-    await expect(
-      screen.findByRole("button", { name: "Voting disabled" })
-    ).resolves.toBeDisabled();
-    expect(screen.getByText("12 votes")).toBeInTheDocument();
+    const { container } = mount();
+
+    await waitFor(() => expect(container).toBeEmptyDOMElement());
+  });
+
+  it("hides the voting card when voting is enabled but not set up", async () => {
+    mocks.status.mockResolvedValue({
+      enabled: true,
+      configured: false,
+      totalVotes: 12,
+      nextVoteAt: null,
+    });
+    const { container } = mount();
+
+    await waitFor(() => expect(container).toBeEmptyDOMElement());
   });
 
   it("shows an active cooldown", async () => {
     mocks.status.mockResolvedValue({
       enabled: true,
+      configured: true,
       totalVotes: 12,
       nextVoteAt: new Date(Date.now() + 3_600_000).toISOString(),
     });
@@ -126,11 +141,13 @@ describe("server voting flow", () => {
     mocks.status
       .mockResolvedValueOnce({
         enabled: true,
+        configured: true,
         totalVotes: 12,
         nextVoteAt: null,
       })
       .mockResolvedValue({
         enabled: true,
+        configured: true,
         totalVotes: 13,
         nextVoteAt: new Date(Date.now() + 86_400_000).toISOString(),
       });

@@ -33,6 +33,8 @@ import {
   formatCooldownRemaining,
   MINECRAFT_EDITIONS,
   MINECRAFT_EDITION_LABELS,
+  shouldShowVotingCard,
+  voteButtonLabel,
 } from "@/lib/server-voting";
 import type { MinecraftEdition } from "@/lib/server-voting";
 import { castVote, voteCooldown } from "@/lib/server-voting.functions";
@@ -150,13 +152,13 @@ export const ServerVoteButton = ({
     );
   }
 
-  let label = "Vote";
-
-  if (!status.data.enabled) {
-    label = "Voting disabled";
-  } else if (remaining) {
-    label = `Vote again in ${remaining}`;
+  // The full card is only for servers that finished setting voting up. The
+  // compact counter stays on list cards so the row does not change shape.
+  if (!compact && !shouldShowVotingCard(status.data)) {
+    return null;
   }
+
+  const label = voteButtonLabel(status.data, remaining);
 
   const headingId = `server-voting-${projectId}`;
 
@@ -251,7 +253,7 @@ export const ServerVoteButton = ({
           <Button
             size={compact ? "default" : "lg"}
             className={compact ? "min-h-10" : "min-h-11 w-full"}
-            disabled={!status.data.enabled || !!remaining}
+            disabled={!shouldShowVotingCard(status.data) || !!remaining}
           />
         }
       >
