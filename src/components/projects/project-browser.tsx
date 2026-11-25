@@ -1,259 +1,27 @@
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconPackage,
-  IconSearch,
-  IconSearchOff,
-  IconX,
-} from "@tabler/icons-react";
-import { useDebouncedValue } from "@tanstack/react-pacer/debouncer";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { IconPackage, IconSearchOff } from "@tabler/icons-react";
 
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { PageHeader } from "@/components/page-header";
-import { ProjectCard } from "@/components/projects/project-card";
+import { ProjectBrowserFilters } from "@/components/projects/project-browser-filters";
+import {
+  LiveEventBanner,
+  ResultSkeletons,
+  Results,
+} from "@/components/projects/project-browser-results";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxField,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProjectBrowser } from "@/hooks/use-project-browser";
 import { categoryIconForPath } from "@/lib/categories";
-import { formatCategory, formatCount } from "@/lib/format";
-import { filterGameVersions } from "@/lib/game-version-search";
-import { toSearchErrorMessage } from "@/lib/project-browser-loader";
+import { formatCount } from "@/lib/format";
 import type { ProjectBrowserData } from "@/lib/project-browser-loader";
-import { projectSearchCache } from "@/lib/project-search-cache";
-import { searchProjects } from "@/lib/project-search.functions";
-import type {
-  ProjectSearchParams,
-  ProjectSearchResponse,
-} from "@/lib/project-search.functions";
 import {
-  CATEGORIES_BY_TYPE,
-  CLIENT_REQUIREMENT_LABELS,
-  CLIENT_REQUIREMENTS,
-  hasLoaders,
-  LOADER_LABELS,
-  LOADERS_BY_TYPE,
   PROJECT_TYPE_DESCRIPTIONS,
   PROJECT_TYPE_LABELS,
   PROJECT_TYPE_PATHS,
 } from "@/lib/projects";
 import type { ProjectType } from "@/lib/projects";
-import { getMinecraftServerStatuses } from "@/lib/server-status.functions";
-import { cn } from "@/lib/utils";
-
-const DEFAULT_SORT = "downloads:desc";
-
-// SAFETY: Vite exposes VITE_* vars as `any`; narrowing to string | undefined
-// matches the runtime value (string when set, undefined when absent). Local
-// development uses the same-origin Vite proxy; production connects directly to
-// the configured public API and never falls back to the visitor's localhost.
-const API_URL = import.meta.env.DEV
-  ? ""
-  : (import.meta.env.VITE_API_URL as string | undefined);
-
-const noEventCleanup = (): void => {
-  // No EventSource exists when the API URL is not configured.
-};
-
-interface LiveModEventData {
-  id: string;
-  name: string;
-}
-
-interface LiveModEvent {
-  event: "mod.created" | "mod.updated" | "mod.deleted";
-  data: LiveModEventData;
-}
-
-/**
- * Banner copy for a live stream event.
- *
- * Deliberately type-neutral. The stream is a single global feed that every
- * browse page subscribes to, and the webhook payload carries only `id` and
- * `name`  -  no project type. The labels previously said "New mod added", so a
- * shader publish announced itself as a mod on the Shaders page, next to a
- * "Refresh results" button that would not show it. Naming the object "project"
- * is what the payload actually supports; the surrounding page supplies the type.
- */
-const LIVE_EVENT_LABELS = {
-  "mod.created": "New project added",
-  "mod.deleted": "Project removed",
-  "mod.updated": "Project updated",
-} as const satisfies Record<LiveModEvent["event"], string>;
-
-/** Only servers collect votes, so other project types never offer this sort. */
-const VOTES_SORT = "votes:desc";
-
-const SORT_OPTIONS = [
-  { label: "Most voted", value: VOTES_SORT },
-  { label: "Most downloaded", value: DEFAULT_SORT },
-  { label: "Recently updated", value: "updatedAt:desc" },
-  { label: "Name (A–Z)", value: "name:asc" },
-] as const;
-
-const NON_SERVER_SORT_OPTIONS = SORT_OPTIONS.filter(
-  (option) => option.value !== VOTES_SORT
-);
-
-const sortOptionsFor = (type: ProjectType) =>
-  type === "server" ? SORT_OPTIONS : NON_SERVER_SORT_OPTIONS;
-
-const SearchBar = ({
-  query,
-  onQueryChange,
-  type,
-}: {
-  query: string;
-  onQueryChange: (value: string) => void;
-  type: ProjectType;
-}) => (
-  <div className="relative">
-    <IconSearch
-      size={18}
-      stroke={1.8}
-      aria-hidden="true"
-      className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 -translate-y-1/2"
-    />
-    <label className="sr-only" htmlFor={`${type}-search`}>
-      Search {PROJECT_TYPE_LABELS[type].plural.toLowerCase()}
-    </label>
-    <input
-      id={`${type}-search`}
-      name="query"
-      type="search"
-      value={query}
-      onChange={(event) => onQueryChange(event.target.value)}
-      placeholder={`Search ${PROJECT_TYPE_LABELS[type].plural.toLowerCase()}…`}
-      autoComplete="off"
-      className="border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus-visible:ring-ring focus:bg-background min-h-12 w-full rounded-xl border pr-12 pl-11 text-base transition-colors focus-visible:ring-2 focus-visible:outline-none"
-    />
-    {query ? (
-      <button
-        type="button"
-        onClick={() => onQueryChange("")}
-        aria-label="Clear search"
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute top-1/2 right-2 flex size-11 -translate-y-1/2 items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:outline-none"
-      >
-        <IconX size={16} aria-hidden="true" />
-      </button>
-    ) : null}
-  </div>
-);
-
-interface FiltersProps {
-  category: string;
-  categories: readonly string[];
-  clientRequirement: string;
-  onClientRequirementChange: (value: string | null) => void;
-  gameVersion: string;
-  loader: string;
-  onCategoryChange: (value: string | null) => void;
-  onGameVersionChange: (value: string | null) => void;
-  onLoaderChange: (value: string | null) => void;
-  onSortChange: (value: string | null) => void;
-  sort: string;
-  type: ProjectType;
-}
-
-const CLIENT_REQUIREMENT_OPTIONS = [
-  { label: "Any client", value: "" },
-  ...CLIENT_REQUIREMENTS.map((value) => ({
-    label: CLIENT_REQUIREMENT_LABELS[value],
-    value,
-  })),
-];
-
-const ClientRequirementFilter = ({
-  onChange,
-  value,
-}: {
-  onChange: (value: string | null) => void;
-  value: string;
-}) => (
-  <div>
-    <label className="sr-only" htmlFor="server-client-requirement">
-      Client requirement
-    </label>
-    <Select
-      items={CLIENT_REQUIREMENT_OPTIONS}
-      value={value}
-      onValueChange={onChange}
-    >
-      <SelectTrigger id="server-client-requirement" className="min-h-11 w-full">
-        <SelectValue placeholder="Any client" />
-      </SelectTrigger>
-      <SelectContent>
-        {CLIENT_REQUIREMENT_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
-
-const GameVersionFilter = ({
-  onChange,
-  type,
-  value,
-}: {
-  onChange: (value: string | null) => void;
-  type: ProjectType;
-  value: string;
-}) => {
-  const [query, setQuery] = useState("");
-  const options = filterGameVersions(query, true, false);
-
-  return (
-    <Combobox
-      items={options}
-      filteredItems={options}
-      value={value || null}
-      onValueChange={(next: string | null) => {
-        setQuery("");
-        onChange(next);
-      }}
-      inputValue={query}
-      onInputValueChange={setQuery}
-    >
-      <ComboboxField
-        id={`${type}-game-version`}
-        placeholder={value ? `Minecraft ${value}` : "All versions"}
-        className={cn(
-          "min-h-11 w-full [&>input]:h-full",
-          value && "placeholder:text-foreground"
-        )}
-      />
-      <ComboboxContent>
-        <ComboboxEmpty>No matching versions.</ComboboxEmpty>
-        <ComboboxList>
-          {(item: string) => (
-            <ComboboxItem key={item} value={item}>
-              Minecraft {item}
-            </ComboboxItem>
-          )}
-        </ComboboxList>
-      </ComboboxContent>
-    </Combobox>
-  );
-};
 
 /**
  * The icon for the browse empty state.
@@ -267,13 +35,6 @@ const GameVersionFilter = ({
  * A plain function rather than a component: the icon is chosen from a lookup
  * and rendering `<Icon />` would otherwise define a component during render.
  */
-/** The category mark in the page header, as an element rather than a component. */
-const headerIcon = (type: ProjectType) => {
-  const Icon = categoryIconForPath(PROJECT_TYPE_PATHS[type]) ?? IconPackage;
-
-  return <Icon size={22} aria-hidden="true" />;
-};
-
 const emptyStateIcon = (type: ProjectType, isFiltered: boolean) => {
   if (isFiltered) {
     return <IconSearchOff size={24} aria-hidden="true" />;
@@ -288,486 +49,84 @@ const emptyStateIcon = (type: ProjectType, isFiltered: boolean) => {
   return <IconPackage size={24} aria-hidden="true" />;
 };
 
-const Filters = ({
-  category,
-  categories,
-  clientRequirement,
-  onClientRequirementChange,
-  gameVersion,
-  loader,
-  onCategoryChange,
-  onGameVersionChange,
-  onLoaderChange,
-  onSortChange,
-  sort,
-  type,
-}: FiltersProps) => (
-  <div
-    className={cn(
-      "mt-4 grid gap-3 sm:grid-cols-2",
-      hasLoaders(type) || type === "server"
-        ? "lg:grid-cols-4"
-        : "lg:grid-cols-3"
-    )}
-  >
-    <div>
-      <label className="sr-only" htmlFor={`${type}-category`}>
-        Category
-      </label>
-      <Select
-        items={[
-          { label: "All categories", value: "" },
-          ...categories.map((value) => ({
-            label: formatCategory(value),
-            value,
-          })),
-        ]}
-        value={category}
-        onValueChange={onCategoryChange}
-      >
-        <SelectTrigger id={`${type}-category`} className="min-h-11 w-full">
-          <SelectValue placeholder="All categories" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">All categories</SelectItem>
-          {categories.map((value) => (
-            <SelectItem key={value} value={value}>
-              {formatCategory(value)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+/** The category mark in the page header, as an element rather than a component. */
+const headerIcon = (type: ProjectType) => {
+  const Icon = categoryIconForPath(PROJECT_TYPE_PATHS[type]) ?? IconPackage;
 
-    <div>
-      <label className="sr-only" htmlFor={`${type}-game-version`}>
-        Game version
-      </label>
-      <div className="flex gap-1">
-        <GameVersionFilter
-          type={type}
-          value={gameVersion}
-          onChange={onGameVersionChange}
-        />
-        {gameVersion ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-lg"
-            className="size-11 shrink-0"
-            aria-label="Show all versions"
-            onClick={() => onGameVersionChange(null)}
-          >
-            <IconX size={16} aria-hidden="true" />
-          </Button>
-        ) : null}
-      </div>
-    </div>
-
-    {type === "server" ? (
-      <ClientRequirementFilter
-        value={clientRequirement}
-        onChange={onClientRequirementChange}
-      />
-    ) : null}
-
-    {hasLoaders(type) ? (
-      <div>
-        <label className="sr-only" htmlFor={`${type}-loader`}>
-          {LOADER_LABELS[type].singular}
-        </label>
-        <Select
-          items={[
-            {
-              label: `All ${LOADER_LABELS[type].plural.toLowerCase()}`,
-              value: "",
-            },
-            ...LOADERS_BY_TYPE[type].map((value) => ({
-              label: formatCategory(value),
-              value,
-            })),
-          ]}
-          value={loader}
-          onValueChange={onLoaderChange}
-        >
-          <SelectTrigger id={`${type}-loader`} className="min-h-11 w-full">
-            <SelectValue
-              placeholder={`All ${LOADER_LABELS[type].plural.toLowerCase()}`}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">
-              All {LOADER_LABELS[type].plural.toLowerCase()}
-            </SelectItem>
-            {LOADERS_BY_TYPE[type].map((value) => (
-              <SelectItem key={value} value={value}>
-                {formatCategory(value)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    ) : null}
-
-    <div>
-      <label className="sr-only" htmlFor={`${type}-sort`}>
-        Sort by
-      </label>
-      <Select
-        items={sortOptionsFor(type)}
-        value={sort}
-        onValueChange={onSortChange}
-      >
-        <SelectTrigger id={`${type}-sort`} className="min-h-11 w-full">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          {sortOptionsFor(type).map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  </div>
-);
-
-// ---------------------------------------------------------------------------
-// Search state managed via useReducer: consolidates result, error, and
-// isSearching that were previously three separate useState hooks.
-// ---------------------------------------------------------------------------
-
-interface SearchState {
-  result: ProjectSearchResponse | null;
-  error: string | null;
-  isSearching: boolean;
-}
-
-type SearchAction =
-  | { type: "SEARCH_START" }
-  | { type: "SEARCH_SUCCESS"; payload: ProjectSearchResponse }
-  | { type: "SEARCH_ERROR"; payload: string }
-  | { type: "RETRY" };
-
-const searchReducer = (
-  state: SearchState,
-  action: SearchAction
-): SearchState => {
-  switch (action.type) {
-    case "SEARCH_START": {
-      return { ...state, error: null, isSearching: true };
-    }
-
-    case "SEARCH_SUCCESS": {
-      return { error: null, isSearching: false, result: action.payload };
-    }
-
-    case "SEARCH_ERROR": {
-      return { ...state, error: action.payload, isSearching: false };
-    }
-
-    case "RETRY": {
-      return { error: null, isSearching: true, result: null };
-    }
-
-    default: {
-      return state;
-    }
-  }
+  return <Icon size={22} aria-hidden="true" />;
 };
 
-interface PaginationProps {
-  currentPage: number;
-  isSearching: boolean;
-  onPageChange: (page: number) => void;
-  totalPages: number;
-}
-
-const Pagination = ({
-  currentPage,
-  isSearching,
-  onPageChange,
-  totalPages,
-}: PaginationProps) => {
-  if (totalPages <= 1) {
-    return null;
-  }
-
-  return (
-    <nav
-      aria-label="Search results pagination"
-      className="mt-8 flex items-center justify-center gap-2"
-    >
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="min-h-11"
-        disabled={currentPage <= 1 || isSearching}
-        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-      >
-        <IconChevronLeft size={16} aria-hidden="true" />
-        Previous
-      </Button>
-
-      <span className="text-muted-foreground min-w-24 text-center text-sm">
-        Page {currentPage} of {totalPages}
-      </span>
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="min-h-11"
-        disabled={currentPage >= totalPages || isSearching}
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-      >
-        Next
-        <IconChevronRight size={16} aria-hidden="true" />
-      </Button>
-    </nav>
-  );
-};
-
-interface LiveEventBannerProps {
-  event: LiveModEvent;
-  onRefresh: () => void;
-}
-
-const LiveEventBanner = ({ event, onRefresh }: LiveEventBannerProps) => (
-  <output className="border-primary/30 bg-primary/5 text-foreground mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm">
-    <span>
-      {LIVE_EVENT_LABELS[event.event]}: {event.data.name}
-    </span>
-    <button
-      type="button"
-      onClick={onRefresh}
-      className="text-primary focus-visible:ring-ring min-h-11 rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-    >
-      Refresh results
-    </button>
-  </output>
-);
-
-const ResultSkeletons = () => (
-  <div
-    aria-busy="true"
-    className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-  >
-    {Array.from({ length: 6 }, (_, index) => (
-      <Skeleton key={index} className="h-52 rounded-2xl" />
-    ))}
-  </div>
-);
-
-interface ResultsProps {
-  currentPage: number;
-  isSearching: boolean;
-  onPageChange: (page: number) => void;
-  result: ProjectSearchResponse;
-  totalPages: number;
+interface BrowseEmptyStateProps {
+  filtersActive: boolean;
+  label: string;
+  onClearFilters: () => void;
   type: ProjectType;
 }
 
-const Results = ({
-  currentPage,
-  isSearching,
-  onPageChange,
-  result,
-  totalPages,
+const BrowseEmptyState = ({
+  filtersActive,
+  label,
+  onClearFilters,
   type,
-}: ResultsProps) => {
-  const projectIds =
-    type === "server" ? result.hits.map((project) => project.id) : [];
-
-  const { data: serverStatuses } = useQuery({
-    enabled: projectIds.length > 0,
-    queryFn: () => getMinecraftServerStatuses({ data: { projectIds } }),
-    queryKey: ["minecraft-server-statuses", ...projectIds],
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: 60_000,
-  });
-
-  return (
-    <>
-      <p className="text-muted-foreground mt-8 text-sm" aria-live="polite">
-        {result.estimatedTotalHits}{" "}
-        {(result.estimatedTotalHits === 1
-          ? PROJECT_TYPE_LABELS[type].singular
-          : PROJECT_TYPE_LABELS[type].plural
-        ).toLowerCase()}{" "}
-        found
-      </p>
-
-      <ul
-        aria-busy={isSearching}
-        className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {result.hits.map((project) => (
-          <li key={project.id}>
-            <ProjectCard
-              project={project}
-              serverStatus={serverStatuses?.[project.id]}
-              serverStatusManaged={type === "server"}
-            />
-          </li>
-        ))}
-      </ul>
-
-      <Pagination
-        currentPage={currentPage}
-        isSearching={isSearching}
-        onPageChange={onPageChange}
-        totalPages={totalPages}
-      />
-    </>
-  );
-};
+}: BrowseEmptyStateProps) => (
+  <EmptyState
+    icon={emptyStateIcon(type, filtersActive)}
+    title={
+      filtersActive
+        ? `No ${label.toLowerCase()} found`
+        : `No ${label.toLowerCase()} yet`
+    }
+    description={
+      filtersActive
+        ? "Try a different search or clear your filters."
+        : `Once ${label.toLowerCase()} are published, the newest ones show up here.`
+    }
+    action={
+      filtersActive ? (
+        <Button variant="link" onClick={onClearFilters}>
+          Clear filters
+        </Button>
+      ) : null
+    }
+  />
+);
 
 interface ProjectBrowserProps extends ProjectBrowserData {
   type: ProjectType;
 }
 
-// oxlint-disable-next-line react-doctor/no-giant-component, eslint/complexity -- Search, filters, live events and results share one query state; extracting further would fragment the page logic
 export const ProjectBrowser = ({
   initial,
   initialError,
   type,
 }: ProjectBrowserProps) => {
-  const [query, setQuery] = useState("");
-  const [debouncedQuery] = useDebouncedValue(query, { wait: 300 });
-  const [category, setCategory] = useState("");
-  const [gameVersion, setGameVersion] = useState("");
-  const [loader, setLoader] = useState("");
-  const [clientRequirement, setClientRequirement] = useState("");
-  const [sort, setSort] = useState(DEFAULT_SORT);
-  const [page, setPage] = useState(1);
-  const [liveEvent, setLiveEvent] = useState<LiveModEvent | null>(null);
-
-  const [state, dispatch] = useReducer(searchReducer, {
-    error: initialError,
-    isSearching: false,
-    result: initial,
-  });
-
-  const hasMountedRef = useRef(false);
-  const requestIdRef = useRef(0);
-
-  const { result, error, isSearching } = state;
-
-  const categories = [
-    ...new Set([
-      ...CATEGORIES_BY_TYPE[type],
-      ...Object.keys(result?.facetDistribution?.category ?? {}),
-      ...(category ? [category] : []),
-    ]),
-  ];
-
-  // oxlint-disable-next-line react-doctor/react-compiler-no-manual-memoization -- React Compiler is not enabled in this project; useCallback keeps runSearch stable so the search effect does not re-run on every render
-  const runSearch = useCallback(async (params: ProjectSearchParams) => {
-    requestIdRef.current += 1;
-    const thisRequestId = requestIdRef.current;
-    dispatch({ type: "SEARCH_START" });
-
-    const cached = projectSearchCache.get(params);
-
-    if (cached) {
-      if (requestIdRef.current === thisRequestId) {
-        dispatch({ payload: cached, type: "SEARCH_SUCCESS" });
-      }
-
-      return;
-    }
-
-    try {
-      const data = await searchProjects({ data: params });
-      projectSearchCache.set(params, data);
-
-      if (requestIdRef.current === thisRequestId) {
-        dispatch({ payload: data, type: "SEARCH_SUCCESS" });
-      }
-    } catch (searchError) {
-      if (requestIdRef.current === thisRequestId) {
-        dispatch({
-          payload: toSearchErrorMessage(searchError),
-          type: "SEARCH_ERROR",
-        });
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // The loader already fetched the default search on the server; skip the
-    // mount-time run so the initial data is not re-fetched on the client.
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-
-      return;
-    }
-
-    runSearch({
-      query: debouncedQuery,
-      category,
-      clientRequirement,
-      gameVersion,
-      loader,
-      page,
-      sort,
-      type,
-    });
-  }, [
+  const {
+    categories,
     category,
+    clearFilters,
     clientRequirement,
-    debouncedQuery,
+    error,
+    filterCount,
+    filtersActive,
     gameVersion,
+    isSearching,
+    liveEvent,
     loader,
+    onCategoryChange,
+    onClientRequirementChange,
+    onGameVersionChange,
+    onLoaderChange,
+    onSortChange,
     page,
-    runSearch,
-    sort,
-    type,
-  ]);
-
-  useEffect(() => {
-    if (API_URL === undefined) {
-      return noEventCleanup;
-    }
-
-    const source = new EventSource(`${API_URL}/api/events`);
-
-    // A dropped stream is silent by design: browsing, filtering and searching
-    // all still work, and EventSource reconnects on its own. Infrastructure
-    // warnings belong on the admin dashboard, not in a public user's toast.
-    const handleEvent = (event: MessageEvent) => {
-      try {
-        // SAFETY: The event stream is produced by our own webhook endpoint,
-        // which validates the payload shape before broadcasting.
-        setLiveEvent(JSON.parse(event.data) as LiveModEvent);
-      } catch {
-        // Ignore malformed events from the stream.
-      }
-    };
-
-    source.addEventListener("mod.created", handleEvent);
-    source.addEventListener("mod.updated", handleEvent);
-    source.addEventListener("mod.deleted", handleEvent);
-
-    return () => {
-      source.removeEventListener("mod.created", handleEvent);
-      source.removeEventListener("mod.updated", handleEvent);
-      source.removeEventListener("mod.deleted", handleEvent);
-      source.close();
-    };
-  }, []);
-
-  const hasFilters = [
-    category,
-    clientRequirement,
-    gameVersion,
-    loader,
     query,
-  ].some(Boolean);
+    refreshFromLiveEvent,
+    result,
+    retry,
+    setPage,
+    setQuery,
+    sort,
+    totalPages,
+  } = useProjectBrowser({ initial, initialError, type });
 
   // Shared by the heading, the empty state, and the result count so the three
   // cannot disagree on what this section is called.
@@ -784,63 +143,10 @@ export const ProjectBrowser = ({
   // client search resolves), keep skeletons visible instead of a blank page.
   const showInitialSkeletons = !isSearching && !error && !result;
 
-  const totalPages = result
-    ? Math.max(1, Math.ceil(result.estimatedTotalHits / result.pageSize))
-    : 1;
-
-  const clearFilters = () => {
-    setQuery("");
-    setCategory("");
-    setGameVersion("");
-    setLoader("");
-    setClientRequirement("");
-    setPage(1);
-    dispatch({ type: "SEARCH_START" });
-  };
-
-  const retry = () => {
-    dispatch({ type: "RETRY" });
-    runSearch({
-      category,
-      clientRequirement,
-      gameVersion,
-      loader,
-      page,
-      query,
-      sort,
-      type,
-    });
-  };
-
-  const refreshFromLiveEvent = () => {
-    setLiveEvent(null);
-
-    const params = {
-      category,
-      clientRequirement,
-      gameVersion,
-      loader,
-      page,
-      query,
-      sort,
-      type,
-    };
-
-    projectSearchCache.delete(params);
-    runSearch(params);
-  };
-
-  const changeFilter =
-    (setter: (value: string) => void) => (value: string | null) => {
-      setter(value ?? "");
-      setPage(1);
-      dispatch({ type: "SEARCH_START" });
-    };
-
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <PageHeader
-        title={PROJECT_TYPE_LABELS[type].plural}
+        title={label}
         description={PROJECT_TYPE_DESCRIPTIONS[type]}
         icon={
           <span className="border-primary/20 bg-primary/10 text-primary flex size-12 items-center justify-center rounded-xl border">
@@ -849,44 +155,42 @@ export const ProjectBrowser = ({
         }
       />
 
-      <section
-        aria-label="Search and filters"
-        className="border-border bg-card mt-8 rounded-xl border p-4 sm:p-5"
-      >
-        <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
-          Find a project
-        </p>
-        <SearchBar query={query} onQueryChange={setQuery} type={type} />
+      <ProjectBrowserFilters
+        category={category}
+        categories={categories}
+        clientRequirement={clientRequirement}
+        filterCount={filterCount}
+        gameVersion={gameVersion}
+        hasFilters={filtersActive}
+        loader={loader}
+        onCategoryChange={onCategoryChange}
+        onClearFilters={clearFilters}
+        onClientRequirementChange={onClientRequirementChange}
+        onGameVersionChange={onGameVersionChange}
+        onLoaderChange={onLoaderChange}
+        onQueryChange={setQuery}
+        onSortChange={onSortChange}
+        query={query}
+        sort={sort}
+        type={type}
+      />
 
-        <Filters
-          category={category}
-          categories={categories}
-          clientRequirement={clientRequirement}
-          onClientRequirementChange={changeFilter(setClientRequirement)}
-          gameVersion={gameVersion}
-          loader={loader}
-          onCategoryChange={changeFilter(setCategory)}
-          onGameVersionChange={changeFilter(setGameVersion)}
-          onLoaderChange={changeFilter(setLoader)}
-          onSortChange={changeFilter(setSort)}
-          sort={sort}
-          type={type}
-        />
-      </section>
-
-      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+      <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
+          <h2 className="text-foreground text-xl font-semibold tracking-tight">
             Results
-          </p>
+          </h2>
           <p className="text-muted-foreground mt-1 text-sm">
             Browse {label.toLowerCase()} from across the community.
           </p>
         </div>
         {result ? (
-          <span className="border-border bg-muted text-foreground inline-flex min-h-8 items-center rounded-full border px-3 text-sm font-medium tabular-nums">
+          <Badge
+            variant="outline"
+            className="h-7 px-3 text-sm font-medium tabular-nums"
+          >
             {formatCount(result.estimatedTotalHits)} total
-          </span>
+          </Badge>
         ) : null}
       </div>
 
@@ -899,29 +203,11 @@ export const ProjectBrowser = ({
       {showSkeletons || showInitialSkeletons ? <ResultSkeletons /> : null}
 
       {showEmpty ? (
-        <EmptyState
-          icon={emptyStateIcon(type, hasFilters)}
-          title={
-            hasFilters
-              ? `No ${label.toLowerCase()} found`
-              : `No ${label.toLowerCase()} yet`
-          }
-          description={
-            hasFilters
-              ? "Try a different search or clear your filters."
-              : `Once ${label.toLowerCase()} are published, the newest ones show up here.`
-          }
-          action={
-            hasFilters ? (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-primary focus-visible:ring-ring mt-4 min-h-11 rounded-lg px-3 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-              >
-                Clear filters
-              </button>
-            ) : null
-          }
+        <BrowseEmptyState
+          filtersActive={filtersActive}
+          label={label}
+          onClearFilters={clearFilters}
+          type={type}
         />
       ) : null}
 
@@ -947,16 +233,22 @@ export const ProjectBrowserSkeleton = () => (
     <Skeleton className="size-12 rounded-xl" />
     <Skeleton className="mt-4 h-9 w-64 max-w-full" />
     <Skeleton className="mt-3 h-5 w-80 max-w-full" />
-    <div className="border-border bg-card mt-8 rounded-xl border p-4 sm:p-5">
-      <Skeleton className="h-4 w-32" />
-      <Skeleton className="mt-4 h-12 w-full rounded-xl" />
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Skeleton className="h-11 w-full" />
-        <Skeleton className="h-11 w-full" />
-        <Skeleton className="h-11 w-full" />
+    <div className="border-border bg-card mt-8 overflow-hidden rounded-xl border">
+      <div className="border-border/70 bg-muted/20 border-b px-4 py-4 sm:px-6 sm:py-5">
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="mt-2 h-4 w-72 max-w-full" />
+        <Skeleton className="mt-5 h-12 w-full rounded-xl" />
+      </div>
+      <div className="grid gap-4 px-4 py-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index}>
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="mt-2 h-10 w-full" />
+          </div>
+        ))}
       </div>
     </div>
-    <Skeleton className="mt-8 h-5 w-32" />
+    <Skeleton className="mt-10 h-6 w-28" />
     <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }, (_, index) => (
         <Skeleton key={index} className="h-52 rounded-xl" />

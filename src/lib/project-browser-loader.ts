@@ -1,3 +1,4 @@
+import { DEFAULT_SORT } from "@/lib/project-browser";
 import { projectSearchCache } from "@/lib/project-search-cache";
 import { searchProjects } from "@/lib/project-search.functions";
 import type {
@@ -5,8 +6,6 @@ import type {
   ProjectSearchResponse,
 } from "@/lib/project-search.functions";
 import type { ProjectType } from "@/lib/projects";
-
-const DEFAULT_SORT = "downloads:desc";
 
 export interface ProjectBrowserData {
   initial: ProjectSearchResponse | null;
