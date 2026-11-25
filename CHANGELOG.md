@@ -31,7 +31,9 @@ names match the repository's `ALPHA-*` git tags.
   out of the navbar into the corner dock. The corner button is the picture with
   a thin outline and no background. The bell stays in the navbar.
 * The footer is now a compact two-row bar, with the Discord invite in the social
-  row, the quick links and the closing line.
+  row, the quick links and the closing line. The "Top" link is gone.
+* The corner avatar is larger, shrinks while pressed and opens the menu when the
+  pointer is released rather than on press.
 * The browse filter panel now uses shadcn controls with visible field labels,
   an active-filter count and a one-click reset. Search state lives in a focused
   hook over tested pure helpers, so the page no longer carries a complexity
@@ -51,6 +53,10 @@ names match the repository's `ALPHA-*` git tags.
 * The "All versions" filter now matches the other browse filters' size.
 * Notification load failures show the server message with one retry action in
   the card, instead of a split error block and a stale toast.
+* The supported-versions fade on public server pages uses the card surface
+  colour instead of black; the manage page keeps its own darker fade.
+* The public voting card is hidden unless voting is enabled and its listener is
+  fully configured, so an unfinished setup is not advertised to visitors.
 * Development warnings: the dev script no longer spawns pnpm through a shell,
   aborted SSE streams no longer print `ECONNRESET` stack traces, and legacy
   `sslmode` aliases are normalised before `pg` reads the connection string.
