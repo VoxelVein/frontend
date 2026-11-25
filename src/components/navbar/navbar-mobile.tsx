@@ -1,4 +1,4 @@
-import { IconArticle, IconX } from "@tabler/icons-react";
+import { IconArticle, IconHome, IconX } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 
 import { AuthButtons } from "@/components/navbar/auth-buttons";
@@ -73,6 +73,25 @@ const NavbarMobileMenu = ({
         </DrawerHeader>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+          <Link
+            to="/"
+            preload="intent"
+            onClick={onClose}
+            className={cn(
+              MOBILE_LINK_CLASS,
+              "gap-3",
+              !!matchRoute({ to: "/" }) && "bg-primary/10 text-primary"
+            )}
+          >
+            <IconHome
+              size={18}
+              stroke={1.8}
+              aria-hidden="true"
+              className="text-muted-foreground shrink-0"
+            />
+            Home
+          </Link>
+
           <nav
             aria-labelledby="mobile-projects-heading"
             className="flex flex-col"
