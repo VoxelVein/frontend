@@ -3,7 +3,7 @@
 Two inboxes, deliberately separate:
 
 * **`user_notifications`**, addressed to one account, shown in the navbar
-  bell.
+  bell and on the full `/notifications` page.
 * **`admin_notifications`**, a shared inbox every admin reads, rendered by
   the admin panel's Notifications tab.
 
@@ -78,6 +78,17 @@ once nothing is unread. Only read rows are cleared in bulk: clearing an unread
 row would discard it before the reader had seen it, which is not what "tidy
 up" means.
 
+## The full page
+
+The bell is a glance: it loads at most 50 rows and opens on demand. Its footer
+links to `/notifications`, which renders the same rows with All / Unread / Read
+tabs, a text search over title, message and project name, and the bulk actions
+that no longer fit in a popup. Both views share `USER_NOTIFICATION_KEYS`, so a
+row marked read on one view updates the badge and the other view immediately.
+
+The page uses TanStack Query rather than the bell's open-time state: it is a
+destination, so its data is cached and refetched like any other list.
+
 ## The badge
 
 The unread count is a separate query from the list, because the list is capped
@@ -103,10 +114,11 @@ at something that no longer exists.
 
 ## On a phone
 
-The desktop bell sits beside the avatar menu, which has no room in a narrow
-navbar. The signed-in drawer renders it as a labelled row instead, beside
-My projects, Support, Settings, and Admin panel, so the inbox stays reachable
-without opening a popup and the unread badge stays visible in the row.
+The desktop bell stays in the navbar, but the avatar menu does not: it moved
+to a small button fixed to the bottom-right corner. The signed-in drawer renders
+the bell as a labelled row beside My projects, Support, Settings, and Admin
+panel, so the inbox stays reachable without opening a popup and the unread
+badge stays visible in the row.
 
 ## Tests
 

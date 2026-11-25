@@ -8,6 +8,10 @@ names match the repository's `ALPHA-*` git tags.
 
 ### Added
 
+* A full `/notifications` inbox with unread/read filters, search, Read all and
+  Clear read. The navbar popup now links to it instead of offering a bulk action.
+* A small account button fixed to the bottom-right corner: hover shows the
+  signed-in name in a tooltip, click opens the account menu.
 * Project ownership transfers: owners re-authenticate to offer a project and
   the recipient accepts within seven days, while admins can move projects
   immediately. Both sides get notifications and a transfers inbox.
@@ -17,6 +21,10 @@ names match the repository's `ALPHA-*` git tags.
 
 ### Changed
 
+* The navbar reads Home, Products, Blog. Products groups Mods and Plugins with
+  a Browse submenu for the remaining project types.
+* The account popup was simplified to one shared row style, and the avatar moved
+  out of the navbar into the corner dock. The bell stays in the navbar.
 * The browse filter panel now uses shadcn controls with visible field labels,
   an active-filter count and a one-click reset. Search state lives in a focused
   hook over tested pure helpers, so the page no longer carries a complexity
