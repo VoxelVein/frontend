@@ -9,7 +9,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ErrorState } from "@/components/error-state";
 import { InboxRow } from "@/components/notifications/inbox-row";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToastError } from "@/hooks/use-toast-error";
 import {
   groupNotifications,
   notificationGroupLabel,
@@ -125,6 +125,29 @@ const InboxEmptyState = ({
         Show all
       </Button>
     ) : null}
+  </div>
+);
+
+/**
+ * A failed load has to offer a retry inside the card. The old block delegated
+ * to a component that rendered only a button, so the sentence and the action
+ * looked unrelated, and the retry could leave the stale toast on screen.
+ */
+const InboxError = ({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) => (
+  <div className="py-10 text-center">
+    <p className="text-foreground font-medium">
+      We couldn&apos;t load your notifications.
+    </p>
+    <p className="text-muted-foreground mt-1 text-sm">{message}</p>
+    <Button onClick={onRetry} type="button" variant="outline">
+      Try again
+    </Button>
   </div>
 );
 
@@ -230,6 +253,11 @@ const NotificationsPage = () => {
     queryKey: USER_NOTIFICATION_KEYS.unread,
     staleTime: 60_000,
   });
+
+  useToastError(
+    listQuery.isError ? listQuery.error.message : null,
+    "notifications-list"
+  );
 
   const items = listQuery.data ?? [];
   const unreadCount = unreadQuery.data ?? 0;
@@ -350,17 +378,12 @@ const NotificationsPage = () => {
           {listQuery.isPending ? <LoadingRows /> : null}
 
           {listQuery.isError ? (
-            <div className="py-10 text-center">
-              <p className="text-muted-foreground mb-3 text-sm">
-                Could not load your notifications.
-              </p>
-              <ErrorState
-                message="Could not load your notifications."
-                onRetry={async () => {
-                  await listQuery.refetch();
-                }}
-              />
-            </div>
+            <InboxError
+              message={listQuery.error.message}
+              onRetry={() => {
+                void listQuery.refetch();
+              }}
+            />
           ) : null}
 
           {listQuery.isSuccess && visible.length === 0 ? (
