@@ -8,6 +8,9 @@ names match the repository's `ALPHA-*` git tags.
 
 ### Added
 
+* Player reviews on project and server pages: a five-star selector with an
+  optional short comment, a newest-first list and a mean rating. Projects can
+  be reviewed five seconds after a download; servers need no download.
 * A full `/notifications` inbox with unread/read filters, search, Read all and
   Clear read. It has its own list design in a single Card with a CardHeader,
   rather than repeating the popup's rows. The popup links to it instead of

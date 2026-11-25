@@ -596,3 +596,7 @@ required first: both seeders attach their content to the first admin.
 
 Servers support voting, rolling leaderboards, and optional Votifier rewards.
 See [Server voting](server-voting.md) for player flows, cooldowns and deployment.
+
+Published projects and servers also carry player ratings with optional short
+notes. See [Player reviews](reviews.md) for the download gate and the rating
+format.

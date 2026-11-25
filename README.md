@@ -213,6 +213,7 @@ The full guide index lives in [docs/README.md](docs/README.md). Useful
 starting points:
 
 * [Projects, versions, uploads and reviews](docs/content/projects.md)
+* [Player reviews](docs/content/reviews.md)
 * [Server voting](docs/content/server-voting.md)
 * [Admin panel](docs/content/admin-panel.md)
 * [Postgres search](docs/search/postgres.md)

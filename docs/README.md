@@ -55,6 +55,8 @@ frontend. Each guide lives in its own directory under `docs/`.
 
 * [Projects and Files](content/projects.md), all six project types,
   versions, uploads, downloads, permissions, and the review workflow
+* [Player reviews](content/reviews.md), eligibility, star ratings and the
+  download gate
 * [Discovery](content/discovery.md), the trending ranking and the
   category registry
 * [Motion](content/motion.md), the scroll-reveal and easing system
