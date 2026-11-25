@@ -4,9 +4,24 @@ import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { MICRO_LABEL_CLASS, PILL_CLASS } from "@/lib/classes";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
+import { PROJECT_DOWNLOADED_EVENT } from "@/lib/project-reviews";
 import { hasLoaders, LOADER_LABELS } from "@/lib/projects";
 import type { ProjectVersionView, ProjectView } from "@/lib/projects";
 import { platformLabel } from "@/lib/release-platforms";
+
+/**
+ * Tell the review panel that one of this project's files was fetched.
+ *
+ * A small DOM event keeps the download links usable on pages that have no
+ * query client; the panel decides whether and when to refresh its status.
+ */
+const onDownloadNotice =
+  (projectId: string): (() => void) =>
+  () => {
+    window.dispatchEvent(
+      new CustomEvent(PROJECT_DOWNLOADED_EVENT, { detail: projectId })
+    );
+  };
 
 /**
  * A short factual value as a chip, or a note when there is none.
@@ -41,9 +56,11 @@ const ValuePills = ({ label, values }: { label: string; values: string[] }) => (
 const DownloadLinks = ({
   version,
   isModpack,
+  onDownloaded,
 }: {
   version: ProjectVersionView;
   isModpack: boolean;
+  onDownloaded: () => void;
 }) => {
   const [primary, ...others] = version.files;
 
@@ -67,6 +84,7 @@ const DownloadLinks = ({
                   <a
                     aria-label={`Download ${file.filename} for ${platformLabel(file.platform)}`}
                     href={`/api/download/${file.id}`}
+                    onClick={onDownloaded}
                   />
                 }
               >
@@ -98,6 +116,7 @@ const DownloadLinks = ({
               <a
                 aria-label={`Download ${primary.filename}`}
                 href={`/api/download/${primary.id}`}
+                onClick={onDownloaded}
               />
             }
           >
@@ -119,6 +138,7 @@ const DownloadLinks = ({
                   <a
                     className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
                     href={`/api/download/${file.id}`}
+                    onClick={onDownloaded}
                   >
                     <IconDownload aria-hidden="true" size={14} />
                     <span className="break-all">{file.filename}</span>
@@ -176,6 +196,7 @@ const Compatibility = ({
  */
 const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
   const [latest] = project.versions;
+  const onDownloaded = onDownloadNotice(project.id);
 
   return (
     <section aria-labelledby="download-panel-heading" className="grid gap-3">
@@ -217,6 +238,7 @@ const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
               <DownloadLinks
                 version={latest}
                 isModpack={project.type === "modpack"}
+                onDownloaded={onDownloaded}
               />
 
               <div className="border-border mt-5 flex items-center justify-between gap-3 border-t pt-4">
@@ -245,9 +267,11 @@ const ProjectDownloadPanel = ({ project }: { project: ProjectView }) => {
 const VersionsTable = ({
   versions,
   isModpack,
+  onDownloaded,
 }: {
   versions: ProjectVersionView[];
   isModpack: boolean;
+  onDownloaded: () => void;
 }) => {
   if (versions.length === 0) {
     return (
@@ -311,6 +335,7 @@ const VersionsTable = ({
                       <a
                         className="text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
                         href={`/api/download/${file.id}`}
+                        onClick={onDownloaded}
                       >
                         <IconDownload size={16} aria-hidden="true" />
                         <span>
@@ -343,27 +368,32 @@ const VersionsTable = ({
  * the latest version: two sections both called "Versions" on one page reads as a
  * duplicate, and the table is the past, not the present.
  */
-const ProjectVersionHistory = ({ project }: { project: ProjectView }) => (
-  <section aria-labelledby="version-history-heading">
-    <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
-      Releases
-    </p>
-    <h2
-      className="text-foreground mt-2 text-xl font-semibold tracking-tight sm:text-2xl"
-      id="version-history-heading"
-    >
-      Version history
-    </h2>
-    <p className="text-muted-foreground mt-1 text-sm">
-      Downloads and compatibility for every published release.
-    </p>
-    <div className="mt-4">
-      <VersionsTable
-        versions={project.versions}
-        isModpack={project.type === "modpack"}
-      />
-    </div>
-  </section>
-);
+const ProjectVersionHistory = ({ project }: { project: ProjectView }) => {
+  const onDownloaded = onDownloadNotice(project.id);
+
+  return (
+    <section aria-labelledby="version-history-heading">
+      <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
+        Releases
+      </p>
+      <h2
+        className="text-foreground mt-2 text-xl font-semibold tracking-tight sm:text-2xl"
+        id="version-history-heading"
+      >
+        Version history
+      </h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Downloads and compatibility for every published release.
+      </p>
+      <div className="mt-4">
+        <VersionsTable
+          versions={project.versions}
+          isModpack={project.type === "modpack"}
+          onDownloaded={onDownloaded}
+        />
+      </div>
+    </section>
+  );
+};
 
 export { ProjectDownloadPanel, ProjectVersionHistory };

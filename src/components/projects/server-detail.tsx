@@ -11,6 +11,7 @@ import {
   ServerRequirements,
 } from "@/components/projects/server-detail-panels";
 import { ServerVoteButton } from "@/components/projects/server-vote-button";
+import { ProjectReviews } from "@/components/reviews/project-reviews";
 import { authClient } from "@/lib/auth-client";
 import type { ProjectView } from "@/lib/projects";
 import { can } from "@/lib/roles";
@@ -90,6 +91,10 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
               <ServerRequirements server={project.server} />
             </div>
           </section>
+        ) : null}
+
+        {project.status === "published" ? (
+          <ProjectReviews projectId={project.id} />
         ) : null}
 
         {project.disclosures.length > 0 ? (

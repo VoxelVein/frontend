@@ -16,6 +16,7 @@ import {
   ProjectDownloadPanel,
   ProjectVersionHistory,
 } from "@/components/projects/project-versions";
+import { ProjectReviews } from "@/components/reviews/project-reviews";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { errorMessage } from "@/lib/form-errors";
@@ -180,6 +181,10 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
               <MarkdownBody>{project.description}</MarkdownBody>
             </div>
           </section>
+        ) : null}
+
+        {project.status === "published" ? (
+          <ProjectReviews projectId={project.id} />
         ) : null}
 
         {project.disclosures.length > 0 ? (
