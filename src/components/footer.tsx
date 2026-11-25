@@ -1,8 +1,4 @@
-import {
-  IconArrowUp,
-  IconBrandDiscord,
-  IconBrandGithub,
-} from "@tabler/icons-react";
+import { IconBrandDiscord, IconBrandGithub } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
 import { Logo } from "@/components/logo";
@@ -128,10 +124,6 @@ const Footer = () => (
               {link.label}
             </Link>
           ))}
-          <a className={LINK_CLASS} href="#main-content">
-            <IconArrowUp size={13} aria-hidden="true" />
-            Top
-          </a>
         </div>
       </div>
     </div>
