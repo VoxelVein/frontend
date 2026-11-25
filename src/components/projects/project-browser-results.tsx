@@ -70,7 +70,7 @@ interface LiveEventBannerProps {
 }
 
 export const LiveEventBanner = ({ event, onRefresh }: LiveEventBannerProps) => (
-  <output className="border-primary/30 bg-primary/5 text-foreground mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm">
+  <output className="border-primary/30 bg-primary/5 text-foreground animate-in fade-in-0 slide-in-from-bottom-1 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm duration-300 motion-reduce:animate-none">
     <span>
       {LIVE_EVENT_LABELS[event.event]}: {event.data.name}
     </span>
@@ -136,7 +136,10 @@ export const Results = ({
         className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         {result.hits.map((project) => (
-          <li key={project.id}>
+          <li
+            key={project.id}
+            className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 motion-reduce:animate-none"
+          >
             <ProjectCard
               project={project}
               serverStatus={serverStatuses?.[project.id]}

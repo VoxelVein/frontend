@@ -394,7 +394,7 @@ export const ProjectBrowserFilters = ({
 }: ProjectBrowserFiltersProps) => (
   <section
     aria-label="Search and filters"
-    className="border-border bg-card mt-8 overflow-hidden rounded-xl border shadow-xs"
+    className="border-border bg-card animate-in fade-in-0 slide-in-from-bottom-2 mt-8 overflow-hidden rounded-xl border shadow-xs duration-300 motion-reduce:animate-none"
   >
     <div className="border-border/70 bg-muted/20 border-b px-4 py-4 sm:px-6 sm:py-5">
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">

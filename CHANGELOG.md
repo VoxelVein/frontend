@@ -21,6 +21,9 @@ names match the repository's `ALPHA-*` git tags.
   an active-filter count and a one-click reset. Search state lives in a focused
   hook over tested pure helpers, so the page no longer carries a complexity
   exemption.
+* Browse pages fade and lift their filter panel, result cards and live banner in
+  once, respecting reduced motion. The redundant total badge is gone; the
+  accessible "found" summary remains.
 * Server voting and its settings use shadcn components throughout, and the
   listener cards dim when voting is off.
 * Long supported-version lists fold behind an expand button on the public

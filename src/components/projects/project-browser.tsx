@@ -9,12 +9,10 @@ import {
   ResultSkeletons,
   Results,
 } from "@/components/projects/project-browser-results";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectBrowser } from "@/hooks/use-project-browser";
 import { categoryIconForPath } from "@/lib/categories";
-import { formatCount } from "@/lib/format";
 import type { ProjectBrowserData } from "@/lib/project-browser-loader";
 import {
   PROJECT_TYPE_DESCRIPTIONS,
@@ -128,8 +126,8 @@ export const ProjectBrowser = ({
     totalPages,
   } = useProjectBrowser({ initial, initialError, type });
 
-  // Shared by the heading, the empty state, and the result count so the three
-  // cannot disagree on what this section is called.
+  // Shared by the heading, the empty state and the results summary so the
+  // three cannot disagree on what this section is called.
   const label = PROJECT_TYPE_LABELS[type].plural;
   const showSkeletons = isSearching && !result && !error;
 
@@ -175,23 +173,13 @@ export const ProjectBrowser = ({
         type={type}
       />
 
-      <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-foreground text-xl font-semibold tracking-tight">
-            Results
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Browse {label.toLowerCase()} from across the community.
-          </p>
-        </div>
-        {result ? (
-          <Badge
-            variant="outline"
-            className="h-7 px-3 text-sm font-medium tabular-nums"
-          >
-            {formatCount(result.estimatedTotalHits)} total
-          </Badge>
-        ) : null}
+      <div className="mt-10">
+        <h2 className="text-foreground text-xl font-semibold tracking-tight">
+          Results
+        </h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Browse {label.toLowerCase()} from across the community.
+        </p>
       </div>
 
       {error ? <ErrorState message={error} onRetry={retry} /> : null}
