@@ -57,14 +57,18 @@ const write = (source: Source, line: string): void => {
 
 const children: ChildProcess[] = [];
 
+// pnpm exposes the binary actually running this script, which on Windows is a
+// real executable rather than a .cmd shim. Spawning it directly with an argument
+// array avoids `shell: true`, which Node deprecates for child arguments because
+// they are concatenated into one shell string instead of passed separately.
+const pnpmBinary = process.env.npm_execpath ?? "pnpm";
+
 for (const service of services) {
-  // oxlint-disable-next-line sonarjs/no-os-command-from-path -- Fixed `pnpm` binary; the script names are hardcoded above
-  const child = spawn("pnpm", ["run", service.script], {
+  // oxlint-disable-next-line sonarjs/no-os-command-from-path -- pnpm binary supplied by the package manager; the script names are hardcoded above
+  const child = spawn(pnpmBinary, ["run", service.script], {
     stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env, FORCE_COLOR: "1" },
-    // On Windows pnpm is a .cmd shim, which child_process cannot launch
-    // directly unless it goes through the command shell.
-    shell: process.platform === "win32",
+    shell: false,
   });
 
   children.push(child);

@@ -31,6 +31,26 @@ const config = defineConfig(({ command, mode }) => {
       "/api/events": {
         target: env.API_URL ?? "http://localhost:3002",
         changeOrigin: true,
+        configure: (proxy) => {
+          // EventSource streams are long-lived. Closing a browser tab aborts
+          // the proxied request, and http-proxy reports that as `aborted` /
+          // ECONNRESET. It is the expected end of a stream, not a proxy
+          // failure, so it should not print a stack trace on every reload.
+          proxy.on("error", (error) => {
+            if (
+              "code" in error &&
+              (error.code === "ECONNRESET" || error.code === "ECONNABORTED")
+            ) {
+              return;
+            }
+
+            if (error.message === "aborted") {
+              return;
+            }
+
+            console.error("[vite] /api/events proxy error:", error);
+          });
+        },
       },
     };
   }
