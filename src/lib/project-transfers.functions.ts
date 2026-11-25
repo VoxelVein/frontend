@@ -24,7 +24,7 @@ import {
   requireSession,
   verifyReauthentication,
 } from "@/lib/project-transfer-auth";
-import { PROJECT_TRANSFER_EXPIRY_MS } from "@/lib/project-transfers";
+import { isTransferExpired, transferExpiresAt } from "@/lib/project-transfers";
 import { requireCapability } from "@/lib/role-guards";
 import { normalizeUsername } from "@/lib/usernames";
 
@@ -161,7 +161,7 @@ export const requestProjectTransfer = createServerFn({ method: "POST" })
         );
       }
 
-      const expiresAt = new Date(Date.now() + PROJECT_TRANSFER_EXPIRY_MS);
+      const expiresAt = transferExpiresAt(new Date());
 
       const [transfer] = await db
         .insert(projectTransfers)
@@ -289,7 +289,7 @@ export const respondToProjectTransfer = createServerFn({ method: "POST" })
         throw new ProjectAccessError(PROJECT_ACCESS_ERROR.forbidden);
       }
 
-      if (transfer.expiresAt.getTime() < Date.now()) {
+      if (isTransferExpired(transfer.expiresAt)) {
         throw new TransferError("This transfer offer has expired.");
       }
 
