@@ -6,7 +6,7 @@ locally.
 ## Prerequisites
 
 * Node.js 24 or newer (pinned in `mise.toml`, the Dockerfile, and CI)
-* pnpm 11.3.0, via the `packageManager` field and Corepack
+* pnpm 12.23.0, via the `packageManager` field and Corepack
 * PostgreSQL 16 or newer (the images use `postgres:18`)
 * Docker, for local object storage, optional
 

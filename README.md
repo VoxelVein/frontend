@@ -86,7 +86,7 @@ the small ElysiaJS event server behind the wider
 ## Requirements
 
 * Node.js 24 or later (pinned in `mise.toml`, the Dockerfile and CI)
-* pnpm 11.3.0, pinned through `packageManager` in `package.json`
+* pnpm 12.23.0, pinned through `packageManager` in `package.json`
 * PostgreSQL for server-side data
 * Optional: Redis or Valkey for shared rate limits, S3-compatible object
   storage for uploads, Google/GitHub OAuth credentials, Cloudflare Turnstile
