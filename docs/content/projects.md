@@ -242,6 +242,7 @@ children:
 * `/dashboard/projects/new`, create a project
 * `/dashboard/projects/$projectId?tab=`, `details`, `images`, `versions`,
   or `danger`
+* `/dashboard/transfers`, the ownership-offer inbox
 
 The project editor shares the Settings and Admin panel shell: a
 `PageHeader` carrying the name, type, slug and status, a mobile section
@@ -271,6 +272,13 @@ action inside a link would navigate before the confirmation could open,
 so the row leads with its content and ends with separate actions.
 `listMyProjects` selects the icon row so the row can show it, falling back
 to a type glyph when there is none.
+
+`/dashboard/transfers` follows the notifications page's shape: one Card with a
+CardHeader holding the pending count plus **Accept all** and **Deny all**, then
+Incoming / Outgoing tabs, search and flat rows. Both bulk actions open an
+AlertDialog first, because accepting several offers changes several owners.
+They call the same per-transfer server function as a single row, so an expired
+or stale offer is rejected on its own and the rest still go through.
 
 Every Markdown surface in the creator dashboard uses `MarkdownEditor`
 (`src/components/markdown-editor.tsx`): project descriptions, release

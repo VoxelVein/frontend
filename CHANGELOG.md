@@ -12,6 +12,8 @@ names match the repository's `ALPHA-*` git tags.
   Clear read. It has its own list design in a single Card with a CardHeader,
   rather than repeating the popup's rows. The popup links to it instead of
   offering a bulk action.
+* A redesigned `/dashboard/transfers` inbox with Incoming/Outgoing tabs, search,
+  a CardHeader, and confirmation-gated Accept all and Deny all actions.
 * A small account button fixed to the bottom-right corner: hover shows the
   signed-in name in a tooltip, click opens the account menu.
 * Project ownership transfers: owners re-authenticate to offer a project and
@@ -28,6 +30,8 @@ names match the repository's `ALPHA-*` git tags.
 * The account popup was simplified to one shared row style, and the avatar moved
   out of the navbar into the corner dock. The corner button is the picture with
   a thin outline and no background. The bell stays in the navbar.
+* The footer is now a compact two-row bar, with the Discord invite in the social
+  row, the quick links and the closing line.
 * The browse filter panel now uses shadcn controls with visible field labels,
   an active-filter count and a one-click reset. Search state lives in a focused
   hook over tested pure helpers, so the page no longer carries a complexity
@@ -45,6 +49,15 @@ names match the repository's `ALPHA-*` git tags.
 * Server and query failures are announced with Sonner toasts instead of inline
   errors; field validation and not-configured notices stay inline.
 * The "All versions" filter now matches the other browse filters' size.
+* Notification load failures show the server message with one retry action in
+  the card, instead of a split error block and a stale toast.
+* Development warnings: the dev script no longer spawns pnpm through a shell,
+  aborted SSE streams no longer print `ECONNRESET` stack traces, and legacy
+  `sslmode` aliases are normalised before `pg` reads the connection string.
+
+### Tooling
+
+* Upgraded pnpm from 11.3.0 to 12.23.0, including the setup action and docs.
 
 ## [ALPHA-0.17.0] - 2026-11-24
 

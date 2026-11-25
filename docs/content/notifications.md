@@ -47,6 +47,10 @@ long as the request took.
 It now renders skeleton rows instead. This was locked in by a test that asserted
 the old behaviour, which is the only reason it survived as long as it did.
 
+A failed load on the full page keeps its sentence and its retry together in one
+block, and the Sonner toast carries the underlying server message rather than a
+generic replacement.
+
 ## Reading the list
 
 **Grouped by day**, under Today / Yesterday / Earlier. Compared against whole
