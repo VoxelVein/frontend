@@ -81,10 +81,13 @@ up" means.
 ## The full page
 
 The bell is a glance: it loads at most 50 rows and opens on demand. Its footer
-links to `/notifications`, which renders the same rows with All / Unread / Read
-tabs, a text search over title, message and project name, and the bulk actions
-that no longer fit in a popup. Both views share `USER_NOTIFICATION_KEYS`, so a
-row marked read on one view updates the badge and the other view immediately.
+links to `/notifications`, which presents the same information with its own row
+design inside a single Card with a `CardHeader` - dividers instead of row cards,
+and an accent for unread instead of a tinted background. It adds All / Unread /
+Read tabs, a text search over title, message and project name, and the bulk
+actions that no longer fit in a popup. Both views share `USER_NOTIFICATION_KEYS`,
+so a row marked read on one view updates the badge and the other view
+immediately.
 
 The page uses TanStack Query rather than the bell's open-time state: it is a
 destination, so its data is cached and refetched like any other list.
