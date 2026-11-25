@@ -1,33 +1,17 @@
-import {
-  IconChecks,
-  IconCircleCheck,
-  IconInfoCircle,
-  IconMessageReport,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconChecks, IconTrash } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import {
+  TONE_CLASS,
+  TONE_ICON,
+} from "@/components/notifications/notification-tone";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
-import type { NotificationTone } from "@/lib/notifications";
 import { presentationFor } from "@/lib/notifications";
 import { relativeTime } from "@/lib/relative-time";
 import type { UserNotification } from "@/lib/user-notifications.functions";
 import { cn } from "@/lib/utils";
-
-/** Icon and tint per kind, shared by the bell and the full page. */
-const TONE_ICON = {
-  attention: IconMessageReport,
-  neutral: IconInfoCircle,
-  positive: IconCircleCheck,
-} as const satisfies Record<NotificationTone, typeof IconInfoCircle>;
-
-const TONE_CLASS = {
-  attention: "bg-destructive/10 text-destructive",
-  neutral: "bg-muted text-muted-foreground",
-  positive: "bg-primary/10 text-primary",
-} as const satisfies Record<NotificationTone, string>;
 
 /** The row's own background, so an unread row reads as unread at a glance. */
 const ROW_CLASS = {

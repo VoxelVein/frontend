@@ -9,12 +9,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
-import { NotificationRow } from "@/components/notifications/notification-row";
+import { InboxRow } from "@/components/notifications/inbox-row";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   InputGroup,
   InputGroupAddon,
@@ -78,10 +85,10 @@ const filterNotifications = (
   });
 
 const LoadingRows = () => (
-  <div aria-busy="true" className="grid gap-3 p-4 sm:p-6">
+  <div aria-busy="true" className="grid gap-4 px-4 py-6">
     {[0, 1, 2, 3].map((index) => (
       <div className="flex items-start gap-3" key={index}>
-        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <Skeleton className="size-9 shrink-0 rounded-lg" />
         <div className="flex-1 space-y-2">
           <Skeleton className="h-4 w-1/3" />
           <Skeleton className="h-4 w-4/5" />
@@ -91,16 +98,44 @@ const LoadingRows = () => (
   </div>
 );
 
+/**
+ * An empty inbox is a blank area inside the card, not another card inside it.
+ */
+const InboxEmptyState = ({
+  isFiltered,
+  onClear,
+}: {
+  isFiltered: boolean;
+  onClear: () => void;
+}) => (
+  <div className="flex flex-col items-center gap-2 px-4 py-14 text-center">
+    <span className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-full">
+      <IconBell size={22} aria-hidden="true" />
+    </span>
+    <p className="text-foreground font-medium">
+      {isFiltered ? "No matching notifications" : "Nothing here yet"}
+    </p>
+    <p className="text-muted-foreground max-w-sm text-sm">
+      {isFiltered
+        ? "Try a different search or show every notification."
+        : "You are told when a moderator reviews one of your projects, and when they look at something you reported."}
+    </p>
+    {isFiltered ? (
+      <Button variant="link" onClick={onClear}>
+        Show all
+      </Button>
+    ) : null}
+  </div>
+);
+
 interface NotificationToolbarProps {
   filter: Filter;
   hasRead: boolean;
   isMutating: boolean;
   onClearRead: () => void;
   onFilterChange: (filter: Filter) => void;
-  onMarkAll: () => void;
   onSearchChange: (value: string) => void;
   search: string;
-  unreadCount: number;
 }
 
 const NotificationToolbar = ({
@@ -109,12 +144,10 @@ const NotificationToolbar = ({
   isMutating,
   onClearRead,
   onFilterChange,
-  onMarkAll,
   onSearchChange,
   search,
-  unreadCount,
 }: NotificationToolbarProps) => (
-  <div className="border-border/70 bg-muted/20 flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
+  <div className="border-border/70 flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
     <Tabs
       value={filter}
       onValueChange={(value) => {
@@ -161,17 +194,6 @@ const NotificationToolbar = ({
 
       <Button
         type="button"
-        variant="outline"
-        size="sm"
-        className="min-h-11"
-        disabled={unreadCount === 0 || isMutating}
-        onClick={onMarkAll}
-      >
-        <IconChecks size={16} aria-hidden="true" />
-        Read all
-      </Button>
-      <Button
-        type="button"
         variant="ghost"
         size="sm"
         className="min-h-11"
@@ -189,7 +211,7 @@ const NotificationToolbar = ({
  * The full notification inbox.
  *
  * The bell stays a quick glance with a 50-row cap; this page is where a reader
- * filters, searches and acts on those rows. Both views write through the same
+ * filters, searches and acts on the rows. Both views write through the same
  * query keys, so a change here also updates the badge in the navbar.
  */
 const NotificationsPage = () => {
@@ -286,90 +308,90 @@ const NotificationsPage = () => {
             <IconBell size={22} aria-hidden="true" />
           </span>
         }
-        action={
-          unreadCount > 0 ? (
-            <Badge variant="secondary">
-              <span className="tabular-nums">{unreadCount}</span> unread
-            </Badge>
-          ) : null
-        }
       />
 
-      <section
-        aria-label="Your notifications"
-        className="border-border bg-card mt-8 overflow-hidden rounded-xl border shadow-xs"
-      >
+      <Card className="mt-8" size="sm">
+        <CardHeader className="border-border/70 border-b">
+          <CardTitle className="text-lg">Inbox</CardTitle>
+          <CardDescription>
+            Your latest project and report updates, newest first.
+          </CardDescription>
+          <CardAction className="flex flex-wrap items-center gap-2">
+            {unreadCount > 0 ? (
+              <Badge variant="secondary">
+                <span className="tabular-nums">{unreadCount}</span> unread
+              </Badge>
+            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11"
+              disabled={unreadCount === 0 || isMutating}
+              onClick={() => markAll.mutate()}
+            >
+              <IconChecks size={16} aria-hidden="true" />
+              Read all
+            </Button>
+          </CardAction>
+        </CardHeader>
+
         <NotificationToolbar
           filter={filter}
           hasRead={hasRead}
           isMutating={isMutating}
           onClearRead={() => dismissRead.mutate()}
           onFilterChange={setFilter}
-          onMarkAll={() => markAll.mutate()}
           onSearchChange={setSearch}
           search={search}
-          unreadCount={unreadCount}
         />
 
-        {listQuery.isPending ? <LoadingRows /> : null}
+        <CardContent className="pt-2 pb-5">
+          {listQuery.isPending ? <LoadingRows /> : null}
 
-        {listQuery.isError ? (
-          <div className="px-4 py-6 sm:px-6">
-            <ErrorState
-              message="Could not load your notifications."
-              onRetry={async () => {
-                await listQuery.refetch();
-              }}
-            />
-          </div>
-        ) : null}
+          {listQuery.isError ? (
+            <div className="py-10 text-center">
+              <p className="text-muted-foreground mb-3 text-sm">
+                Could not load your notifications.
+              </p>
+              <ErrorState
+                message="Could not load your notifications."
+                onRetry={async () => {
+                  await listQuery.refetch();
+                }}
+              />
+            </div>
+          ) : null}
 
-        {listQuery.isSuccess && visible.length === 0 ? (
-          <EmptyState
-            variant="inline"
-            icon={<IconBell size={22} aria-hidden="true" />}
-            title={
-              isFiltered ? "No matching notifications" : "Nothing here yet"
-            }
-            description={
-              isFiltered
-                ? "Try a different search or show every notification."
-                : "You are told when a moderator reviews one of your projects, and when they look at something you reported."
-            }
-            action={
-              isFiltered ? (
-                <Button variant="link" onClick={clearFilters}>
-                  Show all
-                </Button>
-              ) : null
-            }
-          />
-        ) : null}
+          {listQuery.isSuccess && visible.length === 0 ? (
+            <InboxEmptyState isFiltered={isFiltered} onClear={clearFilters} />
+          ) : null}
 
-        {listQuery.isSuccess && visible.length > 0
-          ? groupNotifications(visible, now).map(([group, grouped]) => (
-              <div className="px-4 py-4 sm:px-6" key={group}>
-                <h2 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
-                  {notificationGroupLabel(group)}
-                </h2>
-                <ul className="grid gap-2">
-                  {grouped.map((item) => (
-                    <li key={item.id}>
-                      <NotificationRow
-                        isMutating={isMutating}
-                        item={item}
-                        now={now}
-                        onDismiss={(id) => dismissOne.mutate(id)}
-                        onMarkRead={(id) => markOne.mutate(id)}
-                        onOpen={(id) => markOne.mutate(id)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          : null}
-      </section>
+          {listQuery.isSuccess && visible.length > 0
+            ? groupNotifications(visible, now).map(([group, grouped]) => (
+                <div className="pt-4 first:pt-0" key={group}>
+                  <h2 className="text-muted-foreground mb-1 text-xs font-semibold tracking-wide uppercase">
+                    {notificationGroupLabel(group)}
+                  </h2>
+                  <ul>
+                    {grouped.map((item) => (
+                      <li key={item.id}>
+                        <InboxRow
+                          isMutating={isMutating}
+                          item={item}
+                          now={now}
+                          onDismiss={(id) => dismissOne.mutate(id)}
+                          onMarkRead={(id) => markOne.mutate(id)}
+                          onOpen={(id) => markOne.mutate(id)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            : null}
+        </CardContent>
+      </Card>
 
       {items.length === 50 ? (
         <p className="text-muted-foreground mt-4 text-xs">
