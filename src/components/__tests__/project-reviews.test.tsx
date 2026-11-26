@@ -1,10 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 /* oxlint-disable anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Server functions and auth are network boundaries; exercise the real form and query cache. */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
 
 import { ProjectReviews } from "@/components/reviews/project-reviews";
+import type { CommentView, ReviewResponseView } from "@/lib/comments.functions";
 import type {
   ReviewListing,
   ReviewStatus,
@@ -35,7 +42,17 @@ vi.mock("@/lib/project-reviews.functions", () => ({
   reviewStatus: mocks.status,
 }));
 
-const mount = () =>
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Responses are exercised in their own suite; this module pulls the database into the browser test
+vi.mock("@/lib/comments.functions", () => ({
+  createReviewResponse: vi.fn<() => Promise<ReviewResponseView>>(),
+  listPostComments: vi.fn<() => Promise<CommentView[]>>(() =>
+    Promise.resolve([])
+  ),
+  toggleCommentHeart:
+    vi.fn<() => Promise<{ heartCount: number; hearted: boolean }>>(),
+}));
+
+const mount = (ownerId: string | null = null) =>
   render(
     <QueryClientProvider
       client={
@@ -47,7 +64,7 @@ const mount = () =>
         })
       }
     >
-      <ProjectReviews projectId="project" />
+      <ProjectReviews ownerId={ownerId} projectId="project" />
     </QueryClientProvider>
   );
 
@@ -113,6 +130,7 @@ describe("project reviews", () => {
       createdAt: "2026-01-01T00:00:00.000Z",
       id: "review-1",
       rating: 4,
+      response: null,
     });
     mount();
 
@@ -140,6 +158,7 @@ describe("project reviews", () => {
           createdAt: "2026-01-01T00:00:00.000Z",
           id: "review-1",
           rating: 4,
+          response: null,
         },
       ],
     });
@@ -158,5 +177,73 @@ describe("project reviews", () => {
     // The mean badge and the individual row both expose the same rating.
     expect(screen.getAllByText("4 out of 5 stars")).toHaveLength(2);
     expect(screen.getByText("You reviewed this.")).toBeInTheDocument();
+  });
+
+  it("offers a response only to the project creator", async () => {
+    mocks.status.mockResolvedValue({
+      downloadReadyAt: null,
+      eligible: false,
+      hasReviewed: false,
+      reason: "download-required",
+    });
+    mocks.list.mockResolvedValue({
+      averageRating: 4,
+      ratingCount: 1,
+      reviews: [
+        {
+          authorName: "Player",
+          comment: "Great mod",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          id: "review-1",
+          rating: 4,
+          response: null,
+        },
+      ],
+    });
+
+    mount("user");
+    await expect(
+      screen.findByLabelText("Respond as the creator")
+    ).resolves.toBeInTheDocument();
+
+    cleanup();
+    mount("someone-else");
+    await expect(screen.findByText("Great mod")).resolves.toBeInTheDocument();
+    expect(screen.queryByLabelText("Respond as the creator")).toBeNull();
+  });
+
+  it("shows the creator's response under the review", async () => {
+    const response: ReviewResponseView = {
+      authorName: "Creator",
+      authorRole: "admin",
+      body: "Thanks for playing!",
+      createdAt: "2026-01-01T00:01:00.000Z",
+      heartCount: 1,
+      heartedByMe: false,
+      id: "response-1",
+      reviewId: "review-1",
+    };
+
+    mocks.list.mockResolvedValue({
+      averageRating: 4,
+      ratingCount: 1,
+      reviews: [
+        {
+          authorName: "Player",
+          comment: "Great mod",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          id: "review-1",
+          rating: 4,
+          response,
+        },
+      ],
+    });
+
+    mount();
+    await expect(
+      screen.findByText("Thanks for playing!")
+    ).resolves.toBeInTheDocument();
+    expect(screen.getByText("Creator")).toBeInTheDocument();
+    expect(screen.getAllByText("Admin")).toHaveLength(2);
   });
 });

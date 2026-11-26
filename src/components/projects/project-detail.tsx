@@ -184,7 +184,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         ) : null}
 
         {project.status === "published" ? (
-          <ProjectReviews projectId={project.id} />
+          <ProjectReviews ownerId={project.ownerId} projectId={project.id} />
         ) : null}
 
         {project.disclosures.length > 0 ? (

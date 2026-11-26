@@ -2,13 +2,19 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { ReviewForm } from "@/components/reviews/review-form";
+import {
+  ReviewResponseCard,
+  ReviewResponseForm,
+} from "@/components/reviews/review-response";
 import { StarRatingDisplay } from "@/components/reviews/star-rating";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToastError } from "@/hooks/use-toast-error";
 import { authClient } from "@/lib/auth-client";
+import { canRespondToReview } from "@/lib/comments";
 import { formatDate } from "@/lib/format";
 import {
   PROJECT_DOWNLOADED_EVENT,
@@ -20,11 +26,13 @@ import {
 import type {
   ReviewListing,
   ReviewStatus,
+  ReviewView,
 } from "@/lib/project-reviews.functions";
 import {
   listProjectReviews,
   reviewStatus,
 } from "@/lib/project-reviews.functions";
+import { can } from "@/lib/roles";
 
 /** Why this account cannot review, or confirmation that it already did. */
 const ReviewGate = ({ status }: { status: ReviewStatus }) => {
@@ -36,9 +44,9 @@ const ReviewGate = ({ status }: { status: ReviewStatus }) => {
         <div className="grid gap-2">
           <p className="text-muted-foreground text-sm">{message}</p>
           {status.reason === "sign-in" ? (
-            <Button render={<a aria-label="Sign in" href="/login" />} size="sm">
+            <a className={buttonVariants({ size: "sm" })} href="/login">
               Sign in
-            </Button>
+            </a>
           ) : null}
         </div>
       ) : null}
@@ -64,8 +72,57 @@ const ReviewSummary = ({ listing }: { listing: ReviewListing }) => {
   );
 };
 
+/** The creator's answer, or the form to write one, under a review. */
+const ResponseArea = ({
+  canHeart,
+  ownerId,
+  projectId,
+  review,
+  viewerId,
+}: {
+  canHeart: boolean;
+  ownerId: string | null;
+  projectId: string;
+  review: ReviewView;
+  viewerId: string | undefined;
+}) => {
+  if (review.response) {
+    return (
+      <div className="w-full">
+        <ReviewResponseCard
+          canHeart={canHeart}
+          projectId={projectId}
+          response={review.response}
+        />
+      </div>
+    );
+  }
+
+  if (canRespondToReview(ownerId, viewerId)) {
+    return (
+      <div className="w-full">
+        <ReviewResponseForm projectId={projectId} reviewId={review.id} />
+      </div>
+    );
+  }
+
+  return null;
+};
+
 /** The reviews themselves, newest first. */
-const ReviewList = ({ listing }: { listing: ReviewListing | undefined }) => {
+const ReviewList = ({
+  canHeart,
+  listing,
+  ownerId,
+  projectId,
+  viewerId,
+}: {
+  canHeart: boolean;
+  listing: ReviewListing | undefined;
+  ownerId: string | null;
+  projectId: string;
+  viewerId: string | undefined;
+}) => {
   if (listing === undefined) {
     return <Skeleton className="h-20 w-full" aria-label="Loading reviews" />;
   }
@@ -97,6 +154,13 @@ const ReviewList = ({ listing }: { listing: ReviewListing | undefined }) => {
             </p>
             <p>{formatDate(review.createdAt)}</p>
           </div>
+          <ResponseArea
+            canHeart={canHeart}
+            ownerId={ownerId}
+            projectId={projectId}
+            review={review}
+            viewerId={viewerId}
+          />
         </li>
       ))}
     </ul>
@@ -110,9 +174,16 @@ const ReviewList = ({ listing }: { listing: ReviewListing | undefined }) => {
  * post. The latter polls for a few seconds after a download, which is how the
  * five-second gate turns into a usable form without a page reload.
  */
-export const ProjectReviews = ({ projectId }: { projectId: string }) => {
+export const ProjectReviews = ({
+  ownerId,
+  projectId,
+}: {
+  ownerId: string | null;
+  projectId: string;
+}) => {
   const { data: session } = authClient.useSession();
   const client = useQueryClient();
+  const canHeart = can(session?.user.role, "heartComments");
   const headingId = `project-reviews-${projectId}`;
 
   useEffect(() => {
@@ -188,7 +259,13 @@ export const ProjectReviews = ({ projectId }: { projectId: string }) => {
             Retry reviews
           </Button>
         ) : null}
-        <ReviewList listing={listing.data} />
+        <ReviewList
+          canHeart={canHeart}
+          listing={listing.data}
+          ownerId={ownerId}
+          projectId={projectId}
+          viewerId={session?.user.id}
+        />
       </CardContent>
     </Card>
   );
