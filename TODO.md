@@ -24,6 +24,13 @@ already shipped.
 
 * [ ] `src/routes/admin/index.tsx` fetches badge counts client-side in a
       `useEffect` while every other route uses a loader.
+* [ ] The server voting system has not been verified end to end. Its
+      author noted this in the integrating commit; test a real vote, reward
+      delivery, cooldowns and the leaderboards before relying on it.
+* [ ] Votifier cannot confirm that an in-game reward was granted. Classic v1
+      confirms only that bytes were written, and failed deliveries are not
+      retried because the protocols have no idempotency key. Document this
+      clearly for owners.
 
 ## Documentation
 
