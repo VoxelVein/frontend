@@ -82,8 +82,8 @@ the small ElysiaJS event server behind the wider
 
 * Server-rendered React 19 with progressive enhancement, light and dark
   themes with a view-transition switch, and a mobile-first responsive layout.
-* WCAG 2.2 AA accessibility as a baseline, visible focus styles, reduced
-  motion support, and an opt-in beta custom cursor.
+* WCAG 2.2 AA accessibility as a baseline, visible focus styles and reduced
+  motion support.
 * TypeScript in strict mode, TanStack Start and Router, TanStack Query and
   Form, Tailwind CSS v4 with OKLCH tokens, Drizzle ORM with PostgreSQL,
   Valibot validation shared across the stack, Vitest, Oxlint and Oxfmt.

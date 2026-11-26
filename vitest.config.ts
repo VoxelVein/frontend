@@ -12,7 +12,6 @@ export default defineConfig({
       include: [
         "src/components/admin/use-admin-posts.ts",
         "src/components/blog/post-card.tsx",
-        "src/components/cookie-banner.tsx",
         "src/components/ui/skeleton.tsx",
         "src/components/ui/spinner.tsx",
         "src/hooks/use-post-search.ts",

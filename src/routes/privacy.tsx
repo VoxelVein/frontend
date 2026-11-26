@@ -34,9 +34,7 @@ const PrivacyPage = () => (
               Authentication data: session identifiers and passkey credentials
               used to keep you signed in.
             </li>
-            <li>
-              Preferences: theme and cursor preferences stored in your browser.
-            </li>
+            <li>Preferences: your theme choice stored in your browser.</li>
             <li>
               Usage data: search queries and page interactions needed to operate
               the service.

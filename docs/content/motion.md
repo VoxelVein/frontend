@@ -93,10 +93,10 @@ Four sections, one motion system:
 ## Browse pages
 
 The filter panel, the result cards and the live-event banner use the same
-one-shot `animate-in fade-in-0 slide-in-from-bottom-*` entrance as the cookie
-banner, at 300 ms. Cards animate when they mount, so a new page or a new filter
-arrives without re-animating the page header. There is no stagger and no
-per-frame work, and `motion-reduce:animate-none` disables all three.
+one-shot `animate-in fade-in-0 slide-in-from-bottom-*` entrance, at 300 ms.
+Cards animate when they mount, so a new page or a new filter arrives without
+re-animating the page header. There is no stagger and no per-frame work, and
+`motion-reduce:animate-none` disables all three.
 
 ## Reduced motion
 

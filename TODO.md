@@ -56,12 +56,18 @@ already shipped.
       route shells are covered in `src/__tests__/`; these three are not.
       Settings' tab policy is tested in `settings-tabs.test.ts`, so what is
       missing there is the shell.
-* [ ] Eight of the nine hooks in `src/hooks/` have no test. Only
-      `custom-cursor` is covered, in `src/lib/__tests__/custom-cursor.test.ts`.
-      `use-post-search` is in `coverage.include` despite having no test.
+* [ ] No hook in `src/hooks/` has a direct test. `use-post-search` is in
+      `coverage.include` despite having no test.
 
 ## Planned
 
+* [ ] Re-add a working Cookie Consent Banner soon. The old banner only wrote
+      `accepted` or `declined` to `localStorage` and nothing read it back, while
+      its animation and entry cost the whole site a visible lag, so it was
+      removed. The replacement must actually gate non-essential storage, offer
+      Accept, Deny and a "More" option for tweaking categories individually,
+      persist a versioned choice, and stay light enough not to stall first
+      paint. Keep `/cookies` linked and in sync with whatever it stores.
 * [ ] FastStats integration: downloads from this and other providers, total
       servers, plugin versions and game versions in use.
 * [ ] A sitemap.
@@ -71,6 +77,8 @@ already shipped.
 
 ## Completed
 
+* [x] Removed the opt-in beta custom cursor and its Appearance tab. The tab is
+      a legacy URL alias that now lands on Profile.
 * [x] Split `ProjectBrowser` into pure rules, a search hook, a filter panel and
       result components; the complexity exemption is gone.
 * [x] Project ownership transfers with owner re-authentication, recipient
@@ -89,8 +97,6 @@ already shipped.
 * [x] Server voting with Votifier v1/v2 rewards, cooldowns, leaderboards,
       encrypted tokens and hardened outbound delivery.
 * [x] Creator disclosures with seven types and a public Transparency section.
-* [x] Opt-in beta custom cursor, using a theme-aware SVG for the default
-      pointer.
 * [x] Mojang-backed suggested Minecraft versions with Backspace re-editing.
 * [x] Admin warnings for unconfigured Redis or object storage, and removal of
       the public SSE-unavailable toast.

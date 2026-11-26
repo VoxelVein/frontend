@@ -17,6 +17,16 @@ names match the repository's `ALPHA-*` git tags.
 * A Changelog link in the footer and a guide describing the fetch, validation
   and rendering pipeline.
 
+### Removed
+
+* The opt-in beta custom cursor, its SVG asset, its pre-hydration script and
+  its Appearance tab. Old `?tab=appearance` links now land on Profile. The
+  native platform cursor is used everywhere again.
+
+### Changed
+
+* Cookie and privacy pages no longer describe a cursor preference.
+
 ## [ALPHA-0.18.0] - 2026-11-26
 
 Changes on `main` since `ALPHA-0.17.0`.

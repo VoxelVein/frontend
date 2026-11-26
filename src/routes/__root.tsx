@@ -16,7 +16,6 @@ import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { applyStoredCursorPreference } from "@/lib/custom-cursor";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 import appCss from "../styles.css?url";
@@ -198,11 +197,6 @@ export const Route = createRootRoute({
       },
     ],
     scripts: [
-      {
-        // Applied before hydration, like the theme class, so anyone who turned
-        // the custom cursor off never sees it flash on first paint.
-        children: `(${applyStoredCursorPreference})();`,
-      },
       {
         type: "application/ld+json",
         children: JSON.stringify({
