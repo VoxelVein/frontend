@@ -86,18 +86,17 @@ Changes on `main` since `ALPHA-0.16.1`.
 
 ### Added
 
-* Server voting: players vote with a 24-hour rolling cooldown, and server
-  owners can enable Votifier rewards (classic v1 or NuVotifier v2), test their
-  listener and inspect the last 50 deliveries. Daily, weekly, monthly and
-  all-time leaderboards are available on the home and browse pages.
+* Server voting with a 24-hour rolling cooldown. Owners can enable Votifier
+  rewards with classic v1 or NuVotifier v2, test their listener and inspect the
+  last 50 deliveries. Daily, weekly, monthly and all-time leaderboards appear
+  on the home and browse pages.
 * Reward tokens are encrypted at rest with AES-256-GCM using
   `VOTING_ENCRYPTION_KEY` and are never returned to the browser.
-* A custom SVG cursor with an opt-in setting in Appearance, marked beta.
+* A custom SVG cursor, opt-in from Appearance and marked beta.
 * Suggested Minecraft versions from Mojang in the server form, with Backspace
-  in an empty field returning the last chip for correction.
-* All project browse, detail and gallery pages under `/p/<type>/...`, with the
-  old top-level URLs kept as redirects.
-* Persistent admin warnings when Redis or object storage is not configured.
+  in an empty field restoring the last chip for correction.
+* All project browse, detail and gallery pages under `/p/<type>/...`, with
+  persistent admin warnings when Redis or object storage is not configured.
 
 ### Changed
 
@@ -119,7 +118,13 @@ Changes on `main` since `ALPHA-0.16.1`.
   status write stays distinguishable from an unattempted one.
 * Pre-existing lint, test and dependency errors were cleared.
 
+### Documentation
+
+* The comparison figures and the no-paid-services statement were updated.
+
 ## [ALPHA-0.16.1] - 2026-11-23
+
+Changes on `main` since `ALPHA-0.16.0`.
 
 ### Added
 
@@ -131,28 +136,30 @@ Changes on `main` since `ALPHA-0.16.1`.
 * A redesigned About page and an About link in the site navigation.
 * Account destinations in the signed-in mobile drawer.
 * Shared sidebar navigation for the settings and admin areas.
+* Avatars are cropped and stored as full squares, and the logo is now a
+  theme-aware inline SVG.
 
 ### Changed
 
-* Refreshed the navbar, footer and news section animation.
-* Avatars are cropped and stored as full squares; the logo is now a
-  theme-aware inline SVG.
+* The navbar, footer and News section animation were refreshed.
 
 ### Fixed
 
 * Passkey sign-in is actionable instead of merely advertised.
 * Images that cannot be decoded are reported rather than failing silently,
   and the crop window stays square behind a circular overlay.
+* The upload client accepts any 2xx response instead of only 201.
 
 ## [ALPHA-0.16.0] - 2026-11-20
 
+Changes on `main` since `ALPHA-0.15.0`.
+
 ### Added
 
-* Live server player counts on server cards, and richer review detail with
-  descriptions, changelogs and files.
 * A collapsible, responsive admin sidebar grouped into People, Content,
   Moderation and Support.
-* Editable project slugs on the manage page.
+* Editable project slugs, richer review detail with descriptions, changelogs
+  and files, and live server player counts on server cards.
 * Side-by-side Markdown editing for project descriptions, release changelogs
   and profile bios.
 * Per-route Open Graph and Twitter tags, a card-based news section, and admin
@@ -165,30 +172,43 @@ Changes on `main` since `ALPHA-0.16.1`.
   schema no longer pulls Drizzle's query builder into the client bundle.
 * Blog posts now return a real 404, with the tailored view moved to a
   route-level `notFoundComponent`.
-* Search error copy names the failing connection instead of a lost "search
-  service".
 
 ### Fixed
 
 * Review and project updates were corrected.
-* Invalid or stale `?tab=` values fall back to the default admin tab.
+* Search error copy names the failing connection instead of a lost "search
+  service".
+* Usernames are required and authentication failures are reported.
 * The development proxy forwards events, and authentication limits are
   explained in the guides.
-* Usernames are required and authentication failures are reported.
+
+### Tooling
+
+* Dependency groups were bumped and an unused Dependabot configuration was
+  disabled. The auth-client mock uses the string form Vitest expects.
 
 ## [ALPHA-0.15.0] - 2026-10-05
 
+Changes on `main` since `ALPHA-0.12.1`.
+
 ### Added
 
-* Blog categories, multiple co-authors, XSS-safe rendered post HTML and member
+* PostgreSQL full-text and trigram search replaced Meilisearch, so escaped
+  `ILIKE` wildcards no longer make `100%` match unrelated results.
+* Modpacks, resource packs, shaders and servers were added, with a searchable
+  version picker and client-requirement filters.
+* Projects are reviewed before publication, and republishing no longer needs
+  review unless staff took the project down.
+* Blog categories, multiple co-authors, XSS-safe rendered HTML and member
   reports with a moderator inbox.
 * A gallery page that 404s when a project has no images, and public profiles
-  rebuilt around an identity card and stats.
+  rebuilt around an identity card and stats with Markdown bios.
 * Custom profile pictures, shared Valkey-backed rate limits, and a rebuilt
   notification inbox with per-item mark-as-read.
 * An account deletion wizard with a grace period, and a guided danger zone in
   settings.
-* Indexes on seven foreign keys that PostgreSQL does not index by default.
+* A user/moderator/admin ladder with capabilities named by intent, and indexes
+  on the seven foreign keys PostgreSQL does not index by default.
 
 ### Changed
 
@@ -197,21 +217,60 @@ Changes on `main` since `ALPHA-0.16.1`.
   changes after an edit was undone.
 * Download-first project detail pages and tighter explore cards; server
   pages rebuilt around the join panel.
-* Images are resized in the browser before upload, and the bundle budget,
-  tracing tools and shared scroll-reveal observer were updated.
+* Images are resized in the browser before upload. The bundle budget, tracing
+  tools and a shared scroll-reveal observer were updated.
+* Action feedback moved to Sonner, leaving field validation inline.
 
 ### Fixed
 
-* Search escaped `ILIKE` wildcards that had never been escaped, so `100%` no
-  longer matched every result containing "100".
 * Settings tab resolution, username cooldown boundaries and the malformed
   timestamp path were covered and corrected.
-* Republishing a project no longer requires review unless staff took it down.
+* `isomorphic-dompurify` was kept out of the server bundle, and content that
+  relies on the reveal observer no longer stays invisible.
+
+## [ALPHA-0.12.1] - 2026-09-26
+
+Changes on `main` since `ALPHA-0.10.2`.
+
+### Added
+
+* Account deletion for every sign-in method, generated usernames and a
+  sign-in methods page.
+* Favicons and a web manifest, plus placeholders on password fields and
+  visible visited-link styling in the footer.
+
+### Fixed
+
+* The Dokploy compose stack deploys cleanly, runs migrations on deploy and
+  repairs the migration journal; a fresh deployment works end to end.
+* The exposed port changed from 6001 to 3000.
+* Tailwind scans only `src/` for classes, so server-rendered pages link the
+  real stylesheet.
+* Failed chunk loads recover instead of leaving the page stuck.
+
+## [ALPHA-0.10.2] - 2026-09-26
+
+The first tagged alpha, built on the initial project types and the ElysiaJS
+event server.
+
+### Added
+
+* Real mods and plugins with uploads and downloads.
+* Blog post previews, Meilisearch search and admin auto-refresh.
+* A rotating project-type headline and a pixel theme transition.
+* One login field for both email address and username.
+
+### Fixed
+
+* Webhooks, API limits, auth sessions and deployment settings were hardened.
+* The API is deployed, migrations run on deploy, and uploads and counters were
+  hardened.
+* `accounts.issuer` was dropped so sign-ups work on Better Auth 1.7.3+.
+* Button-styled links render as real links, and the compose stack passes
+  `VITE_API_URL` and `TRUST_PROXY` into the containers.
 
 ## Earlier alpha releases
 
-Releases before `ALPHA-0.15.0` include the initial project types,
-moderated publishing, the move from Meilisearch to PostgreSQL full-text and
-trigram search, object storage for images and files, the three-role ladder,
-Cloudflare Turnstile, the ElysiaJS event server and the Node 24 toolchain.
-See the git tags and history for the individual changes.
+Releases before `ALPHA-0.10.2` predate the `ALPHA-*` tag convention. They
+include the initial project types, moderated publishing, the move to object
+storage and the Node 24 toolchain. See the git history for those commits.
