@@ -5,6 +5,10 @@ import env from "../../env.config";
 import {
   accounts,
   accountsRelations,
+  commentHearts,
+  commentHeartsRelations,
+  comments,
+  commentsRelations,
   passkeys,
   passkeysRelations,
   posts,
@@ -40,6 +44,10 @@ import {
 const schema = {
   accounts,
   accountsRelations,
+  commentHearts,
+  commentHeartsRelations,
+  comments,
+  commentsRelations,
   passkeys,
   passkeysRelations,
   posts,

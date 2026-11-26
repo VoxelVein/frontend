@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { and, avg, count, desc, eq } from "drizzle-orm";
 import {
+  check,
   maxLength,
   object,
   optional,
@@ -16,6 +17,12 @@ import {
 import { db } from "@/db";
 import { projectDownloads, projectReviews, projects, users } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import type { ReviewResponseView } from "@/lib/comments.functions";
+import { responsesForReviews } from "@/lib/comments.functions";
+import {
+  CONTENT_FILTER_MESSAGE,
+  containsBlockedWord,
+} from "@/lib/content-filter";
 import {
   REVIEW_COMMENT_MAX_LENGTH,
   REVIEW_MESSAGES,
@@ -56,7 +63,12 @@ const projectSchema = object({ projectId: pipe(string(), uuid()) });
 const reviewSchema = object({
   ...projectSchema.entries,
   comment: optional(
-    pipe(string(), trim(), maxLength(REVIEW_COMMENT_MAX_LENGTH))
+    pipe(
+      string(),
+      trim(),
+      maxLength(REVIEW_COMMENT_MAX_LENGTH),
+      check((value) => !containsBlockedWord(value), CONTENT_FILTER_MESSAGE)
+    )
   ),
   rating: picklist(REVIEW_RATINGS),
 });
@@ -90,6 +102,8 @@ export interface ReviewView {
   createdAt: string;
   id: string;
   rating: number;
+  /** The project creator's answer, when one has been given. */
+  response: ReviewResponseView | null;
 }
 
 export interface ReviewListing {
@@ -137,6 +151,16 @@ export const listProjectReviews = createServerFn({ method: "GET" })
     ]);
 
     const [summary] = summaries;
+    const session = await auth.api.getSession({ headers });
+
+    const responses = await responsesForReviews(
+      rows.map((row) => row.id),
+      session?.user.id
+    );
+
+    const responseByReview = new Map(
+      responses.map((response) => [response.reviewId, response])
+    );
 
     return {
       averageRating:
@@ -150,6 +174,7 @@ export const listProjectReviews = createServerFn({ method: "GET" })
         createdAt: row.createdAt.toISOString(),
         id: row.id,
         rating: row.rating,
+        response: responseByReview.get(row.id) ?? null,
       })),
     };
   });
@@ -319,6 +344,7 @@ export const createProjectReview = createServerFn({ method: "POST" })
         createdAt: review.createdAt.toISOString(),
         id: review.id,
         rating: review.rating,
+        response: null,
       };
     });
   });

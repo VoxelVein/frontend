@@ -1,4 +1,5 @@
 import { relations, sql } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   bigint,
   boolean,
@@ -459,6 +460,73 @@ export const projectReviews = pgTable(
       table.projectId,
       table.createdAt
     ),
+  ]
+);
+
+/**
+ * A comment on a blog post, or the project owner's reply to a review.
+ *
+ * One table with two target columns and a check constraint: both surfaces need
+ * the same author, nesting and staff-heart behaviour, and a second table would
+ * mean writing that three times. Blog comments may nest; review replies may
+ * not, which the write path enforces.
+ */
+export const comments = pgTable(
+  "comments",
+  {
+    // Soft-deleted: the comment stays useful after its author leaves.
+    authorId: text("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Nested replies on blog posts only. Deleting a parent takes its replies.
+    parentId: uuid("parent_id").references((): AnyPgColumn => comments.id, {
+      onDelete: "cascade",
+    }),
+    // Better Auth-style text id, matching `posts.id` exactly.
+    postId: text("post_id").references(() => posts.id, {
+      onDelete: "cascade",
+    }),
+    reviewId: uuid("review_id").references(() => projectReviews.id, {
+      onDelete: "cascade",
+    }),
+    targetKind: text("target_kind").$type<"post" | "review">().notNull(),
+  },
+  (table) => [
+    check(
+      "comments_one_target_check",
+      sql`(
+        (${table.targetKind} = 'post' AND ${table.postId} IS NOT NULL AND ${table.reviewId} IS NULL)
+        OR
+        (${table.targetKind} = 'review' AND ${table.reviewId} IS NOT NULL AND ${table.postId} IS NULL)
+      )`
+    ),
+    // The post page reads every comment for one post in created-at order.
+    index("comments_postId_createdAt_idx").on(table.postId, table.createdAt),
+    // Review responses are read with the reviews they answer.
+    index("comments_reviewId_idx").on(table.reviewId),
+    index("comments_parentId_idx").on(table.parentId),
+    index("comments_authorId_idx").on(table.authorId),
+  ]
+);
+
+/** A staff member's "heart" on a comment, at most one per account and comment. */
+export const commentHearts = pgTable(
+  "comment_hearts",
+  {
+    commentId: uuid("comment_id")
+      .notNull()
+      .references(() => comments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.commentId, table.userId] }),
+    // Seeded by the primary key on comment_id; this covers the other direction.
+    index("comment_hearts_userId_idx").on(table.userId),
   ]
 );
 
@@ -1013,6 +1081,38 @@ export const projectReviewsRelations = relations(projectReviews, ({ one }) => ({
   }),
   user: one(users, {
     fields: [projectReviews.userId],
+    references: [users.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one, many }) => ({
+  author: one(users, {
+    fields: [comments.authorId],
+    references: [users.id],
+  }),
+  parent: one(comments, {
+    fields: [comments.parentId],
+    references: [comments.id],
+    relationName: "comment_replies",
+  }),
+  replies: many(comments, { relationName: "comment_replies" }),
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id],
+  }),
+  review: one(projectReviews, {
+    fields: [comments.reviewId],
+    references: [projectReviews.id],
+  }),
+}));
+
+export const commentHeartsRelations = relations(commentHearts, ({ one }) => ({
+  comment: one(comments, {
+    fields: [commentHearts.commentId],
+    references: [comments.id],
+  }),
+  user: one(users, {
+    fields: [commentHearts.userId],
     references: [users.id],
   }),
 }));
