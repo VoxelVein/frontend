@@ -61,6 +61,8 @@ frontend. Each guide lives in its own directory under `docs/`.
   category registry
 * [Motion](content/motion.md), the scroll-reveal and easing system
 * [Blog](content/blog.md), posts, admin post management, and post search
+* [Changelog page](content/changelog.md), GitHub releases as a filterable
+  timeline
 * [Admin Panel](content/admin-panel.md), users, sessions, storage,
   notifications, account deletions, and the review queue
 * [Object Storage](storage/object-storage.md), how the app uses S3

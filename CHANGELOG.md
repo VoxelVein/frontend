@@ -6,6 +6,17 @@ names match the repository's `ALPHA-*` git tags.
 
 ## [Unreleased]
 
+### Added
+
+* A public `/changelog` page that reads GitHub releases with `per_page=100` and
+  renders them newest-first as a vertical timeline with versions, publication
+  dates and sanitized release notes.
+* Milestone markers for breaking changes, the first `ALPHA-` prefixed tag and
+  major version jumps, plus filter pills for features, fixes and breaking
+  changes and anchor links that jump straight to a release.
+* A Changelog link in the footer and a guide describing the fetch, validation
+  and rendering pipeline.
+
 ## [ALPHA-0.18.0] - 2026-11-26
 
 Changes on `main` since `ALPHA-0.17.0`.

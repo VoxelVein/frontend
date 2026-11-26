@@ -21,6 +21,7 @@ const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: PROJECT_TYPE_PATHS.mod, label: "Explore" },
   { href: "/blog", label: "Blog" },
+  { href: "/changelog", label: "Changelog" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
 ] as const;

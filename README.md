@@ -219,6 +219,7 @@ starting points:
 
 * [Projects, versions, uploads and reviews](docs/content/projects.md)
 * [Player reviews](docs/content/reviews.md)
+* [Changelog page](docs/content/changelog.md)
 * [Server voting](docs/content/server-voting.md)
 * [Admin panel](docs/content/admin-panel.md)
 * [Postgres search](docs/search/postgres.md)
