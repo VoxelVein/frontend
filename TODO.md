@@ -22,9 +22,6 @@ already shipped.
 
 ## Bugs and inconsistencies
 
-* [ ] No `og:image`; `twitter:card` is `summary` rather than
-      `summary_large_image`. The missing image is deliberate rather than
-      pointing at a file that does not exist.
 * [ ] `src/routes/admin/index.tsx` fetches badge counts client-side in a
       `useEffect` while every other route uses a loader.
 * [ ] The server voting system has not been verified end to end. Its

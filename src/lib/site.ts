@@ -29,6 +29,16 @@ export const SITE_URL = (
   "http://localhost:3000"
 ).replace(/\/$/u, "");
 
+// The share card in public/, rendered by `pnpm og:image`. Scrapers need an
+// absolute URL, so it is built on SITE_URL like og:url.
+export const SITE_IMAGE = {
+  alt: `${SITE_NAME} logo with the tagline "Free & open-source Minecraft mod platform"`,
+  height: 630,
+  type: "image/png",
+  url: `${SITE_URL}/og-image.png`,
+  width: 1200,
+} as const;
+
 interface SocialMetaOptions {
   /** Page summary. Omit to keep the root site-level description. */
   description?: string;
