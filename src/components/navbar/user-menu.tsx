@@ -94,7 +94,7 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="size-12 rounded-full p-0 transition-transform duration-150 hover:bg-transparent active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="size-12 rounded-full p-0 transition-transform duration-200 hover:scale-110 hover:bg-transparent active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
                   />
                 }
               />
