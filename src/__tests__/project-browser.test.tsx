@@ -12,11 +12,16 @@ import type {
 } from "@/lib/project-search.functions";
 import type { ProjectDocument } from "@/lib/projects";
 
+interface ToastCallOptions {
+  id?: string;
+}
+
 const {
   cacheDeleteMock,
   cacheGetMock,
   cacheSetMock,
   searchModsMock,
+  toastErrorMock,
   useLoaderDataMock,
 } = vi.hoisted(() => ({
   cacheDeleteMock: vi.fn<(params: ProjectSearchParams) => void>(),
@@ -27,7 +32,18 @@ const {
     vi.fn<
       (opts: { data: ProjectSearchParams }) => Promise<ProjectSearchResponse>
     >(),
+  toastErrorMock:
+    vi.fn<(message: string, options?: ToastCallOptions) => void>(),
   useLoaderDataMock: vi.fn<() => ProjectBrowserData>(),
+}));
+
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Server failures are announced by Sonner; stubbing it makes the toast assertable
+vi.mock("sonner", () => ({
+  toast: {
+    error: toastErrorMock,
+    success: vi.fn<() => void>(),
+    dismiss: vi.fn<() => void>(),
+  },
 }));
 
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Testing the browser requires a faithful search stub; string path avoids strict factory type-checking against the server function type
@@ -166,6 +182,7 @@ describe(ProjectBrowser, () => {
     cacheGetMock.mockReset();
     cacheSetMock.mockReset();
     searchModsMock.mockReset();
+    toastErrorMock.mockReset();
     useLoaderDataMock.mockReset();
     useLoaderDataMock.mockReturnValue({ initial: null, initialError: null });
     vi.stubGlobal("EventSource", EventSourceMock);
@@ -239,7 +256,10 @@ describe(ProjectBrowser, () => {
     await selectCategory("performance");
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent("Search failed");
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        expect.stringContaining("Search failed"),
+        expect.any(Object)
+      );
     });
 
     searchModsMock.mockResolvedValueOnce(responseFixture([modFixture]));
@@ -261,8 +281,9 @@ describe(ProjectBrowser, () => {
     await selectCategory("performance");
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Could not reach the database"
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        expect.stringContaining("Could not reach the database"),
+        expect.any(Object)
       );
     });
   });
@@ -277,8 +298,9 @@ describe(ProjectBrowser, () => {
     await selectCategory("performance");
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Could not reach the server"
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        expect.stringContaining("Could not reach the server"),
+        expect.any(Object)
       );
     });
   });

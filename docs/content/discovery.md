@@ -111,9 +111,12 @@ Each entry carries two flags:
   that 404s.
 
 `alwaysInline`
-: Whether it appears in the navbar from `lg`. The rest wait for `xl` and
-  sit in the navbar's **More** menu until then, which keeps every category
-  reachable at every width.
+: Whether a section sits at the top level of the navbar's **Products** menu.
+  Mods and Plugins are the two featured entries; every other type lives in the
+  **Browse** submenu under them, so all seven stay reachable from one trigger.
+
+The desktop navbar reads Home, Products, Blog, in that order. The mobile drawer
+lists Home and every category flat, since a nested menu would only add a tap.
 
 Array order is the display order, the navbar and the explore grid both
 render the list in sequence, so reordering the array moves entries in both

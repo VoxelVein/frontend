@@ -4,6 +4,42 @@
 
 export const VOTE_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
+/** The public status of one server's voting setup. */
+export interface VoteStatusSnapshot {
+  /** Voting is on and the project is published. */
+  enabled: boolean;
+  /** A listener host, port and the credentials for its protocol are saved. */
+  configured: boolean;
+  nextVoteAt: string | null;
+  totalVotes: number;
+}
+
+/**
+ * Whether a server should show the voting card.
+ *
+ * Enabling the toggle is only half of the setup: without a listener address
+ * and its credentials there is nothing to vote for, so an empty card would
+ * advertise a feature the owner has not finished configuring.
+ */
+export const shouldShowVotingCard = (status: VoteStatusSnapshot): boolean =>
+  status.enabled && status.configured;
+
+/** The vote button's label, from the same status rules as the card's presence. */
+export const voteButtonLabel = (
+  status: VoteStatusSnapshot,
+  remaining: string | null
+): string => {
+  if (!shouldShowVotingCard(status)) {
+    return "Voting disabled";
+  }
+
+  if (remaining) {
+    return `Vote again in ${remaining}`;
+  }
+
+  return "Vote";
+};
+
 /**
  * Which protocol a server's Votifier listener speaks.
  */

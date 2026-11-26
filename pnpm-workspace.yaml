@@ -38,3 +38,15 @@ minimumReleaseAgeExclude:
   - "@opencode/protocol@2.0.18"
   - "@opencode/schema@2.0.18"
   - "@opencode/util@2.0.18"
+
+permissions:
+  "@tanstack/devtools-vite":
+    skills: true
+  "@tanstack/markdown":
+    skills: true
+  "@tanstack/react-router":
+    skills: true
+  "@tanstack/react-start":
+    skills: true
+  ultracite:
+    skills: true

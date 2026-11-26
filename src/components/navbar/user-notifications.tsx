@@ -1,10 +1,7 @@
 import {
+  IconArrowRight,
   IconBell,
   IconBellOff,
-  IconChecks,
-  IconCircleCheck,
-  IconInfoCircle,
-  IconMessageReport,
   IconTrash,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +11,7 @@ import type { ReactNode } from "react";
 import { toast } from "sonner";
 
 import { MOBILE_LINK_CLASS } from "@/components/navbar/navbar-links";
+import { NotificationRow } from "@/components/notifications/notification-row";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,21 +23,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/format";
-import type { NotificationTone, NotificationGroup } from "@/lib/notifications";
+import type { NotificationGroup } from "@/lib/notifications";
 import {
-  notificationGroup,
+  groupNotifications,
   notificationGroupLabel,
-  presentationFor,
 } from "@/lib/notifications";
-import { relativeTime } from "@/lib/relative-time";
+import { USER_NOTIFICATION_KEYS } from "@/lib/user-notification-keys";
 import type { UserNotification } from "@/lib/user-notifications.functions";
 import {
   countUnreadUserNotifications,
   dismissReadUserNotifications,
   dismissUserNotification,
   listUserNotifications,
-  markAllUserNotificationsRead,
   markUserNotificationRead,
 } from "@/lib/user-notifications.functions";
 import { cn } from "@/lib/utils";
@@ -62,168 +57,8 @@ interface Panel {
   loadedAt: number;
 }
 
-const UNREAD_QUERY_KEY = ["user-notifications", "unread"] as const;
-const LIST_QUERY_KEY = ["user-notifications", "list"] as const;
-
-/**
- * Icon and tint per kind.
- *
- * The icon is the fastest thing a list can offer: four rows about three
- * different subjects are scannable by shape long before anyone reads the text,
- * and without it the panel is four paragraphs of similar grey.
- */
-const TONE_ICON = {
-  attention: IconMessageReport,
-  neutral: IconInfoCircle,
-  positive: IconCircleCheck,
-} as const satisfies Record<NotificationTone, typeof IconBell>;
-
-const TONE_CLASS = {
-  attention: "bg-destructive/10 text-destructive",
-  neutral: "bg-muted text-muted-foreground",
-  positive: "bg-primary/10 text-primary",
-} as const satisfies Record<NotificationTone, string>;
-
-/** The row's own background, so an unread row reads as unread at a glance. */
-const ROW_CLASS = {
-  read: "border-transparent hover:bg-muted/60",
-  unread: "border-primary/15 bg-primary/5 hover:bg-primary/10",
-} as const;
-
-interface NotificationRowProps {
-  isMutating: boolean;
-  item: UserNotification;
-  now: number;
-  onDismiss: (id: string) => void;
-  onMarkRead: (id: string) => void;
-  onOpen: (id: string) => void;
-}
-
-/**
- * One notification.
- *
- * A container rather than a `DropdownMenuItem`, because a row carries three
- * controls: it opens, it marks read, and it dismisses. A menu item renders as a
- * single interactive element, so buttons inside one would nest controls in a
- * link, which is invalid and unusable by keyboard.
- */
-const NotificationRow = ({
-  isMutating,
-  item,
-  now,
-  onDismiss,
-  onMarkRead,
-  onOpen,
-}: NotificationRowProps) => {
-  const { headline, tone } = presentationFor(item.type);
-  const Icon = TONE_ICON[tone];
-  const canOpen = item.projectSlug !== null;
-  const absolute = formatDate(item.createdAt);
-
-  const body = (
-    <>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-full",
-          TONE_CLASS[tone]
-        )}
-        data-slot="notification-icon"
-      >
-        <Icon size={16} stroke={1.8} />
-      </span>
-
-      <span className="min-w-0 flex-1">
-        <span className="text-foreground flex items-center gap-1.5 text-sm font-medium">
-          {/* The dot is decoration; the sr-only word is what actually carries the
-              state to a screen reader, because a bare dot announces nothing. */}
-          {item.isRead ? null : (
-            <>
-              <span
-                aria-hidden="true"
-                className="bg-primary size-1.5 shrink-0 rounded-full"
-              />
-              <span className="sr-only">Unread:</span>
-            </>
-          )}
-          <span className="truncate">{item.title}</span>
-        </span>
-
-        <span className="text-muted-foreground mt-0.5 line-clamp-2 block text-sm leading-5">
-          {item.message}
-        </span>
-
-        <span className="text-muted-foreground mt-1 flex items-center gap-1.5 text-xs">
-          {/* Relative, because the question is "is this new?"; the absolute date
-              stays available on hover and to a screen reader. */}
-          <time dateTime={item.createdAt} title={absolute}>
-            {relativeTime(item.createdAt, now)}
-          </time>
-          {item.projectName ? (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="truncate">{item.projectName}</span>
-            </>
-          ) : null}
-        </span>
-      </span>
-    </>
-  );
-
-  return (
-    <div
-      className={cn(
-        "flex items-start gap-3 rounded-lg border p-2.5 transition-colors",
-        ROW_CLASS[item.isRead ? "read" : "unread"]
-      )}
-    >
-      {canOpen ? (
-        <Link
-          className="focus-visible:ring-ring min-w-0 flex-1 rounded-md focus-visible:ring-2 focus-visible:outline-none"
-          onClick={() => onOpen(item.id)}
-          params={{ projectId: item.projectId ?? "" }}
-          to="/dashboard/projects/$projectId"
-        >
-          {body}
-          <span className="sr-only">
-            {headline}. Open {item.projectName}, created {absolute}.
-          </span>
-        </Link>
-      ) : (
-        // No destination, so not a link: a control that goes nowhere is worse
-        // than no control, and the message is the whole notification.
-        <div className="min-w-0 flex-1">{body}</div>
-      )}
-
-      <div className="flex shrink-0 items-center gap-0.5">
-        {item.isRead ? null : (
-          <Button
-            aria-label={`Mark "${item.title}" as read`}
-            className="text-muted-foreground hover:text-foreground size-8"
-            disabled={isMutating}
-            onClick={() => onMarkRead(item.id)}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <IconChecks size={16} stroke={1.8} aria-hidden="true" />
-          </Button>
-        )}
-        <Button
-          aria-label={`Dismiss "${item.title}"`}
-          className="text-muted-foreground hover:text-foreground size-8"
-          disabled={isMutating}
-          onClick={() => onDismiss(item.id)}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <IconTrash size={16} stroke={1.8} aria-hidden="true" />
-        </Button>
-      </div>
-    </div>
-  );
-};
+const UNREAD_QUERY_KEY = USER_NOTIFICATION_KEYS.unread;
+const LIST_QUERY_KEY = USER_NOTIFICATION_KEYS.list;
 
 /**
  * Notifications for one day, under a heading.
@@ -299,7 +134,6 @@ interface NotificationsBodyProps {
   unread: number;
   onDismiss: (id: string) => void;
   onDismissRead: () => void;
-  onMarkAllRead: () => void;
   onMarkRead: (id: string) => void;
   onOpen: (id: string) => void;
 }
@@ -320,7 +154,6 @@ export const NotificationsBody = ({
   now,
   onDismiss,
   onDismissRead,
-  onMarkAllRead,
   onMarkRead,
   onOpen,
   unread,
@@ -351,24 +184,9 @@ export const NotificationsBody = ({
       </div>
     );
   } else {
-    // Grouped in one pass: the list is already newest-first, so a bucket only
-    // has to remember which group it is currently filling.
-    const buckets = new Map<NotificationGroup, UserNotification[]>();
-
-    for (const item of items) {
-      const group = notificationGroup(item.createdAt, now);
-      const existing = buckets.get(group);
-
-      if (existing) {
-        existing.push(item);
-      } else {
-        buckets.set(group, [item]);
-      }
-    }
-
     content = (
       <div className="max-h-[26rem] overflow-y-auto py-1">
-        {[...buckets].map(([group, grouped]) => (
+        {groupNotifications(items, now).map(([group, grouped]) => (
           <NotificationGroupBlock
             group={group}
             isMutating={isMutating}
@@ -384,19 +202,21 @@ export const NotificationsBody = ({
     );
   }
 
-  const footer =
-    (items?.length ?? 0) > 0 && unread > 0 ? (
-      <>
-        <DropdownMenuSeparator className="border-border/70 my-1 border-t" />
-        <DropdownMenuItem
-          className="text-muted-foreground hover:bg-muted hover:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium"
-          onClick={() => onMarkAllRead()}
-        >
-          <IconChecks size={16} stroke={1.8} aria-hidden="true" />
-          Mark all as read
-        </DropdownMenuItem>
-      </>
-    ) : null;
+  // The bulk action moved to the full page, where it has room for filters and
+  // confirmation. From here the useful escape is the page itself: it is the
+  // only way to reach an older notification than the 50 this panel loads.
+  const footer = (
+    <>
+      <DropdownMenuSeparator className="border-border/70 my-1 border-t" />
+      <DropdownMenuItem
+        render={<Link to="/notifications" />}
+        className="text-muted-foreground hover:bg-muted hover:text-foreground flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium"
+      >
+        <IconArrowRight size={16} stroke={1.8} aria-hidden="true" />
+        View all notifications
+      </DropdownMenuItem>
+    </>
+  );
 
   const tidy =
     (items?.length ?? 0) > 0 && unread === 0 ? (
@@ -511,27 +331,6 @@ export const UserNotifications = ({
     }
 
     setIsLoadingList(false);
-  };
-
-  const markAllRead = async (): Promise<void> => {
-    try {
-      await markAllUserNotificationsRead();
-      setPanel((current) =>
-        current
-          ? {
-              ...current,
-              items:
-                current.items?.map((item) => ({
-                  ...item,
-                  isRead: true,
-                })) ?? null,
-            }
-          : current
-      );
-      settleCount(0);
-    } catch {
-      toast.error("Could not mark your notifications as read.");
-    }
   };
 
   /**
@@ -710,9 +509,6 @@ export const UserNotifications = ({
           now={now}
           onDismiss={(id) => dismissItem.mutate(id)}
           onDismissRead={() => dismissRead.mutate()}
-          onMarkAllRead={() => {
-            void markAllRead();
-          }}
           onMarkRead={(id) => {
             void markItemRead(id);
           }}

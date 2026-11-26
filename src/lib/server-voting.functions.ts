@@ -314,7 +314,14 @@ export const voteCooldown = createServerFn({ method: "GET" })
           )
         ),
       db
-        .select({ enabled: serverVoteConfig.votingEnabled })
+        .select({
+          enabled: serverVoteConfig.votingEnabled,
+          host: serverVoteConfig.host,
+          port: serverVoteConfig.port,
+          protocol: serverVoteConfig.protocol,
+          publicKey: serverVoteConfig.publicKey,
+          token: serverVoteConfig.token,
+        })
         .from(serverVoteConfig)
         .where(eq(serverVoteConfig.projectId, data.projectId)),
     ]);
@@ -338,7 +345,13 @@ export const voteCooldown = createServerFn({ method: "GET" })
 
     const next = previous ? previous.votedAt.getTime() + VOTE_COOLDOWN_MS : 0;
 
+    const configured =
+      !!config?.host &&
+      config.port !== null &&
+      (config.protocol === "v2" ? !!config.token : !!config.publicKey);
+
     return {
+      configured,
       totalVotes: project?.status === "published" ? project.totalVotes : 0,
       enabled: project?.status === "published" && !!config?.enabled,
       nextVoteAt: next > Date.now() ? new Date(next).toISOString() : null,

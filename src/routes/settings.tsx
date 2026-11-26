@@ -1,7 +1,6 @@
 import {
   IconDevices,
   IconLock,
-  IconPalette,
   IconTrash,
   IconUser,
 } from "@tabler/icons-react";
@@ -19,7 +18,6 @@ import { PageHeader } from "@/components/page-header";
 import { AvatarCard } from "@/components/settings/avatar-card";
 import { ChangePasswordCard } from "@/components/settings/change-password-card";
 import { SettingsDangerZone } from "@/components/settings/danger/settings-danger-zone";
-import { SettingsAppearance } from "@/components/settings/settings-appearance";
 import { SettingsPasskeys } from "@/components/settings/settings-passkeys";
 import { SettingsProfile } from "@/components/settings/settings-profile";
 import { SettingsSessions } from "@/components/settings/settings-sessions";
@@ -52,16 +50,6 @@ const SETTINGS_SECTIONS = [
         value: "sessions",
         label: "Sessions",
         icon: <IconDevices size={18} aria-hidden="true" />,
-      },
-    ],
-  },
-  {
-    heading: "Preferences",
-    entries: [
-      {
-        value: "appearance",
-        label: "Appearance",
-        icon: <IconPalette size={18} aria-hidden="true" />,
       },
     ],
   },
@@ -152,8 +140,6 @@ const SettingsPage = () => {
 
         <section aria-label={activeLabel} className="min-w-0 flex-1">
           {tab === "profile" ? profileSection : null}
-
-          {tab === "appearance" ? <SettingsAppearance /> : null}
 
           {tab === "security" ? (
             <div className="grid gap-6">

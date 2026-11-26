@@ -83,11 +83,11 @@ const source = new EventSource(`${API_URL}/api/events`);
 source.addEventListener("mod.created", handleEvent);
 ```
 
-In the app this lives in `src/components/projects/project-browser.tsx`,
-which every browse page renders. Development uses the same-origin
-`/api/events` path, proxied by Vite to `API_URL` (default
-`http://localhost:3002`) so the browser does not need cross-origin access.
-Production uses `VITE_API_URL`; without it the live banner is disabled.
+In the app this lives in `src/hooks/use-project-browser.ts`, which every
+browse page uses. Development uses the same-origin `/api/events` path,
+proxied by Vite to `API_URL` (default `http://localhost:3002`) so the browser
+does not need cross-origin access. Production uses `VITE_API_URL`; without it
+the live banner is disabled.
 
 ### `POST /api/webhooks/mods`
 

@@ -26,6 +26,7 @@ import type { Capability } from "@/lib/roles";
  */
 const EXPECTED = {
   admin: [
+    "heartComments",
     "manageDeletions",
     "manageNotifications",
     "managePosts",
@@ -34,12 +35,18 @@ const EXPECTED = {
     "manageSessions",
     "manageStorage",
     "manageTickets",
+    "manageTransfers",
     "manageUsers",
     "publishPosts",
     "reviewProjects",
     "viewAdminPanel",
   ],
-  moderator: ["manageReports", "reviewProjects", "viewAdminPanel"],
+  moderator: [
+    "heartComments",
+    "manageReports",
+    "reviewProjects",
+    "viewAdminPanel",
+  ],
   user: [],
 } as const satisfies Record<string, readonly Capability[]>;
 

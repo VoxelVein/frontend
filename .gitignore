@@ -58,3 +58,4 @@ coverage/
 *.local
 todos.json
 .tmp/
+POST.md

@@ -108,7 +108,7 @@ export const PublishPanel = ({
   project: ProjectView;
 }) => {
   const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
   const isServer = !hasVersions(project.type);
 
   // Servers are listings: saved join details stand in for an uploaded file.
@@ -165,7 +165,6 @@ export const PublishPanel = ({
   })();
 
   const run = async (action: Transition) => {
-    setError(null);
     setIsPending(true);
 
     try {
@@ -183,7 +182,7 @@ export const PublishPanel = ({
       await onChange();
       toast.success(message);
     } catch (actionError) {
-      setError(errorMessage(actionError, "Could not change visibility."));
+      toast.error(errorMessage(actionError, "Could not change visibility."));
     }
 
     setIsPending(false);
@@ -207,11 +206,6 @@ export const PublishPanel = ({
           ? missingForReview(isServer)
           : null}
       </p>
-      {error ? (
-        <p role="alert" className="text-destructive mt-3 text-sm">
-          {error}
-        </p>
-      ) : null}
       {project.status === "draft" && project.rejectionReason ? (
         <RejectionNotice reason={project.rejectionReason} />
       ) : null}

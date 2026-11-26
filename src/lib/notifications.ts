@@ -20,6 +20,12 @@ export const USER_NOTIFICATION_TYPES = [
   "report-resolved",
   /** A moderator looked at a report the user filed and disagreed with it. */
   "report-dismissed",
+  /** The recipient has a project transfer waiting for their decision. */
+  "project-transfer-offered",
+  /** The sender's transfer was accepted and the project has a new owner. */
+  "project-transfer-accepted",
+  /** The sender's transfer was declined by the recipient. */
+  "project-transfer-declined",
 ] as const;
 
 export type UserNotificationType = (typeof USER_NOTIFICATION_TYPES)[number];
@@ -65,6 +71,18 @@ const PRESENTATION = {
   "report-resolved": {
     headline: "Report actioned",
     tone: "positive",
+  },
+  "project-transfer-offered": {
+    headline: "Project transfer offered",
+    tone: "attention",
+  },
+  "project-transfer-accepted": {
+    headline: "Project transferred",
+    tone: "positive",
+  },
+  "project-transfer-declined": {
+    headline: "Transfer declined",
+    tone: "neutral",
   },
 } as const satisfies Record<UserNotificationType, NotificationPresentation>;
 
@@ -126,6 +144,33 @@ export const notificationGroup = (
   }
 
   return "earlier";
+};
+
+/**
+ * Buckets a newest-first list into day groups, preserving that order.
+ *
+ * Both the bell and the full page need exactly this split. Keeping it here
+ * means a change to the day boundary cannot make one view disagree with the
+ * other about which heading a row belongs under.
+ */
+export const groupNotifications = <T extends { createdAt: string }>(
+  items: readonly T[],
+  now: number
+): [NotificationGroup, T[]][] => {
+  const buckets = new Map<NotificationGroup, T[]>();
+
+  for (const item of items) {
+    const group = notificationGroup(item.createdAt, now);
+    const existing = buckets.get(group);
+
+    if (existing) {
+      existing.push(item);
+    } else {
+      buckets.set(group, [item]);
+    }
+  }
+
+  return [...buckets];
 };
 
 const groupLabels = {

@@ -25,6 +25,12 @@ vi.mock("@/lib/auth-client", () => ({
   authClient: { useSession: useSessionMock },
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Comments are independently covered; importing them here pulls server code into this layout test
+vi.mock("@/components/blog/post-comments", () => ({
+  // oxlint-disable-next-line sonarjs/function-name -- The mock keeps the component's exported name
+  PostComments: () => null,
+}));
+
 /** Fills a route pattern's `$params` the way the router would. */
 const resolvePath = (to: string, params: Record<string, string>): string => {
   let path = to;

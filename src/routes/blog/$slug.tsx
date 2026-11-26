@@ -3,6 +3,7 @@ import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 
 import { PostAuthors } from "@/components/blog/post-authors";
 import { PostCategoryBadge } from "@/components/blog/post-category";
+import { PostComments } from "@/components/blog/post-comments";
 import { BlogPostNotFound } from "@/components/blog/post-not-found";
 import { MarkdownBody } from "@/components/markdown-body";
 import {
@@ -168,6 +169,10 @@ const BlogPostPage = () => {
           </Link>
         </footer>
       </article>
+
+      <div className="mt-10">
+        <PostComments postId={post.id} />
+      </div>
     </div>
   );
 };

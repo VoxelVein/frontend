@@ -11,6 +11,7 @@ import {
   ServerRequirements,
 } from "@/components/projects/server-detail-panels";
 import { ServerVoteButton } from "@/components/projects/server-vote-button";
+import { ProjectReviews } from "@/components/reviews/project-reviews";
 import { authClient } from "@/lib/auth-client";
 import type { ProjectView } from "@/lib/projects";
 import { can } from "@/lib/roles";
@@ -25,7 +26,6 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
 
   return (
     <ProjectDetailPageFrame>
-      <ServerVoteButton projectId={project.id} />
       {project.status === "published" ? null : (
         <output className="border-primary/20 bg-primary/5 text-foreground mb-4 block rounded-lg border px-4 py-3 text-sm">
           This server is{" "}
@@ -42,7 +42,12 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
       />
 
       <ProjectDetailColumns
-        sidebar={<ServerJoinPanel server={project.server} />}
+        sidebar={
+          <div className="grid gap-4">
+            <ServerJoinPanel server={project.server} />
+            <ServerVoteButton projectId={project.id} />
+          </div>
+        }
       >
         <section
           aria-labelledby="server-description-heading"
@@ -86,6 +91,10 @@ const ServerDetail = ({ project }: { project: ProjectView }) => {
               <ServerRequirements server={project.server} />
             </div>
           </section>
+        ) : null}
+
+        {project.status === "published" ? (
+          <ProjectReviews ownerId={project.ownerId} projectId={project.id} />
         ) : null}
 
         {project.disclosures.length > 0 ? (

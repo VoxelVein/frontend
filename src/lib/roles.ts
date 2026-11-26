@@ -86,6 +86,9 @@ export const isModerator = (role: string | null | undefined): boolean =>
  * ban, or delete an account  -  including an admin's.
  */
 export const CAPABILITY_MINIMUM = {
+  // A heart is a staff endorsement, not a popularity vote. Moderators may give
+  // one, but it never changes how a comment is ordered or scored.
+  heartComments: "moderator",
   manageDeletions: "admin",
   manageNotifications: "admin",
   managePosts: "admin",
@@ -98,6 +101,7 @@ export const CAPABILITY_MINIMUM = {
   manageSessions: "admin",
   manageStorage: "admin",
   manageTickets: "admin",
+  manageTransfers: "admin",
   manageUsers: "admin",
   // Split from `managePosts` because publishing makes a post public, which is a
   // different decision from writing one. Same minimum today, kept separate so
@@ -117,6 +121,7 @@ export type Capability = keyof typeof CAPABILITY_MINIMUM;
  * the startup checks and the tests. Order matches `CAPABILITY_MINIMUM`.
  */
 export const ALL_CAPABILITIES = [
+  "heartComments",
   "manageDeletions",
   "manageNotifications",
   "managePosts",
@@ -125,6 +130,7 @@ export const ALL_CAPABILITIES = [
   "manageSessions",
   "manageStorage",
   "manageTickets",
+  "manageTransfers",
   "manageUsers",
   "publishPosts",
   "reviewProjects",

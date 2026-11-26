@@ -90,6 +90,14 @@ Four sections, one motion system:
   it.
 * `ExploreSection`, heading, then the category tiles.
 
+## Browse pages
+
+The filter panel, the result cards and the live-event banner use the same
+one-shot `animate-in fade-in-0 slide-in-from-bottom-*` entrance, at 300 ms.
+Cards animate when they mount, so a new page or a new filter arrives without
+re-animating the page header. There is no stagger and no per-frame work, and
+`motion-reduce:animate-none` disables all three.
+
 ## Reduced motion
 
 Two independent layers, and both matter.
@@ -106,8 +114,8 @@ transition to `0.01ms` and forces `scroll-behavior: auto` under
 
 ## Overlays
 
-Dialogs, alert dialogs, dropdowns, selects, comboboxes and the cookie banner
-are not hand-written: they animate through `tw-animate-css`, imported at the
+Dialogs, alert dialogs, dropdowns, selects and comboboxes are not
+hand-written: they animate through `tw-animate-css`, imported at the
 top of `src/styles.css`. That library takes its curve from `--tw-ease` and its
 duration from `--tw-duration`.
 

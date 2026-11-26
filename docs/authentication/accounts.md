@@ -310,12 +310,13 @@ declares its own minimum in `CAPABILITY_MINIMUM`. A call site asks
 `can(role, "manageUsers")`, never `role === "admin"`, so the minimum for
 every job is stated in exactly one place.
 
-**`admin`** holds all eleven capabilities: user and session management,
-posts, publishing, storage, deletions, notifications, protected projects.
+**`admin`** holds every capability: user and session management, posts,
+publishing, storage, deletions, notifications, protected projects.
 
-**`moderator`** holds exactly two, `reviewProjects` and
-`viewAdminPanel`, and nothing else. It works the publishing review queue
-and nothing beyond it. It deliberately **cannot** list, ban, or delete an
+**`moderator`** holds `heartComments`, `reviewProjects`, `manageReports`,
+and `viewAdminPanel`, and nothing else. It works the publishing review
+queue, the report queue, and comment hearts. It deliberately **cannot**
+list, ban, or delete an
 account, revoke sessions, or read or write blog posts. Those statements
 are absent from its role object rather than checked in app code, so Better
 Auth refuses the matching `/admin/*` endpoints even if a route guard is

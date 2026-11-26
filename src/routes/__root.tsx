@@ -10,20 +10,13 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
-import { CookieBanner } from "@/components/cookie-banner";
 import { Footer } from "@/components/footer";
+import { AccountDock } from "@/components/navbar/account-dock";
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { applyStoredCursorPreference } from "@/lib/custom-cursor";
-import {
-  SITE_DESCRIPTION,
-  SITE_IMAGE,
-  SITE_NAME,
-  SITE_TITLE,
-  SITE_URL,
-} from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 import appCss from "../styles.css?url";
 
@@ -48,7 +41,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
           <Footer />
         </ThemeProvider>
       </TooltipProvider>
-      <CookieBanner />
+      <AccountDock />
       <Toaster />
       {import.meta.env.DEV ? (
         <TanStackDevtools
@@ -231,11 +224,6 @@ export const Route = createRootRoute({
       },
     ],
     scripts: [
-      {
-        // Applied before hydration, like the theme class, so anyone who turned
-        // the custom cursor off never sees it flash on first paint.
-        children: `(${applyStoredCursorPreference})();`,
-      },
       {
         type: "application/ld+json",
         children: JSON.stringify({

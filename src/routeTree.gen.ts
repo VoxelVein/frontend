@@ -14,12 +14,14 @@ import { Route as R404RouteImport } from './routes/404'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ErrorRouteImport } from './routes/error'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -32,6 +34,7 @@ import { Route as AdminPostsRouteImport } from './routes/admin/posts'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardTransfersRouteImport } from './routes/dashboard/transfers'
 import { Route as DatapacksIndexRouteImport } from './routes/datapacks/index'
 import { Route as DatapacksSlugRouteImport } from './routes/datapacks/$slug'
 import { Route as ModpacksIndexRouteImport } from './routes/modpacks/index'
@@ -114,6 +117,11 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
@@ -142,6 +150,11 @@ const LegalRoute = LegalRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -202,6 +215,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTransfersRoute = DashboardTransfersRouteImport.update({
+  id: '/transfers',
+  path: '/transfers',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DatapacksIndexRoute = DatapacksIndexRouteImport.update({
@@ -497,12 +515,14 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/changelog': typeof ChangelogRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/disclaimer': typeof DisclaimerRoute
   '/error': typeof ErrorRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -512,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/transfers': typeof DashboardTransfersRoute
   '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -576,11 +597,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/about': typeof AboutRoute
+  '/changelog': typeof ChangelogRoute
   '/cookies': typeof CookiesRoute
   '/disclaimer': typeof DisclaimerRoute
   '/error': typeof ErrorRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -590,6 +613,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/transfers': typeof DashboardTransfersRoute
   '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -657,12 +681,14 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/changelog': typeof ChangelogRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/disclaimer': typeof DisclaimerRoute
   '/error': typeof ErrorRoute
   '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -672,6 +698,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/transfers': typeof DashboardTransfersRoute
   '/datapacks/$slug': typeof DatapacksSlugRouteWithChildren
   '/modpacks/$slug': typeof ModpacksSlugRouteWithChildren
   '/mods/$slug': typeof ModsSlugRouteWithChildren
@@ -740,12 +767,14 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/blog'
+    | '/changelog'
     | '/cookies'
     | '/dashboard'
     | '/disclaimer'
     | '/error'
     | '/legal'
     | '/login'
+    | '/notifications'
     | '/privacy'
     | '/settings'
     | '/signup'
@@ -755,6 +784,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/dashboard/transfers'
     | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -819,11 +849,13 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/about'
+    | '/changelog'
     | '/cookies'
     | '/disclaimer'
     | '/error'
     | '/legal'
     | '/login'
+    | '/notifications'
     | '/privacy'
     | '/settings'
     | '/signup'
@@ -833,6 +865,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/dashboard/transfers'
     | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -899,12 +932,14 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/blog'
+    | '/changelog'
     | '/cookies'
     | '/dashboard'
     | '/disclaimer'
     | '/error'
     | '/legal'
     | '/login'
+    | '/notifications'
     | '/privacy'
     | '/settings'
     | '/signup'
@@ -914,6 +949,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/posts'
     | '/blog/$slug'
+    | '/dashboard/transfers'
     | '/datapacks/$slug'
     | '/modpacks/$slug'
     | '/mods/$slug'
@@ -981,12 +1017,14 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
+  ChangelogRoute: typeof ChangelogRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DisclaimerRoute: typeof DisclaimerRoute
   ErrorRoute: typeof ErrorRoute
   LegalRoute: typeof LegalRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
@@ -1069,6 +1107,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cookies': {
       id: '/cookies'
       path: '/cookies'
@@ -1109,6 +1154,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1193,6 +1245,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/transfers': {
+      id: '/dashboard/transfers'
+      path: '/transfers'
+      fullPath: '/dashboard/transfers'
+      preLoaderRoute: typeof DashboardTransfersRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/datapacks/': {
@@ -1629,6 +1688,7 @@ const BlogRouteChildren: BlogRouteChildren = {
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
 interface DashboardRouteChildren {
+  DashboardTransfersRoute: typeof DashboardTransfersRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardProjectsProjectIdRoute: typeof DashboardProjectsProjectIdRoute
   DashboardProjectsNewRoute: typeof DashboardProjectsNewRoute
@@ -1636,6 +1696,7 @@ interface DashboardRouteChildren {
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardTransfersRoute: DashboardTransfersRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardProjectsProjectIdRoute: DashboardProjectsProjectIdRoute,
   DashboardProjectsNewRoute: DashboardProjectsNewRoute,
@@ -1833,12 +1894,14 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
+  ChangelogRoute: ChangelogRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DisclaimerRoute: DisclaimerRoute,
   ErrorRoute: ErrorRoute,
   LegalRoute: LegalRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,

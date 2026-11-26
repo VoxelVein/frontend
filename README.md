@@ -4,12 +4,13 @@
 
 VoxelVein is a self-hostable marketplace where creators publish Minecraft
 mods, modpacks, plugins, resource packs, shaders, datapacks and servers, and
-players find and download them. This repository holds the web application and
+players find, download, review and discuss them. This repository holds the web
+application and
 the small ElysiaJS event server behind the wider
 [VoxelVein](https://github.com/VoxelVein) platform.
 
 > [!NOTE]
-> The project is in alpha (`ALPHA-0.17.0`). No paid services are planned. The
+> The project is in alpha (`ALPHA-0.18.1`). No paid services are planned. The
 > legal pages still contain placeholder operator details and need review by a
 > qualified professional before production.
 
@@ -41,6 +42,9 @@ the small ElysiaJS event server behind the wider
   quotas. Images are resized in the browser before upload (512 px for an icon,
   1920 px for a gallery image); GIFs are left alone to preserve animation.
 * Project reporting with fixed reason codes and a moderator review inbox.
+* Player reviews with a five-star rating and an optional note. Projects can be
+  reviewed five seconds after a download; servers need no download. The creator
+  may answer each review once. See [player reviews](docs/content/reviews.md).
 * Download counting with per-client deduplication.
 
 ### Creators and community
@@ -50,7 +54,8 @@ the small ElysiaJS event server behind the wider
 * Moderated publishing: `draft` to `pending` to `published`, with a review
   queue, rejection reasons and notifications to the creator.
 * A blog with Markdown posts, categories, multiple co-authors, post search and
-  editor shortcuts for staff.
+  editor shortcuts for staff. Signed-in readers can comment and reply in an
+  indented thread; moderators and admins can heart comments.
 * Public author profiles at `/u/<username>` with a Markdown bio.
 
 ### Accounts and administration
@@ -61,20 +66,24 @@ the small ElysiaJS event server behind the wider
 * Three roles on one ladder: `user`, `moderator` and `admin`. The same
   permissions are enforced server-side so a moderator cannot reach admin-only
   actions.
-* An admin panel with nine URL-driven sections: users, sessions, posts,
-  storage, notifications, account deletions, reviews, reports and support
-  tickets, each hidden from roles that cannot use it.
+* Ownership transfers: owners offer a project to another member after
+  re-authenticating, and the recipient must accept; admins can move projects
+  immediately. Offers and outcomes appear in a transfers inbox and the
+  notification bell.
+* An admin panel with ten URL-driven sections: users, transfers, sessions,
+  posts, storage, notifications, account deletions, reviews, reports and
+  support tickets, each hidden from roles that cannot use it.
 * Support tickets at `/support` (at most five open per member), a notification
-  bell with per-item and bulk mark-as-read, legal pages and a cookie consent
-  banner.
+  bell and full inbox with filters, search and bulk mark-as-read, and legal
+  pages.
 * Rate limiting through Valkey / Redis with an automatic in-memory fallback.
 
 ### Interface and engineering
 
 * Server-rendered React 19 with progressive enhancement, light and dark
   themes with a view-transition switch, and a mobile-first responsive layout.
-* WCAG 2.2 AA accessibility as a baseline, visible focus styles, reduced
-  motion support, and an opt-in beta custom cursor.
+* WCAG 2.2 AA accessibility as a baseline, visible focus styles and reduced
+  motion support.
 * TypeScript in strict mode, TanStack Start and Router, TanStack Query and
   Form, Tailwind CSS v4 with OKLCH tokens, Drizzle ORM with PostgreSQL,
   Valibot validation shared across the stack, Vitest, Oxlint and Oxfmt.
@@ -82,7 +91,7 @@ the small ElysiaJS event server behind the wider
 ## Requirements
 
 * Node.js 24 or later (pinned in `mise.toml`, the Dockerfile and CI)
-* pnpm 11.3.0, pinned through `packageManager` in `package.json`
+* pnpm 12.23.0, pinned through `packageManager` in `package.json`
 * PostgreSQL for server-side data
 * Optional: Redis or Valkey for shared rate limits, S3-compatible object
   storage for uploads, Google/GitHub OAuth credentials, Cloudflare Turnstile
@@ -114,9 +123,9 @@ NODE_ENV=development
 OAuth providers and Turnstile each disable themselves when unset.
 
 `pnpm dev` runs the web app on port 3000 and the API server on port 3002.
-Use `pnpm dev:web` or `pnpm dev:api` to run only one. Apply migrations with
-`pnpm db:migrate`; migrations `0029_project_disclosures` and
-`0030_server_voting` must be applied before the features that use them.
+Use `pnpm dev:web` or `pnpm dev:api` to run only one. Apply all migrations with
+`pnpm db:migrate`; `0032_project_reviews` and `0033_comments` add the tables
+behind reviews and comments.
 
 > [!WARNING]
 > Never commit `.env.local` or real credentials to the repository.
@@ -171,7 +180,7 @@ and `just test`.
 | Role | Can do |
 | --- | --- |
 | `user` | Manage only their own content; no admin panel |
-| `moderator` | Review projects, draft blog posts, disable an account |
+| `moderator` | Review projects and reports, heart comments |
 | `admin` | Everything, including publishing posts, deleting users and roles |
 
 Checks use named capabilities rather than repeated role comparisons, and the
@@ -209,6 +218,8 @@ The full guide index lives in [docs/README.md](docs/README.md). Useful
 starting points:
 
 * [Projects, versions, uploads and reviews](docs/content/projects.md)
+* [Player reviews](docs/content/reviews.md)
+* [Changelog page](docs/content/changelog.md)
 * [Server voting](docs/content/server-voting.md)
 * [Admin panel](docs/content/admin-panel.md)
 * [Postgres search](docs/search/postgres.md)

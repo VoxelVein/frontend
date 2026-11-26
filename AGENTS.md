@@ -86,6 +86,12 @@ to. Keep changes maintainable, tested, and consistent with the surrounding code.
 * Use Tailwind CSS and follow the design guidelines already established by all
   shadcn/ui components inside `src/components/`
 * Reuse existing Components before introducing new, or custom ones.
+* Prefer shadcn/ui primitives from `src/components/ui/` over native HTML
+  controls. Use `Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Card`,
+  `Badge`, `Alert`, and `Item` instead of hand-styled `<button>`, `<input>`,
+  `<textarea>`, `<select>`, or `<div>` lookalikes, including inside dialogs,
+  settings, and dashboards. For link buttons use the `render` prop with a
+  router `Link`; never hand-roll a dropdown arrow or a checkbox mark.
 * Never apply `className` to a component, either create a new style inside the
   component, or look for an already existing style that could match.
 * Prefer low-specificity class selectors and avoid `!important` when writing

@@ -20,6 +20,12 @@ vi.mock("@/components/projects/server-vote-button", () => ({
   ServerVoteButton: () => <button type="button">Vote</button>,
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Reviews are independently covered; importing them here pulls server code into this layout suite
+vi.mock("@/components/reviews/project-reviews", () => ({
+  // oxlint-disable-next-line sonarjs/function-name -- The mock keeps the component's exported name
+  ProjectReviews: () => null,
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The session comes from Better Auth over the network; this suite is about layout and copy
 vi.mock("@/lib/auth-client", () => ({
   authClient: { useSession: useSessionMock },

@@ -199,6 +199,7 @@ export const loadStorageConfig = (): StorageConfig => {
     maxFileBytes: env.STORAGE_MAX_FILE_BYTES
       ? Number(env.STORAGE_MAX_FILE_BYTES)
       : DEFAULT_MAX_FILE_BYTES,
+    // oxlint-disable-next-line sonarjs/super-linear-regex -- A single trailing-slash run anchored at the end has no alternation to backtrack through.
     publicUrl: env.STORAGE_PUBLIC_URL?.replace(/\/+$/u, "") ?? null,
     quotaBytes: env.STORAGE_QUOTA_BYTES
       ? Number(env.STORAGE_QUOTA_BYTES)

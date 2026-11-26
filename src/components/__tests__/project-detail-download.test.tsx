@@ -19,6 +19,12 @@ vi.mock("@/lib/reports.functions", () => ({
   createReport: vi.fn<(opts: { data: unknown }) => Promise<void>>(),
 }));
 
+// oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- Reviews are independently covered; importing them here pulls server code into this layout suite
+vi.mock("@/components/reviews/project-reviews", () => ({
+  // oxlint-disable-next-line sonarjs/function-name -- The mock keeps the component's exported name
+  ProjectReviews: () => null,
+}));
+
 // oxlint-disable-next-line anti-slop/no-module-mocking, vitest/prefer-import-in-mock -- The player count query pulls in the database; this suite is about the project page's layout
 vi.mock("@/lib/server-status.functions", () => ({
   getMinecraftServerStatuses: vi.fn<() => Promise<Record<string, never>>>(() =>

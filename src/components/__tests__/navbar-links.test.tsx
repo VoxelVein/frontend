@@ -3,7 +3,11 @@ import { render, screen, within } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { BrowseMenuItems, NavbarLinks } from "@/components/navbar/navbar-links";
+import {
+  BrowseMenuItems,
+  NavbarLinks,
+  ProductsMenuItems,
+} from "@/components/navbar/navbar-links";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,20 +36,17 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 /**
- * The navbar's density, written out rather than derived.
- *
- * Deriving these from the `alwaysInline` flag would make every assertion below
- * tautological: flipping a section to `alwaysInline` would move it from one
- * list to the other and the test would still pass. Which sections get a flat
- * link is a design decision, so it is pinned here as a literal  -  and this is
- * the assertion that fails if the bar starts growing a link per project type
- * again, which is how it reached seven.
+ * Which sections sit at the top of the Products dropdown, written out rather
+ * than derived from `alwaysInline` so the assertion is not tautological. If the
+ * menu starts growing a link per project type again, this pinned list fails.
  */
-const FLAT_LABELS = ["Mods", "Plugins"];
+const FEATURED_LABELS = ["Mods", "Plugins"];
 
 const ALL_LABELS = MINECRAFT_CATEGORIES.map((entry) => entry.label);
 
-const MENU_LABELS = ALL_LABELS.filter((label) => !FLAT_LABELS.includes(label));
+const MENU_LABELS = ALL_LABELS.filter(
+  (label) => !FEATURED_LABELS.includes(label)
+);
 
 /**
  * Renders the menu body inside a menu that is already open.
@@ -53,32 +54,27 @@ const MENU_LABELS = ALL_LABELS.filter((label) => !FLAT_LABELS.includes(label));
  * Base UI portals the popup, so it exists in the document only while the menu
  * is open, and opening it through pointer events is not practical in jsdom.
  */
-const openMenu = () =>
+const openMenu = (children: ReactNode) =>
   render(
     <DropdownMenu onOpenChange={noop} open>
       <DropdownMenuTrigger />
-      <DropdownMenuContent>
-        <BrowseMenuItems isActive={() => false} />
-      </DropdownMenuContent>
+      <DropdownMenuContent>{children}</DropdownMenuContent>
     </DropdownMenu>
   );
 
 describe(NavbarLinks, () => {
-  it("shows exactly two sections as flat links", () => {
+  it("shows Home and Blog as the only flat links", () => {
     render(<NavbarLinks />);
 
-    for (const label of FLAT_LABELS) {
-      expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
-    }
-
-    // Two sections plus Blog.
-    expect(screen.getAllByRole("link")).toHaveLength(FLAT_LABELS.length + 1);
+    expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Blog" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(2);
   });
 
-  it("collapses every other section behind one Browse trigger", () => {
+  it("collapses every section behind one Products trigger", () => {
     render(<NavbarLinks />);
 
-    for (const label of MENU_LABELS) {
+    for (const label of ALL_LABELS) {
       expect(
         screen.queryByRole("link", { name: label }),
         `${label} should not be a flat link`
@@ -86,8 +82,8 @@ describe(NavbarLinks, () => {
     }
 
     expect(
-      screen.getByRole("button", { name: /browse/iu }),
-      "one trigger for every collapsed section"
+      screen.getByRole("button", { name: /products/iu }),
+      "one trigger for every project section"
     ).toBeInTheDocument();
   });
 
@@ -98,16 +94,16 @@ describe(NavbarLinks, () => {
     // cannot be exercised here; what must hold is that the trigger is still a
     // real button announcing a menu, so Enter, Space, and Escape keep working.
     render(<NavbarLinks />);
-    const trigger = screen.getByRole("button", { name: /browse/iu });
+    const trigger = screen.getByRole("button", { name: /products/iu });
 
     expect(trigger).toHaveAttribute("aria-haspopup", "menu");
     expect(trigger).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("keeps every section reachable, flat or not", () => {
-    // Guards against a section being dropped from both places when the navbar
+  it("keeps every section reachable, featured or not", () => {
+    // Guards against a section being dropped from both levels when the navbar
     // is retuned  -  the failure mode of a collapse that loses an entry.
-    expect(new Set([...FLAT_LABELS, ...MENU_LABELS])).toStrictEqual(
+    expect(new Set([...FEATURED_LABELS, ...MENU_LABELS])).toStrictEqual(
       new Set(ALL_LABELS)
     );
   });
@@ -122,8 +118,24 @@ describe(NavbarLinks, () => {
 });
 
 describe(BrowseMenuItems, () => {
-  it("lists every collapsed section", () => {
-    openMenu();
+  it("lists the featured sections and every collapsed section", () => {
+    // Two levels of the same Products menu, checked in one pass so the count
+    // of tests stays pinned while both levels stay covered.
+    const products = openMenu(<ProductsMenuItems isActive={() => false} />);
+    const productsMenu = screen.getByRole("menu");
+
+    for (const label of FEATURED_LABELS) {
+      expect(
+        within(productsMenu).getByRole("menuitem", {
+          name: new RegExp(label, "u"),
+        })
+      ).toBeInTheDocument();
+    }
+
+    expect(within(productsMenu).getByText("Browse")).toBeInTheDocument();
+    products.unmount();
+
+    openMenu(<BrowseMenuItems isActive={() => false} />);
     const menu = screen.getByRole("menu");
 
     for (const label of MENU_LABELS) {
@@ -134,7 +146,7 @@ describe(BrowseMenuItems, () => {
   });
 
   it("describes each section, which a flat link has no room for", () => {
-    openMenu();
+    openMenu(<BrowseMenuItems isActive={() => false} />);
 
     for (const label of MENU_LABELS) {
       const category = MINECRAFT_CATEGORIES.find(
@@ -152,7 +164,7 @@ describe(BrowseMenuItems, () => {
     // Base UI puts `role="menuitem"` on the element it renders into. That only
     // survives because the menu item's `render` target forwards the merged
     // props  -  a mock or wrapper that dropped them would strip the role.
-    openMenu();
+    openMenu(<BrowseMenuItems isActive={() => false} />);
     expect(screen.getAllByRole("menuitem")).toHaveLength(MENU_LABELS.length);
   });
 });

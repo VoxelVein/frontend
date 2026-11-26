@@ -172,6 +172,7 @@ describe("capability statements", () => {
     // real `Role`, rather than asserting a key list back into one.
     const expected = {
       admin: [
+        "heartComments",
         "manageDeletions",
         "manageNotifications",
         "managePosts",
@@ -180,12 +181,18 @@ describe("capability statements", () => {
         "manageSessions",
         "manageStorage",
         "manageTickets",
+        "manageTransfers",
         "manageUsers",
         "publishPosts",
         "reviewProjects",
         "viewAdminPanel",
       ],
-      moderator: ["manageReports", "reviewProjects", "viewAdminPanel"],
+      moderator: [
+        "heartComments",
+        "manageReports",
+        "reviewProjects",
+        "viewAdminPanel",
+      ],
       user: [],
     } satisfies Record<Role, readonly Capability[]>;
 

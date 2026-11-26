@@ -31,6 +31,26 @@ const config = defineConfig(({ command, mode }) => {
       "/api/events": {
         target: env.API_URL ?? "http://localhost:3002",
         changeOrigin: true,
+        configure: (proxy) => {
+          // EventSource streams are long-lived. Closing a browser tab aborts
+          // the proxied request, and http-proxy reports that as `aborted` /
+          // ECONNRESET. It is the expected end of a stream, not a proxy
+          // failure, so it should not print a stack trace on every reload.
+          proxy.on("error", (error) => {
+            if (
+              "code" in error &&
+              (error.code === "ECONNRESET" || error.code === "ECONNABORTED")
+            ) {
+              return;
+            }
+
+            if (error.message === "aborted") {
+              return;
+            }
+
+            console.error("[vite] /api/events proxy error:", error);
+          });
+        },
       },
     };
   }
@@ -85,20 +105,33 @@ const config = defineConfig(({ command, mode }) => {
       // attribute entry-chunk bytes to their sources.
       sourcemap: process.env.BUNDLE_SOURCEMAP === "1",
       rollupOptions: {
-        // `src/db/schema.ts` is server-only: its tables are read by the Drizzle
-        // client and the server functions, never by browser code. Start rewrites
-        // each `.functions.ts` module down to its client RPC stubs, but with
-        // `verbatimModuleSyntax` the module's `@/db/schema` import is preserved
-        // even once nothing references it. Because a `pgTable(...)` module looks
-        // side-effectful, tree-shaking kept the whole file in the entry chunk  -
-        // about 11 kB of column builders plus the ~33 kB of `drizzle-orm` they
-        // pull in  -  for a module the browser never calls.
+        // The DB, its schema, the auth instance and the env loader are
+        // server-only. Start rewrites each `.functions.ts` module down to its
+        // client RPC stubs, but with `verbatimModuleSyntax` those modules'
+        // imports are preserved even once nothing references them. Because a
+        // `pgTable(...)` or `new Pool()` module looks side-effectful, tree-
+        // shaking kept them in the entry chunk along with `drizzle-orm`, `pg`
+        // and `dotenv`  -  none of which the browser ever calls. `pg-types`
+        // then threw `Buffer is not defined` on load and hydration died.
         //
-        // Declaring it side-effect-free lets the unused module be dropped.
-        // Exports a client bridge genuinely used are still kept, so this only
-        // removes code that would never run in the browser.
+        // Declaring these modules side-effect-free lets unused imports be
+        // dropped. Modules genuinely used by the client bridge are still kept,
+        // and the server build still evaluates them normally.
         treeshake: {
-          moduleSideEffects: (id) => !id.endsWith("/db/schema.ts"),
+          // Ids are absolute Windows paths here, so normalise before matching.
+          // Without that the schema predicate above never fired and the whole
+          // Postgres client ended up in the browser build, where `pg-types`
+          // calls `Buffer.from` on load and kills hydration.
+          moduleSideEffects: (id) => {
+            const normalized = id.replaceAll("\\", "/");
+
+            return ![
+              "/src/db/schema.ts",
+              "/src/db/index.ts",
+              "/src/lib/auth.ts",
+              "/src/env.config.ts",
+            ].some((suffix) => normalized.endsWith(suffix));
+          },
         },
       },
     },

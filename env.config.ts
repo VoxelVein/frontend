@@ -12,11 +12,25 @@ import {
 
 config({ path: ".env.local" });
 
+/**
+ * `pg` 8 reads `sslmode=require`, `prefer` and `verify-ca` as aliases of
+ * `verify-full` and warns on every process start about the upcoming change in
+ * `pg-connection-string` 3. Those aliases already mean `verify-full` here, so
+ * writing the explicit mode keeps the same TLS behaviour without the warning.
+ * A malformed URL is left alone; the schema below reports it.
+ */
+const normalizeDatabaseUrl = (value: string | undefined): string | undefined =>
+  value?.replaceAll(
+    /(?<separator>[?&])sslmode=(?:prefer|require|verify-ca)(?=&|$)/giu,
+    "$<separator>sslmode=verify-full"
+  );
+
 // Apply defaults before validation so Valibot schemas only validate presence + format.
 const envWithDefaults = {
   ...process.env,
   API_URL: process.env.API_URL ?? "http://localhost:3002",
   BETTER_AUTH_TRUSTED_ORIGINS: process.env.BETTER_AUTH_TRUSTED_ORIGINS,
+  DATABASE_URL: normalizeDatabaseUrl(process.env.DATABASE_URL),
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

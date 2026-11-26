@@ -205,13 +205,14 @@ literal. Editing the text does not update the date, so there is nothing keeping
 the two in sync. (`/terms-of-use` no longer renders a page, it redirects to
 `/terms`.)
 
-**Cookie consent is recorded but not enforced.** The banner stores
-`accepted` or `declined` in `localStorage` under `voxelvein-cookie-consent`
-and nothing reads it back. That is consistent with the code today, there
-is no analytics, no third-party script, and no non-essential cookie, so
-there is nothing to gate. It is only worth knowing because the banner
-offers a choice that currently has no consequence, so adding a tracker
-later means wiring the gate up, not just adding the script.
+**There is no cookie consent banner.** The old one stored `accepted` or
+`declined` in `localStorage` under `voxelvein-cookie-consent` and nothing
+read it back, so it was removed. Today the site writes a session cookie and
+a local theme preference only; there is no analytics or third-party script
+to gate. A banner that actually enforces the choice, with Accept, Deny and
+a "More" panel for manual tweaking, is planned in
+[TODO](../../TODO.md). Adding non-essential storage before that lands means
+wiring the gate up too, not just adding the script.
 
 If the app is reachable at more than one origin, set
 `BETTER_AUTH_TRUSTED_ORIGINS` to a comma-separated list. See

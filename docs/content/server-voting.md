@@ -30,7 +30,10 @@ Enable voting and save. Rewards are optional: leave the host empty to count
 votes without sending Minecraft notifications. For rewards, enter a public
 Votifier listener hostname and port, choose v1 or v2, and save the RSA public
 key or NuVotifier token. Blank tokens retain an existing token. Clearing the
-host disables delivery. Test with an explicit player name after saving.
+host disables delivery. The public voting card appears only once voting is
+enabled and a listener address with its credentials is saved; the toggle alone
+leaves that card hidden, and the compact button on list cards stays disabled.
+Test with an explicit player name after saving.
 **The test sends a real reward notification**, but adds no website vote and
 starts no cooldown. Recent history shows the last 50 votes and their delivery
 outcomes; statistics refresh every 30 seconds.

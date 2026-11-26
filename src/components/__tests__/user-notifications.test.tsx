@@ -119,7 +119,6 @@ const openMenu = ({
           now={NOW}
           onDismiss={onDismiss}
           onDismissRead={onDismissRead}
-          onMarkAllRead={noop}
           onMarkRead={noop}
           onOpen={onOpen}
           unread={unread}
@@ -239,12 +238,13 @@ describe(NotificationsBody, () => {
     expect(screen.getByText("Yesterday")).toBeInTheDocument();
   });
 
-  it("offers mark all as read only while something is unread", () => {
-    openMenu({ items: [APPROVED], unread: 0 });
-    expect(screen.queryByText("Mark all as read")).toBeNull();
-
+  it("links to the full inbox instead of offering a bulk action", () => {
     openMenu({ items: [APPROVED], unread: 1 });
-    expect(screen.getByText("Mark all as read")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: /view all notifications/iu })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Mark all as read")).toBeNull();
   });
 
   it("offers a mark-as-read button only on unread notifications", () => {
@@ -361,7 +361,7 @@ describe(NotificationsBody, () => {
     openMenu({ items: many, unread: 1 });
 
     // A long list has to scroll rather than growing the panel without bound.
-    const scroller = document.querySelector<HTMLElement>(".overflow-y-auto");
+    const scroller = document.querySelector<HTMLElement>(".max-h-\\[26rem\\]");
 
     expect(scroller).not.toBeNull();
     expect(within(scroller ?? document.body).getAllByRole("link")).toHaveLength(

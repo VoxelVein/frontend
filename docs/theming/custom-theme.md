@@ -131,23 +131,6 @@ which masks `::view-transition-new(root)` frame by frame from
 Every motion path checks `prefers-reduced-motion` and skips the animation
 entirely when it is set, so a theme change becomes an instant repaint.
 
-## The custom cursor
-
-`public/cursor.svg` is applied through the `--cursor-default` custom
-property in `src/styles.css`. The base layer sets that cursor on `html`,
-and a utility-layer override maps shadcn's `cursor-default` class to the
-same property. Because `cursor` inherits, elements that declare their own
-value (links, text fields, resize handles) keep their natural cursor.
-
-The cursor is opt-in and marked BETA in the Appearance tab. That tab
-stores a `voxelvein-custom-cursor` localStorage preference: only the
-value `on` enables it, and an absent key means the native cursor. Turning
-it on removes `data-custom-cursor="off"` from the document root, where
-`--cursor-default` resolves to the SVG; turning it off puts the attribute
-back so the platform arrow returns. A script in the document head applies
-the stored value before hydration so the choice never flashes on first
-paint.
-
 ## Verify
 
 After applying a theme:

@@ -1,4 +1,5 @@
 import {
+  IconArrowsExchange,
   IconBell,
   IconClipboardCheck,
   IconDatabase,
@@ -41,7 +42,7 @@ interface AdminSidebarProps {
  */
 const NAV_GROUPS = [
   { label: "People", tabs: ["users", "sessions", "deletions"] },
-  { label: "Content", tabs: ["posts", "storage"] },
+  { label: "Content", tabs: ["posts", "storage", "transfers"] },
   { label: "Moderation", tabs: ["notifications", "reviews", "reports"] },
   { label: "Support", tabs: ["tickets"] },
 ] as const satisfies readonly {
@@ -58,6 +59,7 @@ const TAB_ICONS: Record<AdminTab, ReactNode> = {
   sessions: <IconDevices size={18} aria-hidden="true" />,
   storage: <IconDatabase size={18} aria-hidden="true" />,
   tickets: <IconLifebuoy size={18} aria-hidden="true" />,
+  transfers: <IconArrowsExchange size={18} aria-hidden="true" />,
   users: <IconUsers size={18} aria-hidden="true" />,
 };
 

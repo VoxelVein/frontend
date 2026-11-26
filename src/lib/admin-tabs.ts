@@ -13,6 +13,7 @@ import type { Capability } from "@/lib/roles";
 
 export const ADMIN_TABS = [
   { label: "Users", value: "users" },
+  { label: "Transfers", value: "transfers" },
   // "Devices" and "Account deletions" rather than the bare "Sessions" and
   // "Deletions": a tab label is all an admin sees before clicking, and neither
   // noun said what it was about. These match the headings inside each panel.
@@ -40,6 +41,7 @@ export const TAB_CAPABILITY = {
   reviews: "reviewProjects",
   sessions: "manageSessions",
   storage: "manageStorage",
+  transfers: "manageTransfers",
   users: "manageUsers",
 } as const satisfies Record<AdminTab, Capability>;
 

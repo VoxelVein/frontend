@@ -1,4 +1,5 @@
 import { relations, sql } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   bigint,
   boolean,
@@ -15,6 +16,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import type { UserNotificationType } from "../lib/notifications";
+import type { ProjectTransferStatus } from "../lib/project-transfers";
 import type {
   ProjectDisclosure,
   ProjectImageKind,
@@ -392,6 +394,140 @@ export const serverVoteConfig = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [index("server_vote_config_project_id_idx").on(table.projectId)]
+);
+
+/**
+ * When an account last fetched a project's files.
+ *
+ * One row per account and project, overwritten on each download: the review
+ * gate asks "have you fetched this recently enough?", not which version or how
+ * many times. Only signed-in accounts are recorded, because only they can
+ * leave a review; anonymous traffic stays in the aggregate download counter.
+ */
+export const projectDownloads = pgTable(
+  "project_downloads",
+  {
+    downloadedAt: timestamp("downloaded_at").defaultNow().notNull(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    // Also lets one account's download of a project be replaced in place.
+    uniqueIndex("project_downloads_userId_projectId_uidx").on(
+      table.userId,
+      table.projectId
+    ),
+    // Leading projectId serves the cascade check when a project is deleted.
+    index("project_downloads_projectId_idx").on(table.projectId),
+  ]
+);
+
+/**
+ * A player's rating of a project or server, with an optional short note.
+ *
+ * The account is soft-deleted rather than cascaded: a review stays attached to
+ * the listing after its author leaves, but loses the name that went with the
+ * account. A project, in contrast, takes its reviews with it when removed.
+ */
+export const projectReviews = pgTable(
+  "project_reviews",
+  {
+    comment: text("comment"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    // 1 through 5; validated by REVIEW_RATINGS at the request boundary.
+    rating: integer("rating").notNull(),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [
+    // One review per account per listing, so an unfinished form cannot produce
+    // two rows and a later visit cannot quietly add a second rating.
+    uniqueIndex("project_reviews_userId_projectId_uidx").on(
+      table.userId,
+      table.projectId
+    ),
+    // Newest first, which is the order the public list renders.
+    index("project_reviews_projectId_createdAt_idx").on(
+      table.projectId,
+      table.createdAt
+    ),
+  ]
+);
+
+/**
+ * A comment on a blog post, or the project owner's reply to a review.
+ *
+ * One table with two target columns and a check constraint: both surfaces need
+ * the same author, nesting and staff-heart behaviour, and a second table would
+ * mean writing that three times. Blog comments may nest; review replies may
+ * not, which the write path enforces.
+ */
+export const comments = pgTable(
+  "comments",
+  {
+    // Soft-deleted: the comment stays useful after its author leaves.
+    authorId: text("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Nested replies on blog posts only. Deleting a parent takes its replies.
+    parentId: uuid("parent_id").references((): AnyPgColumn => comments.id, {
+      onDelete: "cascade",
+    }),
+    // Better Auth-style text id, matching `posts.id` exactly.
+    postId: text("post_id").references(() => posts.id, {
+      onDelete: "cascade",
+    }),
+    reviewId: uuid("review_id").references(() => projectReviews.id, {
+      onDelete: "cascade",
+    }),
+    targetKind: text("target_kind").$type<"post" | "review">().notNull(),
+  },
+  (table) => [
+    check(
+      "comments_one_target_check",
+      sql`(
+        (${table.targetKind} = 'post' AND ${table.postId} IS NOT NULL AND ${table.reviewId} IS NULL)
+        OR
+        (${table.targetKind} = 'review' AND ${table.reviewId} IS NOT NULL AND ${table.postId} IS NULL)
+      )`
+    ),
+    // The post page reads every comment for one post in created-at order.
+    index("comments_postId_createdAt_idx").on(table.postId, table.createdAt),
+    // Review responses are read with the reviews they answer.
+    index("comments_reviewId_idx").on(table.reviewId),
+    index("comments_parentId_idx").on(table.parentId),
+    index("comments_authorId_idx").on(table.authorId),
+  ]
+);
+
+/** A staff member's "heart" on a comment, at most one per account and comment. */
+export const commentHearts = pgTable(
+  "comment_hearts",
+  {
+    commentId: uuid("comment_id")
+      .notNull()
+      .references(() => comments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.commentId, table.userId] }),
+    // Seeded by the primary key on comment_id; this covers the other direction.
+    index("comment_hearts_userId_idx").on(table.userId),
+  ]
 );
 
 export const projectServerLinks = pgTable(
@@ -858,6 +994,128 @@ export const userNotifications = pgTable(
     index("user_notifications_projectId_idx").on(table.projectId),
   ]
 );
+
+/**
+ * An ownership hand-off. User-initiated transfers wait for the recipient to
+ * accept; an admin transfer applies immediately, so it is recorded with the
+ * accepted status and no offer to answer.
+ */
+export const projectTransfers = pgTable(
+  "project_transfers",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    fromUserId: text("from_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .references(() => projects.id, { onDelete: "cascade" })
+      .notNull(),
+    resolvedAt: timestamp("resolved_at"),
+    status: text("status")
+      .$type<ProjectTransferStatus>()
+      .default("pending")
+      .notNull(),
+    toUserId: text("to_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => [
+    // One open offer per project: a second request must not leave two people
+    // able to accept the same hand-off.
+    uniqueIndex("project_transfers_pending_project_idx")
+      .on(table.projectId)
+      .where(sql`${table.status} = 'pending'`),
+    index("project_transfers_projectId_status_idx").on(
+      table.projectId,
+      table.status
+    ),
+    index("project_transfers_toUserId_status_idx").on(
+      table.toUserId,
+      table.status
+    ),
+    index("project_transfers_fromUserId_status_idx").on(
+      table.fromUserId,
+      table.status
+    ),
+  ]
+);
+
+export const projectTransfersRelations = relations(
+  projectTransfers,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [projectTransfers.projectId],
+      references: [projects.id],
+    }),
+    fromUser: one(users, {
+      fields: [projectTransfers.fromUserId],
+      references: [users.id],
+    }),
+    toUser: one(users, {
+      fields: [projectTransfers.toUserId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const projectDownloadsRelations = relations(
+  projectDownloads,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [projectDownloads.projectId],
+      references: [projects.id],
+    }),
+    user: one(users, {
+      fields: [projectDownloads.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const projectReviewsRelations = relations(projectReviews, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectReviews.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [projectReviews.userId],
+    references: [users.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one, many }) => ({
+  author: one(users, {
+    fields: [comments.authorId],
+    references: [users.id],
+  }),
+  parent: one(comments, {
+    fields: [comments.parentId],
+    references: [comments.id],
+    relationName: "comment_replies",
+  }),
+  replies: many(comments, { relationName: "comment_replies" }),
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id],
+  }),
+  review: one(projectReviews, {
+    fields: [comments.reviewId],
+    references: [projectReviews.id],
+  }),
+}));
+
+export const commentHeartsRelations = relations(commentHearts, ({ one }) => ({
+  comment: one(comments, {
+    fields: [commentHearts.commentId],
+    references: [comments.id],
+  }),
+  user: one(users, {
+    fields: [commentHearts.userId],
+    references: [users.id],
+  }),
+}));
 
 export const projectFilesRelations = relations(projectFiles, ({ one }) => ({
   version: one(projectVersions, {

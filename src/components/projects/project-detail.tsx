@@ -1,6 +1,7 @@
 import { IconShieldCheck } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { MarkdownBody } from "@/components/markdown-body";
 import { PageHeader } from "@/components/page-header";
@@ -15,6 +16,7 @@ import {
   ProjectDownloadPanel,
   ProjectVersionHistory,
 } from "@/components/projects/project-versions";
+import { ProjectReviews } from "@/components/reviews/project-reviews";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { errorMessage } from "@/lib/form-errors";
@@ -46,12 +48,10 @@ export const ProjectNotFound = ({ type }: { type: ProjectType }) => (
 const ProtectionControl = ({
   isProtected,
   isSaving,
-  saveError,
   onToggle,
 }: {
   isProtected: boolean;
   isSaving: boolean;
-  saveError: string | null;
   onToggle: () => void;
 }) => (
   <section
@@ -83,11 +83,6 @@ const ProtectionControl = ({
           ? "Stop protecting this project"
           : "Protect from owner deletion"}
       </Button>
-      {saveError ? (
-        <p role="alert" className="text-destructive text-sm">
-          {saveError}
-        </p>
-      ) : null}
     </div>
   </section>
 );
@@ -111,7 +106,6 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
     useState<ProtectedOverride | null>(null);
 
   const [isSavingProtection, setIsSavingProtection] = useState(false);
-  const [protectionError, setProtectionError] = useState<string | null>(null);
 
   const isProtected =
     protectedOverride?.projectId === project.id
@@ -121,7 +115,6 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
   const toggleProtected = async () => {
     const next = !isProtected;
     setIsSavingProtection(true);
-    setProtectionError(null);
 
     try {
       await setProjectProtected({
@@ -129,7 +122,7 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
       });
       setProtectedOverride({ isProtected: next, projectId: project.id });
     } catch (error) {
-      setProtectionError(errorMessage(error, "Could not update the project."));
+      toast.error(errorMessage(error, "Could not update the project."));
     }
 
     setIsSavingProtection(false);
@@ -163,7 +156,6 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
         <ProtectionControl
           isProtected={isProtected}
           isSaving={isSavingProtection}
-          saveError={protectionError}
           onToggle={() => toggleProtected()}
         />
       ) : null}
@@ -189,6 +181,10 @@ export const ProjectDetail = ({ project }: { project: ProjectView }) => {
               <MarkdownBody>{project.description}</MarkdownBody>
             </div>
           </section>
+        ) : null}
+
+        {project.status === "published" ? (
+          <ProjectReviews ownerId={project.ownerId} projectId={project.id} />
         ) : null}
 
         {project.disclosures.length > 0 ? (

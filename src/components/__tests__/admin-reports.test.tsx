@@ -252,11 +252,13 @@ describe(AdminReports, () => {
 
     render(<AdminReports onResolved={onResolved} />);
 
-    // An empty inbox and a failed request look identical otherwise, and "no
-    // reports" would read as an absence of problems.
-    await expect(
-      screen.findByText("Unauthorized.")
-    ).resolves.toBeInTheDocument();
+    // The failure is announced as a toast; only the retry stays in the panel.
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(
+        "Unauthorized.",
+        expect.any(Object)
+      );
+    });
     expect(screen.queryByText("No reports")).not.toBeInTheDocument();
   });
 

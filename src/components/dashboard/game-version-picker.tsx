@@ -1,3 +1,5 @@
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import { cn } from "cn";
 import { useId, useState } from "react";
 import type { KeyboardEvent } from "react";
 
@@ -36,6 +38,10 @@ const describeVersion = (id: string): string | null => {
 
 const [LATEST_RELEASE] = filterGameVersions("", false, false);
 
+/** Above this many chips the field is folded until the owner opens it. */
+const COLLAPSE_THRESHOLD = 8;
+const PREVIEW_COUNT = 5;
+
 interface GameVersionPickerProps {
   error?: string;
   id: string;
@@ -56,6 +62,7 @@ export const GameVersionPicker = ({
   values,
 }: GameVersionPickerProps) => {
   const [query, setQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const [selectionError, setSelectionError] = useState<string | null>(null);
 
   const [includeSnapshots, setIncludeSnapshots] = useState(() =>
@@ -70,6 +77,9 @@ export const GameVersionPicker = ({
   const allVersions = getAllGameVersions(includeSnapshots);
   const selectedVersions = new Set(values);
   const selectedVersionLabel = values.length === 1 ? "version" : "versions";
+
+  const collapsible = values.length > COLLAPSE_THRESHOLD && !showAll;
+  const shownValues = collapsible ? values.slice(0, PREVIEW_COUNT) : values;
 
   const helpText =
     values.length === 0
@@ -126,6 +136,18 @@ export const GameVersionPicker = ({
     setQuery("");
     setSelectionError(null);
   };
+
+  const chipsInput = (
+    <ComboboxChipsInput
+      id={inputId}
+      onKeyDown={handleQueryKeyDown}
+      placeholder={
+        values.length > 0 ? "Add more…" : "Type a version, like 1.20"
+      }
+      aria-invalid={error ? true : undefined}
+      aria-describedby={error ? `${helpId} ${errorId}` : helpId}
+    />
+  );
 
   return (
     <div className="grid gap-2">
@@ -200,22 +222,43 @@ export const GameVersionPicker = ({
             : value
         }
       >
-        <ComboboxChips>
-          {values.map((value) => (
-            <ComboboxChip key={value} removeLabel={`Remove ${value}`}>
-              {value}
-            </ComboboxChip>
-          ))}
-          <ComboboxChipsInput
-            id={inputId}
-            onKeyDown={handleQueryKeyDown}
-            placeholder={
-              values.length > 0 ? "Add more…" : "Type a version, like 1.20"
-            }
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? `${helpId} ${errorId}` : helpId}
-          />
-        </ComboboxChips>
+        <div
+          className={cn("relative", collapsible && "max-h-28 overflow-hidden")}
+        >
+          <ComboboxChips>
+            {collapsible ? chipsInput : null}
+            {shownValues.map((value) => (
+              <ComboboxChip key={value} removeLabel={`Remove ${value}`}>
+                {value}
+              </ComboboxChip>
+            ))}
+            {collapsible ? null : chipsInput}
+          </ComboboxChips>
+          {collapsible ? (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black to-transparent"
+            />
+          ) : null}
+        </div>
+
+        {values.length > COLLAPSE_THRESHOLD ? (
+          <Button
+            onClick={() => setShowAll((current) => !current)}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            {showAll ? (
+              <IconChevronUp aria-hidden="true" size={16} />
+            ) : (
+              <IconChevronDown aria-hidden="true" size={16} />
+            )}
+            {showAll
+              ? "Show fewer versions"
+              : `Show all ${values.length} versions`}
+          </Button>
+        ) : null}
 
         <ComboboxContent>
           <ComboboxEmpty>No matching versions.</ComboboxEmpty>

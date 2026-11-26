@@ -37,6 +37,13 @@ describe(resolveTab, () => {
     expect(resolveTab(search("tab=passkeys"))).toBe("security");
   });
 
+  it("folds the removed appearance tab into Profile", () => {
+    // The cursor preference and its tab are gone, but old bookmarks and
+    // settings links still carry `?tab=appearance`. Throwing would turn a
+    // harmless link into a broken page.
+    expect(resolveTab(search("tab=appearance"))).toBe("profile");
+  });
+
   it("opens the Danger Zone for the deletion re-authentication return", () => {
     // What `REAUTH_CALLBACK_URL` sends back to the app.
     expect(resolveTab(search(`tab=danger&confirm=${DELETE_CONFIRM}`))).toBe(

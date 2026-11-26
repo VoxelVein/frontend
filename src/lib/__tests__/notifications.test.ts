@@ -90,6 +90,12 @@ describe(presentationFor, () => {
     );
   });
 
+  it("separates an accepted transfer from a declined one", () => {
+    expect(presentationFor("project-transfer-accepted").tone).not.toBe(
+      presentationFor("project-transfer-declined").tone
+    );
+  });
+
   it("falls back for a kind this version does not know", () => {
     // A row written by a newer deploy should still render with a plain icon,
     // not blank the panel out because this build recognises no kind in it.

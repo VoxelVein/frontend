@@ -21,7 +21,6 @@ import { object, optional, parse, picklist } from "valibot";
  */
 export const SETTINGS_TABS = [
   { label: "Profile", value: "profile" },
-  { label: "Appearance", value: "appearance" },
   { label: "Security", value: "security" },
   { label: "Sessions", value: "sessions" },
   { label: "Danger Zone", value: "danger" },
@@ -32,9 +31,10 @@ export type SettingsTab = (typeof SETTINGS_TABS)[number]["value"];
 /**
  * Tab names accepted in the URL, which is a superset of the tabs.
  *
- * `passkeys` is the former name of the Security tab. It is kept so links that
- * predate the rename still land on the right panel; `resolveTab` folds it into
- * `security` rather than it being a tab in its own right.
+ * `passkeys` is the former name of the Security tab and `appearance` is the
+ * removed cursor tab. Both stay accepted so bookmarks that predate the changes
+ * still land on a real panel instead of throwing during search validation;
+ * `resolveTab` folds them into the tab that replaced them.
  *
  * `as const` is what makes `picklist` narrow: without it the schema accepts any
  * string and `resolveTab` stops being able to promise a real tab.
@@ -47,8 +47,6 @@ const URL_TAB_NAMES = [
   "sessions",
   "danger",
 ] as const;
-
-const LEGACY_TAB_ALIAS = "passkeys";
 
 /** The value that marks a return from the deletion re-authentication round trip. */
 export const DELETE_CONFIRM = "delete";
@@ -69,7 +67,8 @@ export type SettingsSearch = ReturnType<typeof parseSettingsSearch>;
  *
  * Three inputs, in this order:
  *
- * 1. The legacy `passkeys` alias, folded into the tab it was renamed to.
+ * 1. A legacy alias, folded into the tab that replaced it: `passkeys` became
+ *    Security, and the removed `appearance` tab became Profile.
  * 2. An explicit `tab`, so a shared or bookmarked link lands where it was aimed.
  * 3. Otherwise `confirm=delete`  -  the return from re-authenticating to delete
  *    an account  -  which lands on the Danger Zone, and everything else on
@@ -84,7 +83,11 @@ export type SettingsSearch = ReturnType<typeof parseSettingsSearch>;
  * an accident.
  */
 export const resolveTab = ({ confirm, tab }: SettingsSearch): SettingsTab => {
-  if (tab === LEGACY_TAB_ALIAS) {
+  if (tab === "appearance") {
+    return "profile";
+  }
+
+  if (tab === "passkeys") {
     return "security";
   }
 

@@ -59,8 +59,20 @@ if (!mainChunk) {
   process.exit(1);
 }
 
-const rawBytes = statSync(mainChunk).size;
-const gzipBytes = gzipSync(readFileSync(mainChunk)).length;
+const bundle = readFileSync(mainChunk, "utf-8");
+const rawBytes = Buffer.byteLength(bundle);
+const gzipBytes = gzipSync(bundle).length;
+
+// Server-only modules used to survive the `.functions.ts` transform as
+// side-effect imports. `pg-types` then called `Buffer.from` on browser load and
+// hydration died before any interaction worked. Size limits catch bloat, not
+// this, so fail on the exact marker that broke production.
+if (bundle.includes("Buffer.from")) {
+  console.error(
+    "\n✗ Client bundle calls `Buffer.from`. A server-only module leaked into the browser build."
+  );
+  process.exit(1);
+}
 
 console.log(`\n  Main chunk: ${mainChunk}`);
 

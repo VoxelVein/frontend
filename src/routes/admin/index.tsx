@@ -17,6 +17,7 @@ import { AdminMobileNav, AdminSidebar } from "@/components/admin/admin-sidebar";
 import type { AdminTabCounts } from "@/components/admin/admin-sidebar";
 import { AdminStorage } from "@/components/admin/admin-storage";
 import { AdminTickets } from "@/components/admin/admin-tickets";
+import { AdminTransfers } from "@/components/admin/admin-transfers";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { PageHeader } from "@/components/page-header";
 import { countUnreadAdminNotifications } from "@/lib/admin-accounts.functions";
@@ -36,6 +37,7 @@ const adminSearchSchema = object({
       "sessions",
       "storage",
       "tickets",
+      "transfers",
       "users",
     ])
   ),
@@ -202,6 +204,7 @@ const AdminPage = () => {
             <AdminReports onResolved={refreshOpenReports} />
           ) : null}
           {activeTab === "tickets" ? <AdminTickets /> : null}
+          {activeTab === "transfers" ? <AdminTransfers /> : null}
         </section>
       </div>
     </div>

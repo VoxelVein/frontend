@@ -54,7 +54,10 @@ const anchorsIn = (file: string): Set<string> => {
   const anchors = new Set<string>();
   const text = readFileSync(file, "utf-8");
 
-  for (const match of text.matchAll(/^#{1,6}\s+(?<heading>.*)$/gmu)) {
+  for (const match of text.matchAll(
+    // oxlint-disable-next-line sonarjs/super-linear-regex -- The heading class excludes newlines, so the scan cannot backtrack across lines.
+    /^#{1,6}\s+(?<heading>[^\r\n]*)$/gmu
+  )) {
     anchors.add(anchorFor(match.groups?.heading ?? ""));
   }
 
@@ -78,6 +81,7 @@ const files = [
  * run of backticks longer than the span markers around it.
  */
 const withoutCode = (text: string): string =>
+  // oxlint-disable-next-line sonarjs/super-linear-regex -- The backreference pins the closing fence length; the alternation consumes one character at a time.
   text.replaceAll(/(?<fence>`+)(?:[^`]|(?!\k<fence>)`)*\k<fence>/gu, (span) =>
     " ".repeat(span.length)
   );
@@ -89,6 +93,7 @@ for (const file of files) {
   const dir = path.dirname(file);
 
   for (const match of withoutCode(text).matchAll(
+    // oxlint-disable-next-line sonarjs/super-linear-regex -- Link text and target each stop at a delimiter that is excluded from their class.
     /\[[^\]]*\]\(\s*(?<target>[^)\s]+)\s*\)/gu
   )) {
     const link = match.groups?.target?.trim() ?? "";
