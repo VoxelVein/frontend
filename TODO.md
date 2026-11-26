@@ -22,7 +22,8 @@ already shipped.
 
 ## Bugs and inconsistencies
 
-None open.
+* [ ] `src/routes/admin/index.tsx` fetches badge counts client-side in a
+      `useEffect` while every other route uses a loader.
 
 ## Documentation
 
