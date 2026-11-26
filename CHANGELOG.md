@@ -6,6 +6,10 @@ names match the repository's `ALPHA-*` git tags.
 
 ## [Unreleased]
 
+## [ALPHA-0.18.0] - 2026-11-26
+
+Changes on `main` since `ALPHA-0.17.0`.
+
 ### Added
 
 * Player reviews on project and server pages: a five-star selector with an
