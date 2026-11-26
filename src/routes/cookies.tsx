@@ -37,10 +37,6 @@ const CookiesPage = () => (
               without losing access to your account.
             </li>
             <li>
-              Consent preference: stored in your browser to remember whether you
-              accepted or declined the cookie banner.
-            </li>
-            <li>
               Theme preference: stored in your browser to remember your light or
               dark theme choice.
             </li>
@@ -57,8 +53,8 @@ const CookiesPage = () => (
           <p>
             You can control or delete cookies through your browser settings.
             Note that disabling the session cookie will prevent you from staying
-            signed in. The consent, theme and cursor preferences are stored
-            locally in your browser and can be cleared at any time.
+            signed in. The theme and cursor preferences are stored locally in
+            your browser and can be cleared at any time.
           </p>
         ),
       },

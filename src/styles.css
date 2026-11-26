@@ -95,8 +95,8 @@
      fails to load. */
   --cursor-default: url("/cursor.svg") 2 1, auto;
 
-  /* Every overlay  -  dialog, alert dialog, dropdown, select, cookie banner  - 
-     animates through tw-animate-css, which reads its curve from `--tw-ease` and
+  /* Every overlay  -  dialog, alert dialog, dropdown, select  -  animates
+     through tw-animate-css, which reads its curve from `--tw-ease` and
      its duration from `--tw-duration`.
 
      That library ships a default curve of its own (cubic-bezier(.32,.72,0,1)),

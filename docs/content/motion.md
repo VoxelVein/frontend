@@ -114,8 +114,8 @@ transition to `0.01ms` and forces `scroll-behavior: auto` under
 
 ## Overlays
 
-Dialogs, alert dialogs, dropdowns, selects, comboboxes and the cookie banner
-are not hand-written: they animate through `tw-animate-css`, imported at the
+Dialogs, alert dialogs, dropdowns, selects and comboboxes are not
+hand-written: they animate through `tw-animate-css`, imported at the
 top of `src/styles.css`. That library takes its curve from `--tw-ease` and its
 duration from `--tw-duration`.
 
