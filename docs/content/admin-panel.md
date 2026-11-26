@@ -80,6 +80,7 @@ declares its own minimum in one table:
 
 ```ts
 CAPABILITY_MINIMUM = {
+  heartComments: "moderator",
   manageDeletions: "admin",
   manageNotifications: "admin",
   managePosts: "admin",
@@ -109,11 +110,11 @@ ladder lacks a compile error rather than a grant to nobody.
 : Own projects only. No capabilities, no panel.
 
 **`moderator`** (rank 1)
-: `reviewProjects`, `manageReports`, and `viewAdminPanel`, and
-  **nothing else**.
+: `heartComments`, `reviewProjects`, `manageReports`, and `viewAdminPanel`,
+  and **nothing else**.
 
 **`admin`** (rank 2)
-: All twelve capabilities.
+: Every capability in the table above.
 
 A moderator's reach is deliberately narrow: they open the panel and work
 the two moderation queues, Reviews and Reports. Account and session
@@ -127,9 +128,9 @@ concerns is a far heavier action that only an admin can take, and
 grouping the two would let a moderator reach the second by accident.
 
 If you are working from an older guide that gave moderators the account
-and post controls, that changed when the role was narrowed to these two
-capabilities. Check `CAPABILITY_MINIMUM` rather than any table you
-remember.
+and post controls, that changed when the role was narrowed to the review,
+report, and comment-heart capabilities. Check `CAPABILITY_MINIMUM` rather
+than any table you remember.
 
 `publishPosts` is split from `managePosts` even though both are admin-only
 today. Publishing makes a post public, which is a different decision from

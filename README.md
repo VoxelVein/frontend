@@ -69,8 +69,7 @@ the small ElysiaJS event server behind the wider
   posts, storage, notifications, account deletions, reviews, reports and
   support tickets, each hidden from roles that cannot use it.
 * Support tickets at `/support` (at most five open per member), a notification
-  bell with per-item and bulk mark-as-read, legal pages and a cookie consent
-  banner.
+  bell with per-item and bulk mark-as-read, and legal pages.
 * Rate limiting through Valkey / Redis with an automatic in-memory fallback.
 
 ### Interface and engineering
@@ -175,7 +174,7 @@ and `just test`.
 | Role | Can do |
 | --- | --- |
 | `user` | Manage only their own content; no admin panel |
-| `moderator` | Review projects, draft blog posts, disable an account |
+| `moderator` | Review projects and reports, heart comments |
 | `admin` | Everything, including publishing posts, deleting users and roles |
 
 Checks use named capabilities rather than repeated role comparisons, and the

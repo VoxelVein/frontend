@@ -35,9 +35,21 @@ timer or cached client state grants permission on its own.
 The selector is five star-shaped radio buttons: pointer users click a star and
 keyboard users move between them with the arrow keys, Home and End. A rating is
 required. The comment is optional, limited to 300 characters, and stored
-trimmed; an empty comment becomes `null`. Reviews are ordered newest first and
-the mean is rounded to one decimal. A deleted account's review stays on the
-listing under the label "Deleted user".
+trimmed; an empty comment becomes `null`. Blocked words are rejected by
+`src/lib/content-filter.ts` both in the form (inline) and in the Valibot schema
+at the write boundary. Reviews are ordered newest first and the mean is rounded
+to one decimal. A deleted account's review stays on the listing under the label
+"Deleted user".
+
+## Creator responses
+
+The project's owner may answer each review once, with a short note of at most
+500 characters. Nobody else may respond: the form is only rendered for the
+owner, and `createReviewResponse` re-checks `projects.owner_id` against the
+session before writing the row. Review responses are comments with a
+`review_id` rather than a `post_id`, so they share the nesting, author and
+staff-heart rules with [blog comments](blog.md#comments). They cannot be
+nested further, because only the creator may reply at all.
 
 ## Data and migrations
 
@@ -49,6 +61,8 @@ Two tables were added in `drizzle/0032_project_reviews.sql`:
 * `project_reviews` — rating, optional comment, creation time, and the two
   ids. The author is `set null` when an account is deleted; the project
   cascades, so removing a listing removes its reviews.
+* `comments` and `comment_hearts` (`drizzle/0033_comments.sql`) — the shared
+  comment thread, staff hearts, and the creator's review responses.
 
 Reads use the public read rate-limit bucket and writes use the content-write
 bucket. Both are keyed on the account when signed in, falling back to the
@@ -57,5 +71,6 @@ client address for the public listing read.
 ## See also
 
 * [Projects and Files](projects.md), for the public listing pages
+* [Blog comments](blog.md#comments), the other surface using this thread
 * [Server voting](server-voting.md), the other per-server player action
 * [Notifications](notifications.md), the in-app inbox

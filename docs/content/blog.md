@@ -334,8 +334,29 @@ empty blog is a dead control.
 listing immediately when the query is cleared, so the unfiltered posts are
 never hidden behind an empty result set.
 
+## Comments
+
+Any signed-in account can comment on a published post and reply to any other
+comment. Replies are stored with a `parent_id` and rendered as a nested tree,
+each level indented under its parent; the pure `buildCommentTree` helper in
+`src/lib/comments.ts` owns that ordering so the page does not keep a second
+copy of the rule. A missing parent becomes a root rather than disappearing.
+
+Comments live in the shared `comments` table, with a `post_id` for this
+surface and a `review_id` for a project creator's answer to a review. Body
+text is trimmed, capped at 1000 characters and checked for blocked words
+before it is written; the same check runs in the form so a rejected word is
+shown beside the field instead of only in a toast.
+
+Staff (moderator or admin) may heart a comment, one heart per account and
+comment, by toggling a row in `comment_hearts`. Everyone sees the count. A
+staff author's name is tinted and heavier than a player's, with a shield on
+its right; the role is read from the users table when the thread loads, so a
+later role change is reflected in old comments.
+
 ## Related
 
+* [Player reviews](reviews.md)
 * [Admin Panel](admin-panel.md)
 * [Search](../search/postgres.md)
 * [Migrations](../database/migrations.md)

@@ -11,6 +11,12 @@ names match the repository's `ALPHA-*` git tags.
 * Player reviews on project and server pages: a five-star selector with an
   optional short comment, a newest-first list and a mean rating. Projects can
   be reviewed five seconds after a download; servers need no download.
+* Blog post comments for signed-in readers, with replies to any comment shown
+  as an indented thread. The project creator may answer each review once; no
+  other account may respond.
+* Staff-only hearts on comments and review responses. Staff names are tinted
+  and carry a shield beside them; blocked words are rejected inline and at the
+  write boundary.
 * A full `/notifications` inbox with unread/read filters, search, Read all and
   Clear read. It has its own list design in a single Card with a CardHeader,
   rather than repeating the popup's rows. The popup links to it instead of
@@ -37,6 +43,8 @@ names match the repository's `ALPHA-*` git tags.
   row, the quick links and the closing line. The "Top" link is gone.
 * The corner avatar is larger, shrinks while pressed and opens the menu when the
   pointer is released rather than on press.
+* The cookie consent banner is gone. The cookie policy page stays linked from
+  the footer, and the site no longer stores a consent choice.
 * The browse filter panel now uses shadcn controls with visible field labels,
   an active-filter count and a one-click reset. Search state lives in a focused
   hook over tested pure helpers, so the page no longer carries a complexity
