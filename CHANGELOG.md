@@ -6,6 +6,10 @@ names match the repository's `ALPHA-*` git tags.
 
 ## [Unreleased]
 
+## [ALPHA-0.18.1] - 2026-11-26
+
+Changes on `main` since `ALPHA-0.18.0`.
+
 ### Added
 
 * A public `/changelog` page that reads GitHub releases with `per_page=100` and
@@ -26,6 +30,12 @@ names match the repository's `ALPHA-*` git tags.
 ### Changed
 
 * Cookie and privacy pages no longer describe a cursor preference.
+
+### Documentation
+
+* Earlier release sections were clarified against their actual commits.
+* Stale cookie-banner references were corrected in the deployment and motion
+  guides, and its deleted component was removed from the coverage config.
 
 ## [ALPHA-0.18.0] - 2026-11-26
 

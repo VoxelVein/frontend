@@ -10,7 +10,7 @@ the small ElysiaJS event server behind the wider
 [VoxelVein](https://github.com/VoxelVein) platform.
 
 > [!NOTE]
-> The project is in alpha (`ALPHA-0.18.0`). No paid services are planned. The
+> The project is in alpha (`ALPHA-0.18.1`). No paid services are planned. The
 > legal pages still contain placeholder operator details and need review by a
 > qualified professional before production.
 
