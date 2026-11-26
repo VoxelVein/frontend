@@ -6,6 +6,14 @@ names match the repository's `ALPHA-*` git tags.
 
 ## [Unreleased]
 
+### Fixed
+
+* Server-only database, schema, auth and env modules no longer leak into the
+  client bundle. `pg-types` called `Buffer.from` on load, which threw in the
+  browser and stopped hydration before the hero carousel or any page control
+  could run. The entry chunk also dropped from 923 kB to 780 kB, back inside
+  the bundle budget. The bundle check now fails if `Buffer.from` reappears.
+
 ## [ALPHA-0.18.1] - 2026-11-26
 
 Changes on `main` since `ALPHA-0.18.0`.
