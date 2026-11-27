@@ -4,7 +4,7 @@ import {
   IconBellOff,
   IconTrash,
 } from "@tabler/icons-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUnreadNotificationsCount } from "@/hooks/use-unread-notifications-count";
 import type { NotificationGroup } from "@/lib/notifications";
 import {
   groupNotifications,
@@ -300,13 +301,7 @@ export const UserNotifications = ({
   const items = panel?.items ?? null;
   const now = panel?.loadedAt ?? 0;
 
-  const unreadQuery = useQuery({
-    queryFn: countUnreadUserNotifications,
-    queryKey: UNREAD_QUERY_KEY,
-    staleTime: 60_000,
-  });
-
-  const unread = unreadQuery.data ?? 0;
+  const unread = useUnreadNotificationsCount();
 
   const settleCount = (count: number) => {
     queryClient.setQueryData(UNREAD_QUERY_KEY, count);

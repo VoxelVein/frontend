@@ -39,7 +39,12 @@ interface UserMenuUser {
 interface UserMenuProps {
   user: UserMenuUser;
   onSignOut: () => void;
+  /** Unread notifications, shown as a badge so the removed navbar bell is still visible. */
+  unreadCount?: number;
 }
+
+/** Above this the badge stops being a countable number, as on the bell. */
+const BADGE_MAX = 9;
 
 /**
  * Every row in the account popup shares one treatment.
@@ -65,14 +70,21 @@ const MenuLink = ({ children, icon, to }: MenuLinkProps) => (
 );
 
 /**
- * The account popup, opened from the small avatar button fixed to the corner.
+ * The account popup, opened from the avatar button in the desktop navbar.
  *
  * The trigger is an icon-only button, so the name is carried by the tooltip for
- * sighted pointer users and by `aria-label` for everyone else. The popup itself
- * is deliberately short: the destinations that matter, then sign out.
+ * sighted pointer users and by `aria-label` for everyone else. When there are
+ * unread notifications the count is appended to that label, because the badge
+ * itself is decorative: screen readers must still learn the inbox has items.
+ * The popup is deliberately short: the destinations that matter, then sign out.
  */
-const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
+const UserMenu = ({ user, onSignOut, unreadCount = 0 }: UserMenuProps) => {
   const [open, setOpen] = useState(false);
+  const hasUnread = unreadCount > 0;
+
+  const ariaLabel = hasUnread
+    ? `Account menu for ${user.name}, ${unreadCount} unread notifications`
+    : `Account menu for ${user.name}`;
 
   return (
     <DropdownMenu onOpenChange={setOpen} open={open}>
@@ -94,12 +106,12 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="size-12 rounded-full p-0 transition-transform duration-200 hover:scale-110 hover:bg-transparent active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="relative size-12 rounded-full p-0 transition-transform duration-200 hover:scale-110 hover:bg-transparent active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
                   />
                 }
               />
             }
-            aria-label={`Account menu for ${user.name}`}
+            aria-label={ariaLabel}
           >
             <Avatar
               className="ring-border size-full ring-1"
@@ -107,6 +119,14 @@ const UserMenu = ({ user, onSignOut }: UserMenuProps) => {
               image={user.image ?? null}
               name={user.name}
             />
+            {hasUnread ? (
+              <span
+                aria-hidden="true"
+                className="bg-primary text-primary-foreground ring-background absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.65rem] leading-none font-semibold ring-2"
+              >
+                {unreadCount > BADGE_MAX ? `${BADGE_MAX}+` : unreadCount}
+              </span>
+            ) : null}
           </DropdownMenuTrigger>
         </div>
         <TooltipContent side="top">{user.name}</TooltipContent>

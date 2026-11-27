@@ -11,7 +11,6 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
 import { Footer } from "@/components/footer";
-import { AccountDock } from "@/components/navbar/account-dock";
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -41,7 +40,6 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
           <Footer />
         </ThemeProvider>
       </TooltipProvider>
-      <AccountDock />
       <Toaster />
       {import.meta.env.DEV ? (
         <TanStackDevtools

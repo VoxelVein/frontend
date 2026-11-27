@@ -8,12 +8,14 @@ import { NavbarLogo } from "@/components/navbar/navbar-logo";
 import { NavbarMobileMenu } from "@/components/navbar/navbar-mobile";
 import { Button } from "@/components/ui/button";
 import { useSignOut } from "@/hooks/use-sign-out";
+import { useUnreadNotificationsCount } from "@/hooks/use-unread-notifications-count";
 import { authClient } from "@/lib/auth-client";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
   const signOut = useSignOut();
+  const unreadCount = useUnreadNotificationsCount(Boolean(session?.user));
 
   const handleSignOut = () => {
     setMenuOpen(false);
@@ -39,6 +41,7 @@ const Navbar = () => {
             isPending={isPending}
             session={session}
             onSignOut={handleSignOut}
+            unreadCount={unreadCount}
           />
         </div>
 

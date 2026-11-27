@@ -13,6 +13,7 @@ import {
   MOBILE_LINK_CLASS,
   MOBILE_SECTION_HEADING_CLASS,
 } from "@/components/navbar/navbar-links";
+import { UserMenu } from "@/components/navbar/user-menu";
 import { UserNotifications } from "@/components/navbar/user-notifications";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -33,6 +34,8 @@ interface AuthButtonsProps {
   isPending: boolean;
   session: { user: NavbarUser } | null | undefined;
   onSignOut: () => void;
+  /** Unread count for the desktop avatar badge; the drawer's bell owns its own. */
+  unreadCount?: number;
   /** Closes the mobile drawer after an account link navigates. */
   onClose?: () => void;
 }
@@ -120,10 +123,9 @@ const MobileUserCard = ({
 /**
  * The signed-in drawer's account destinations.
  *
- * The desktop bar hides these inside two popups: the notification bell and the
- * avatar menu. A drawer has room to list them, so the same destinations stay
- * reachable without opening a popup, including the admin panel that moderators
- * need on a phone.
+ * The desktop bar hides these inside the avatar menu; only the drawer and the
+ * full inbox page list them openly. A drawer has room to show them, including
+ * the admin panel that moderators need on a phone.
  */
 const MobileAccountLinks = ({
   onClose,
@@ -223,16 +225,20 @@ const AuthSignedIn = ({
   user,
   onSignOut,
   onClose,
+  unreadCount,
 }: {
   variant: "desktop" | "mobile";
   user: NavbarUser;
   onSignOut: () => void;
   onClose?: () => void;
+  unreadCount?: number;
 }) => {
   if (variant === "desktop") {
-    // The account menu moved to the floating avatar button in the corner; the
-    // navbar keeps the bell, which is still the fastest route to the inbox.
-    return <UserNotifications />;
+    // The avatar menu now lives in the bar. Its badge carries the unread count
+    // so removing the bell does not hide the state of the inbox.
+    return (
+      <UserMenu onSignOut={onSignOut} unreadCount={unreadCount} user={user} />
+    );
   }
 
   return (
@@ -249,6 +255,7 @@ const AuthButtons = ({
   session,
   onSignOut,
   onClose,
+  unreadCount,
 }: AuthButtonsProps) => {
   if (isPending) {
     return <AuthSkeleton variant={variant} />;
@@ -261,6 +268,7 @@ const AuthButtons = ({
         user={session.user}
         onSignOut={onSignOut}
         onClose={onClose}
+        unreadCount={unreadCount}
       />
     );
   }

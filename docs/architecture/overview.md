@@ -31,6 +31,7 @@ src/
   components/       Reusable UI components, grouped by feature
     admin/          Admin panel tabs (users, sessions, posts, storage, …)
     blog/           Post card and shared search bar
+    chatbot/        Corner joke chatbot and its canned replies
     dashboard/      Creator project, version, and server forms
     legal/          Shared legal-document renderer
     motion/         Theme toggle, rotating text, view transitions
@@ -39,7 +40,7 @@ src/
     settings/       Settings tabs
     ui/             Base UI + shadcn primitives
   db/               Drizzle client and schema
-  hooks/            Reduced motion, username availability, post search
+  hooks/            Reduced motion, unread count, username availability, post search
   lib/              Auth, projects, search, storage, server functions
     classes.ts      Class strings shared across unrelated components
   routes/           TanStack Start file-based routes, grouped by URL segments

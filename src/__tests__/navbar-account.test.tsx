@@ -92,7 +92,7 @@ describe("AuthButtons mobile account", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("leaves the desktop bar to its popups", () => {
+  it("puts the avatar menu, not the bell, in the desktop bar", () => {
     render(
       <AuthButtons
         variant="desktop"
@@ -101,9 +101,16 @@ describe("AuthButtons mobile account", () => {
           user: { email: "ada@example.com", name: "Ada", role: "moderator" },
         }}
         onSignOut={vi.fn<() => void>()}
+        unreadCount={3}
       />
     );
 
+    expect(
+      screen.getByRole("button", {
+        name: "Account menu for Ada, 3 unread notifications",
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Notifications" })).toBeNull();
     expect(screen.queryByRole("link", { name: "My projects" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Sign out" })).toBeNull();
   });
