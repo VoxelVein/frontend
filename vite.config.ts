@@ -55,31 +55,26 @@ const config = defineConfig(({ command, mode }) => {
     };
   }
 
+  // The dev server does not tree-shake. Server functions become RPC stubs, but
+  // a helper left outside a handler keeps its server-only import alive in the
+  // dev client graph, which pre-bundles `pg` and crashes on `Buffer.from`.
+  // Production drops that import while tree-shaking, so the deny rule is
+  // dev-only: keeping it in the build would flag code that never ships.
+  const importProtection = isDevelopment
+    ? {
+        client: {
+          specifiers: ["@/db", "@/lib/auth", "drizzle-orm/node-postgres"],
+        },
+      }
+    : undefined;
+
   return {
     plugins: [
       ...(isDevelopment ? [devtools()] : []),
       tailwindcss(),
-      tanstackStart(),
+      tanstackStart({ importProtection }),
       nitro({
         experimental: { tasks: true },
-        // Keep `isomorphic-dompurify` out of the server bundle so Node loads it
-        // from node_modules instead.
-        //
-        // Nitro 3 inlines every dependency unless it is listed here  -  the
-        // externals plugin is a no-op with an empty `traceDeps`, not an
-        // allowlist-by-default. That inlining is what broke Markdown rendering
-        // in production: the Node build of the package constructs a JSDOM
-        // window at import time, and jsdom reads its `default-stylesheet.css`
-        // through `__dirname`. Rollup converted jsdom's CommonJS to ESM with
-        // lazy `require_*` proxies but cannot define `__dirname`, so the first
-        // `sanitize()` call threw `__dirname is not defined in ES module scope`
-        // and every SSR request 500'd. Loading the real package lets Node
-        // evaluate jsdom as CommonJS, where `__dirname` exists.
-        //
-        // The browser build is unaffected  -  the client resolves the `browser`
-        // export condition, which is plain DOMPurify with no jsdom, so this adds
-        // nothing to the client bundle.
-        traceDeps: ["isomorphic-dompurify"],
         // Hourly, so an account is purged within an hour of its grace period
         // ending. The task is idempotent, so a missed run only delays it.
         // Local dev commonly runs without PostgreSQL. Do not trigger a noisy

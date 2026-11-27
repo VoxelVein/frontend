@@ -110,61 +110,36 @@ allow-list, not a sanitiser that parses arbitrary URLs. It is sound for
 the on-site destinations it is given, and it has unit tests covering
 each branch.
 
-## Post bodies are sanitized
+## Post bodies are Markdown only
 
-A post body is author-written HTML as well as Markdown, and it reaches
-the browser through `dangerouslySetInnerHTML`. Three things keep that from
-being a cross-site scripting hole, and all three are load-bearing.
+A post body is author-written Markdown, and **raw HTML is deliberately not
+enabled**. `@tanstack/markdown` escapes author tags into text by default, so
+`<script>` and friends become visible angle brackets rather than live nodes.
+This is the whole XSS boundary: the renderer never reaches its
+`dangerouslySetInnerHTML` path for author content, and there is no HTML
+allowlist to maintain or drift.
 
-**It is sanitized before it is rendered, not when it is saved.**
-`src/lib/sanitize.ts` walks the parsed Markdown tree and sanitizes the
-`value` of every `html` and `inlineHtml` node, then hands the
-already-cleaned document to the renderer. Sanitizing the rendered markup
-instead would strip the class names on code blocks and the ids the
-renderer adds for footnote links. Render-time sanitizing also means posts
-written before this existed are covered, and the admin preview is
-protected by the same code as the public page, there is no second path
-to get wrong.
+`src/components/markdown-body.tsx` is the single trust boundary. Both the
+public pages and the admin preview use it, so older posts are covered just
+like new ones and there is no second path to get wrong. It passes a
+`urlTransform` from `src/lib/sanitize.ts` at parse time, because a Markdown
+link is not an HTML node and its destination would otherwise be
+author-controlled:
 
-**The allowlist is deny-by-default.** `ALLOWED_TAGS` and `ALLOWED_ATTR`
-name everything permitted; nothing is allowed because it was not
-explicitly blocked. `FORBID_TAGS` and `FORBID_ATTR` repeat the critical
-exclusions so the guarantee is auditable in one place rather than
-inferred from the absence of an entry. All `aria-*` attributes are off
-(`ALLOW_ARIA_ATTR: false`), as are `data-*`, `srcset`, and `style`.
+* `javascript:` is rejected however it is spelled  -  mixed case, leading
+  whitespace, or control characters injected into the scheme, which
+  browsers strip before resolving it;
+* `vbscript:`, `file:` and `blob:` are rejected too;
+* `data:` is allowed on images only, restricted to base64 raster types
+  (`avif`, `gif`, `jpeg`, `jpg`, `png`, `webp`). `data:image/svg+xml` is
+  rejected, because SVG is a document format that can carry script.
 
-**`inlineHtml` is handled explicitly.** The renderer has separate
-injection sites for block `html`, inline `inlineHtml`, and a syntax
-highlighter. A sanitizer that only knew the first would leave every piece
-of inline author HTML in the document unsanitized, which in practice is
-most of the HTML anyone writes. The tree also has four child collections,
-not one: `children`, `items`, `header`, and `rows`. Table cells live in
-`header` and `rows`, so a walk that only recurses through `children`
-never reaches them.
-
-URLs get two independent checks, because a Markdown link is never an HTML
-node and so never reaches `sanitizeHtml`:
-
-* `sanitizeHtml` handles URLs inside embedded HTML;
-* `markdownUrlTransform` handles `[a](b)` and `![a](b)` at parse time.
-
-Both reject `javascript:` however it is spelled, mixed case, leading
-whitespace, or with control characters injected into the scheme, which
-browsers strip before resolving it. `data:` URLs are allowed on `img`
-only, restricted to base64 raster types (`avif`, `gif`, `jpeg`, `jpg`,
-`png`, `webp`); `data:image/svg+xml` is rejected, because SVG is a
-document format that can carry script.
-
-`target` is stripped rather than allowed, since permitting it without a
-global DOMPurify hook to add `rel="noopener"` would open links in a new
-tab with a handle on `window.opener`.
-
-The test suite asserts against the rendered DOM, not against HTML
-strings. A string can satisfy a "no `<script`" check while still yielding
-a live element once the browser parses it; asking the DOM what it actually
-built cannot be fooled that way. `sanitize.test.ts` pins the sanitizer's
-output and `markdown-body.test.tsx` pins the rendered result, including
-that the legitimate markup a post is actually made of survives.
+The tests assert against the rendered DOM, not against HTML strings. A
+string can satisfy a "no `<script`" check while still yielding a live
+element once the browser parses it; asking the DOM what it actually built
+cannot be fooled that way. `sanitize.test.ts` pins the URL filter and the
+escaped parse tree; `markdown-body.test.tsx` pins the rendered result,
+including that the Markdown a post is actually made of survives.
 
 ## Upload gates
 

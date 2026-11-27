@@ -117,24 +117,17 @@ the author's text. The trade is that runs of spaces and paragraph
 indentation are now preserved rather than collapsed, which is what GitHub,
 Discord, and every modern comment box already do.
 
-### HTML in post bodies is allowed, and sanitized
+### Raw HTML is not supported
 
-A post body may contain raw HTML alongside the Markdown  -  that is how
-authors embed a `<figure>`, a `<table>`, or an inline image that
-Markdown cannot express. `allowHtml` is therefore **on**, set in both
-of the two places it matters, and they are not the same place:
+Post bodies are Markdown only. `allowHtml` is **off**, so an author's
+`<figure>` or `<table>` tags render as visible angle brackets instead of
+live elements. Tables and images have Markdown syntax, and anything
+Markdown cannot express is deliberately out of scope rather than being
+accepted through an HTML allowlist.
 
-* at **parse** time, so raw HTML becomes an HTML node rather than
-  literal text;
-* at **render** time, so that node is emitted instead of being escaped
-  back to text.
-
-Omitting it at render time does not fail loudly. It quietly renders
-every HTML post as visible angle brackets.
-
-Everything the author wrote goes through `src/lib/sanitize.ts`, a
-deny-by-default allowlist on top of `isomorphic-dompurify`. See
-[Hardening](../security/hardening.md#post-bodies-are-sanitized) for
+Author URLs still pass through `src/lib/sanitize.ts`, which filters
+link and image destinations at parse time. See
+[Hardening](../security/hardening.md#post-bodies-are-markdown-only) for
 what that rejects and why.
 
 ## Data model
@@ -280,11 +273,10 @@ drift.
 the page component because the whole thing otherwise exceeded the
 cognitive-complexity limit and became unreadable.
 
-The editor preview is protected by the same sanitizer as the public
-page, because both render through `MarkdownBody`. That is a direct
-consequence of sanitizing at render time rather than at write time: there
-is no second code path to get wrong, and posts written before any of
-this existed are covered too.
+The editor preview is protected by the same Markdown renderer as the
+public page, because both go through `MarkdownBody`. There is no second
+code path to get wrong, and posts written before this was enforced are
+covered too.
 
 ### Drafting and publishing are separate capabilities
 
@@ -360,5 +352,5 @@ later role change is reflected in old comments.
 * [Admin Panel](admin-panel.md)
 * [Search](../search/postgres.md)
 * [Migrations](../database/migrations.md)
-* [Hardening](../security/hardening.md#post-bodies-are-sanitized)
+* [Hardening](../security/hardening.md#post-bodies-are-markdown-only)
 * [Architecture Overview](../architecture/overview.md)

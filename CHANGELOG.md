@@ -6,8 +6,31 @@ names match the repository's `ALPHA-*` git tags.
 
 ## [Unreleased]
 
+### Added
+
+* A joke AI chatbot in the bottom-right corner, visible to every visitor. It
+  makes no network calls and always answers with one of three fixed paragraphs:
+  "I don't know", a content-policy refusal, or an off-topic notice.
+
+### Changed
+
+* The desktop navbar now opens the account menu from the avatar instead of a
+  notification bell. The unread count stays visible as a badge on that avatar,
+  and the signed-in mobile drawer keeps its labelled bell row.
+* Post bodies are Markdown only. Raw HTML is no longer enabled, so
+  `@tanstack/markdown` escapes author tags itself and DOMPurify is gone.
+  Author link and image URLs are still filtered at parse time. The main chunk
+  drops by about 30 kB raw and 12 kB gzipped.
+* Removed the unused Recharts-based chart component and dependency. Nothing
+  imported it, so it only cost install size and dead code.
+
 ### Fixed
 
+* The Vite dev server no longer pre-bundles `pg` into the client graph. A helper
+  outside the server functions in `comments.functions.ts` kept an `@/db` import
+  alive where production tree-shaking would have dropped it, so `pg-types`
+  threw `Buffer is not defined` on load in development. Start's import
+  protection now mocks that edge in dev only; production builds are unchanged.
 * Server-only database, schema, auth and env modules no longer leak into the
   client bundle. `pg-types` called `Buffer.from` on load, which threw in the
   browser and stopped hydration before the hero carousel or any page control

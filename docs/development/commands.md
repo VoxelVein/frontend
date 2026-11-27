@@ -31,10 +31,10 @@ worth defending. Raw minified bytes count characters no reader ever
 receives, so the raw limit is a loose regression guard rather than a
 performance target.
 
-It has been raised twice: 700 kB to 720 kB for project icons and gallery
-images, then 720 kB to 780 kB for the Markdown sanitiser. DOMPurify is the
-price of letting post bodies contain HTML, which is a deliberate feature
-rather than a dependency that crept in.
+Its history: 700 kB to 720 kB for project icons and gallery images, 720 kB
+to 780 kB for the Markdown sanitiser, 780 kB to 810 kB for the chatbot, then
+back to 790 kB when DOMPurify was dropped. Post bodies are Markdown only now,
+so the parser's own escaping replaces the HTML allowlist.
 
 A raise is a decision with a reason attached, so it goes in the comment
 above `RAW_LIMIT_BYTES` in `scripts/check-bundle-size.ts`. That comment is

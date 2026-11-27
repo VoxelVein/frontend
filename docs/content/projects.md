@@ -364,9 +364,9 @@ back to draft, so a published project always has something to download.
 The current status drives the available transitions, and the panel on the
 project's manage page shows only the ones that apply.
 
-A creator sees the outcome through the notification bell in the navbar,
-which lists `project-approved` and `project-rejected` notifications. These
-are the only two kinds
+A creator sees the outcome through the navbar avatar's unread badge and the
+notifications inbox, which lists `project-approved` and `project-rejected`
+notifications. These are the only two kinds
 (`USER_NOTIFICATION_TYPES` in `src/lib/notifications.ts`).
 
 ### Why `pending` is a status and not a flag

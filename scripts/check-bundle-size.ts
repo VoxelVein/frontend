@@ -6,16 +6,16 @@ import { gzipSync } from "node:zlib";
 const ASSETS_DIR = path.resolve(".output/public/assets");
 const MAIN_CHUNK_PATTERN = /^index-.*\.js$/u;
 
-// Raised 700_000 -> 720_000 for project icons and gallery images (~18 kB), and
-// again to 780_000 for the Markdown sanitiser. DOMPurify is the cost of letting
-// post bodies contain HTML, which is a deliberate feature rather than a
-// dependency that crept in: it is the price of rendering author HTML at all,
-// and about 29 kB of it is paid only by routes that render a post.
+// History: 700_000 -> 720_000 for project icons and gallery images, 720_000 ->
+// 780_000 for the Markdown sanitiser, then 780_000 -> 810_000 for the corner
+// chatbot's Base UI popover and transcript. Dropping DOMPurify gave 30 kB back
+// (post bodies are Markdown only now), so the limit returns to 790_000: roughly
+// 22 kB of headroom over the measured 767.7 kB main chunk.
 //
 // The gzip limit is the one that tracks what a reader downloads, and it is
 // unchanged at 250_000. Raw bytes never tracked that  -  it counts minified text,
 // which no reader receives.
-const RAW_LIMIT_BYTES = 780_000;
+const RAW_LIMIT_BYTES = 790_000;
 const GZIP_LIMIT_BYTES = 250_000;
 
 const formatBytes = (bytes: number) => `${(bytes / 1000).toFixed(1)} kB`;

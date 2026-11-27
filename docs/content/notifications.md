@@ -2,8 +2,9 @@
 
 Two inboxes, deliberately separate:
 
-* **`user_notifications`**, addressed to one account, shown in the navbar
-  bell and on the full `/notifications` page.
+* **`user_notifications`**, addressed to one account, shown as a badge on the
+  navbar avatar, in the signed-in drawer's bell, and on the full `/notifications`
+  page.
 * **`admin_notifications`**, a shared inbox every admin reads, rendered by
   the admin panel's Notifications tab.
 
@@ -11,7 +12,8 @@ A member is told when a moderator reviews one of their projects, and when a
 moderator looks at something they reported. A staff member is told when
 something needs their attention. Nothing else notifies anybody, which is
 deliberate: a notification that reports a fact the reader can already see
-somewhere else is noise, and noise is what makes people stop opening the bell.
+somewhere else is noise, and noise is what makes people stop checking the
+badge.
 
 ## The kinds, and what each is for
 
@@ -84,17 +86,18 @@ up" means.
 
 ## The full page
 
-The bell is a glance: it loads at most 50 rows and opens on demand. Its footer
-links to `/notifications`, which presents the same information with its own row
-design inside a single Card with a `CardHeader` - dividers instead of row cards,
+The drawer bell is a glance: it loads at most 50 rows and opens on demand. Its
+footer links to `/notifications`, which presents the same information with its
+own row design inside a single Card with a `CardHeader` - dividers instead of row
+cards,
 and an accent for unread instead of a tinted background. It adds All / Unread /
 Read tabs, a text search over title, message and project name, and the bulk
 actions that no longer fit in a popup. Both views share `USER_NOTIFICATION_KEYS`,
 so a row marked read on one view updates the badge and the other view
 immediately.
 
-The page uses TanStack Query rather than the bell's open-time state: it is a
-destination, so its data is cached and refetched like any other list.
+The page uses TanStack Query rather than the drawer bell's open-time state: it
+is a destination, so its data is cached and refetched like any other list.
 
 ## The badge
 
@@ -119,13 +122,22 @@ somewhere unrelated. Migration `0020` dropped the constraint.
 A row about a project still cascades with it, so a notification can never point
 at something that no longer exists.
 
+## In the navbar
+
+The bell is no longer in the desktop bar; the account avatar menu is. Its badge
+shows the unread count, capped at `9+`, and adds that count to the button's
+accessible name because the badge itself is decorative. `useUnreadNotificationsCount`
+shares one query key with the drawer bell and the full page, so marking a row
+read anywhere clears every view of the count. The request is disabled for
+signed-out visitors, who have no inbox to count.
+
+The bottom-right corner now holds the joke chatbot instead of the account dock.
+
 ## On a phone
 
-The desktop bell stays in the navbar, but the avatar menu does not: it moved
-to a small button fixed to the bottom-right corner. The signed-in drawer renders
-the bell as a labelled row beside My projects, Support, Settings, and Admin
-panel, so the inbox stays reachable without opening a popup and the unread
-badge stays visible in the row.
+The signed-in drawer renders the bell as a labelled row beside My projects,
+Support, Settings, and Admin panel, so the inbox stays reachable without opening
+a popup and the unread badge stays visible in the row.
 
 ## Tests
 

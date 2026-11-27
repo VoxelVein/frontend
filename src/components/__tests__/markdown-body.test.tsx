@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { MarkdownBody } from "@/components/markdown-body";
 
 /** The scheme these tests assert is neutralised, spelled the way a browser reads it. */
-// oxlint-disable-next-line no-script-url -- Adversarial fixture: the point of the test is that a browser parses this exact spelling as a script URL and the sanitizer rejects it. Rewriting the literal would defeat what is being verified.
+// oxlint-disable-next-line no-script-url -- Adversarial fixture: the point of the test is that a browser parses this exact spelling as a script URL and the URL filter rejects it. Rewriting the literal would defeat what is being verified.
 const SCRIPT_SCHEME = "javascript:";
 
 /** Renders a post body and hands back the container to inspect. */
@@ -59,11 +59,11 @@ describe(MarkdownBody, () => {
 });
 
 /**
- * The unit tests in `sanitize.test.ts` pin the sanitizer's output. These pin the
- * thing that actually matters: what the browser ends up holding after the
- * renderer writes author HTML through `dangerouslySetInnerHTML`.
+ * The unit tests in `sanitize.test.ts` pin the URL filter and the parsed tree.
+ * These pin the thing that actually matters: what the browser ends up holding
+ * after the renderer writes author content to the DOM.
  *
- * Assertions are made against the rendered DOM rather than against rendered HTML
+ * Assertions are made against the rendered DOM rather than against HTML
  * *strings*, because a string can satisfy a "no <script" check while still
  * yielding a live element once the parser gets hold of it. Asking the DOM what
  * it actually built cannot be fooled that way.
@@ -75,6 +75,7 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
     );
 
     expect(container.querySelector("script")).toBeNull();
+    expect(container).toHaveTextContent("<script>alert(1)</script>");
   });
 
   it("never puts an element that loads a foreign document in the document", () => {
@@ -105,10 +106,8 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
     expect(handlers).toStrictEqual([]);
   });
 
-  it("leaves no javascript: destination on any link", () => {
-    const container = renderMarkdown(
-      '[markdown](javascript:alert(1)) and <a href="javascript:alert(2)">html</a>'
-    );
+  it("leaves no javascript: destination on any Markdown link", () => {
+    const container = renderMarkdown("[bad](javascript:alert(1))");
 
     const destinations = [...container.querySelectorAll("a")].map((anchor) =>
       anchor.getAttribute("href")
@@ -119,23 +118,9 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
     ).toBeFalsy();
   });
 
-  it("strips inline styles, ids, names and target from author HTML", () => {
-    const container = renderMarkdown(
-      '<a href="/a" id="location" name="x" target="_blank" style="position:fixed">y</a>'
-    );
-
-    const anchor = container.querySelector("a");
-
-    expect(anchor?.getAttribute("style")).toBeNull();
-    expect(anchor?.getAttribute("id")).toBeNull();
-    expect(anchor?.getAttribute("name")).toBeNull();
-    expect(anchor?.getAttribute("target")).toBeNull();
-    expect(anchor?.getAttribute("href")).toBe("/a");
-  });
-
-  it("renders a blocked payload's text instead of dropping the author's words", () => {
-    // Blocking a tag should not silently swallow the sentence around it. The
-    // payload body survives as escaped text, which is inert.
+  it("shows a blocked payload's text instead of dropping the author's words", () => {
+    // Escaping a tag keeps the sentence around it. The payload body survives as
+    // escaped text, which is inert.
     const container = renderMarkdown(
       "Callout: <script>alert(1)</script> done."
     );
@@ -154,25 +139,9 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
     expect(container.querySelector("script")).toBeNull();
   });
 
-  it("keeps the images a post is actually made of, internal and external", () => {
-    // The other half of the contract. A sanitizer that only ever removed things
-    // would pass every test above while breaking the blog.
+  it("keeps ordinary Markdown links, emphasis and table semantics", () => {
     const container = renderMarkdown(
-      '<figure><img src="/uploads/cover.png" alt="Cover"><figcaption>Fig 1</figcaption></figure><img src="https://cdn.example.com/a.png" alt="Remote">'
-    );
-
-    expect(container.querySelector("figcaption")).toHaveTextContent("Fig 1");
-    expect(
-      container.querySelector('img[src="/uploads/cover.png"]')
-    ).toHaveAttribute("alt", "Cover");
-    expect(
-      container.querySelector('img[src="https://cdn.example.com/a.png"]')
-    ).toBeInTheDocument();
-  });
-
-  it("keeps ordinary links, emphasis and table semantics", () => {
-    const container = renderMarkdown(
-      '<a href="https://example.com/docs">Docs</a> <strong>bold</strong> <em>italic</em><table><thead><tr><th scope="col">H</th></tr></thead><tbody><tr><td>c</td></tr></tbody></table>'
+      "[Docs](https://example.com/docs) **bold** *italic*\n\n| A | B |\n| - | - |\n| c | d |"
     );
 
     expect(
@@ -180,7 +149,21 @@ describe(`${MarkdownBody.name} XSS boundary`, () => {
     ).toHaveTextContent("Docs");
     expect(container.querySelector("strong")).toHaveTextContent("bold");
     expect(container.querySelector("em")).toHaveTextContent("italic");
-    expect(container.querySelector('th[scope="col"]')).toHaveTextContent("H");
     expect(container.querySelector("td")).toHaveTextContent("c");
+  });
+
+  it("keeps the images a post is actually made of, internal and external", () => {
+    // The other half of the contract. A filter that only ever removed things
+    // would pass every test above while breaking the blog.
+    const container = renderMarkdown(
+      "![Cover](/uploads/cover.png)\n\n![Remote](https://cdn.example.com/a.png)"
+    );
+
+    expect(
+      container.querySelector('img[src="/uploads/cover.png"]')
+    ).toHaveAttribute("alt", "Cover");
+    expect(
+      container.querySelector('img[src="https://cdn.example.com/a.png"]')
+    ).toBeInTheDocument();
   });
 });

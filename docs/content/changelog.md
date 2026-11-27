@@ -18,9 +18,10 @@ malformed response throws rather than reaching a component as `any`. A module
 cache of five minutes keeps navigation inside GitHub's unauthenticated rate
 limit; `GITHUB_TOKEN` is optional and only raises that limit.
 
-Notes are sanitized when rendered, not when fetched. `MarkdownBody` parses and
-sanitizes the Markdown before handing it to the renderer, the same path blog
-posts and project descriptions use. Raw release HTML is never injected.
+Notes are filtered when rendered, not when fetched. `MarkdownBody` parses the
+Markdown with raw HTML disabled and filters author URLs at parse time, the same
+path blog posts and project descriptions use. Raw release HTML is never
+injected.
 
 ## Categories and milestones
 
