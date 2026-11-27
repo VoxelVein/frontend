@@ -10,6 +10,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
+import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
           <Footer />
         </ThemeProvider>
       </TooltipProvider>
+      <ChatbotWidget />
       <Toaster />
       {import.meta.env.DEV ? (
         <TanStackDevtools
